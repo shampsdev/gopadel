@@ -20,7 +20,7 @@ jobs:
       id-token: write
     secrets: inherit
     with:
-      dockerfile_path: 'server/Dockerfile'
+      dockerfile_path: 'server/Dockerfile.bot'
       context_path: 'server'
       image_name: 'russianpadel-bot'
       environment: ${{ github.event.inputs.environment }}
