@@ -1,0 +1,28 @@
+from datetime import datetime
+from typing import TYPE_CHECKING
+from uuid import UUID
+
+from sqlalchemy import String, Integer, Float, DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from db import Base
+
+if TYPE_CHECKING:
+    from db.models.registration import Registration
+    from db.models.waitlist import Waitlist
+
+
+class Tournament(Base):
+    __tablename__ = "tournaments"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    price: Mapped[int] = mapped_column(Integer, nullable=False)
+    location: Mapped[str] = mapped_column(String(255), nullable=False)
+    rank_min: Mapped[float] = mapped_column(Float, nullable=False)
+    rank_max: Mapped[float] = mapped_column(Float, nullable=False)
+    max_users: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    registrations: Mapped[list["Registration"]] = relationship("Registration", back_populates="tournament")
+    waitlist_entries: Mapped[list["Waitlist"]] = relationship("Waitlist", back_populates="tournament") 
