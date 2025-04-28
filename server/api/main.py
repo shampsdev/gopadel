@@ -4,6 +4,7 @@ import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.deps import SessionDep
 from api.payments import configure_yookassa
 from api.routes.main import api_router
 from config import settings
