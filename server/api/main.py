@@ -1,9 +1,6 @@
 import logging
 import sys
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
 from api.deps import SessionDep
 from api.payments import configure_yookassa
 from api.routes.main import api_router
@@ -11,11 +8,10 @@ from config import settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    stream=sys.stdout
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stdout,
 )
 logger = logging.getLogger(__name__)
 
@@ -29,7 +25,7 @@ app = FastAPI(
 )
 
 if settings.DEBUG:
-    logger.info(f"settings: {settings}")
+    logger.info("settings:\n%s", settings.model_dump_json(indent=2, exclude_none=True))
 
 app.add_middleware(
     CORSMiddleware,
