@@ -10,8 +10,8 @@ from api.deps import SessionDep
 configure_yookassa()
 
 app = FastAPI(
-    docs_url=None if settings.DEBUG else "/api/v1/docs",
-    redoc_url=None if settings.DEBUG else "/api/v1/redoc",
+    docs_url="/api/v1/docs" if settings.DEBUG else None,
+    redoc_url="/api/v1/redoc" if settings.DEBUG else None,
 )
 
 app.add_middleware(
