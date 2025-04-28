@@ -8,8 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 configure_yookassa()
 
 app = FastAPI(
-    docs_url="/docs" if settings.DEBUG else None,
-    redoc_url="/redoc" if settings.DEBUG else None,
+    openapi_url="/api/v1/openapi.json" if settings.DEBUG else None,
+    docs_url="/api/v1/docs" if settings.DEBUG else None,
+    redoc_url="/api/v1/redoc" if settings.DEBUG else None,
 )
 
 app.add_middleware(
