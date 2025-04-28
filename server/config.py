@@ -1,3 +1,4 @@
+import logging
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
