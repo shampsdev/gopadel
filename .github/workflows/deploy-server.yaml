@@ -12,8 +12,9 @@ on:
       migrate:
         required: true
         description: migrate
-        type: boolean
-        default: false
+        options: [T, F]
+        type: choice
+        default: F
 
 jobs:
   deploy:
@@ -38,7 +39,8 @@ jobs:
       contents: read
       attestations: write
       id-token: write
-    if: ${{ github.event.inputs.migrate == true }}
+    if: ${{ github.event.inputs.migrate == 'T' }}
+    needs: deploy
     with:
       image_name: 'russianpadel-server'
       environment: ${{ github.event.inputs.environment }}
