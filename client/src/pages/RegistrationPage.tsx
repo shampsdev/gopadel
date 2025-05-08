@@ -6,7 +6,7 @@ import SimpleCitySelector from "@/components/SimpleCitySelector"
 import { isValidDateFormat, formatDateForBackend } from "@/utils/date"
 import { api } from "@/api/api"
 import { useNavigate } from "react-router-dom"
-import useAuth from "@/hooks/UseAuth"
+import useAuth from "@/hooks/useAuth"
 import useUserStore from "@/stores/userStore"
 export default function RegistrationPage() {
   const [name, setName] = useState(initData.user()?.first_name ?? "")

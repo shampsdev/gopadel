@@ -9,7 +9,7 @@ import ProfilePage from "@/pages/ProfilePage"
 import RegistrationPage from "@/pages/RegistrationPage"
 import ProtectedRoute from "@/components/ProtectedRoute"
 import useBackButton from "@/hooks/useBackButton"
-import useAuth from "@/hooks/UseAuth"
+import useAuth from "@/hooks/useAuth"
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.15 } },

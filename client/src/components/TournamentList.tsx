@@ -39,6 +39,16 @@ export default function TournamentList() {
     }
   }, [availableOnly, tournaments])
 
+  // Example of how to mark unused variables with an underscore
+  // This is just an example for demonstration - not for actual implementation
+  const exampleFunction = (_unusedParam: string) => {
+    const _unusedVariable = "This won't trigger a warning"
+
+    // Variables that you actually use don't need the underscore
+    const usedVariable = "This is used"
+    console.log(usedVariable)
+  }
+
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="mb-5 flex items-center justify-between">
