@@ -17,8 +17,12 @@ class Waitlist(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), nullable=True)
-    tournament_id: Mapped[UUID] = mapped_column(ForeignKey("tournaments.id"), nullable=True)
+    tournament_id: Mapped[UUID] = mapped_column(
+        ForeignKey("tournaments.id"), nullable=True
+    )
     date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     user: Mapped["User"] = relationship("User", back_populates="waitlist_entries")
-    tournament: Mapped["Tournament"] = relationship("Tournament", back_populates="waitlist_entries") 
+    tournament: Mapped["Tournament"] = relationship(
+        "Tournament", back_populates="waitlist_entries"
+    )

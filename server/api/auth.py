@@ -30,6 +30,4 @@ async def get_user(
     if res != init_data["hash"]:
         raise HTTPException(status_code=401, detail="Invalid authorization")
     data = json.loads(init_data["user"])
-    return get_or_create_user(
-        db, data["id"], data.get("username")
-    )
+    return get_or_create_user(db, data["id"], data.get("username"))

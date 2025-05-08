@@ -18,11 +18,15 @@ class Registration(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
-    tournament_id: Mapped[UUID] = mapped_column(ForeignKey("tournaments.id"), nullable=False)
+    tournament_id: Mapped[UUID] = mapped_column(
+        ForeignKey("tournaments.id"), nullable=False
+    )
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[str] = mapped_column(String(255), nullable=False)
     payment_id: Mapped[UUID] = mapped_column(ForeignKey("payments.id"), nullable=False)
 
     user: Mapped["User"] = relationship("User", back_populates="registrations")
-    tournament: Mapped["Tournament"] = relationship("Tournament", back_populates="registrations")
-    payment: Mapped["Payment"] = relationship("Payment", back_populates="registration") 
+    tournament: Mapped["Tournament"] = relationship(
+        "Tournament", back_populates="registrations"
+    )
+    payment: Mapped["Payment"] = relationship("Payment", back_populates="registration")

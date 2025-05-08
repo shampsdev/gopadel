@@ -19,16 +19,24 @@ class User(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
-    username: Mapped[Optional[str]] = mapped_column(String(255), unique=True, nullable=True)
+    username: Mapped[Optional[str]] = mapped_column(
+        String(255), unique=True, nullable=True
+    )
     first_name: Mapped[str] = mapped_column(String(255), nullable=False)
     second_name: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar: Mapped[str] = mapped_column(String(255), nullable=False)
     rank: Mapped[float] = mapped_column(Float, nullable=False)
     city: Mapped[str] = mapped_column(String(255), nullable=False)
     birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
-    loyalty_id: Mapped[int] = mapped_column(Integer, ForeignKey("loyalties.id"), nullable=False)
+    loyalty_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("loyalties.id"), nullable=False
+    )
     is_registered: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     loyalty: Mapped["Loyalty"] = relationship("Loyalty", back_populates="users")
-    registrations: Mapped[list["Registration"]] = relationship("Registration", back_populates="user")
-    waitlist_entries: Mapped[list["Waitlist"]] = relationship("Waitlist", back_populates="user") 
+    registrations: Mapped[list["Registration"]] = relationship(
+        "Registration", back_populates="user"
+    )
+    waitlist_entries: Mapped[list["Waitlist"]] = relationship(
+        "Waitlist", back_populates="user"
+    )

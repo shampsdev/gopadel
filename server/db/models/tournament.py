@@ -24,5 +24,9 @@ class Tournament(Base):
     rank_max: Mapped[float] = mapped_column(Float, nullable=False)
     max_users: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    registrations: Mapped[list["Registration"]] = relationship("Registration", back_populates="tournament")
-    waitlist_entries: Mapped[list["Waitlist"]] = relationship("Waitlist", back_populates="tournament") 
+    registrations: Mapped[list["Registration"]] = relationship(
+        "Registration", back_populates="tournament"
+    )
+    waitlist_entries: Mapped[list["Waitlist"]] = relationship(
+        "Waitlist", back_populates="tournament"
+    )

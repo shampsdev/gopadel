@@ -16,4 +16,4 @@ class Loyalty(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     discount: Mapped[int] = mapped_column(SmallInteger, nullable=False)
 
-    users: Mapped[list["User"]] = relationship("User", back_populates="loyalty") 
+    users: Mapped[list["User"]] = relationship("User", back_populates="loyalty")

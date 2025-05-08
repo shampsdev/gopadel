@@ -48,9 +48,7 @@ async def get_user(
     check_hash(data_check_string, init_data["hash"])
 
     data = json.loads(init_data["user"])
-    return get_or_create_user(
-        db, data["id"], data.get("username")
-    )
+    return get_or_create_user(db, data["id"], data.get("username"))
 
 
 UserDep = Annotated[User, Depends(get_user)]

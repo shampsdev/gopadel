@@ -20,4 +20,6 @@ class Payment(Base):
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    registration: Mapped["Registration"] = relationship("Registration", back_populates="payment") 
+    registration: Mapped["Registration"] = relationship(
+        "Registration", back_populates="payment"
+    )

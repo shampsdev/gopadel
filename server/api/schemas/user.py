@@ -3,6 +3,7 @@ from typing import Optional
 from pydantic import BaseModel
 from uuid import UUID
 
+
 class UserBase(BaseModel):
     id: UUID
     username: str | None
