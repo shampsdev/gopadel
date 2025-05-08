@@ -32,7 +32,7 @@ jobs:
         run: |
           echo "This workflow should only run on the 'main' branch."
           exit 1
-      
+
       - name: Define Docker tags
         run: |
           if [ "${{ inputs.environment }}" == "DEV" ]; then
@@ -52,3 +52,26 @@ jobs:
             echo "Error: expected 204, but got $response"
             exit 1
           fi
+
+      - name: Shoutrrr - success
+        if: ${{ success() }}
+        uses: containrrr/shoutrrr-action@v1
+        with:
+          url: telegram://${{ secrets.ALERTS_TELEGRAM_HTTP_API_TOKEN }}@telegram/?channels=${{ secrets.ALERTS_CHAT_ID }}
+          title: "[${{ inputs.environment }}] Migrate started"
+          message: |
+            ✅ Migrate container triggered via Portainer ✅
+
+      - name: Shoutrrr - fail
+        if: ${{ failure() }}
+        uses: containrrr/shoutrrr-action@v1
+        with:
+          url: telegram://${{ secrets.ALERTS_TELEGRAM_HTTP_API_TOKEN }}@telegram/?channels=${{ secrets.ALERTS_CHAT_ID }}
+          title: "[${{ inputs.environment }}] Migrate failed"
+          message: |
+            ❌ An error occurred during migration ❌
+            
+            Link to commit: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+            Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            Check the pipeline logs for details.
