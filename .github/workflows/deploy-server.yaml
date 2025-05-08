@@ -41,7 +41,8 @@ jobs:
       id-token: write
     if: ${{ github.event.inputs.migrate == 'T' }}
     needs: deploy
+    secrets: inherit
     with:
       image_name: 'russianpadel-server'
       environment: ${{ github.event.inputs.environment }}
-      secret-service-hash: ${{ github.event.inputs.environment == 'PROD' && 'MIGRATE_HASH' || 'MIGRATE_HASH_DEV' }}
+      secret-migrate-hash: ${{ github.event.inputs.environment == 'PROD' && 'MIGRATE_HASH' || 'MIGRATE_HASH_DEV' }}
