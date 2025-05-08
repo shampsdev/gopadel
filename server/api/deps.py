@@ -49,7 +49,7 @@ async def get_user(
 
     data = json.loads(init_data["user"])
     return get_or_create_user(
-        db, data["id"], data.get("first_name"), data.get("username")
+        db, data["id"], data.get("username")
     )
 
 

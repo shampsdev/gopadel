@@ -4,12 +4,12 @@ from ..models import User
 
 
 def get_or_create_user(
-    db: Session, tg_id: int, first_name: str, username: str | None = None
+    db: Session, tg_id: int, username: str | None = None
 ):
-    user = db.query(User).filter(User.tg_id == tg_id).first()
+    user = db.query(User).filter(User.telegram_id == tg_id).first()
     if user:
         return user
-    user = User(tg_id=tg_id, first_name=first_name, username=username)
+    user = User(telegram_id=tg_id, username=username, is_registered=False, first_name="", second_name="", avatar="", rank=0, city="", birth_date=None, loyalty_id=0)
     db.add(user)
     db.commit()
     db.refresh(user)

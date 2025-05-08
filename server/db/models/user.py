@@ -1,8 +1,9 @@
 from datetime import date
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID
+import uuid
 
-from sqlalchemy import String, Float, Date, Integer, ForeignKey
+from sqlalchemy import BigInteger, Boolean, String, Float, Date, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db import Base
@@ -16,16 +17,17 @@ if TYPE_CHECKING:
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True)
-    telegram_id: Mapped[int] = mapped_column(unique=True, nullable=False)
-    username: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
+    username: Mapped[Optional[str]] = mapped_column(String(255), unique=True, nullable=True)
     first_name: Mapped[str] = mapped_column(String(255), nullable=False)
     second_name: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar: Mapped[str] = mapped_column(String(255), nullable=False)
     rank: Mapped[float] = mapped_column(Float, nullable=False)
     city: Mapped[str] = mapped_column(String(255), nullable=False)
     birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
-    loyalty_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("loyalties.id"), nullable=True)
+    loyalty_id: Mapped[int] = mapped_column(Integer, ForeignKey("loyalties.id"), nullable=False)
+    is_registered: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     loyalty: Mapped["Loyalty"] = relationship("Loyalty", back_populates="users")
     registrations: Mapped[list["Registration"]] = relationship("Registration", back_populates="user")

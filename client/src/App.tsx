@@ -1,34 +1,57 @@
-import { useState } from "react"
-import reactLogo from "./assets/react.svg"
-import viteLogo from "/vite.svg"
 import "./App.css"
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import MainPage from "@/pages/MainPage"
+import { useCallback, useEffect } from "react"
+import { backButton, initData } from "@telegram-apps/sdk-react"
+import { AnimatePresence, motion } from "framer-motion"
+import useUserStore from "@/stores/userStore"
+import ProfilePage from "@/pages/ProfilePage"
+import RegistrationPage from "@/pages/RegistrationPage"
+import ProtectedRoute from "@/components/ProtectedRoute"
+import useBackButton from "@/hooks/useBackButton"
+import useAuth from "@/hooks/UseAuth"
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.15 } },
+  exit: { opacity: 0, y: -20, transition: { duration: 0.15 } },
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useBackButton()
+  const { checkAuth } = useAuth()
+  useEffect(() => {
+    checkAuth()
+    backButton.onClick(() => {
+      navigate(-1)
+    })
+  }, [])
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>{window.api.API_URL}</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="bg-main w-[100vw] h-[100vh] overflow-y-auto">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={location.pathname}
+          {...{
+            initial: "initial",
+            animate: "animate",
+            exit: "exit",
+            variants: pageVariants,
+          }}
+          style={{ height: "100%" }}
+        >
+          <Routes location={location}>
+            <Route path="/" element={<ProtectedRoute />}>
+              <Route path="/" element={<MainPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+            <Route path="/register" element={<RegistrationPage />} />
+          </Routes>
+        </motion.div>
+      </AnimatePresence>
+    </div>
   )
 }
 
