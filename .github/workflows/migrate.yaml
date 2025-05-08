@@ -1,0 +1,54 @@
+name: migrate-db
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        required: true
+        type: string
+        description: name of docker image
+      environment:
+        required: true
+        description: Pushing to DEV/PROD (should be DEV or PROD)
+        type: string
+        default: "DEV"
+      secret-service-hash:
+        required: true
+        description: name of secret value
+        type: string
+
+jobs:
+  make_migrate:
+    name: Make db migration
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+      - name: Fail if not on main branch or release tag
+        if: inputs.environment == 'PROD' && github.ref != 'refs/heads/main'
+        run: |
+          echo "This workflow should only run on the 'main' branch."
+          exit 1
+      
+      - name: Define Docker tags
+        run: |
+          if [ "${{ inputs.environment }}" == "DEV" ]; then
+              echo "VERSION_TAG=dev" >> $GITHUB_ENV
+          elif [ "${{ inputs.environment }}" == "PROD" ]; then
+              echo "VERSION_TAG=latest" >> $GITHUB_ENV
+          fi
+
+      - name: Trigger portainer webhook to update container
+        id: portainer_webhook
+        shell: bash
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}/${{ secrets[inputs.secret-service-hash] }}?tag=${{ env.VERSION_TAG }}")
+
+          if [ "$response" -ne 204 ]; then
+            echo "Error: expected 204, but got $response"
+            exit 1
+          fi

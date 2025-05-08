@@ -9,6 +9,11 @@ on:
         type: choice
         options: [PROD, DEV]
         default: DEV
+      migrate:
+        required: true
+        description: migrate
+        type: boolean
+        default: false
 
 jobs:
   deploy:
@@ -25,3 +30,12 @@ jobs:
       image_name: 'russianpadel-server'
       environment: ${{ github.event.inputs.environment }}
       secret-service-hash: ${{ github.event.inputs.environment == 'PROD' && 'SERVER_SERVICE_HASH' || 'SERVER_SERVICE_HASH_DEV' }}
+
+  migrate-db:
+    if: ${{ github.event.inputs.migrate == true }}
+    needs: deploy
+    uses: ./.github/workflows/migrate.yaml
+    with:
+      image_name: 'russianpadel-server'
+      environment: ${{ github.event.inputs.environment }}
+      secret-service-hash: ${{ github.event.inputs.environment == 'PROD' && 'MIGRATE_HASH' || 'MIGRATE_HASH_DEV' }}

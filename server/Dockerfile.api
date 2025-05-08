@@ -1,4 +1,3 @@
-
 FROM python:3.12-alpine
 
 WORKDIR /app
@@ -12,4 +11,4 @@ RUN poetry install --no-root
 COPY . .
 
 
-CMD ["poetry", "run", "alembic", "upgrade", "head", "&&", "poetry", "run", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["poetry", "run", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
