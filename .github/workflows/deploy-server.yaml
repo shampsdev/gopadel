@@ -39,7 +39,6 @@ jobs:
       attestations: write
       id-token: write
     if: ${{ github.event.inputs.migrate == true }}
-    needs: deploy
     with:
       image_name: 'russianpadel-server'
       environment: ${{ github.event.inputs.environment }}
