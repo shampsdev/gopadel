@@ -13,7 +13,7 @@ export default function ProfilePage() {
   return (
     <div className="p-4 min-h-screen flex flex-col">
       <HugeHeader />
-      <h1 className="text-2xl font-bold text-center mt-6">Профиль</h1>
+      <h1 className="text-2xl font-bold text-center mt-4">Профиль</h1>
 
       <div className="flex flex-col gap-2 bg-form rounded-xl p-4 mt-6">
         <div>
@@ -50,7 +50,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-      <div className="flex-1 flex flex-col gap-3 justify-end">
+      <div className="flex-1 flex flex-col gap-3 justify-end mt-3">
         <Link
           to={"/pofile/history"}
           className="text-white font-semibold pressable bg-gray-500 rounded-xl py-3"
