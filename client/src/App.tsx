@@ -1,10 +1,9 @@
 import "./App.css"
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import MainPage from "@/pages/MainPage"
-import { useCallback, useEffect } from "react"
-import { backButton, initData } from "@telegram-apps/sdk-react"
+import { useEffect } from "react"
+import { backButton } from "@telegram-apps/sdk-react"
 import { AnimatePresence, motion } from "framer-motion"
-import useUserStore from "@/stores/userStore"
 import ProfilePage from "@/pages/ProfilePage"
 import RegistrationPage from "@/pages/RegistrationPage"
 import ProtectedRoute from "@/components/ProtectedRoute"
@@ -12,6 +11,7 @@ import useBackButton from "@/hooks/useBackButton"
 import useAuth from "@/hooks/useAuth"
 import TournamentPage from "./pages/TournamentPage"
 import TournamentParticipantsPage from "./pages/TournamentParticipantsPage"
+import EditProfilePage from "./pages/EditProfilePage"
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -48,13 +48,21 @@ function App() {
           <Routes location={location}>
             <Route path="/" element={<ProtectedRoute />}>
               <Route path="/" element={<MainPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/tournament/:id" element={<TournamentPage />} />
-              <Route
-                path="/tournament/:id/participants"
-                element={<TournamentParticipantsPage />}
-              />
+
+              <Route path="profile">
+                <Route index element={<ProfilePage />} />
+                <Route path="edit" element={<EditProfilePage />} />
+              </Route>
+
+              <Route path="tournament/:id">
+                <Route index element={<TournamentPage />} />
+                <Route
+                  path="participants"
+                  element={<TournamentParticipantsPage />}
+                />
+              </Route>
             </Route>
+
             <Route path="/register" element={<RegistrationPage />} />
           </Routes>
         </motion.div>

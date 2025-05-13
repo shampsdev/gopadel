@@ -20,10 +20,8 @@ export default function GreenButton({
     <button
       onClick={onClick}
       disabled={disabled || isLoading}
-      className={`py-3 px-6 rounded-xl font-semibold text-white transition-colors relative pressable ${
-        !disabled && !isLoading
-          ? "bg-green hover:bg-green-dark active:bg-green-dark"
-          : "bg-gray-400 cursor-not-allowed"
+      className={`py-3 px-6 rounded-xl font-semibold text-white transition-colors duration-200 relative pressable ${
+        !disabled && !isLoading ? "bg-green" : "bg-gray-400 cursor-not-allowed"
       } ${className}`}
     >
       <span

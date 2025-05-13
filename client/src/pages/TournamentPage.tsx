@@ -18,6 +18,7 @@ import ParticipateButton from "@/components/ParticipateButton"
 import Divider from "@/components/ui/Divider"
 import { Spinner } from "@/components/ui/Spinner"
 import useUserStore from "@/stores/userStore"
+import { formatPrice } from "@/utils/formatPrice"
 
 export default function TournamentPage() {
   const { id } = useParams<{ id: string }>()
@@ -97,10 +98,10 @@ export default function TournamentPage() {
   const hasAvailableSpots = tournament.current_users < tournament.max_users
 
   return (
-    <div className="p-4 bg-white min-h-screen">
+    <div className="p-4 bg-white min-h-screen flex flex-col">
       <Header />
 
-      <div className="w-full max-w-md mx-auto">
+      <div className="w-full max-w-md mx-auto flex flex-col flex-1">
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">{tournament.name}</h1>
           <p className="text-gray-700">{tournament.organizer}</p>
@@ -146,7 +147,7 @@ export default function TournamentPage() {
             </span>
           </div>
           <div className="font-semibold">
-            <span>{tournament.price} ₽</span>
+            <span>{formatPrice(tournament.price)}</span>
           </div>
         </div>
 
@@ -159,44 +160,46 @@ export default function TournamentPage() {
           participants={tournament.participants || []}
         />
 
-        {isParticipating ? (
-          <ParticipateButton
-            tournamentId={tournament.id}
-            isParticipating={true}
-          />
-        ) : !hasValidRank ? (
-          <div className="mt-4 text-center">
-            <p className="opacity-50 mb-2">
-              Ваш ранг не соответствует требованиям турнира
-            </p>
-          </div>
-        ) : !hasAvailableSpots ? (
-          waitlistStatus === "inWaitlist" ? (
+        <div className="mt-auto">
+          {isParticipating ? (
+            <ParticipateButton
+              tournamentId={tournament.id}
+              isParticipating={true}
+            />
+          ) : !hasValidRank ? (
             <div className="mt-4 text-center">
-              <p className="text-amber-600 mb-2">Вы в листе ожидания</p>
-              <ParticipateButton
-                tournamentId={tournament.id}
-                isParticipating={true}
-              />
-            </div>
-          ) : (
-            <div className="mt-4 text-center">
-              <p className="text-amber-600 mb-2">
-                Мест нет, но вы можете записаться в лист ожидания
+              <p className="opacity-50 mb-2">
+                Ваш ранг не соответствует требованиям турнира
               </p>
-              <ParticipateButton
-                tournamentId={tournament.id}
-                isParticipating={false}
-                isWaitlist={true}
-              />
             </div>
-          )
-        ) : (
-          <ParticipateButton
-            tournamentId={tournament.id}
-            isParticipating={false}
-          />
-        )}
+          ) : !hasAvailableSpots ? (
+            waitlistStatus === "inWaitlist" ? (
+              <div className="mt-4 text-center">
+                <p className="text-amber-600 mb-2">Вы в листе ожидания</p>
+                <ParticipateButton
+                  tournamentId={tournament.id}
+                  isParticipating={true}
+                />
+              </div>
+            ) : (
+              <div className="mt-4 text-center">
+                <p className="text-amber-600 mb-2">
+                  Мест нет, но вы можете записаться в лист ожидания
+                </p>
+                <ParticipateButton
+                  tournamentId={tournament.id}
+                  isParticipating={false}
+                  isWaitlist={true}
+                />
+              </div>
+            )
+          ) : (
+            <ParticipateButton
+              tournamentId={tournament.id}
+              isParticipating={false}
+            />
+          )}
+        </div>
       </div>
     </div>
   )

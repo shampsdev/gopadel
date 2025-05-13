@@ -12,11 +12,11 @@ export type User = {
   rank: number
   city: string
   birth_date: string | null // Date in TypeScript is often represented as ISO string
-  loyalty_id: number | null
+  loyalty_id: number
   is_registered: boolean
 
   // Relations
-  loyalty?: Loyalty
+  loyalty: Loyalty
   registrations?: Registration[]
   waitlist_entries?: Waitlist[]
 }
