@@ -2,10 +2,10 @@ import {
   hapticFeedbackImpactOccurred,
   initData,
 } from "@telegram-apps/sdk-react"
-import { Text } from "@telegram-apps/telegram-ui"
+
 import { Link } from "react-router-dom"
 import blackLogo from "@/assets/logo-black.png"
-
+import Divider from "@/components/ui/Divider"
 import { IoIosArrowForward } from "react-icons/io"
 
 initData.restore()
@@ -42,8 +42,9 @@ export default function Header() {
           </div>
         </Link>
       </div>
-
-      <div className="border-t opacity-50 my-4"></div>
+      <div className="my-4">
+        <Divider />
+      </div>
     </div>
   )
 }

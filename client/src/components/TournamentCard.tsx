@@ -15,9 +15,13 @@ type TournamentCardProps = {
 }
 
 export default function TournamentCard({ tournament }: TournamentCardProps) {
-  const formattedDate = format(new Date(tournament.start_time), "d MMMM", {
-    locale: ru,
-  })
+  const formattedDate = format(
+    new Date(tournament.start_time),
+    "dd MMMM HH:mm",
+    {
+      locale: ru,
+    }
+  )
 
   return (
     <div className="w-full rounded-3xl border-2 border-gray-300 p-5 mb-3">

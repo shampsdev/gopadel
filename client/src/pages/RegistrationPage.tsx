@@ -8,6 +8,8 @@ import { api } from "@/api/api"
 import { useNavigate } from "react-router-dom"
 import useAuth from "@/hooks/useAuth"
 import useUserStore from "@/stores/userStore"
+import GreenButton from "@/components/ui/GreenButton"
+
 export default function RegistrationPage() {
   const [name, setName] = useState(initData.user()?.first_name ?? "")
   const [secondName, setSecondName] = useState(initData.user()?.last_name ?? "")
@@ -160,17 +162,14 @@ export default function RegistrationPage() {
           optional={true}
         />
 
-        <button
+        <GreenButton
           onClick={handleSubmit}
-          disabled={!formIsValid || isSubmitting}
-          className={`mt-4 py-3 px-6 rounded-xl font-semibold text-white ${
-            formIsValid && !isSubmitting
-              ? "bg-[#20C86E] hover:bg-[#1BA15C]"
-              : "bg-gray-400 cursor-not-allowed"
-          }`}
+          disabled={!formIsValid}
+          isLoading={isSubmitting}
+          className="mt-4"
         >
-          {isSubmitting ? "Отправка..." : "Зарегистрироваться"}
-        </button>
+          Зарегистрироваться
+        </GreenButton>
       </div>
     </div>
   )

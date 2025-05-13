@@ -30,3 +30,7 @@ class Tournament(Base):
     waitlist_entries: Mapped[list["Waitlist"]] = relationship(
         "Waitlist", back_populates="tournament"
     )
+
+    @property
+    def registrations_count(self) -> int:
+        return len(self.registrations)

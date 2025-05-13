@@ -37,34 +37,34 @@ export const getTournaments = async (): Promise<Tournament[]> => {
 */
 
 // Mock function for development
-export const getTournaments = async (): Promise<Tournament[]> => {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 500))
+export const getTournaments = async (
+  availableOnly: boolean
+): Promise<Tournament[]> => {
+  const response = await api.get<Tournament[]>(
+    `/tournaments?available=${availableOnly}`
+  )
+  return response.data
+}
 
-  return [
-    {
-      id: "1",
-      name: "Название",
-      organizer: "Иван Иванов",
-      start_time: new Date().toISOString(),
-      price: 5000,
-      location: "локация",
-      rank_min: 1.0,
-      rank_max: 2.0,
-      max_users: 36,
-      current_users: 30,
-    },
-    {
-      id: "2",
-      name: "Название",
-      organizer: "Иван Иванов",
-      start_time: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
-      price: 5000,
-      location: "локация",
-      rank_min: 1.0,
-      rank_max: 2.0,
-      max_users: 36,
-      current_users: 30,
-    },
-  ]
+export const getTournament = async (id: string): Promise<Tournament | null> => {
+  try {
+    const response = await api.get<Tournament>(`/tournaments/${id}`)
+    return response.data
+  } catch (error) {
+    console.error(`Error fetching tournament with id ${id}:`, error)
+    return null
+  }
+}
+
+export const getTournamentParticipants = async (tournamentId: string) => {
+  try {
+    const response = await api.get(`/tournaments/${tournamentId}/participants`)
+    return response.data
+  } catch (error) {
+    console.error(
+      `Error fetching participants for tournament ${tournamentId}:`,
+      error
+    )
+    return []
+  }
 }

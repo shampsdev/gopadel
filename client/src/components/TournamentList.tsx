@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react"
 import { Tournament } from "@/types/tournament"
 import TournamentCard from "./TournamentCard"
 import { getTournaments } from "@/api/api"
+import { Link } from "react-router-dom"
+import { Spinner } from "./ui/Spinner"
 
 export default function TournamentList() {
   const [tournaments, setTournaments] = useState<Tournament[]>([])
@@ -15,7 +17,7 @@ export default function TournamentList() {
     const fetchTournaments = async () => {
       setLoading(true)
       try {
-        const data = await getTournaments()
+        const data = await getTournaments(availableOnly)
         setTournaments(data)
         setFilteredTournaments(data)
       } catch (error) {
@@ -26,7 +28,7 @@ export default function TournamentList() {
     }
 
     fetchTournaments()
-  }, [])
+  }, [availableOnly])
 
   useEffect(() => {
     if (!availableOnly) {
@@ -71,12 +73,16 @@ export default function TournamentList() {
       </div>
 
       {loading ? (
-        <div className="text-center py-4">Загрузка...</div>
+        <div className="text-center py-4">
+          <Spinner className="mx-auto text-green-500" />
+        </div>
       ) : filteredTournaments.length === 0 ? (
         <div className="text-center py-4">Нет доступных турниров</div>
       ) : (
         filteredTournaments.map((tournament) => (
-          <TournamentCard key={tournament.id} tournament={tournament} />
+          <Link key={tournament.id} to={`/tournament/${tournament.id}`}>
+            <TournamentCard tournament={tournament} />
+          </Link>
         ))
       )}
     </div>

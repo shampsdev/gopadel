@@ -9,6 +9,7 @@
   --color-form: #f5f5f5;
   --text-xxs: 0.625rem;
   --color-green: #20c86e;
+  --color-green-dark: #1ba15c;
 }
 
 .bag-tg {
@@ -79,6 +80,20 @@ html {
 
 .scrollbar-none {
   scrollbar-width: none;
+}
+
+/* Custom scrollbar utilities */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scroll-smooth {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -246,5 +261,20 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scroll-smooth {
+    scroll-behavior: smooth;
   }
 }

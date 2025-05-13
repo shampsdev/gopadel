@@ -10,6 +10,9 @@ import RegistrationPage from "@/pages/RegistrationPage"
 import ProtectedRoute from "@/components/ProtectedRoute"
 import useBackButton from "@/hooks/useBackButton"
 import useAuth from "@/hooks/useAuth"
+import TournamentPage from "./pages/TournamentPage"
+import TournamentParticipantsPage from "./pages/TournamentParticipantsPage"
+
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.15 } },
@@ -46,6 +49,11 @@ function App() {
             <Route path="/" element={<ProtectedRoute />}>
               <Route path="/" element={<MainPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/tournament/:id" element={<TournamentPage />} />
+              <Route
+                path="/tournament/:id/participants"
+                element={<TournamentParticipantsPage />}
+              />
             </Route>
             <Route path="/register" element={<RegistrationPage />} />
           </Routes>
