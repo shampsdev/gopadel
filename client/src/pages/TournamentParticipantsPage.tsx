@@ -57,16 +57,6 @@ export default function TournamentParticipantsPage() {
 
   return (
     <div className="p-4 bg-white min-h-screen">
-      <div className="mb-4">
-        <Link
-          to={`/tournament/${id}`}
-          className="flex items-center text-gray-700"
-        >
-          <IoIosArrowBack size={20} />
-          <span className="ml-1">Назад</span>
-        </Link>
-      </div>
-
       <Header />
 
       <div className="w-full max-w-md mx-auto">
