@@ -17,7 +17,7 @@ def get_or_create_user(db: Session, tg_id: int, username: str | None = None):
         rank=0,
         city="",
         birth_date=None,
-        loyalty_id=0,
+        loyalty_id=1,
     )
     db.add(user)
     db.commit()
