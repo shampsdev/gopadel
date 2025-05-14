@@ -46,7 +46,9 @@ export default function ProfilePage() {
         <div>
           <div className="opacity-50">Уровень лояльности</div>
           <div>
-            {userData?.loyalty.name} (скидка {userData?.loyalty.discount}%)
+            {userData?.loyalty.name}
+            {userData?.loyalty.discount &&
+              ` (скидка ${userData?.loyalty.discount}%)`}
           </div>
         </div>
       </div>
