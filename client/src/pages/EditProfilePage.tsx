@@ -27,7 +27,7 @@ export default function RegistrationPage() {
     setSecondName(userData?.second_name ?? "")
     setRank(userData?.rank.toString() ?? "")
     setCity(userData?.city ?? "")
-    setBirthDate(userData?.birth_date ?? "")
+    setBirthDate(userData?.birth_date_ru ?? "")
   }, [userData])
 
   const validateRank = (value: string): boolean => {

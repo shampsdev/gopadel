@@ -18,6 +18,7 @@ class UserBase(BaseModel):
     rank: float
     city: str
     birth_date: date | None
+    birth_date_ru: str | None
     loyalty_id: int
     loyalty: Loyalty
     is_registered: bool

@@ -40,3 +40,9 @@ class User(Base):
     waitlist_entries: Mapped[list["Waitlist"]] = relationship(
         "Waitlist", back_populates="user"
     )
+
+    @property
+    def birth_date_ru(self) -> str | None:
+        if self.birth_date:
+            return self.birth_date.strftime("%d.%m.%Y")
+        return None

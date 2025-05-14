@@ -11,7 +11,7 @@ export type User = {
   avatar: string
   rank: number
   city: string
-  birth_date: string | null // Date in TypeScript is often represented as ISO string
+  birth_date_ru: string | null
   loyalty_id: number
   is_registered: boolean
 

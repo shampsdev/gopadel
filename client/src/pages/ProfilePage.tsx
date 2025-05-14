@@ -33,12 +33,12 @@ export default function ProfilePage() {
           <div>{userData?.city}</div>
         </div>
 
-        {userData?.birth_date && (
+        {userData?.birth_date_ru && (
           <>
             <Divider />
             <div>
               <div className="opacity-50">Дата рождения</div>
-              <div>{userData?.birth_date}</div>
+              <div>{userData?.birth_date_ru}</div>
             </div>
           </>
         )}
