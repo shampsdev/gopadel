@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, computed_field
 from datetime import datetime
 from typing import List
 from uuid import UUID
@@ -11,14 +11,12 @@ class UserBase(BaseModel):
     avatar: str
 
 
-
 class ParticipantResponse(BaseModel):
     user: UserBase
 
 
 class RegistrationBase(BaseModel):
     user: UserBase
-
 
 
 class TournamentBase(BaseModel):
@@ -32,11 +30,9 @@ class TournamentBase(BaseModel):
     max_users: int
 
 
-
 class TournamentResponse(TournamentBase):
     registrations: List[RegistrationBase] = []
-    
+
     @computed_field
     def current_users(self) -> int:
         return len(self.registrations)
-    

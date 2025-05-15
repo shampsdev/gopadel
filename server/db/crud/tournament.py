@@ -5,7 +5,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
 
 from db.models.tournament import Tournament
-from db.models.user import User
 from db.models.registration import Registration
 
 
@@ -69,11 +68,16 @@ def get_tournament_by_id(db: Session, tournament_id: UUID) -> Optional[Tournamen
     return db.query(Tournament).filter(Tournament.id == tournament_id).first()
 
 
-def get_tournament_with_participants_by_id(db: Session, tournament_id: UUID) -> Optional[Tournament]:
+def get_tournament_with_participants_by_id(
+    db: Session, tournament_id: UUID
+) -> Optional[Tournament]:
     """Get a specific tournament by ID with eager loading of registrations and users"""
-    return db.query(Tournament).options(
-        joinedload(Tournament.registrations).joinedload(Registration.user)
-    ).filter(Tournament.id == tournament_id).first()
+    return (
+        db.query(Tournament)
+        .options(joinedload(Tournament.registrations).joinedload(Registration.user))
+        .filter(Tournament.id == tournament_id)
+        .first()
+    )
 
 
 def update_tournament(
