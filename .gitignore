@@ -8,3 +8,4 @@ dist
 media
 postgres_data
 client/public/config.js
+venv

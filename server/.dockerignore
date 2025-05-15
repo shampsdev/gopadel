@@ -5,3 +5,4 @@ postgres_data
 dist
 media
 node_modules
+venv

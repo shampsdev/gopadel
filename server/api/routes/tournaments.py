@@ -1,12 +1,12 @@
-from typing import Optional, List
-from fastapi import APIRouter
+from datetime import datetime
+from typing import List, Optional
+
 from api.deps import SessionDep, UserDep
+from db.models.registration import Registration
 from db.models.tournament import Tournament
 from db.models.user import User
-from db.models.registration import Registration
+from fastapi import APIRouter
 from pydantic import BaseModel
-from datetime import datetime
-from uuid import UUID
 
 router = APIRouter()
 
@@ -33,23 +33,31 @@ class TournamentResponse(BaseModel):
 
 
 @router.get("", response_model=List[TournamentResponse])
-async def get_tournaments(db: SessionDep, user: UserDep, available: Optional[bool] = None):
+async def get_tournaments(
+    db: SessionDep, user: UserDep, available: Optional[bool] = None
+):
     if available is not None:
         query = db.query(Tournament)
         if available:
-            query = query.filter(Tournament.rank_min <= user.rank, Tournament.rank_max >= user.rank)
+            query = query.filter(
+                Tournament.rank_min <= user.rank, Tournament.rank_max >= user.rank
+            )
         tournaments = query.all()
     else:
         tournaments = db.query(Tournament).all()
-    
+
     result = []
-    
+
     # Add participants to each tournament
     for tournament in tournaments:
-        registrations = db.query(Registration).filter(Registration.tournament_id == tournament.id).all()
+        registrations = (
+            db.query(Registration)
+            .filter(Registration.tournament_id == tournament.id)
+            .all()
+        )
         user_ids = [reg.user_id for reg in registrations]
         participants = db.query(User).filter(User.id.in_(user_ids)).all()
-        
+
         # Create response object with participants
         tournament_response = TournamentResponse(
             id=str(tournament.id),
@@ -67,27 +75,31 @@ async def get_tournaments(db: SessionDep, user: UserDep, available: Optional[boo
                     id=str(user.id),
                     first_name=user.first_name,
                     second_name=user.second_name,
-                    avatar=user.avatar
+                    avatar=user.avatar,
                 )
                 for user in participants
-            ]
+            ],
         )
-        
+
         result.append(tournament_response)
-    
+
     return result
 
 
 @router.get("/{tournament_id}", response_model=TournamentResponse)
 async def get_tournament(db: SessionDep, tournament_id: str):
     tournament = db.query(Tournament).filter(Tournament.id == tournament_id).first()
-    
+
     if tournament:
         # Get participants for this tournament
-        registrations = db.query(Registration).filter(Registration.tournament_id == tournament.id).all()
+        registrations = (
+            db.query(Registration)
+            .filter(Registration.tournament_id == tournament.id)
+            .all()
+        )
         user_ids = [reg.user_id for reg in registrations]
         participants = db.query(User).filter(User.id.in_(user_ids)).all()
-        
+
         # Create response object with participants
         return TournamentResponse(
             id=str(tournament.id),
@@ -105,28 +117,30 @@ async def get_tournament(db: SessionDep, tournament_id: str):
                     id=str(user.id),
                     first_name=user.first_name,
                     second_name=user.second_name,
-                    avatar=user.avatar
+                    avatar=user.avatar,
                 )
                 for user in participants
-            ]
+            ],
         )
-    
+
     return None
 
 
 @router.get("/{tournament_id}/participants", response_model=List[ParticipantResponse])
 async def get_tournament_participants(db: SessionDep, tournament_id: str):
     # Get actual participants from the database
-    registrations = db.query(Registration).filter(Registration.tournament_id == tournament_id).all()
+    registrations = (
+        db.query(Registration).filter(Registration.tournament_id == tournament_id).all()
+    )
     user_ids = [reg.user_id for reg in registrations]
     participants = db.query(User).filter(User.id.in_(user_ids)).all()
-    
+
     return [
         ParticipantResponse(
             id=str(user.id),
             first_name=user.first_name,
             second_name=user.second_name,
-            avatar=user.avatar
+            avatar=user.avatar,
         )
         for user in participants
     ]

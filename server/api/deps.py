@@ -4,13 +4,12 @@ import json
 from typing import Annotated
 from urllib.parse import unquote
 
-from fastapi import Depends, Header, HTTPException
-from sqlalchemy.orm import Session
-
 from config import settings
 from db import SessionLocal
-from db.models import User
 from db.crud.user import get_or_create_user
+from db.models import User
+from fastapi import Depends, Header, HTTPException
+from sqlalchemy.orm import Session
 
 
 def get_db():
