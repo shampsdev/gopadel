@@ -1,26 +1,32 @@
-from datetime import date
-from typing import Optional
+from datetime import datetime
+from typing import List, Optional
 from uuid import UUID
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session, joinedload
 
 from db.models.tournament import Tournament
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from db.models.user import User
+from db.models.registration import Registration
 
 
 def create_tournament(
     db: Session,
     name: str,
-    description: Optional[str],
-    start_date: date,
-    end_date: date,
+    start_time: datetime,
+    price: int,
     location: str,
+    rank_min: float,
+    rank_max: float,
+    max_users: int,
 ) -> Tournament:
     tournament = Tournament(
         name=name,
-        description=description,
-        start_date=start_date,
-        end_date=end_date,
+        start_time=start_time,
+        price=price,
         location=location,
+        rank_min=rank_min,
+        rank_max=rank_max,
+        max_users=max_users,
     )
     db.add(tournament)
     db.commit()
@@ -28,18 +34,58 @@ def create_tournament(
     return tournament
 
 
+def get_tournaments(
+    db: Session, user_rank: Optional[float] = None, available: Optional[bool] = None
+) -> List[Tournament]:
+    """Get all tournaments, optionally filtered by user rank if available=True"""
+    query = db.query(Tournament)
+
+    if available and user_rank is not None:
+        query = query.filter(
+            Tournament.rank_min <= user_rank, Tournament.rank_max >= user_rank
+        )
+
+    return query.all()
+
+
+def get_tournaments_with_participants(
+    db: Session, user_rank: Optional[float] = None, available: Optional[bool] = None
+) -> List[Tournament]:
+    """Get all tournaments with eager loading of registrations and users"""
+    query = db.query(Tournament).options(
+        joinedload(Tournament.registrations).joinedload(Registration.user)
+    )
+
+    if available and user_rank is not None:
+        query = query.filter(
+            Tournament.rank_min <= user_rank, Tournament.rank_max >= user_rank
+        )
+
+    return query.all()
+
+
 def get_tournament_by_id(db: Session, tournament_id: UUID) -> Optional[Tournament]:
+    """Get a specific tournament by ID"""
     return db.query(Tournament).filter(Tournament.id == tournament_id).first()
+
+
+def get_tournament_with_participants_by_id(db: Session, tournament_id: UUID) -> Optional[Tournament]:
+    """Get a specific tournament by ID with eager loading of registrations and users"""
+    return db.query(Tournament).options(
+        joinedload(Tournament.registrations).joinedload(Registration.user)
+    ).filter(Tournament.id == tournament_id).first()
 
 
 def update_tournament(
     db: Session,
     tournament_id: UUID,
     name: Optional[str] = None,
-    description: Optional[str] = None,
-    start_date: Optional[date] = None,
-    end_date: Optional[date] = None,
+    start_time: Optional[datetime] = None,
+    price: Optional[int] = None,
     location: Optional[str] = None,
+    rank_min: Optional[float] = None,
+    rank_max: Optional[float] = None,
+    max_users: Optional[int] = None,
 ) -> Optional[Tournament]:
     tournament = db.query(Tournament).filter(Tournament.id == tournament_id).first()
     if not tournament:
@@ -47,14 +93,18 @@ def update_tournament(
 
     if name:
         tournament.name = name
-    if description:
-        tournament.description = description
-    if start_date:
-        tournament.start_date = start_date
-    if end_date:
-        tournament.end_date = end_date
+    if start_time:
+        tournament.start_time = start_time
+    if price:
+        tournament.price = price
     if location:
         tournament.location = location
+    if rank_min is not None:
+        tournament.rank_min = rank_min
+    if rank_max is not None:
+        tournament.rank_max = rank_max
+    if max_users:
+        tournament.max_users = max_users
 
     db.commit()
     db.refresh(tournament)

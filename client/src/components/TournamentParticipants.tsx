@@ -1,20 +1,20 @@
 import React, { useEffect, useState, useRef } from "react"
 import { Link } from "react-router-dom"
 import { IoIosArrowForward } from "react-icons/io"
-import { Participant } from "@/types/tournament"
+import { Registration } from "@/types/tournament"
 import "./TournamentParticipants.css"
 import { Spinner } from "./ui/Spinner"
 
 type TournamentParticipantsProps = {
   tournamentId: string
-  participants?: Participant[]
+  registrations?: Registration[]
   showAll?: boolean
   maxDisplay?: number
 }
 
 export default function TournamentParticipants({
   tournamentId,
-  participants = [],
+  registrations = [],
   showAll = false,
   maxDisplay = 4,
 }: TournamentParticipantsProps) {
@@ -42,11 +42,11 @@ export default function TournamentParticipants({
 
       return () => container.removeEventListener("scroll", checkScroll)
     }
-  }, [participants])
+  }, [registrations])
 
-  const displayParticipants = showAll
-    ? participants
-    : participants.slice(0, maxDisplay)
+  const displayRegistrations = showAll
+    ? registrations
+    : registrations.slice(0, maxDisplay)
 
   return (
     <div>
@@ -67,26 +67,26 @@ export default function TournamentParticipants({
           className="overflow-x-auto scrollbar-hide px-1"
         >
           <div className="flex space-x-4 min-w-max py-2 scroll-smooth">
-            {displayParticipants.length > 0 ? (
-              displayParticipants.map((participant) => (
+            {displayRegistrations.length > 0 ? (
+              displayRegistrations.map((registration) => (
                 <div
-                  key={participant.id}
+                  key={registration.user.id}
                   className="flex flex-col items-center"
                 >
                   <div className="w-16 h-16 rounded-full bg-gray-200 mb-2 overflow-hidden">
-                    {participant.avatar && (
+                    {registration.user.avatar && (
                       <img
-                        src={participant.avatar}
-                        alt={`${participant.first_name} ${participant.second_name}`}
+                        src={registration.user.avatar}
+                        alt={`${registration.user.first_name} ${registration.user.second_name}`}
                         className="w-full h-full object-cover"
                       />
                     )}
                   </div>
                   <p className="text-center text-xs">
-                    {participant.second_name}
+                    {registration.user.second_name}
                     <br />
                     dsf
-                    {participant.first_name}
+                    {registration.user.first_name}
                   </p>
                 </div>
               ))

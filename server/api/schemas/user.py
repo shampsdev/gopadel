@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Optional
 from pydantic import BaseModel
 from uuid import UUID
 
@@ -8,6 +7,7 @@ class Loyalty(BaseModel):
     id: int
     name: str
     discount: float
+
 
 class UserBase(BaseModel):
     id: UUID

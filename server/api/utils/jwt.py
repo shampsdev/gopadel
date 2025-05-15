@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import jwt
-from api.deps import SessionDep
 from db.models.admin import AdminUser
 from fastapi import Depends, HTTPException
 from passlib.context import CryptContext
@@ -32,7 +31,6 @@ def get_password_hash(password: str) -> str:
 
 
 def get_current_admin(db: Session, token: str = Depends()) -> AdminUser:
-
     credentials_exception = HTTPException(
         status_code=401, detail="Could not validate credentials"
     )

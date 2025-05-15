@@ -4,8 +4,7 @@ from api.deps import SessionDep
 from api.schemas.admin_auth import AdminLogin, Token
 from api.utils.jwt import create_access_token, verify_password
 from db.crud.admin_user import get_admin_by_username
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 

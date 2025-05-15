@@ -9,7 +9,11 @@ export type Tournament = {
   max_users: number
   current_users: number // Number of current registrations
   organizer: string // Name of the organizer
-  participants?: Participant[]
+  registrations?: Registration[]
+}
+
+export type Registration = {
+  user: Participant
 }
 
 export type Participant = {

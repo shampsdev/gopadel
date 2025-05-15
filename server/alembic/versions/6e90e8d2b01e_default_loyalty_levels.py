@@ -5,6 +5,7 @@ Revises: 200c5a93cb67
 Create Date: 2025-05-14 12:47:01.631362
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -12,15 +13,15 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6e90e8d2b01e'
-down_revision: Union[str, None] = '200c5a93cb67'
+revision: str = "6e90e8d2b01e"
+down_revision: Union[str, None] = "200c5a93cb67"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
     """Upgrade schema."""
-    
+
     # Create loyalty levels
     op.bulk_insert(
         sa.table(

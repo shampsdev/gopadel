@@ -42,8 +42,8 @@ export default function TournamentPage() {
 
         // Check if user is already participating
         const isUserParticipating =
-          data.participants?.some(
-            (participant) => participant.id === userData?.id
+          data.registrations?.some(
+            (registration) => registration.user.id === userData?.id
           ) || false
 
         setIsParticipating(isUserParticipating)
@@ -157,7 +157,7 @@ export default function TournamentPage() {
 
         <TournamentParticipants
           tournamentId={tournament.id}
-          participants={tournament.participants || []}
+          registrations={tournament.registrations || []}
         />
 
         <div className="mt-auto">

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useParams, Link } from "react-router-dom"
 
-import { Tournament, Participant } from "@/types/tournament"
+import { Tournament, Registration } from "@/types/tournament"
 import { getTournament, getTournamentParticipants } from "@/api/api"
 import Header from "@/components/Header"
 import { IoIosArrowBack } from "react-icons/io"
@@ -10,7 +10,7 @@ import { Spinner } from "@/components/ui/Spinner"
 export default function TournamentParticipantsPage() {
   const { id } = useParams<{ id: string }>()
   const [tournament, setTournament] = useState<Tournament | null>(null)
-  const [participants, setParticipants] = useState<Participant[]>([])
+  const [registrations, setRegistrations] = useState<Registration[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -18,13 +18,13 @@ export default function TournamentParticipantsPage() {
       if (!id) return
       setLoading(true)
       try {
-        const [tournamentData, participantsData] = await Promise.all([
+        const [tournamentData, registrationsData] = await Promise.all([
           getTournament(id),
           getTournamentParticipants(id),
         ])
 
         setTournament(tournamentData)
-        setParticipants(participantsData)
+        setRegistrations(registrationsData)
       } catch (error) {
         console.error("Error fetching data:", error)
       } finally {
@@ -65,7 +65,7 @@ export default function TournamentParticipantsPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="text-gray-700">
             <span className="font-medium">Всего участников:</span>{" "}
-            {participants.length}
+            {registrations.length}
           </div>
           {tournament && (
             <div className="text-gray-700">
@@ -75,25 +75,28 @@ export default function TournamentParticipantsPage() {
           )}
         </div>
 
-        {participants.length === 0 ? (
+        {registrations.length === 0 ? (
           <div className="text-center py-8">
             <p>Пока нет участников</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-x-6 gap-y-8">
-            {participants.map((participant) => (
-              <div key={participant.id} className="flex flex-col items-center">
+            {registrations.map((registration) => (
+              <div
+                key={registration.user.id}
+                className="flex flex-col items-center"
+              >
                 <div className="w-20 h-20 rounded-full bg-gray-200 mb-3 overflow-hidden">
-                  {participant.avatar && (
+                  {registration.user.avatar && (
                     <img
-                      src={participant.avatar}
-                      alt={`${participant.first_name} ${participant.second_name}`}
+                      src={registration.user.avatar}
+                      alt={`${registration.user.first_name} ${registration.user.second_name}`}
                       className="w-full h-full object-cover"
                     />
                   )}
                 </div>
                 <p className="text-center font-medium">
-                  {participant.second_name} {participant.first_name}
+                  {registration.user.second_name} {registration.user.first_name}
                 </p>
               </div>
             ))}

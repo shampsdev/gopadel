@@ -1,7 +1,7 @@
 import axios from "axios"
 import { API_URL } from "../shared/constants"
 import { User } from "@/types/user"
-import { Tournament } from "@/types/tournament"
+import { Tournament, Registration } from "@/types/tournament"
 import { initDataRaw } from "@telegram-apps/sdk-react"
 
 export const api = axios.create({
@@ -56,9 +56,13 @@ export const getTournament = async (id: string): Promise<Tournament | null> => {
   }
 }
 
-export const getTournamentParticipants = async (tournamentId: string) => {
+export const getTournamentParticipants = async (
+  tournamentId: string
+): Promise<Registration[]> => {
   try {
-    const response = await api.get(`/tournaments/${tournamentId}/participants`)
+    const response = await api.get<Registration[]>(
+      `/tournaments/${tournamentId}/participants`
+    )
     return response.data
   } catch (error) {
     console.error(
