@@ -9,7 +9,11 @@ export default function useBackButton() {
     if (location.pathname !== "/") {
       backButton.show()
       backButton.onClick(() => {
-        navigate(-1)
+        if (location.pathname === "/profile") {
+          navigate("/")
+        } else {
+          navigate(-1)
+        }
       })
     } else {
       backButton.hide()
