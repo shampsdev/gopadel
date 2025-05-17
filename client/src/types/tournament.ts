@@ -1,4 +1,3 @@
-import { Payment } from "./Payment"
 import { Registration } from "./registration"
 
 export type Tournament = {

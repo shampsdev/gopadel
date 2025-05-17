@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { useParams, Link } from "react-router-dom"
 
-import { Tournament, Registration } from "@/types/tournament"
+import { Tournament } from "@/types/tournament"
+import { Registration } from "@/types/registration"
 import { getTournament, getTournamentParticipants } from "@/api/api"
 import Header from "@/components/Header"
 import { IoIosArrowBack } from "react-icons/io"

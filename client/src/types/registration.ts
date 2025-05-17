@@ -9,5 +9,5 @@ export interface Registration {
   status: string
   payment_id: string // UUID
   payment: Payment
-  user?: User
+  user: User
 }
