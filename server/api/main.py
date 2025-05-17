@@ -21,10 +21,26 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json" if settings.DEBUG else None,
     docs_url="/api/v1/docs" if settings.DEBUG else None,
     redoc_url="/api/v1/redoc" if settings.DEBUG else None,
+    title="GoPadel API",
+    description="GoPadel API for admin and client operations",
 )
 
 if settings.DEBUG:
     logger.info("settings:\n%s", settings.model_dump_json(indent=2, exclude_none=True))
+
+# Add JWT bearer token security scheme
+app.openapi_components = {
+    "securitySchemes": {
+        "bearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": "Enter JWT Bearer token for authentication. Only Superusers can create or delete admin users.",
+        }
+    }
+}
+
+app.openapi_security = [{"bearerAuth": []}]
 
 app.add_middleware(
     CORSMiddleware,

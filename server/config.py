@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     S3_ENDPOINT_URL: str
     S3_BUCKET: str
     S3_ROOT_DIRECTORY: str
+    # JWT
+    JWT_SECRET_KEY: str
+    JWT_ACCESS_TOKEN_EXPIRE_HOURS: int
 
     @property
     def SQLALCHEMY_DATABASE_URI(self):

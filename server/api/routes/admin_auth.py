@@ -15,9 +15,7 @@ async def login_for_access_token(admin_data: AdminLogin, db: SessionDep):
     if not admin or not verify_password(admin_data.password, admin.password_hash):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
-    access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
-        data={"sub": admin.username, "is_superuser": admin.is_superuser},
-        expires_delta=access_token_expires,
+        data={"sub": admin.username, "is_superuser": admin.is_superuser}
     )
     return {"access_token": access_token, "token_type": "bearer"}
