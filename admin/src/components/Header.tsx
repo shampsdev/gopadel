@@ -21,6 +21,9 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
         <div className="font-bold text-xl">GO PADEL Admin</div>
         <div className="flex items-center space-x-6">
           <nav className="flex space-x-6">
+            <button onClick={() => navigate('/dashboard')} className="hover:text-gray-600 transition">
+              Главная
+            </button>
             <button onClick={() => navigate('/users')} className="hover:text-gray-600 transition">
               Пользователи
             </button>

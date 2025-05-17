@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
+import TournamentsPage from './pages/TournamentsPage';
 import { authService } from './services/auth';
 import { UserProvider, useUser } from './context/UserContext';
 import Header from './components/Header';
@@ -60,10 +61,7 @@ function App() {
           <Route path="/tournaments" element={
             <ProtectedRoute>
               <Layout>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold text-black">Турниры</h1>
-                  <p className="text-gray-700">Управление турнирами</p>
-                </div>
+                <TournamentsPage />
               </Layout>
             </ProtectedRoute>
           } />
