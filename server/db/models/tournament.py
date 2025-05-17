@@ -1,11 +1,11 @@
+import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import String, Integer, Float, DateTime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from db import Base
+from sqlalchemy import DateTime, Float, Integer, String, text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from db.models.registration import Registration
@@ -15,7 +15,9 @@ if TYPE_CHECKING:
 class Tournament(Base):
     __tablename__ = "tournaments"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(
+        primary_key=True, server_default=text("gen_random_uuid()")
+    )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     price: Mapped[int] = mapped_column(Integer, nullable=False)
