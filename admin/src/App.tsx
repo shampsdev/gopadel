@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import TournamentsPage from './pages/TournamentsPage';
+import DashboardPage from './pages/DashboardPage';
 import { authService } from './services/auth';
 import { UserProvider, useUser } from './context/UserContext';
 import Header from './components/Header';
@@ -40,10 +41,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <div className="p-4 md:p-6">
-                    <h1 className="text-xl md:text-2xl font-bold text-black">Панель администратора</h1>
-                    <p className="text-gray-700">Добро пожаловать в админ-панель GO PADEL!</p>
-                  </div>
+                  <DashboardPage />
                 </Layout>
               </ProtectedRoute>
             } 
