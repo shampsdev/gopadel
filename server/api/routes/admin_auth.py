@@ -1,12 +1,15 @@
 from datetime import timedelta
 
 from api.deps import SessionDep
-from api.schemas.admin_auth import AdminLogin, Token
+from api.schemas.admin_auth import AdminLogin, AdminMe, Token
+from api.utils.admin_middleware import admin_required
 from api.utils.jwt import create_access_token, verify_password
 from db.crud.admin_user import get_admin_by_username
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 router = APIRouter()
+security = HTTPBearer()
 
 
 @router.post("/login", response_model=Token)
@@ -19,3 +22,10 @@ async def login_for_access_token(admin_data: AdminLogin, db: SessionDep):
         data={"sub": admin.username, "is_superuser": admin.is_superuser}
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/me", response_model=AdminMe, dependencies=[Depends(security)])
+@admin_required
+async def get_current_admin(request: Request, db: SessionDep):
+    admin = request.state.admin
+    return {"username": admin.username, "is_superuser": admin.is_superuser}

@@ -14,3 +14,8 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: str
     is_superuser: bool
+
+
+class AdminMe(BaseModel):
+    username: str
+    is_superuser: bool
