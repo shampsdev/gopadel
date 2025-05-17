@@ -8,3 +8,18 @@ export interface Tournament {
   rank_max: number;
   max_users: number;
 } 
+
+export interface User {
+  id: string;
+  telegram_id: number;
+  username?: string;
+  first_name: string;
+  second_name: string;
+  avatar: string;
+  rank: number;
+  city: string;
+  birth_date?: string;
+  birth_date_ru?: string;
+  loyalty_id: number;
+  is_registered: boolean;
+} 
