@@ -118,8 +118,8 @@ const TournamentsPage = () => {
   });
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-black mb-6">Турниры</h1>
+    <div className="p-4 md:p-6">
+      <h1 className="text-xl md:text-2xl font-bold text-black mb-6">Турниры</h1>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -127,9 +127,9 @@ const TournamentsPage = () => {
         </div>
       )}
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Left side - Tournament list */}
-        <div className="w-1/3 bg-white rounded-lg shadow">
+        <div className="w-full lg:w-1/3 bg-white rounded-lg shadow">
           <div className="p-4 border-b flex justify-between items-center">
             <h2 className="text-lg font-medium">Список турниров</h2>
             <button
@@ -232,7 +232,7 @@ const TournamentsPage = () => {
         </div>
         
         {/* Right side - Tournament form */}
-        <div className="w-2/3 bg-white rounded-lg shadow p-6">
+        <div className="w-full lg:w-2/3 bg-white rounded-lg shadow p-6 mt-4 lg:mt-0">
           {isCreating ? (
             <>
               <h2 className="text-lg font-medium mb-4">Создание нового турнира</h2>

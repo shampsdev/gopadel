@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useUser();
   
-  if (loading) return <div className="p-6 bg-green-50">Загрузка...</div>;
+  if (loading) return <div className="p-4 md:p-6 bg-green-50">Загрузка...</div>;
   
   return (
     <div className="flex flex-col min-h-screen bg-green-50">
@@ -40,8 +40,8 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold text-black">Панель администратора</h1>
+                  <div className="p-4 md:p-6">
+                    <h1 className="text-xl md:text-2xl font-bold text-black">Панель администратора</h1>
                     <p className="text-gray-700">Добро пожаловать в админ-панель GO PADEL!</p>
                   </div>
                 </Layout>
@@ -51,8 +51,8 @@ function App() {
           <Route path="/users" element={
             <ProtectedRoute>
               <Layout>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold text-black">Пользователи</h1>
+                <div className="p-4 md:p-6">
+                  <h1 className="text-xl md:text-2xl font-bold text-black">Пользователи</h1>
                   <p className="text-gray-700">Управление пользователями системы</p>
                 </div>
               </Layout>
@@ -68,8 +68,8 @@ function App() {
           <Route path="/admins" element={
             <ProtectedRoute>
               <Layout>
-                <div className="p-6">
-                  <h1 className="text-2xl font-bold text-black">Администраторы</h1>
+                <div className="p-4 md:p-6">
+                  <h1 className="text-xl md:text-2xl font-bold text-black">Администраторы</h1>
                   <p className="text-gray-700">Управление администраторами</p>
                 </div>
               </Layout>

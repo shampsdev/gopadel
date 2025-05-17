@@ -50,8 +50,8 @@ const TournamentList = ({ tournaments, selectedId, onSelect, onDelete }: Tournam
                 ${tournament.id === selectedId ? 'bg-green-50' : ''} 
                 ${isPast ? 'bg-gray-100 opacity-70' : ''}`}
             >
-              <div className="flex justify-between items-start" onClick={() => onSelect(tournament)}>
-                <div className="flex-1">
+              <div className="flex flex-col sm:flex-row justify-between items-start" onClick={() => onSelect(tournament)}>
+                <div className="flex-1 mb-2 sm:mb-0">
                   <h3 className={`text-sm font-medium truncate ${isPast ? 'text-gray-500' : 'text-gray-900'}`}>
                     {tournament.name}
                     {isPast && <span className="ml-2 text-xs text-gray-500 font-normal">(прошедший)</span>}
@@ -67,7 +67,7 @@ const TournamentList = ({ tournaments, selectedId, onSelect, onDelete }: Tournam
                     e.stopPropagation();
                     onDelete(tournament.id as number);
                   }}
-                  className="ml-2 p-1 text-gray-400 hover:text-red-500"
+                  className="sm:ml-2 p-1 text-gray-400 hover:text-red-500 self-end sm:self-start"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
