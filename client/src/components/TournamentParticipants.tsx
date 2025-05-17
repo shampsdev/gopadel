@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react"
 import { Link } from "react-router-dom"
 import { IoIosArrowForward } from "react-icons/io"
-import { Registration } from "@/types/tournament"
+import { Registration } from "@/types/registration"
 import "./TournamentParticipants.css"
 import { Spinner } from "./ui/Spinner"
 
@@ -70,11 +70,11 @@ export default function TournamentParticipants({
             {displayRegistrations.length > 0 ? (
               displayRegistrations.map((registration) => (
                 <div
-                  key={registration.user.id}
+                  key={registration.user?.id}
                   className="flex flex-col items-center"
                 >
                   <div className="w-16 h-16 rounded-full bg-gray-200 mb-2 overflow-hidden">
-                    {registration.user.avatar && (
+                    {registration.user?.avatar && (
                       <img
                         src={registration.user.avatar}
                         alt={`${registration.user.first_name} ${registration.user.second_name}`}
@@ -83,10 +83,9 @@ export default function TournamentParticipants({
                     )}
                   </div>
                   <p className="text-center text-xs">
-                    {registration.user.second_name}
+                    {registration.user?.second_name}
                     <br />
-                    dsf
-                    {registration.user.first_name}
+                    {registration.user?.first_name}
                   </p>
                 </div>
               ))

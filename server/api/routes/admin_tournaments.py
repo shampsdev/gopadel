@@ -15,7 +15,7 @@ from db.crud.tournament import (
     get_tournaments,
     update_tournament,
 )
-from fastapi import APIRouter, Depends, HTTPException, Request, Security, status
+from fastapi import APIRouter, HTTPException, Request, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 router = APIRouter()

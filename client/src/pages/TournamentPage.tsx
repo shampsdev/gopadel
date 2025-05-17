@@ -43,7 +43,7 @@ export default function TournamentPage() {
         // Check if user is already participating
         const isUserParticipating =
           data.registrations?.some(
-            (registration) => registration.user.id === userData?.id
+            (registration) => registration.user_id === userData?.id
           ) || false
 
         setIsParticipating(isUserParticipating)

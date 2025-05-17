@@ -6,7 +6,7 @@ from api.utils.admin_middleware import superuser_required
 from api.utils.jwt import get_password_hash
 from db.crud.admin_user import create_admin_user, delete_admin_user
 from db.models.admin import AdminUser
-from fastapi import APIRouter, Depends, HTTPException, Request, Security
+from fastapi import APIRouter, HTTPException, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 router = APIRouter()

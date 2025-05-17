@@ -3,6 +3,8 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
+from api.schemas.registration import RegistrationResponse
+
 
 class UserBase(BaseModel):
     id: UUID
@@ -12,10 +14,6 @@ class UserBase(BaseModel):
 
 
 class ParticipantResponse(BaseModel):
-    user: UserBase
-
-
-class RegistrationBase(BaseModel):
     user: UserBase
 
 
@@ -31,7 +29,7 @@ class TournamentBase(BaseModel):
 
 
 class TournamentResponse(TournamentBase):
-    registrations: List[RegistrationBase] = []
+    registrations: List[RegistrationResponse] = []
 
     @computed_field
     def current_users(self) -> int:

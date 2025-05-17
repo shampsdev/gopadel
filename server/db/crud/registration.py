@@ -37,7 +37,7 @@ def create_registration(
     db: Session,
     tournament_id: UUID,
     user_id: UUID,
-    payment_id: UUID,
+    payment_id: Optional[UUID] = None,
     status: str = "pending",
 ) -> Registration:
     """Create a new registration"""

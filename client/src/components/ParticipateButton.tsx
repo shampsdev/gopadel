@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import GreenButton from "@/components/ui/GreenButton"
+import { registerForTournament } from "@/api/api"
 
 type ParticipateButtonProps = {
   tournamentId: string
@@ -21,10 +22,12 @@ export default function ParticipateButton({
   const handleParticipate = async () => {
     setLoading(true)
     try {
-      // API call would go here
-      // For now, just navigate to the tournament page after a delay
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      navigate(`/tournament/${tournamentId}`)
+      const registration = await registerForTournament(tournamentId)
+      if (registration?.payment) {
+        window.location.href = registration.payment.payment_link
+      } else {
+        console.error("Failed to register for tournament")
+      }
     } catch (error) {
       console.error("Error participating in tournament:", error)
     } finally {

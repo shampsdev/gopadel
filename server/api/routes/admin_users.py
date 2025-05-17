@@ -5,7 +5,7 @@ from api.deps import SessionDep
 from api.schemas.admin_user_operations import UserResponse, UserUpdateByAdmin
 from api.utils.admin_middleware import admin_required
 from db.crud.user import get_all_users, get_user_by_id, update_user_by_admin
-from fastapi import APIRouter, Depends, HTTPException, Request, Security
+from fastapi import APIRouter, HTTPException, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 router = APIRouter()

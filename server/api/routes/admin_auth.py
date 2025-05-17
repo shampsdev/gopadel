@@ -1,12 +1,11 @@
-from datetime import timedelta
 
 from api.deps import SessionDep
 from api.schemas.admin_auth import AdminLogin, AdminMe, Token
 from api.utils.admin_middleware import admin_required
 from api.utils.jwt import create_access_token, verify_password
 from db.crud.admin_user import get_admin_by_username
-from fastapi import APIRouter, Depends, HTTPException, Request, Security
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.security import HTTPBearer
 
 router = APIRouter()
 security = HTTPBearer()

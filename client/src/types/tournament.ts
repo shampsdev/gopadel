@@ -1,3 +1,6 @@
+import { Payment } from "./Payment"
+import { Registration } from "./registration"
+
 export type Tournament = {
   id: string // UUID
   name: string
@@ -10,10 +13,6 @@ export type Tournament = {
   current_users: number // Number of current registrations
   organizer: string // Name of the organizer
   registrations?: Registration[]
-}
-
-export type Registration = {
-  user: Participant
 }
 
 export type Participant = {

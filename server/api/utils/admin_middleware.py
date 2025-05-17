@@ -5,8 +5,7 @@ import jwt
 from api.deps import SessionDep
 from api.utils.jwt import ALGORITHM, SECRET_KEY
 from db.crud.admin_user import get_admin_by_username
-from fastapi import Depends, HTTPException, Request
-from sqlalchemy.orm import Session
+from fastapi import HTTPException, Request
 
 
 def superuser_required(func: Callable) -> Callable:
