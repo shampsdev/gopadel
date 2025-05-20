@@ -1,11 +1,12 @@
 from api.routes import (
     admin,
     admin_auth,
+    admin_loyalty,
     admin_tournaments,
     admin_users,
     auth,
-    tournaments,
     registration,
+    tournaments,
 )
 from fastapi import APIRouter
 
@@ -20,6 +21,7 @@ api_router.include_router(admin_users.router, prefix="/admin/users", tags=["admi
 api_router.include_router(
     admin_tournaments.router, prefix="/admin/tournaments", tags=["admin"]
 )
+api_router.include_router(admin_loyalty.router, prefix="/admin/loyalty", tags=["admin"])
 api_router.include_router(
     registration.router, prefix="/registration", tags=["registration"]
 )
