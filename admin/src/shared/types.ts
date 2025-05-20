@@ -23,3 +23,12 @@ export interface User {
   loyalty_id: number;
   is_registered: boolean;
 } 
+
+export interface Loyalty {
+  id?: number;
+  name: string;
+  discount: number;
+  description?: string;
+  requirements?: Record<string, unknown>;
+  users_count?: number;
+} 

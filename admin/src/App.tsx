@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import TournamentsPage from './pages/TournamentsPage';
 import UsersPage from './pages/UsersPage';
+import LoyaltyPage from './pages/LoyaltyPage';
 import DashboardPage from './pages/DashboardPage';
 import { authService } from './services/auth';
 import { UserProvider, useUser } from './context/UserContext';
@@ -58,6 +59,13 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <TournamentsPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/loyalty" element={
+            <ProtectedRoute>
+              <Layout>
+                <LoyaltyPage />
               </Layout>
             </ProtectedRoute>
           } />
