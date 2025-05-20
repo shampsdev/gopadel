@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import TournamentsPage from './pages/TournamentsPage';
+import UsersPage from './pages/UsersPage';
 import DashboardPage from './pages/DashboardPage';
 import { authService } from './services/auth';
 import { UserProvider, useUser } from './context/UserContext';
@@ -49,10 +50,7 @@ function App() {
           <Route path="/users" element={
             <ProtectedRoute>
               <Layout>
-                <div className="p-4 md:p-6">
-                  <h1 className="text-xl md:text-2xl font-bold text-black">Пользователи</h1>
-                  <p className="text-gray-700">Управление пользователями системы</p>
-                </div>
+                <UsersPage />
               </Layout>
             </ProtectedRoute>
           } />
