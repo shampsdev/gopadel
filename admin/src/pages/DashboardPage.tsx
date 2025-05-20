@@ -56,14 +56,6 @@ const DashboardPage: React.FC = () => {
         <p className="mt-1 max-w-2xl">
           Управляйте турнирами, пользователями и настройками системы из единой панели администратора.
         </p>
-        <div className="mt-4 flex flex-wrap space-x-3">
-          <button className="px-4 py-2 bg-white text-green-700 rounded-lg hover:bg-green-50 transition font-medium mb-2">
-            Посмотреть руководство
-          </button>
-          <button className="px-4 py-2 border border-white bg-transparent text-white rounded-lg hover:bg-green-600 transition mb-2">
-            Новые функции
-          </button>
-        </div>
       </div>
 
       <div className="flex justify-between items-center">
@@ -71,30 +63,14 @@ const DashboardPage: React.FC = () => {
           <h1 className="text-xl md:text-2xl font-bold text-black">Панель администратора</h1>
           <p className="text-gray-700">Все инструменты управления в одном месте</p>
         </div>
-        <div className="flex space-x-2">
+        {/* <div className="flex space-x-2">
           <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
             Экспорт данных
           </button>
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
             Отчеты
           </button>
-        </div>
-      </div>
-
-      {/* Статистика */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {dashboardData?.stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl shadow-md p-4 border-l-4 border-green-500 hover:shadow-lg transition">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-gray-600">{stat.title}</p>
-                <p className="text-2xl font-bold">{stat.value}</p>
-                <p className="text-xs text-green-500">{stat.change}</p>
-              </div>
-              <div className="text-3xl opacity-75">{stat.icon}</div>
-            </div>
-          </div>
-        ))}
+        </div> */}
       </div>
 
       {/* Navigation Cards */}
@@ -117,38 +93,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Последняя активность */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h2 className="text-lg font-semibold mb-4">Последняя активность</h2>
-        {dashboardData?.recentActivity.length === 0 ? (
-          <p className="text-center text-gray-500 py-4">Нет недавней активности</p>
-        ) : (
-          <div className="space-y-4">
-            {dashboardData?.recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-start border-b border-gray-100 pb-3 last:border-0 hover:bg-gray-50 p-2 rounded-lg">
-                <div className="bg-gray-100 p-2 rounded-lg text-xl mr-3">{activity.icon}</div>
-                <div className="flex-1">
-                  <h3 className="font-medium">{activity.action}</h3>
-                  <p className="text-sm text-gray-600">{activity.details}</p>
-                </div>
-                <div className="text-xs text-gray-500">{activity.time}</div>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="mt-4 text-center">
-          <button className="text-blue-500 hover:underline text-sm">Смотреть все активности →</button>
-        </div>
-      </div>
-      
-      {/* Система в цифрах - график */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h2 className="text-lg font-semibold mb-4">Активность системы</h2>
-        <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-100">
-          <p className="text-gray-500">Здесь будет график активности системы</p>
-        </div>
       </div>
     </div>
   );

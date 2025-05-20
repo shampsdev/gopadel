@@ -21,6 +21,7 @@ export interface User {
   birth_date?: string;
   birth_date_ru?: string;
   loyalty_id: number;
+  loyalty?: Loyalty;
   is_registered: boolean;
 } 
 

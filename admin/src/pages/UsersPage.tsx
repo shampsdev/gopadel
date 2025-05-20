@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import type { User } from '../shared/types';
+import type { User, Loyalty } from '../shared/types';
 import { userService } from '../services/user';
+import { loyaltyService } from '../services/loyalty';
 import UserForm from '../components/UserForm';
 import UserList from '../components/UserList';
 
@@ -11,6 +12,10 @@ const UsersPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
+  // Loyalty states
+  const [loyalties, setLoyalties] = useState<Loyalty[]>([]);
+  const [loadingLoyalty, setLoadingLoyalty] = useState(true);
+  
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
@@ -25,12 +30,34 @@ const UsersPage = () => {
   // Calculate total pages
   const totalPages = Math.ceil(totalUsers / usersPerPage);
 
+  const fetchLoyalties = async () => {
+    try {
+      setLoadingLoyalty(true);
+      const data = await loyaltyService.getAll();
+      setLoyalties(data);
+    } catch (err) {
+      console.error('Error fetching loyalty levels:', err);
+    } finally {
+      setLoadingLoyalty(false);
+    }
+  };
+
   const fetchUsers = async (page: number = 1) => {
     try {
       setLoading(true);
       const skip = (page - 1) * usersPerPage;
       const { users: fetchedUsers, total } = await userService.getAll(skip, usersPerPage);
-      setUsers(fetchedUsers);
+      
+      // Attach loyalty objects to users
+      const usersWithLoyalty = fetchedUsers.map(user => {
+        const loyaltyObj = loyalties.find(l => l.id === user.loyalty_id);
+        return {
+          ...user,
+          loyalty: loyaltyObj
+        };
+      });
+      
+      setUsers(usersWithLoyalty);
       setTotalUsers(total);
       setError(null);
     } catch (err) {
@@ -42,11 +69,29 @@ const UsersPage = () => {
   };
 
   useEffect(() => {
-    fetchUsers(currentPage);
-  }, [currentPage]);
+    // First load loyalties, then load users
+    const initData = async () => {
+      await fetchLoyalties();
+      await fetchUsers(currentPage);
+    };
+    
+    initData();
+  }, []); // Empty dependency array - only run once
+
+  useEffect(() => {
+    // Re-fetch users when page changes
+    if (!loadingLoyalty && loyalties.length > 0) {
+      fetchUsers(currentPage);
+    }
+  }, [currentPage, loadingLoyalty]);
 
   const handleSelectUser = (user: User) => {
-    setSelectedUser(user);
+    // Make sure selected user has the loyalty object
+    const loyaltyObj = loyalties.find(l => l.id === user.loyalty_id);
+    setSelectedUser({
+      ...user,
+      loyalty: loyaltyObj
+    });
   };
 
   const handleChangePage = (page: number) => {
@@ -58,14 +103,21 @@ const UsersPage = () => {
 
     try {
       setLoading(true);
-      await userService.update({
+      const updatedUser = await userService.update({
         id: selectedUser.id,
         ...updatedUserData
       });
+      
+      // Refresh the users list
       await fetchUsers(currentPage);
-      // Reload the selected user with fresh data
-      const updatedUser = await userService.getById(selectedUser.id);
-      setSelectedUser(updatedUser);
+      
+      // Update the selected user with returned data and loyalty info
+      const loyaltyObj = loyalties.find(l => l.id === updatedUser.loyalty_id);
+      setSelectedUser({
+        ...updatedUser,
+        loyalty: loyaltyObj
+      });
+      
       setError(null);
     } catch (err) {
       setError('Ошибка при сохранении данных пользователя');
@@ -106,6 +158,8 @@ const UsersPage = () => {
     setCityFilter('');
     setIsRegisteredFilter('all');
   };
+
+  const isLoading = loading || (loadingLoyalty && loyalties.length === 0);
 
   return (
     <div className="p-4 md:p-6">
@@ -185,7 +239,7 @@ const UsersPage = () => {
           </div>
           
           <div className="p-2">
-            {loading && users.length === 0 ? (
+            {isLoading ? (
               <p className="text-center py-4">Загрузка...</p>
             ) : filteredUsers.length > 0 ? (
               <UserList
@@ -208,7 +262,11 @@ const UsersPage = () => {
         
         {/* Right side - User form */}
         <div className="w-full lg:w-2/3 bg-white rounded-lg shadow p-6 mt-4 lg:mt-0">
-          {selectedUser ? (
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <p className="text-gray-500">Загрузка...</p>
+            </div>
+          ) : selectedUser && loyalties.length > 0 ? (
             <>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-medium">Редактирование пользователя</h2>
@@ -224,7 +282,7 @@ const UsersPage = () => {
                   </div>
                 </div>
               </div>
-              <UserForm user={selectedUser} onSave={handleSave} />
+              <UserForm user={selectedUser} loyalties={loyalties} onSave={handleSave} />
             </>
           ) : (
             <div className="flex items-center justify-center h-64 text-gray-500">

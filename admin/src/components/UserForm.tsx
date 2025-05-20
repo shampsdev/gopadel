@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import type { User } from '../shared/types';
+import type { User, Loyalty } from '../shared/types';
 
 interface UserFormProps {
   user: User;
+  loyalties: Loyalty[];
   onSave: (user: Partial<User>) => void;
 }
 
-const UserForm = ({ user, onSave }: UserFormProps) => {
+const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
   const [formData, setFormData] = useState<Partial<User>>({});
   const [errors, setErrors] = useState<Partial<Record<keyof User, string>>>({});
 
@@ -37,20 +38,17 @@ const UserForm = ({ user, onSave }: UserFormProps) => {
       newErrors.rank = 'Рейтинг должен быть от 0 до 5';
     }
 
-    if (formData.loyalty_id !== undefined && formData.loyalty_id < 0) {
-      newErrors.loyalty_id = 'ID лояльности не может быть отрицательным';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target as HTMLInputElement;
     
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : 
+              type === 'number' || name === 'loyalty_id' ? Number(value) : value
     });
   };
 
@@ -128,15 +126,19 @@ const UserForm = ({ user, onSave }: UserFormProps) => {
       </div>
 
       <div>
-        <label className="block text-gray-700 mb-1">ID лояльности</label>
-        <input
-          type="number"
+        <label className="block text-gray-700 mb-1">Уровень лояльности</label>
+        <select
           name="loyalty_id"
-          value={formData.loyalty_id === undefined ? '' : formData.loyalty_id}
+          value={formData.loyalty_id}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded ${errors.loyalty_id ? 'border-red-500' : 'border-gray-300'}`}
-        />
-        {errors.loyalty_id && <p className="text-red-500 text-sm mt-1">{errors.loyalty_id}</p>}
+          className="w-full px-3 py-2 border border-gray-300 rounded"
+        >
+          {loyalties.map(loyalty => (
+            <option key={loyalty.id} value={loyalty.id}>
+              {loyalty.name} ({loyalty.discount}%)
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="flex items-center">

@@ -55,6 +55,15 @@ const UserList = ({ users, selectedId, onSelect, currentPage, totalPages, onPage
                     <span>ID: {user.telegram_id}</span>
                     <span>Город: {user.city || 'Не указан'}</span>
                     <span>Рейтинг: {user.rank.toFixed(1)}</span>
+                    <span>
+                      Лояльность: {user.loyalty ? (
+                        <span className="px-1 py-0.5 bg-yellow-50 text-yellow-800 rounded-sm">
+                          {user.loyalty.name} ({user.loyalty.discount}%)
+                        </span>
+                      ) : (
+                        `ID: ${user.loyalty_id}`
+                      )}
+                    </span>
                     <span>Дата рождения: {user.birth_date_ru || formatDate(user.birth_date)}</span>
                     <span className="mt-1 flex items-center">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${user.is_registered ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
