@@ -1,16 +1,35 @@
+from typing import List
 from uuid import UUID
 
 from api.deps import SessionDep
 from api.schemas.admin_user import AdminUserCreate, AdminUserResponse
-from api.utils.admin_middleware import superuser_required
+from api.utils.admin_middleware import admin_required, superuser_required
 from api.utils.jwt import get_password_hash
 from db.crud.admin_user import create_admin_user, delete_admin_user
 from db.models.admin import AdminUser
 from fastapi import APIRouter, HTTPException, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 security = HTTPBearer()
+
+
+@router.get(
+    "/",
+    response_model=List[AdminUserResponse],
+    description="Get all admin users. Requires admin privileges.",
+    responses={401: {"description": "Not authenticated or invalid token"}},
+)
+@admin_required
+async def get_admins(
+    request: Request,
+    db: SessionDep,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+):
+    """Get all admin users"""
+    admins = db.query(AdminUser).all()
+    return admins
 
 
 @router.post(

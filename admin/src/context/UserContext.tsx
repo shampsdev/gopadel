@@ -7,9 +7,15 @@ interface User {
   isAdmin: boolean;
 }
 
+export interface CurrentAdmin {
+  username: string;
+  is_superuser: boolean;
+}
+
 interface UserContextType {
   user: User | null;
   loading: boolean;
+  currentAdmin: CurrentAdmin | null;
   setUser: (user: User | null) => void;
   fetchUser: () => Promise<void>;
 }
@@ -18,6 +24,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [currentAdmin, setCurrentAdmin] = useState<CurrentAdmin | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchUser = async () => {
@@ -31,12 +38,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           username: response.data.username,
           isAdmin: response.data.is_superuser
         });
+        setCurrentAdmin({
+          username: response.data.username,
+          is_superuser: response.data.is_superuser
+        });
       } catch (error) {
         console.error('Failed to fetch user data', error);
         setUser(null);
+        setCurrentAdmin(null);
       }
     } else {
       setUser(null);
+      setCurrentAdmin(null);
     }
     setLoading(false);
   };
@@ -50,7 +63,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, loading, setUser, fetchUser }}>
+    <UserContext.Provider value={{ user, currentAdmin, loading, setUser, fetchUser }}>
       {children}
     </UserContext.Provider>
   );

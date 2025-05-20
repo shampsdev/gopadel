@@ -4,6 +4,7 @@ import TournamentsPage from './pages/TournamentsPage';
 import UsersPage from './pages/UsersPage';
 import LoyaltyPage from './pages/LoyaltyPage';
 import DashboardPage from './pages/DashboardPage';
+import AdminsPage from './pages/AdminsPage';
 import { authService } from './services/auth';
 import { UserProvider, useUser } from './context/UserContext';
 import Header from './components/Header';
@@ -72,10 +73,7 @@ function App() {
           <Route path="/admins" element={
             <ProtectedRoute>
               <Layout>
-                <div className="p-4 md:p-6">
-                  <h1 className="text-xl md:text-2xl font-bold text-black">Администраторы</h1>
-                  <p className="text-gray-700">Управление администраторами</p>
-                </div>
+                <AdminsPage />
               </Layout>
             </ProtectedRoute>
           } />

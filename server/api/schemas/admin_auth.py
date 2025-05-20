@@ -19,3 +19,8 @@ class TokenData(BaseModel):
 class AdminMe(BaseModel):
     username: str
     is_superuser: bool
+
+
+class PasswordChange(BaseModel):
+    old_password: str
+    new_password: str
