@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams, Link } from "react-router-dom"
-import { getTournament } from "@/api/api"
+import { getTournament, getTournamentRegistration } from "@/api/api"
 import { Tournament } from "@/types/tournament"
 import Header from "@/components/Header"
 import { format } from "date-fns"
@@ -19,10 +19,13 @@ import Divider from "@/components/ui/Divider"
 import { Spinner } from "@/components/ui/Spinner"
 import useUserStore from "@/stores/userStore"
 import { formatPrice } from "@/utils/formatPrice"
+import { Registration } from "@/types/registration"
+import { RegistrationStatus } from "@/types/registration"
 
 export default function TournamentPage() {
   const { id } = useParams<{ id: string }>()
   const [tournament, setTournament] = useState<Tournament | null>(null)
+  const [registration, setRegistration] = useState<Registration | null>(null)
   const [loading, setLoading] = useState(true)
   const [isParticipating, setIsParticipating] = useState(false)
   const [waitlistStatus, setWaitlistStatus] = useState<
@@ -40,16 +43,27 @@ export default function TournamentPage() {
 
         setTournament(data)
 
-        // Check if user is already participating
-        const isUserParticipating =
-          data.registrations?.some(
-            (registration) => registration.user_id === userData?.id
-          ) || false
+        if (userData?.id) {
+          const registrationData = await getTournamentRegistration(id)
+          setRegistration(registrationData)
 
-        setIsParticipating(isUserParticipating)
+          // Check if user is already participating based on registration
+          setIsParticipating(!!registrationData)
 
-        // TODO: Implement waitlist status check
-        setWaitlistStatus("none")
+          // Set waitlist status based on registration status if available
+          if (registrationData?.status === RegistrationStatus.PENDING) {
+            setWaitlistStatus("inWaitlist")
+          } else if (data.current_users >= data.max_users) {
+            setWaitlistStatus("available")
+          } else {
+            setWaitlistStatus("none")
+          }
+        } else {
+          // If no user data, reset registration state
+          setRegistration(null)
+          setIsParticipating(false)
+          setWaitlistStatus("none")
+        }
       } catch (error) {
         console.error("Error fetching tournament:", error)
       } finally {
@@ -162,10 +176,21 @@ export default function TournamentPage() {
 
         <div className="mt-auto">
           {isParticipating ? (
-            <ParticipateButton
-              tournamentId={tournament.id}
-              isParticipating={true}
-            />
+            <div className="mt-4 text-center">
+              <p
+                className={`mb-2 ${
+                  registration?.status === RegistrationStatus.ACTIVE
+                    ? "text-green-600"
+                    : "text-amber-600"
+                }`}
+              >
+                {registration?.status === RegistrationStatus.ACTIVE
+                  ? "Вы зарегистрированы"
+                  : registration?.status === RegistrationStatus.PENDING
+                  ? "Заявка на рассмотрении"
+                  : "Вы зарегистрированы"}
+              </p>
+            </div>
           ) : !hasValidRank ? (
             <div className="mt-4 text-center">
               <p className="opacity-50 mb-2">
@@ -176,21 +201,12 @@ export default function TournamentPage() {
             waitlistStatus === "inWaitlist" ? (
               <div className="mt-4 text-center">
                 <p className="text-amber-600 mb-2">Вы в листе ожидания</p>
-                <ParticipateButton
-                  tournamentId={tournament.id}
-                  isParticipating={true}
-                />
               </div>
             ) : (
               <div className="mt-4 text-center">
                 <p className="text-amber-600 mb-2">
                   Мест нет, но вы можете записаться в лист ожидания
                 </p>
-                <ParticipateButton
-                  tournamentId={tournament.id}
-                  isParticipating={false}
-                  isWaitlist={true}
-                />
               </div>
             )
           ) : (

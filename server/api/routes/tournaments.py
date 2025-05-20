@@ -2,8 +2,9 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 
 from api.deps import SessionDep, UserDep
+from api.schemas.registration import RegistrationResponse
 from api.schemas.tournament import TournamentResponse, ParticipantResponse
-from db.crud import tournament as tournament_crud
+from db.crud import tournament as tournament_crud, registration as registration_crud
 from uuid import UUID
 
 router = APIRouter()
@@ -20,7 +21,7 @@ async def get_tournaments(
 
 
 @router.get("/{tournament_id}", response_model=TournamentResponse)
-async def get_tournament(db: SessionDep, tournament_id: UUID):
+async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
     tournament = tournament_crud.get_tournament_with_participants_by_id(
         db, tournament_id
     )
@@ -29,6 +30,16 @@ async def get_tournament(db: SessionDep, tournament_id: UUID):
         raise HTTPException(status_code=404, detail="Tournament not found")
 
     return tournament
+
+
+@router.get(
+    "/{tournament_id}/registration", response_model=Optional[RegistrationResponse]
+)
+async def get_tournament_registration(
+    db: SessionDep, tournament_id: UUID, user: UserDep
+):
+    registration = registration_crud.get_registration(db, tournament_id, user.id)
+    return registration
 
 
 @router.get("/{tournament_id}/participants", response_model=List[ParticipantResponse])

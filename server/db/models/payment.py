@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
+import enum
 
 from sqlalchemy import String, Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,6 +10,13 @@ from db import Base
 
 if TYPE_CHECKING:
     from db.models.registration import Registration
+
+
+class PaymentStatus(str, enum.Enum):
+    PENDING = "pending"
+    WAITING_FOR_CAPTURE = "waiting_for_capture"
+    SUCCEEDED = "succeeded"
+    CANCELED = "canceled"
 
 
 class Payment(Base):

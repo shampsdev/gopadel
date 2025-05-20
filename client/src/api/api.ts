@@ -87,3 +87,24 @@ export const registerForTournament = async (
     return null
   }
 }
+
+export const getTournamentRegistration = async (
+  tournamentId: string
+): Promise<Registration | null> => {
+  try {
+    const response = await api.get<Registration>(
+      `/tournaments/${tournamentId}/registration`
+    )
+    return response.data
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      // Not found is expected when user isn't registered
+      return null
+    }
+    console.error(
+      `Error fetching registration for tournament ${tournamentId}:`,
+      error
+    )
+    return null
+  }
+}

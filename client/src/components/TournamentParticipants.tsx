@@ -57,7 +57,7 @@ export default function TournamentParticipants({
         </div>
       </Link>
 
-      <div className="relative mb-8">
+      <div className="relative">
         {showLeftShadow && (
           <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10" />
         )}

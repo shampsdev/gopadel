@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from datetime import datetime
 
-from db.models.registration import Registration
+from db.models.registration import Registration, RegistrationStatus
 
 
 def get_registrations_by_tournament(
@@ -38,7 +38,7 @@ def create_registration(
     tournament_id: UUID,
     user_id: UUID,
     payment_id: Optional[UUID] = None,
-    status: str = "pending",
+    status: RegistrationStatus = RegistrationStatus.PENDING,
 ) -> Registration:
     """Create a new registration"""
     registration = Registration(
@@ -55,7 +55,7 @@ def create_registration(
 
 
 def update_registration_status(
-    db: Session, registration_id: UUID, status: str
+    db: Session, registration_id: UUID, status: RegistrationStatus
 ) -> Optional[Registration]:
     """Update the status of a registration"""
     registration = (

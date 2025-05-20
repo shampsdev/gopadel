@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
+import enum
 
-from sqlalchemy import String, DateTime, ForeignKey
+from sqlalchemy import DateTime, ForeignKey, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db import Base
@@ -11,6 +12,12 @@ if TYPE_CHECKING:
     from db.models.user import User
     from db.models.tournament import Tournament
     from db.models.payment import Payment
+
+
+class RegistrationStatus(str, enum.Enum):
+    PENDING = "pending"
+    ACTIVE = "active"
+    CANCELED = "canceled"
 
 
 class Registration(Base):
@@ -22,7 +29,9 @@ class Registration(Base):
         ForeignKey("tournaments.id"), nullable=False
     )
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    status: Mapped[str] = mapped_column(String(255), nullable=False)
+    status: Mapped[RegistrationStatus] = mapped_column(
+        Enum(RegistrationStatus), nullable=False, default=RegistrationStatus.PENDING
+    )
     payment_id: Mapped[Optional[UUID]] = mapped_column(
         ForeignKey("payments.id"), nullable=True
     )

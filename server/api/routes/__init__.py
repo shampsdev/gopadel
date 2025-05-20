@@ -7,6 +7,7 @@ from api.routes import (
     auth,
     registration,
     tournaments,
+    webhook,
 )
 from fastapi import APIRouter
 
@@ -25,3 +26,4 @@ api_router.include_router(admin_loyalty.router, prefix="/admin/loyalty", tags=["
 api_router.include_router(
     registration.router, prefix="/registration", tags=["registration"]
 )
+api_router.include_router(webhook.router, prefix="/yookassa_webhook", tags=["webhook"])

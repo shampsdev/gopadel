@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import GreenButton from "@/components/ui/GreenButton"
 import { registerForTournament } from "@/api/api"
+import { backButton } from "@telegram-apps/sdk-react"
 
 type ParticipateButtonProps = {
   tournamentId: string
@@ -21,6 +22,7 @@ export default function ParticipateButton({
 
   const handleParticipate = async () => {
     setLoading(true)
+    backButton.hide()
     try {
       const registration = await registerForTournament(tournamentId)
       if (registration?.payment) {

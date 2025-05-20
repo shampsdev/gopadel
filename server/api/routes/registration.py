@@ -2,9 +2,11 @@ from fastapi import APIRouter, HTTPException
 
 from api.deps import SessionDep, UserDep
 from api.schemas.registration import RegistrationResponse
+from config import settings
 from db.crud import tournament as tournament_crud, registration as registration_crud
 from uuid import UUID
 
+from db.models.registration import RegistrationStatus
 from services.payments import create_invoice
 
 router = APIRouter()
@@ -18,13 +20,19 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
 
-    if tournament.price > 0:
-        payment = create_invoice(db, tournament, tournament.name)
+    is_free = tournament.price == 0
+
+    if not is_free:
+        payment = create_invoice(db, tournament, settings.FRONTEND_URL + "/tournament/" + str(tournament_id))
     else:
         payment = None
 
     registration = registration_crud.create_registration(
-        db, tournament_id, user.id, payment.id if payment else None
+        db,
+        tournament_id,
+        user.id,
+        payment.id if payment else None,
+        RegistrationStatus.ACTIVE if is_free else RegistrationStatus.PENDING,
     )
 
     return registration
