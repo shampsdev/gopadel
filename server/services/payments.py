@@ -41,7 +41,7 @@ def create_invoice(
             "return_url": return_url,
         },
         "capture": True,
-        "description": tournament.name,
+        "description": f"GoPadel Tournament {tournament.name}",
     }
 
     # Add receipt if items provided
@@ -55,9 +55,10 @@ def create_invoice(
                     "value": f"{tournament.price}.00",
                     "currency": "RUB",
                 },
-                "vat_code": 9,
+                "vat_code": 1,
                 "quantity": 1,
                 "measure": "piece",
+                "payment_mode": "full_payment",
             }
         ],
     }
