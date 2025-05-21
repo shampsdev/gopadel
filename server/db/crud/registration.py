@@ -2,6 +2,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from uuid import UUID
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from db.models.registration import Registration, RegistrationStatus
 
@@ -33,6 +34,14 @@ def get_registration(
     )
 
 
+def get_registration_by_user_and_tournament(
+    db: Session, user_id: UUID, tournament_id: UUID
+) -> Optional[Registration]:
+    """Get a specific registration by user and tournament"""
+    return (
+        db.query(Registration).filter(Registration.user_id == user_id, Registration.tournament_id == tournament_id).first()
+    )
+
 def create_registration(
     db: Session,
     tournament_id: UUID,
@@ -44,7 +53,7 @@ def create_registration(
     registration = Registration(
         user_id=user_id,
         tournament_id=tournament_id,
-        date=datetime.now(),
+        date=datetime.now(ZoneInfo("Europe/Moscow")),
         status=status,
         payment_id=payment_id,
     )
@@ -63,6 +72,20 @@ def update_registration_status(
     )
     if registration:
         registration.status = status
+        db.commit()
+        db.refresh(registration)
+    return registration
+
+
+def update_registration_payment(
+    db: Session, registration_id: UUID, payment_id: Optional[UUID] = None
+) -> Optional[Registration]:
+    """Update the payment of a registration"""
+    registration = (
+        db.query(Registration).filter(Registration.id == registration_id).first()
+    )
+    if registration:
+        registration.payment_id = payment_id
         db.commit()
         db.refresh(registration)
     return registration

@@ -12,7 +12,6 @@ import {
   FaUsers,
   FaClock,
 } from "react-icons/fa"
-import { IoIosArrowBack } from "react-icons/io"
 import TournamentParticipants from "@/components/TournamentParticipants"
 import ParticipateButton from "@/components/ParticipateButton"
 import Divider from "@/components/ui/Divider"
@@ -21,13 +20,13 @@ import useUserStore from "@/stores/userStore"
 import { formatPrice } from "@/utils/formatPrice"
 import { Registration } from "@/types/registration"
 import { RegistrationStatus } from "@/types/registration"
+import GreenButton from "@/components/ui/GreenButton"
 
 export default function TournamentPage() {
   const { id } = useParams<{ id: string }>()
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [registration, setRegistration] = useState<Registration | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isParticipating, setIsParticipating] = useState(false)
   const [waitlistStatus, setWaitlistStatus] = useState<
     "none" | "available" | "inWaitlist"
   >("none")
@@ -47,9 +46,6 @@ export default function TournamentPage() {
           const registrationData = await getTournamentRegistration(id)
           setRegistration(registrationData)
 
-          // Check if user is already participating based on registration
-          setIsParticipating(!!registrationData)
-
           // Set waitlist status based on registration status if available
           if (registrationData?.status === RegistrationStatus.PENDING) {
             setWaitlistStatus("inWaitlist")
@@ -61,7 +57,6 @@ export default function TournamentPage() {
         } else {
           // If no user data, reset registration state
           setRegistration(null)
-          setIsParticipating(false)
           setWaitlistStatus("none")
         }
       } catch (error) {
@@ -175,21 +170,9 @@ export default function TournamentPage() {
         />
 
         <div className="mt-auto">
-          {isParticipating ? (
+          {registration?.status === RegistrationStatus.ACTIVE ? (
             <div className="mt-4 text-center">
-              <p
-                className={`mb-2 ${
-                  registration?.status === RegistrationStatus.ACTIVE
-                    ? "text-green-600"
-                    : "text-amber-600"
-                }`}
-              >
-                {registration?.status === RegistrationStatus.ACTIVE
-                  ? "Вы зарегистрированы"
-                  : registration?.status === RegistrationStatus.PENDING
-                  ? "Заявка на рассмотрении"
-                  : "Вы зарегистрированы"}
-              </p>
+              <p className={`mb-2 text-green-600`}>Вы зарегистрированы</p>
             </div>
           ) : !hasValidRank ? (
             <div className="mt-4 text-center">
@@ -197,22 +180,19 @@ export default function TournamentPage() {
                 Ваш ранг не соответствует требованиям турнира
               </p>
             </div>
-          ) : !hasAvailableSpots ? (
-            waitlistStatus === "inWaitlist" ? (
-              <div className="mt-4 text-center">
-                <p className="text-amber-600 mb-2">Вы в листе ожидания</p>
-              </div>
-            ) : (
-              <div className="mt-4 text-center">
-                <p className="text-amber-600 mb-2">
-                  Мест нет, но вы можете записаться в лист ожидания
-                </p>
-              </div>
-            )
+          ) : !hasAvailableSpots && !registration ? (
+            <div className="mt-4 text-center">
+              <p className="text-amber-600 mb-2">
+                Мест нет, но вы можете записаться в лист ожидания
+              </p>
+              <GreenButton onClick={() => {}}>
+                Записаться в лист ожидания
+              </GreenButton>
+            </div>
           ) : (
             <ParticipateButton
               tournamentId={tournament.id}
-              isParticipating={false}
+              registration={registration}
             />
           )}
         </div>

@@ -3,19 +3,17 @@ import { useNavigate } from "react-router-dom"
 import GreenButton from "@/components/ui/GreenButton"
 import { registerForTournament } from "@/api/api"
 import { backButton } from "@telegram-apps/sdk-react"
+import { Registration, RegistrationStatus } from "@/types/registration"
 
 type ParticipateButtonProps = {
   tournamentId: string
-  isParticipating?: boolean
+  registration: Registration | null
   disabled?: boolean
-  isWaitlist?: boolean
 }
 
 export default function ParticipateButton({
   tournamentId,
-  isParticipating = false,
-  disabled = false,
-  isWaitlist = false,
+  registration,
 }: ParticipateButtonProps) {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -38,15 +36,13 @@ export default function ParticipateButton({
   }
 
   const buttonText = () => {
-    if (isParticipating) return "Вы участвуете"
-    if (isWaitlist) return "Записаться в лист ожидания"
-    return "Разегистрироваться и оплатить"
+    if (registration?.status === RegistrationStatus.PENDING) return "Оплатить"
+    return "Зарегистрироваться и оплатить"
   }
 
   return (
     <GreenButton
       onClick={handleParticipate}
-      disabled={isParticipating || disabled}
       isLoading={loading}
       className="w-full rounded-full"
     >

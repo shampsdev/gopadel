@@ -2,6 +2,7 @@ from yookassa import Configuration
 from yookassa import Payment as YooKassaPayment
 from uuid import uuid4
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from sqlalchemy.orm import Session
 
 from config import settings
@@ -74,7 +75,7 @@ def create_invoice(
     payment = Payment(
         id=uuid4(),
         payment_id=yoo_payment.id,
-        date=datetime.now(),
+        date=datetime.now(ZoneInfo("Europe/Moscow")),
         amount=tournament.price,
         payment_link=yoo_payment.confirmation.confirmation_url,
         status=yoo_payment.status,
