@@ -10,6 +10,7 @@ from db import Base
 
 if TYPE_CHECKING:
     from db.models.loyalty import Loyalty
+    from db.models.tournament import Tournament
     from db.models.registration import Registration
     from db.models.waitlist import Waitlist
 
@@ -39,6 +40,9 @@ class User(Base):
     )
     waitlist_entries: Mapped[list["Waitlist"]] = relationship(
         "Waitlist", back_populates="user"
+    )
+    tournaments: Mapped[list["Tournament"]] = relationship(
+        "Tournament", back_populates="organizator"
     )
 
     @property

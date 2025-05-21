@@ -3,12 +3,14 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from db import Base
-from sqlalchemy import DateTime, Float, Integer, String, text
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 
 if TYPE_CHECKING:
     from db.models.registration import Registration
     from db.models.waitlist import Waitlist
+    from db.models.user import User
 
 
 class Tournament(Base):
@@ -24,6 +26,13 @@ class Tournament(Base):
     rank_min: Mapped[float] = mapped_column(Float, nullable=False)
     rank_max: Mapped[float] = mapped_column(Float, nullable=False)
     max_users: Mapped[int] = mapped_column(Integer, nullable=False)
+    organizator_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id"), nullable=False
+    )
+
+    organizator: Mapped["User"] = relationship(
+        "User", back_populates="tournaments"
+    )
 
     registrations: Mapped[list["Registration"]] = relationship(
         "Registration", back_populates="tournament"

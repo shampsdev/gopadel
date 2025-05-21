@@ -113,7 +113,9 @@ export default function TournamentPage() {
       <div className="w-full max-w-md mx-auto flex flex-col flex-1">
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">{tournament.name}</h1>
-          <p className="text-gray-700">{tournament.organizer}</p>
+          <p className="text-gray-700">
+            Организатор: {tournament.organizator.first_name}
+          </p>
         </div>
 
         <div className="space-y-4">

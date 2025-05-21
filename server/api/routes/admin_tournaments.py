@@ -15,6 +15,7 @@ from db.crud.tournament import (
     get_tournaments,
     update_tournament,
 )
+from db.crud.user import get_all_users
 from fastapi import APIRouter, HTTPException, Request, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -76,6 +77,17 @@ async def create_tournament_admin(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Create a new tournament"""
+    # If organizator_id is not provided, get the first user from the database
+    organizator_id = tournament_data.organizator_id
+    if not organizator_id:
+        users = get_all_users(db, limit=1)
+        if not users:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="No users found in the database. Cannot create tournament without an organizator."
+            )
+        organizator_id = users[0].id
+    
     tournament = create_tournament(
         db=db,
         name=tournament_data.name,
@@ -85,6 +97,7 @@ async def create_tournament_admin(
         rank_min=tournament_data.rank_min,
         rank_max=tournament_data.rank_max,
         max_users=tournament_data.max_users,
+        organizator_id=organizator_id,
     )
     return tournament
 
@@ -117,6 +130,7 @@ async def update_tournament_admin(
         rank_min=tournament_data.rank_min,
         rank_max=tournament_data.rank_max,
         max_users=tournament_data.max_users,
+        organizator_id=tournament_data.organizator_id,
     )
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")

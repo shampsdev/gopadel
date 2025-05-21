@@ -4,6 +4,7 @@ from typing import List
 from uuid import UUID
 
 from api.schemas.registration import RegistrationResponse
+from db.models.registration import RegistrationStatus
 
 
 class UserBase(BaseModel):
@@ -27,10 +28,19 @@ class TournamentBase(BaseModel):
     rank_max: float
     max_users: int
 
+    organizator: UserBase
+
 
 class TournamentResponse(TournamentBase):
     registrations: List[RegistrationResponse] = []
 
     @computed_field
     def current_users(self) -> int:
-        return len(self.registrations)
+        return len(
+            list(
+                filter(
+                    lambda x: x.status != RegistrationStatus.CANCELED,
+                    self.registrations,
+                )
+            )
+        )

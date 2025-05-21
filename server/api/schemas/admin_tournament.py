@@ -13,6 +13,7 @@ class TournamentCreate(BaseModel):
     rank_min: float
     rank_max: float
     max_users: int
+    organizator_id: Optional[UUID] = None
 
 
 class TournamentUpdate(BaseModel):
@@ -23,6 +24,7 @@ class TournamentUpdate(BaseModel):
     rank_min: Optional[float] = None
     rank_max: Optional[float] = None
     max_users: Optional[int] = None
+    organizator_id: Optional[UUID] = None
 
 
 class AdminTournamentResponse(BaseModel):
@@ -35,6 +37,7 @@ class AdminTournamentResponse(BaseModel):
     rank_max: float
     max_users: int
     registrations_count: int
+    organizator_id: UUID
 
     class Config:
         from_attributes = True

@@ -1,4 +1,5 @@
 import { Registration } from "./registration"
+import { UserBase } from "./user"
 
 export type Tournament = {
   id: string // UUID
@@ -12,6 +13,7 @@ export type Tournament = {
   current_users: number // Number of current registrations
   organizer: string // Name of the organizer
   registrations?: Registration[]
+  organizator: UserBase
 }
 
 export type Participant = {

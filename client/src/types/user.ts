@@ -2,6 +2,13 @@ import { Loyalty } from "@/types/loyalty"
 import { Registration } from "@/types/registration"
 import { Waitlist } from "@/types/waitlist"
 
+export type UserBase = {
+  id: string // UUID in TypeScript is represented as string
+  first_name: string
+  second_name: string
+  avatar: string
+}
+
 export type User = {
   id: string // UUID in TypeScript is represented as string
   telegram_id: number

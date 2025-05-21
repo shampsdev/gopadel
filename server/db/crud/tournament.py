@@ -18,6 +18,7 @@ def create_tournament(
     rank_min: float,
     rank_max: float,
     max_users: int,
+    organizator_id: UUID,
 ) -> Tournament:
     tournament = Tournament(
         name=name,
@@ -27,6 +28,7 @@ def create_tournament(
         rank_min=rank_min,
         rank_max=rank_max,
         max_users=max_users,
+        organizator_id=organizator_id,
     )
     db.add(tournament)
     db.commit()
@@ -94,6 +96,7 @@ def update_tournament(
     rank_min: Optional[float] = None,
     rank_max: Optional[float] = None,
     max_users: Optional[int] = None,
+    organizator_id: Optional[UUID] = None,
 ) -> Optional[Tournament]:
     tournament = db.query(Tournament).filter(Tournament.id == tournament_id).first()
     if not tournament:
@@ -113,6 +116,8 @@ def update_tournament(
         tournament.rank_max = rank_max
     if max_users:
         tournament.max_users = max_users
+    if organizator_id:
+        tournament.organizator_id = organizator_id
 
     db.commit()
     db.refresh(tournament)

@@ -29,7 +29,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
       <div className="text-gray-700 mb-4 flex justify-between gap-4">
         <span className="font-medium">Организатор</span>
 
-        <span>{tournament.organizer}</span>
+        <span>{tournament.organizator.first_name}</span>
       </div>
 
       <div className="space-y-2">
