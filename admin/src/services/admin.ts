@@ -25,7 +25,7 @@ export interface PasswordChangeRequest {
 
 export const adminService = {
   getAll: async (): Promise<AdminUser[]> => {
-    const response = await api.get('/admin');
+    const response = await api.get('/admin/');
     return response.data;
   },
 

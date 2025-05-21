@@ -18,7 +18,7 @@ export const tournamentService = {
   },
 
   async update(tournament: Tournament): Promise<Tournament> {
-    const response = await api.put(`/admin/tournaments/${tournament.id}`, tournament);
+    const response = await api.patch(`/admin/tournaments/${tournament.id}`, tournament);
     return response.data;
   },
 
