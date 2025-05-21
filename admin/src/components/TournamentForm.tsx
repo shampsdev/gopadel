@@ -56,6 +56,14 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       newErrors.rank_max = 'Максимальный ранг должен быть не меньше минимального';
     }
 
+    if (formData.rank_min > 7) {
+      newErrors.rank_min = 'Минимальный ранг не может быть больше 7';
+    }
+
+    if (formData.rank_max > 7) {
+      newErrors.rank_max = 'Максимальный ранг не может быть больше 7';
+    }
+
     if (formData.price < 0) {
       newErrors.price = 'Цена не может быть отрицательной';
     }
@@ -66,9 +74,30 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
+    
+    // Special handling for rank fields to enforce limits
+    if ((name === 'rank_min' || name === 'rank_max') && type === 'number' && value !== '') {
+      const numValue = Number(value);
+      if (numValue > 7) {
+        e.target.value = '7';
+        setFormData({
+          ...formData,
+          [name]: 7
+        });
+        return;
+      } else if (numValue < 0) {
+        e.target.value = '0';
+        setFormData({
+          ...formData,
+          [name]: 0
+        });
+        return;
+      }
+    }
+    
     setFormData({
       ...formData,
-      [name]: type === 'number' ? Number(value) : value
+      [name]: type === 'number' ? (value === '' ? undefined : Number(value)) : value
     });
   };
 
@@ -77,8 +106,13 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
     
     if (validate()) {
       // Format datetime to ISO string for API
+      // Ensure all number fields have valid values (default to 0 if undefined)
       const tournamentToSave = {
         ...formData,
+        price: formData.price ?? 0,
+        rank_min: formData.rank_min ?? 0,
+        rank_max: formData.rank_max ?? 0,
+        max_users: formData.max_users ?? 0,
         start_time: new Date(formData.start_time).toISOString()
       };
       onSave(tournamentToSave);
@@ -115,7 +149,7 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
         <input
           type="number"
           name="price"
-          value={formData.price}
+          value={formData.price === undefined ? '' : formData.price}
           onChange={handleChange}
           className={`w-full px-3 py-2 border rounded ${errors.price ? 'border-red-500' : 'border-gray-300'}`}
         />
@@ -140,7 +174,10 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
           <input
             type="number"
             name="rank_min"
-            value={formData.rank_min}
+            min="0"
+            max="7"
+            step="0.1"
+            value={formData.rank_min === undefined ? '' : formData.rank_min}
             onChange={handleChange}
             className={`w-full px-3 py-2 border rounded ${errors.rank_min ? 'border-red-500' : 'border-gray-300'}`}
           />
@@ -152,7 +189,10 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
           <input
             type="number"
             name="rank_max"
-            value={formData.rank_max}
+            min="0"
+            max="7"
+            step="0.1"
+            value={formData.rank_max === undefined ? '' : formData.rank_max}
             onChange={handleChange}
             className={`w-full px-3 py-2 border rounded ${errors.rank_max ? 'border-red-500' : 'border-gray-300'}`}
           />
@@ -165,7 +205,7 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
         <input
           type="number"
           name="max_users"
-          value={formData.max_users}
+          value={formData.max_users === undefined ? '' : formData.max_users}
           onChange={handleChange}
           className={`w-full px-3 py-2 border rounded ${errors.max_users ? 'border-red-500' : 'border-gray-300'}`}
         />

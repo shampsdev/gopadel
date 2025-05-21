@@ -34,8 +34,8 @@ const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
       newErrors.second_name = 'Фамилия обязательна';
     }
 
-    if (formData.rank !== undefined && (formData.rank < 0 || formData.rank > 5)) {
-      newErrors.rank = 'Рейтинг должен быть от 0 до 5';
+    if (formData.rank !== undefined && (formData.rank < 0 || formData.rank > 7)) {
+      newErrors.rank = 'Рейтинг должен быть от 0 до 7';
     }
 
     setErrors(newErrors);
@@ -45,10 +45,29 @@ const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
     
+    if (name === 'rank' && type === 'number' && value !== '') {
+      const numValue = Number(value);
+      if (numValue > 7) {
+        e.target.value = '7';
+        setFormData({
+          ...formData,
+          [name]: 7
+        });
+        return;
+      } else if (numValue < 0) {
+        e.target.value = '0';
+        setFormData({
+          ...formData,
+          [name]: 0
+        });
+        return;
+      }
+    }
+    
     setFormData({
       ...formData,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : 
-              type === 'number' || name === 'loyalty_id' ? Number(value) : value
+              type === 'number' || name === 'loyalty_id' ? (value === '' ? undefined : Number(value)) : value
     });
   };
 
@@ -117,7 +136,7 @@ const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
           name="rank"
           step="0.1"
           min="0"
-          max="5"
+          max="7"
           value={formData.rank === undefined ? '' : formData.rank}
           onChange={handleChange}
           className={`w-full px-3 py-2 border rounded ${errors.rank ? 'border-red-500' : 'border-gray-300'}`}
