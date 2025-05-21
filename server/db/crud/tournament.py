@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
+from zoneinfo import ZoneInfo
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
 
@@ -51,9 +52,12 @@ def get_tournaments_with_participants(
     db: Session, user_rank: Optional[float] = None, available: Optional[bool] = None
 ) -> List[Tournament]:
     """Get all tournaments with eager loading of registrations and users"""
-    query = db.query(Tournament).options(
-        joinedload(Tournament.registrations).joinedload(Registration.user)
-    )
+    now = datetime.now(ZoneInfo("Europe/Moscow"))
+    
+    naive_now = now.replace(tzinfo=None)
+    query = db.query(Tournament).order_by(Tournament.start_time.desc()).filter(
+        Tournament.start_time > naive_now
+    ).options(joinedload(Tournament.registrations).joinedload(Registration.user))
 
     if available and user_rank is not None:
         query = query.filter(
