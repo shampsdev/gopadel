@@ -16,8 +16,8 @@ export interface Payment {
       id: string;
       first_name: string;
       second_name: string;
-      phone: string;
       city: string;
+      username?: string;
     };
     tournament?: {
       id: string;

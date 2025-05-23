@@ -31,6 +31,29 @@ async def get_users(
     return users
 
 
+@router.get(
+    "/{user_id}",
+    response_model=UserResponse,
+    description="Get a specific user by ID. Requires admin privileges.",
+    responses={
+        401: {"description": "Not authenticated or invalid token"},
+        404: {"description": "User not found"},
+    },
+)
+@admin_required
+async def get_user(
+    user_id: UUID,
+    request: Request,
+    db: SessionDep,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+):
+    """Get a specific user by ID"""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
 @router.patch(
     "/{user_id}",
     response_model=UserResponse,

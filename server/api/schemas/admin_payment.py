@@ -9,7 +9,6 @@ class UserInfo(BaseModel):
     id: str
     first_name: str
     second_name: str
-    phone: str
     city: str
 
 

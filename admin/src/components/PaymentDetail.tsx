@@ -1,3 +1,8 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FaRegCopy, FaCheckCircle, FaTelegram } from 'react-icons/fa';
+// import { paymentService } from '../services/payment'; // Not used, can be removed
+import { userService } from '../services/user';
 import type { Payment } from '../services/payment';
 
 interface PaymentDetailProps {
@@ -5,6 +10,23 @@ interface PaymentDetailProps {
 }
 
 const PaymentDetail = ({ payment }: PaymentDetailProps) => {
+  const [username, setUsername] = useState<string | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      if (payment.registration?.user_id) {
+        try {
+          const user = await userService.getById(payment.registration.user_id);
+          setUsername(user.username || null);
+        } catch {
+          setUsername(null);
+        }
+      }
+    };
+    fetchUsername();
+  }, [payment.registration?.user_id]);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('ru', {
       day: '2-digit',
@@ -45,6 +67,12 @@ const PaymentDetail = ({ payment }: PaymentDetailProps) => {
     }
   };
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(payment.payment_link);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 1200);
+  };
+
   return (
     <div className="space-y-6">
       {/* Payment Status */}
@@ -76,7 +104,7 @@ const PaymentDetail = ({ payment }: PaymentDetailProps) => {
             {payment.payment_link && (
               <tr>
                 <td className="py-2 text-gray-600">Ссылка на оплату:</td>
-                <td className="py-2">
+                <td className="py-2 flex items-center gap-3">
                   <a 
                     href={payment.payment_link} 
                     target="_blank" 
@@ -85,6 +113,13 @@ const PaymentDetail = ({ payment }: PaymentDetailProps) => {
                   >
                     Открыть
                   </a>
+                  <button
+                    className={`text-green-600 hover:text-green-800 transition-colors ${copySuccess ? 'text-green-700' : ''}`}
+                    onClick={handleCopy}
+                    title="Скопировать ссылку"
+                  >
+                    {copySuccess ? <FaCheckCircle className="text-lg" /> : <FaRegCopy className="text-lg" />}
+                  </button>
                 </td>
               </tr>
             )}
@@ -107,13 +142,24 @@ const PaymentDetail = ({ payment }: PaymentDetailProps) => {
                 <td className="py-2 font-medium">{payment.registration.user.second_name}</td>
               </tr>
               <tr>
-                <td className="py-2 text-gray-600">Телефон:</td>
-                <td className="py-2 font-medium">{payment.registration.user.phone}</td>
-              </tr>
-              <tr>
                 <td className="py-2 text-gray-600">Город:</td>
                 <td className="py-2 font-medium">{payment.registration.user.city}</td>
               </tr>
+              {username && (
+                <tr>
+                  <td className="py-2 text-gray-600">Telegram:</td>
+                  <td className="py-2 font-medium flex items-center gap-2">
+                    <a
+                      href={`https://t.me/${username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      <FaTelegram className="inline-block text-blue-400" />@{username}
+                    </a>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -127,7 +173,11 @@ const PaymentDetail = ({ payment }: PaymentDetailProps) => {
             <tbody>
               <tr>
                 <td className="py-2 text-gray-600">Название:</td>
-                <td className="py-2 font-medium">{payment.registration.tournament.name}</td>
+                <td className="py-2 font-medium">
+                  <Link to={`/tournaments/${payment.registration.tournament.id}`} className="text-green-700 hover:underline">
+                    {payment.registration.tournament.name}
+                  </Link>
+                </td>
               </tr>
             </tbody>
           </table>

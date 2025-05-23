@@ -86,7 +86,6 @@ async def get_payments(
                     "id": str(user.id),
                     "first_name": user.first_name,
                     "second_name": user.second_name,
-                    "phone": user.phone,
                     "city": user.city,
                 }
 
