@@ -13,7 +13,8 @@ const defaultTournament: Tournament = {
   location: '',
   rank_min: 0,
   rank_max: 5,
-  max_users: 0
+  max_users: 0,
+  organizator_id: ''
 };
 
 const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
