@@ -1,5 +1,5 @@
 import { api } from "../api/api";
-import type { Tournament } from "../shared/types";
+import type { Tournament, Participant, WaitlistEntry } from "../shared/types";
 
 export const tournamentService = {
   async getAll(): Promise<Tournament[]> {
@@ -24,5 +24,15 @@ export const tournamentService = {
 
   async delete(id: number): Promise<void> {
     await api.delete(`/admin/tournaments/${id}`);
+  },
+
+  async getParticipants(tournamentId: number): Promise<Participant[]> {
+    const response = await api.get(`/admin/tournaments/${tournamentId}/participants`);
+    return response.data;
+  },
+
+  async getWaitlist(tournamentId: number): Promise<WaitlistEntry[]> {
+    const response = await api.get(`/admin/tournaments/${tournamentId}/waitlist`);
+    return response.data;
   }
 }; 

@@ -3,6 +3,8 @@ import type { Tournament } from '../shared/types';
 import { tournamentService } from '../services/tournament';
 import TournamentForm from '../components/TournamentForm';
 import TournamentList from '../components/TournamentList';
+import TournamentParticipants from '../components/TournamentParticipants';
+import TournamentWaitlist from '../components/TournamentWaitlist';
 
 const TournamentsPage = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -17,6 +19,8 @@ const TournamentsPage = () => {
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+
+  const [activeTab, setActiveTab] = useState<'edit' | 'participants' | 'waitlist'>('edit');
 
   const fetchTournaments = async () => {
     try {
@@ -116,6 +120,80 @@ const TournamentsPage = () => {
     
     return true;
   });
+
+  // Right side - Tournament form or details
+  const renderRightSide = () => {
+    if (isCreating) {
+      return (
+        <>
+          <h2 className="text-lg font-medium mb-4">Создание нового турнира</h2>
+          <TournamentForm onSave={handleSave} />
+        </>
+      );
+    } 
+    
+    if (selectedTournament) {
+      return (
+        <>
+          <div className="border-b mb-4">
+            <nav className="flex -mb-px">
+              <button
+                onClick={() => setActiveTab('edit')}
+                className={`mr-6 py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'edit'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Редактирование
+              </button>
+              <button
+                onClick={() => setActiveTab('participants')}
+                className={`mr-6 py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'participants'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Участники
+              </button>
+              <button
+                onClick={() => setActiveTab('waitlist')}
+                className={`mr-6 py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'waitlist'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Лист ожидания
+              </button>
+            </nav>
+          </div>
+
+          {activeTab === 'edit' && (
+            <>
+              <h2 className="text-lg font-medium mb-4">Редактирование турнира</h2>
+              <TournamentForm tournament={selectedTournament} onSave={handleSave} />
+            </>
+          )}
+
+          {activeTab === 'participants' && (
+            <TournamentParticipants tournamentId={selectedTournament.id} />
+          )}
+
+          {activeTab === 'waitlist' && (
+            <TournamentWaitlist tournamentId={selectedTournament.id} />
+          )}
+        </>
+      );
+    }
+    
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-500">
+        Выберите турнир из списка или создайте новый
+      </div>
+    );
+  };
 
   return (
     <div className="p-4 md:p-6">
@@ -233,21 +311,7 @@ const TournamentsPage = () => {
         
         {/* Right side - Tournament form */}
         <div className="w-full lg:w-2/3 bg-white rounded-lg shadow p-6 mt-4 lg:mt-0">
-          {isCreating ? (
-            <>
-              <h2 className="text-lg font-medium mb-4">Создание нового турнира</h2>
-              <TournamentForm onSave={handleSave} />
-            </>
-          ) : selectedTournament ? (
-            <>
-              <h2 className="text-lg font-medium mb-4">Редактирование турнира</h2>
-              <TournamentForm tournament={selectedTournament} onSave={handleSave} />
-            </>
-          ) : (
-            <div className="flex items-center justify-center h-64 text-gray-500">
-              Выберите турнир из списка или создайте новый
-            </div>
-          )}
+          {renderRightSide()}
         </div>
       </div>
     </div>

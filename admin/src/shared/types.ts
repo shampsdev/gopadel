@@ -34,3 +34,28 @@ export interface Loyalty {
   requirements?: Record<string, unknown>
   users_count?: number
 }
+
+export interface Payment {
+  id: string
+  amount: number
+  status: string
+  created_at: string
+}
+
+export interface Participant {
+  id: string
+  user_id: string
+  tournament_id: string
+  date: string
+  status: string
+  user: User
+  payment?: Payment
+}
+
+export interface WaitlistEntry {
+  id: number
+  user_id: string
+  tournament_id: string
+  date: string
+  user: User
+}
