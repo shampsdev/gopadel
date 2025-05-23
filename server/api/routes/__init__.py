@@ -2,6 +2,7 @@ from api.routes import (
     admin,
     admin_auth,
     admin_loyalty,
+    admin_payments,
     admin_tournaments,
     admin_users,
     auth,
@@ -23,6 +24,9 @@ api_router.include_router(
     admin_tournaments.router, prefix="/admin/tournaments", tags=["admin"]
 )
 api_router.include_router(admin_loyalty.router, prefix="/admin/loyalty", tags=["admin"])
+api_router.include_router(
+    admin_payments.router, prefix="/admin/payments", tags=["admin"]
+)
 api_router.include_router(
     registration.router, prefix="/registration", tags=["registration"]
 )

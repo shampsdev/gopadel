@@ -5,6 +5,7 @@ import UsersPage from './pages/UsersPage';
 import LoyaltyPage from './pages/LoyaltyPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminsPage from './pages/AdminsPage';
+import PaymentsPage from './pages/PaymentsPage';
 import { authService } from './services/auth';
 import { UserProvider, useUser } from './context/UserContext';
 import Header from './components/Header';
@@ -60,6 +61,13 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <TournamentsPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/payments" element={
+            <ProtectedRoute>
+              <Layout>
+                <PaymentsPage />
               </Layout>
             </ProtectedRoute>
           } />
