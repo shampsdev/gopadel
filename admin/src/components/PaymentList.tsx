@@ -59,7 +59,7 @@ const PaymentList = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="overflow-y-auto flex-grow">
+      <div className="flex-grow overflow-y-auto h-96">
         {payments.length === 0 ? (
           <p className="text-center py-4 text-gray-500">Платежи не найдены</p>
         ) : (
@@ -96,37 +96,34 @@ const PaymentList = ({
           </ul>
         )}
       </div>
-      
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="px-3 py-2 border-t flex justify-between items-center">
-          <button
-            onClick={() => onChangePage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`px-2 py-1 text-xs rounded ${
-              currentPage === 1
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-green-700 hover:bg-green-50'
-            }`}
-          >
-            &larr; Назад
-          </button>
-          <span className="text-xs text-gray-500">
-            Страница {currentPage} из {totalPages}
-          </span>
-          <button
-            onClick={() => onChangePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={`px-2 py-1 text-xs rounded ${
-              currentPage === totalPages
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-green-700 hover:bg-green-50'
-            }`}
-          >
-            Вперед &rarr;
-          </button>
-        </div>
-      )}
+      <div className="px-3 py-2 border-t flex justify-between items-center min-h-[38px] bg-white">
+        <button
+          onClick={() => onChangePage(currentPage - 1)}
+          disabled={currentPage === 1 || totalPages < 2}
+          className={`px-2 py-1 text-xs rounded ${
+            currentPage === 1 || totalPages < 2
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-green-700 hover:bg-green-50'
+          }`}
+        >
+          &larr; Назад
+        </button>
+        <span className="text-xs text-gray-500">
+          Страница {totalPages === 0 ? 1 : currentPage} из {totalPages === 0 ? 1 : totalPages}
+        </span>
+        <button
+          onClick={() => onChangePage(currentPage + 1)}
+          disabled={currentPage === totalPages || totalPages < 2}
+          className={`px-2 py-1 text-xs rounded ${
+            currentPage === totalPages || totalPages < 2
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-green-700 hover:bg-green-50'
+          }`}
+        >
+          Вперед &rarr;
+        </button>
+      </div>
     </div>
   );
 };

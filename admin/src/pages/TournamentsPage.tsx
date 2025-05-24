@@ -5,6 +5,7 @@ import TournamentForm from '../components/TournamentForm';
 import TournamentList from '../components/TournamentList';
 import TournamentParticipants from '../components/TournamentParticipants';
 import TournamentWaitlist from '../components/TournamentWaitlist';
+import { useLocation } from 'react-router-dom';
 
 const TournamentsPage = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -21,6 +22,8 @@ const TournamentsPage = () => {
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'edit' | 'participants' | 'waitlist'>('edit');
+
+  const location = useLocation();
 
   const fetchTournaments = async () => {
     try {
@@ -39,6 +42,16 @@ const TournamentsPage = () => {
   useEffect(() => {
     fetchTournaments();
   }, []);
+
+  // Выделяем турнир по query-параметру
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tournamentId = params.get('tournamentId');
+    if (tournamentId && tournaments.length > 0) {
+      const found = tournaments.find(t => String(t.id) === String(tournamentId));
+      if (found) setSelectedTournament(found);
+    }
+  }, [location.search, tournaments]);
 
   const handleSelectTournament = (tournament: Tournament) => {
     setSelectedTournament(tournament);
@@ -310,7 +323,7 @@ const TournamentsPage = () => {
         </div>
         
         {/* Right side - Tournament form */}
-        <div className="w-full lg:w-2/3 bg-white rounded-lg shadow p-6 mt-4 lg:mt-0">
+        <div className="w-full lg:w-2/3 bg-white rounded-lg shadow mt-4 lg:mt-0">
           {renderRightSide()}
         </div>
       </div>

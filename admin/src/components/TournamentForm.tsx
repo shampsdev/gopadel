@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import type { Tournament } from '../shared/types';
+import type { Tournament, User } from '../shared/types';
+import { userService } from '../services/user';
 
 interface TournamentFormProps {
   tournament?: Tournament;
@@ -20,6 +21,8 @@ const defaultTournament: Tournament = {
 const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
   const [formData, setFormData] = useState<Tournament>(tournament || defaultTournament);
   const [errors, setErrors] = useState<Partial<Record<keyof Tournament, string>>>({});
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   useEffect(() => {
     if (tournament) {
@@ -33,6 +36,21 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       setFormData(defaultTournament);
     }
   }, [tournament]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoadingUsers(true);
+      try {
+        const { users } = await userService.getAll(0, 1000);
+        setUsers(users);
+      } catch {
+        setUsers([]);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof Tournament, string>> = {};
@@ -73,7 +91,7 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     
     // Special handling for rank fields to enforce limits
@@ -211,6 +229,24 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
           className={`w-full px-3 py-2 border rounded ${errors.max_users ? 'border-red-500' : 'border-gray-300'}`}
         />
         {errors.max_users && <p className="text-red-500 text-sm mt-1">{errors.max_users}</p>}
+      </div>
+
+      <div>
+        <label className="block text-gray-700 mb-1">Организатор</label>
+        <select
+          name="organizator_id"
+          value={formData.organizator_id}
+          onChange={handleChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded"
+          disabled={loadingUsers}
+        >
+          <option value="">Выберите организатора</option>
+          {users.map((user) => (
+            <option key={user.id} value={user.id}>
+              {user.first_name} {user.second_name} {user.username ? `(@${user.username})` : ''}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="flex justify-end">

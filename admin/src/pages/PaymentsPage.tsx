@@ -17,7 +17,7 @@ const PaymentsPage = () => {
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPayments, setTotalPayments] = useState(0);
-  const [paymentsPerPage] = useState(10);
+  const [paymentsPerPage] = useState(5);
 
   // Filter states
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
@@ -38,7 +38,11 @@ const PaymentsPage = () => {
     try {
       setLoading(true);
       const skip = (page - 1) * paymentsPerPage;
-      const { payments: fetchedPayments, total } = await paymentService.getAll(skip, paymentsPerPage);
+      const filters: { user_id?: string; tournament_id?: string; status?: string } = {};
+      if (userFilter) filters.user_id = userFilter;
+      if (tournamentFilter) filters.tournament_id = tournamentFilter;
+      if (statusFilter && statusFilter !== 'all') filters.status = statusFilter;
+      const { payments: fetchedPayments, total } = await paymentService.getAll(skip, paymentsPerPage, filters);
       setPayments(fetchedPayments);
       setTotalPayments(total);
       setError(null);
@@ -88,9 +92,9 @@ const PaymentsPage = () => {
   }, []); // Empty dependency array - only run once
 
   useEffect(() => {
-    // Re-fetch payments when page changes
+    // Re-fetch payments when page changes or filters change
     fetchPayments(currentPage);
-  }, [currentPage]);
+  }, [currentPage, userFilter, tournamentFilter, statusFilter]);
 
   const handleSelectPayment = (payment: Payment) => {
     setSelectedPayment(payment);
@@ -99,26 +103,6 @@ const PaymentsPage = () => {
   const handleChangePage = (page: number) => {
     setCurrentPage(page);
   };
-
-  // Local client-side filtering
-  const filteredPayments = payments.filter(payment => {
-    // Filter by user
-    if (userFilter && payment.registration?.user_id !== userFilter) {
-      return false;
-    }
-    
-    // Filter by tournament
-    if (tournamentFilter && payment.registration?.tournament_id !== tournamentFilter) {
-      return false;
-    }
-    
-    // Filter by status
-    if (statusFilter !== 'all' && payment.status !== statusFilter) {
-      return false;
-    }
-    
-    return true;
-  });
 
   const clearFilters = () => {
     setUserFilter('');
@@ -220,9 +204,9 @@ const PaymentsPage = () => {
           <div className="p-2">
             {loading ? (
               <p className="text-center py-4">Загрузка...</p>
-            ) : filteredPayments.length > 0 ? (
+            ) : payments.length > 0 ? (
               <PaymentList
-                payments={filteredPayments}
+                payments={payments}
                 onSelect={handleSelectPayment}
                 selectedId={selectedPayment?.id}
                 currentPage={currentPage}

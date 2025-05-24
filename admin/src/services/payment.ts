@@ -31,8 +31,12 @@ export interface PaymentResponse {
   total: number;
 }
 
-const getAll = async (skip = 0, limit = 10): Promise<PaymentResponse> => {
-  const response = await api.get("/admin/payments/", { params: { skip, limit } });
+const getAll = async (skip = 0, limit = 10, filters: { user_id?: string; tournament_id?: string; status?: string } = {}): Promise<PaymentResponse> => {
+  const params: Record<string, string | number | undefined> = { skip, limit };
+  if (filters.user_id) params.user_id = filters.user_id;
+  if (filters.tournament_id) params.tournament_id = filters.tournament_id;
+  if (filters.status && filters.status !== 'all') params.status = filters.status;
+  const response = await api.get("/admin/payments/", { params });
   return response.data;
 };
 

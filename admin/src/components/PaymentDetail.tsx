@@ -174,7 +174,7 @@ const PaymentDetail = ({ payment }: PaymentDetailProps) => {
               <tr>
                 <td className="py-2 text-gray-600">Название:</td>
                 <td className="py-2 font-medium">
-                  <Link to={`/tournaments/${payment.registration.tournament.id}`} className="text-green-700 hover:underline">
+                  <Link to={`/tournaments?tournamentId=${payment.registration.tournament.id}`} className="text-green-700 hover:underline">
                     {payment.registration.tournament.name}
                   </Link>
                 </td>
