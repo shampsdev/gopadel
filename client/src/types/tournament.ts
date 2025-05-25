@@ -21,5 +21,5 @@ export type Participant = {
   id: string
   first_name: string
   second_name: string
-  avatar: string
+  avatar: string | null
 }

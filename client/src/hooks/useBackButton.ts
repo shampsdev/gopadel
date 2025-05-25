@@ -11,7 +11,9 @@ export default function useBackButton() {
       backButton.onClick(() => {
         if (location.pathname === "/profile") {
           navigate("/")
-        } else if (location.pathname.startsWith("/tournament")) {
+        } else if (location.pathname.startsWith("/profile/")) {
+          navigate("/profile")
+        } else if (location.pathname.startsWith("/tournament/")) {
           navigate("/")
         } else {
           navigate(-1)

@@ -2,12 +2,15 @@ import logging
 import mimetypes
 import os
 import uuid
-from typing import Optional
+import imghdr
+import io
+from typing import Optional, Tuple
 
 import boto3
 import requests
 from botocore.exceptions import ClientError
 from config import S3Config, settings
+from PIL import Image
 
 
 class Storage:
@@ -44,12 +47,69 @@ class Storage:
             raise RuntimeError(f"Failed to process image {image_url}: {e}")
 
     def save_image_by_bytes(self, image_data: bytes, key: Optional[str] = None) -> str:
-        return self._upload(
-            image_data,
-            key,
-            content_type="application/octet-stream",
-            ext=".bin",
-        )
+        try:
+            # Detect content type and extension from image data
+            content_type, ext = self._detect_image_type(image_data)
+            
+            # Convert to appropriate format if needed
+            if ext in ['.jpg', '.jpeg', '.png']:
+                # Keep as is - these are supported formats
+                processed_data = image_data
+            else:
+                # Convert to PNG as a fallback
+                img = Image.open(io.BytesIO(image_data))
+                img_byte_arr = io.BytesIO()
+                img.save(img_byte_arr, format='PNG')
+                processed_data = img_byte_arr.getvalue()
+                content_type = 'image/png'
+                ext = '.png'
+            
+            return self._upload(processed_data, key, content_type, ext)
+        except Exception as e:
+            # Fallback to jpg if any error occurs
+            logging.warning(f"Error processing image format: {e}. Saving as JPG.")
+            try:
+                img = Image.open(io.BytesIO(image_data))
+                img_byte_arr = io.BytesIO()
+                img.save(img_byte_arr, format='JPEG')
+                processed_data = img_byte_arr.getvalue()
+                return self._upload(processed_data, key, 'image/jpeg', '.jpg')
+            except Exception as e2:
+                raise RuntimeError(f"Failed to process image data: {e2}")
+
+    def _detect_image_type(self, image_data: bytes) -> Tuple[str, str]:
+        """Detect image type from binary data."""
+        # Try using imghdr to detect format
+        img_format = imghdr.what(None, h=image_data)
+        
+        if img_format:
+            if img_format == 'jpeg':
+                return 'image/jpeg', '.jpg'
+            elif img_format == 'png':
+                return 'image/png', '.png'
+            elif img_format == 'gif':
+                return 'image/gif', '.gif'
+            elif img_format == 'webp':
+                return 'image/webp', '.webp'
+        
+        # Try with PIL as a fallback
+        try:
+            img = Image.open(io.BytesIO(image_data))
+            fmt = img.format.lower() if img.format else 'jpeg'
+            
+            if fmt == 'jpeg':
+                return 'image/jpeg', '.jpg'
+            elif fmt == 'png':
+                return 'image/png', '.png'
+            elif fmt == 'gif':
+                return 'image/gif', '.gif'
+            elif fmt == 'webp':
+                return 'image/webp', '.webp'
+        except Exception:
+            pass
+        
+        # Default to JPEG if detection fails
+        return 'image/jpeg', '.jpg'
 
     def _upload(
         self,

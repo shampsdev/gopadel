@@ -87,13 +87,18 @@ export default function TournamentParticipantsPage() {
                 key={registration.user.id}
                 className="flex flex-col items-center"
               >
-                <div className="w-20 h-20 rounded-full bg-gray-200 mb-3 overflow-hidden">
-                  {registration.user.avatar && (
+                <div className="w-10 h-10 rounded-full overflow-hidden mr-3 bg-gray-200">
+                  {registration.user.avatar ? (
                     <img
                       src={registration.user.avatar}
                       alt={`${registration.user.first_name} ${registration.user.second_name}`}
                       className="w-full h-full object-cover"
                     />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-500">
+                      {registration.user.first_name.charAt(0)}
+                      {registration.user.second_name.charAt(0)}
+                    </div>
                   )}
                 </div>
                 <p className="text-center font-medium">
