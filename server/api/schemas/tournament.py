@@ -1,7 +1,7 @@
 from zoneinfo import ZoneInfo
 from pydantic import BaseModel, computed_field
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from db.models.registration import RegistrationStatus
@@ -14,7 +14,7 @@ class UserBase(BaseModel):
     id: UUID
     first_name: str
     second_name: str
-    avatar: str
+    avatar: Optional[str] = None
 
 
 class ParticipantResponse(BaseModel):

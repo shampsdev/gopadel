@@ -25,7 +25,7 @@ class User(Base):
     )
     first_name: Mapped[str] = mapped_column(String(255), nullable=False)
     second_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    avatar: Mapped[str] = mapped_column(String(255), nullable=False)
+    avatar: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     rank: Mapped[float] = mapped_column(Float, nullable=False)
     city: Mapped[str] = mapped_column(String(255), nullable=False)
     birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)

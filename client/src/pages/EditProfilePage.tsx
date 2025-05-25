@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { initData, openPopup, popup, showPopup } from "@telegram-apps/sdk-react"
-import HugeHeader from "@/components/HugeHeader"
 import InputField from "@/components/InputField"
 import SimpleCitySelector from "@/components/SimpleCitySelector"
 import { isValidDateFormat, formatDateForBackend } from "@/utils/date"
@@ -9,14 +8,22 @@ import { useNavigate } from "react-router-dom"
 import useAuth from "@/hooks/useAuth"
 import useUserStore from "@/stores/userStore"
 import GreenButton from "@/components/ui/GreenButton"
+import HeaderEditAvatar from "@/components/HeaderEditAvatar"
+import {
+  addAvatarToFormData,
+  handleAvatarFileChange,
+} from "@/utils/avatarUpload"
 
-export default function RegistrationPage() {
+export default function EditProfilePage() {
   const [name, setName] = useState(initData.user()?.first_name ?? "")
   const [secondName, setSecondName] = useState(initData.user()?.last_name ?? "")
   const [rank, setRank] = useState("")
   const [city, setCity] = useState("")
   const [birthDate, setBirthDate] = useState("")
+  const [profilePicture, setProfilePicture] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [useTelegramPhoto, setUseTelegramPhoto] = useState(false)
 
   const { checkAuth } = useAuth()
   const { userData } = useUserStore()
@@ -29,6 +36,15 @@ export default function RegistrationPage() {
     setCity(userData?.city ?? "")
     setBirthDate(userData?.birth_date_ru ?? "")
   }, [userData])
+
+  useEffect(() => {
+    // Clean up URL objects when component unmounts
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+    }
+  }, [previewUrl])
 
   const validateRank = (value: string): boolean => {
     if (!value) return false
@@ -93,21 +109,47 @@ export default function RegistrationPage() {
     }
   }
 
+  const handleFileChange = (file: File | null) => {
+    handleAvatarFileChange(
+      file,
+      setProfilePicture,
+      setUseTelegramPhoto,
+      setPreviewUrl
+    )
+  }
+
   const handleSubmit = async () => {
     if (!formIsValid || isSubmitting) return
 
     setIsSubmitting(true)
 
     try {
-      const formattedData = {
-        first_name: name,
-        second_name: secondName,
-        rank: parseFloat(rank),
-        city: city,
-        birth_date: birthDate ? formatDateForBackend(birthDate) : null,
+      const formData = new FormData()
+      formData.append("first_name", name)
+      formData.append("second_name", secondName)
+      formData.append("rank", rank.toString())
+      formData.append("city", city)
+
+      if (birthDate) {
+        const formattedDate = formatDateForBackend(birthDate)
+        if (formattedDate) {
+          formData.append("birth_date", formattedDate)
+        }
       }
 
-      await api.patch("/auth/me", formattedData)
+      // Add avatar to form data
+      addAvatarToFormData(
+        formData,
+        profilePicture,
+        useTelegramPhoto,
+        initData.user()?.photo_url
+      )
+
+      await api.patch("/auth/me", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
       checkAuth()
       navigate("/profile")
     } catch (err: any) {
@@ -125,7 +167,10 @@ export default function RegistrationPage() {
 
   return (
     <div className="p-4 flex flex-col min-h-screen">
-      <HugeHeader />
+      <HeaderEditAvatar
+        onFileChange={handleFileChange}
+        previewUrl={previewUrl}
+      />
       <div className="mt-10 flex flex-col gap-4 flex-1">
         <InputField
           onChangeFunction={setName}

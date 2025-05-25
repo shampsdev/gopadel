@@ -1,6 +1,7 @@
 from datetime import date
 from pydantic import BaseModel
 from uuid import UUID
+from typing import Optional
 
 
 class Loyalty(BaseModel):
@@ -14,7 +15,7 @@ class UserBase(BaseModel):
     username: str | None
     first_name: str
     second_name: str
-    avatar: str
+    avatar: Optional[str] = None
     rank: float
     city: str
     birth_date: date | None
@@ -22,19 +23,20 @@ class UserBase(BaseModel):
     loyalty_id: int
     loyalty: Loyalty
     is_registered: bool
+    telegram_id: Optional[int] = None
 
 
 class UserRegister(BaseModel):
     first_name: str
     second_name: str
-    birth_date: date | None
-    city: str
     rank: float
+    city: str
+    birth_date: Optional[date] = None
 
 
 class UserUpdate(BaseModel):
-    first_name: str
-    second_name: str
-    birth_date: date | None
-    city: str
-    rank: float
+    first_name: Optional[str] = None
+    second_name: Optional[str] = None
+    rank: Optional[float] = None
+    city: Optional[str] = None
+    birth_date: Optional[date] = None

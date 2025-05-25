@@ -13,6 +13,7 @@ class UserUpdateByAdmin(BaseModel):
     rank: Optional[float] = None
     is_registered: Optional[bool] = None
     loyalty_id: Optional[int] = None
+    avatar: Optional[str] = None
 
 
 class UserResponse(BaseModel):

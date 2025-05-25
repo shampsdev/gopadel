@@ -16,7 +16,7 @@ def get_or_create_user(db: Session, tg_id: int, username: str | None = None):
         is_registered=False,
         first_name="",
         second_name="",
-        avatar="",
+        avatar='',
         rank=0,
         city="",
         birth_date=None,
@@ -28,7 +28,7 @@ def get_or_create_user(db: Session, tg_id: int, username: str | None = None):
     return user
 
 
-def register_user(db: Session, user: User, register_data: UserRegister) -> User:
+def register_user(db: Session, user: User, register_data: UserRegister, avatar: Optional[str] = None) -> User:
     """Update user data during registration"""
     user.first_name = register_data.first_name
     user.second_name = register_data.second_name
@@ -36,19 +36,30 @@ def register_user(db: Session, user: User, register_data: UserRegister) -> User:
     user.city = register_data.city
     user.rank = register_data.rank
     user.is_registered = True
+    
+    if avatar:
+        user.avatar = avatar
 
     db.commit()
     db.refresh(user)
     return user
 
 
-def update_user(db: Session, user: User, update_data: UserUpdate) -> User:
-    """Update user profile data"""
-    user.first_name = update_data.first_name
-    user.second_name = update_data.second_name
-    user.birth_date = update_data.birth_date
-    user.city = update_data.city
-    user.rank = update_data.rank
+def update_user(db: Session, user: User, update_data: UserUpdate, avatar: Optional[str] = None) -> User:
+    """Update user data"""
+    if update_data.first_name:
+        user.first_name = update_data.first_name
+    if update_data.second_name:
+        user.second_name = update_data.second_name
+    if update_data.birth_date:
+        user.birth_date = update_data.birth_date
+    if update_data.city:
+        user.city = update_data.city
+    if update_data.rank is not None:
+        user.rank = update_data.rank
+    
+    if avatar:
+        user.avatar = avatar
 
     db.commit()
     db.refresh(user)

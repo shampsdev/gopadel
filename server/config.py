@@ -1,19 +1,15 @@
+from pydantic import BaseModel
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class S3Config(BaseSettings):
+class S3Config(BaseModel):
     access_key_id: str
     secret_key: str
     region: str
     endpoint_url: str
     bucket: str
     root_directory: str
-
-    model_config = SettingsConfigDict(
-        env_prefix="S3_",
-        env_file=".env",
-    )
 
 
 class Settings(BaseSettings):
@@ -53,7 +49,7 @@ class Settings(BaseSettings):
         )
 
     @property
-    def S3_CONFIG(self) -> S3Config:
+    def S3_CONFIG(self):
         return S3Config(
             access_key_id=self.S3_ACCESS_KEY_ID,
             secret_key=self.S3_SECRET_KEY,
