@@ -1,12 +1,10 @@
-from typing import List, Optional
+from typing import Optional
 
 from api.deps import SessionDep
 from api.schemas.admin_payment import PaymentResponse, PaymentWithRegistration
 from api.utils.admin_middleware import admin_required
 from db.models.payment import Payment
 from db.models.registration import Registration
-from db.models.tournament import Tournament
-from db.models.user import User
 from fastapi import APIRouter, HTTPException, Query, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import desc

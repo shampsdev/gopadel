@@ -7,8 +7,7 @@ import {
   FaRubleSign,
   FaUsers,
 } from "react-icons/fa"
-import { format } from "date-fns"
-import { ru } from "date-fns/locale"
+import { formatMoscowTime } from "@/utils/formatDate"
 import { formatPrice } from "@/utils/formatPrice"
 import PriceWithDiscount from "./PriceWithDiscount"
 import useAuth from "@/hooks/useAuth"
@@ -20,13 +19,7 @@ type TournamentCardProps = {
 export default function TournamentCard({ tournament }: TournamentCardProps) {
   const { userData } = useUserStore()
 
-  const formattedDate = format(
-    new Date(tournament.start_time),
-    "dd MMMM HH:mm",
-    {
-      locale: ru,
-    }
-  )
+  const formattedDate = formatMoscowTime(tournament.start_time)
 
   return (
     <div className="w-full rounded-3xl border-2 border-gray-300 p-5 mb-3">
@@ -34,7 +27,10 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
       <div className="text-gray-700 mb-4 flex justify-between gap-4">
         <span className="font-medium">Организатор</span>
 
-        <span>{tournament.organizator.first_name}</span>
+        <span>
+          {tournament.organizator.first_name}{" "}
+          {tournament.organizator.second_name}
+        </span>
       </div>
 
       <div className="space-y-2">

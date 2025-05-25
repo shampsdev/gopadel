@@ -1,4 +1,5 @@
 import { Payment } from "./Payment"
+import { Tournament } from "./tournament"
 import { User } from "./user"
 
 export enum RegistrationStatus {
@@ -16,4 +17,8 @@ export interface Registration {
   payment_id: string // UUID
   payment: Payment
   user: User
+}
+
+export interface RegistrationWithTournament extends Registration {
+  tournament: Tournament
 }

@@ -54,7 +54,7 @@ export default function ProfilePage() {
       </div>
       <div className="flex-1 flex flex-col gap-3 justify-end mt-3">
         <Link
-          to={"/pofile/history"}
+          to={"/profile/history"}
           className="text-white font-semibold pressable bg-gray-500 rounded-xl py-3"
         >
           <div className="flex items-center justify-center gap-2">

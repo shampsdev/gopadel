@@ -15,7 +15,6 @@ from db.crud.user import get_user_by_id
 from db.models.admin import AdminUser
 from fastapi import APIRouter, Body, HTTPException, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.orm import Session
 
 router = APIRouter()
 security = HTTPBearer()

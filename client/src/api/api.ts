@@ -2,7 +2,7 @@ import axios from "axios"
 import { API_URL } from "../shared/constants"
 import { User } from "@/types/user"
 import { Tournament } from "@/types/tournament"
-import { Registration } from "@/types/registration"
+import { Registration, RegistrationWithTournament } from "@/types/registration"
 import { initDataRaw } from "@telegram-apps/sdk-react"
 
 export const api = axios.create({
@@ -106,5 +106,22 @@ export const getTournamentRegistration = async (
       error
     )
     return null
+  }
+}
+
+export const getUserTournaments = async (
+  tournamentId: string
+): Promise<RegistrationWithTournament[]> => {
+  try {
+    const response = await api.get<RegistrationWithTournament[]>(
+      `/tournaments/${tournamentId}/my`
+    )
+    return response.data
+  } catch (error) {
+    console.error(
+      `Error fetching user tournaments for tournament ${tournamentId}:`,
+      error
+    )
+    return []
   }
 }

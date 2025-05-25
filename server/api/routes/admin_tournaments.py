@@ -15,7 +15,6 @@ from db.crud.tournament import (
     create_tournament,
     delete_tournament,
     get_tournament_by_id,
-    get_tournament_with_participants_by_id,
     get_tournaments,
     update_tournament,
 )
