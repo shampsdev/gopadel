@@ -77,6 +77,7 @@ async def get_payments(
                 "user_id": str(payment.registration.user_id),
                 "tournament_id": str(payment.registration.tournament_id),
                 "status": payment.registration.status,
+                "date": payment.registration.date.isoformat(),
             }
 
             # Add user data if available
