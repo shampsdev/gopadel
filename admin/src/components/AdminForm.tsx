@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { CreateAdminRequest } from "../services/admin";
 import { useUser } from "../context/UserContext";
 import UserAssociationModal from "./UserAssociationModal";
+import { userService } from "../services/user";
+import type { User } from "../shared/types";
 
 interface AdminFormProps {
   onSubmit: (data: CreateAdminRequest) => void;
@@ -21,6 +23,30 @@ const AdminForm = ({ onSubmit }: AdminFormProps) => {
   
   const [errors, setErrors] = useState<Partial<Record<keyof CreateAdminRequest, string>>>({});
   const [showUserModal, setShowUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // Load user data when user_id is set
+  useEffect(() => {
+    if (formData.user_id) {
+      loadUserData(formData.user_id);
+    } else {
+      setSelectedUser(null);
+    }
+  }, [formData.user_id]);
+
+  const loadUserData = async (userId: string) => {
+    try {
+      setLoading(true);
+      const user = await userService.getById(userId);
+      setSelectedUser(user);
+    } catch (error) {
+      console.error("Error loading user data:", error);
+      setSelectedUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof CreateAdminRequest, string>> = {};
@@ -71,6 +97,7 @@ const AdminForm = ({ onSubmit }: AdminFormProps) => {
         is_active: true,
         user_id: undefined,
       });
+      setSelectedUser(null);
     }
   };
 
@@ -95,13 +122,23 @@ const AdminForm = ({ onSubmit }: AdminFormProps) => {
       ...formData,
       user_id: undefined,
     });
+    setSelectedUser(null);
+  };
+
+  const getUserDisplayInfo = () => {
+    if (loading) return "Загрузка...";
+    if (!selectedUser) return null;
+    
+    if (selectedUser.username) {
+      return `@${selectedUser.username}`;
+    } else {
+      return `${selectedUser.first_name} ${selectedUser.second_name} (ID: ${selectedUser.telegram_id})`;
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Добавить нового администратора</h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Имя пользователя *
@@ -139,7 +176,7 @@ const AdminForm = ({ onSubmit }: AdminFormProps) => {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Имя *
@@ -187,7 +224,20 @@ const AdminForm = ({ onSubmit }: AdminFormProps) => {
               {formData.user_id ? (
                 <>
                   <div className="bg-green-50 border border-green-200 rounded px-3 py-2 text-sm flex-grow">
-                    ID пользователя: {formData.user_id.substring(0, 8)}...
+                    {loading ? (
+                      <span className="text-gray-500">Загрузка данных пользователя...</span>
+                    ) : (
+                      <div className="flex items-center">
+                        {selectedUser?.avatar && (
+                          <img 
+                            src={selectedUser.avatar} 
+                            alt="Avatar" 
+                            className="w-6 h-6 rounded-full mr-2"
+                          />
+                        )}
+                        <span className="text-blue-600">{getUserDisplayInfo()}</span>
+                      </div>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -209,7 +259,7 @@ const AdminForm = ({ onSubmit }: AdminFormProps) => {
             </div>
           </div>
         
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
             <div className="flex items-center">
               <input
                 id="is_superuser"

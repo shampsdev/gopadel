@@ -55,11 +55,18 @@ const UserAssociationModal = ({
   };
 
   const filteredUsers = users.filter(user => {
+    if (!searchTerm) return true;
+    
     const fullName = `${user.first_name} ${user.second_name}`.toLowerCase();
     const username = user.username?.toLowerCase() || '';
+    const telegramId = String(user.telegram_id).toLowerCase();
+    const city = user.city.toLowerCase();
     const search = searchTerm.toLowerCase();
     
-    return fullName.includes(search) || username.includes(search);
+    return fullName.includes(search) || 
+           username.includes(search) || 
+           telegramId.includes(search) ||
+           city.includes(search);
   });
 
   const loadMore = () => {
@@ -78,7 +85,7 @@ const UserAssociationModal = ({
         <div className="p-4 border-b">
           <input
             type="text"
-            placeholder="Поиск по имени или имени пользователя"
+            placeholder="Поиск по имени, юзернейму, городу или ID"
             className="w-full p-2 border rounded"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -106,10 +113,18 @@ const UserAssociationModal = ({
                         <img src={user.avatar} alt={user.first_name} className="w-full h-full object-cover" />
                       )}
                     </div>
-                    <div>
+                    <div className="flex-grow">
                       <div className="font-medium">{user.first_name} {user.second_name}</div>
-                      {user.username && <div className="text-sm text-gray-500">@{user.username}</div>}
-                      <div className="text-sm text-gray-500">{user.city}, рейтинг: {user.rank}</div>
+                      <div className="flex justify-between items-center">
+                        <div className="text-sm text-gray-500">
+                          {user.username ? (
+                            <span className="text-blue-600">@{user.username}</span>
+                          ) : (
+                            <span>ID: {user.telegram_id}</span>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-500">{user.city}, рейтинг: {user.rank}</div>
+                      </div>
                     </div>
                   </div>
                 </div>

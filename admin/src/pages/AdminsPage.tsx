@@ -19,6 +19,7 @@ const AdminsPage = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedAdminId, setSelectedAdminId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'add' | 'password'>('add');
   const { currentAdmin } = useUser();
 
   const fetchAdmins = async () => {
@@ -145,40 +146,66 @@ const AdminsPage = () => {
       )}
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Left side - Admin list */}
-        <div className="w-full lg:w-1/2">
-          <div className="bg-white rounded-lg shadow mb-6">
-            <div className="p-4 border-b">
-              <h2 className="text-lg font-medium">Список администраторов</h2>
-            </div>
-            <div className="p-4">
-              {loading ? (
-                <p className="text-center py-4">Загрузка...</p>
-              ) : admins.length > 0 ? (
-                <AdminList 
-                  admins={admins} 
-                  onDelete={handleDeleteAdmin} 
-                  onEditUserAssociation={handleEditUserAssociation}
-                />
-              ) : (
-                <p className="text-center py-4 text-gray-500">Нет доступных администраторов</p>
-              )}
-            </div>
+        {/* Left column - Admin list */}
+        <div className="w-full lg:w-7/12 bg-white rounded-lg shadow">
+          <div className="p-4 border-b">
+            <h2 className="text-lg font-medium">Список администраторов</h2>
           </div>
-
-          {/* Password change form */}
-          <PasswordChangeForm onSubmit={handleChangePassword} />
+          <div className="p-4">
+            {loading ? (
+              <p className="text-center py-4">Загрузка...</p>
+            ) : admins.length > 0 ? (
+              <AdminList 
+                admins={admins} 
+                onDelete={handleDeleteAdmin} 
+                onEditUserAssociation={handleEditUserAssociation}
+              />
+            ) : (
+              <p className="text-center py-4 text-gray-500">Нет доступных администраторов</p>
+            )}
+          </div>
         </div>
 
-        {/* Right side - Admin form (only for superusers) */}
-        <div className="w-full lg:w-1/2">
-          {currentAdmin?.is_superuser ? (
-            <AdminForm onSubmit={handleAddAdmin} />
-          ) : (
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-500">Только суперпользователи могут добавлять новых администраторов.</p>
-            </div>
-          )}
+        {/* Right column - Forms section */}
+        <div className="w-full lg:w-5/12 bg-white rounded-lg shadow">
+          <div className="border-b">
+            <nav className="flex">
+              <button
+                className={`px-6 py-3 text-sm font-medium ${
+                  activeTab === 'add'
+                    ? 'border-b-2 border-green-500 text-green-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                onClick={() => setActiveTab('add')}
+              >
+                Добавить администратора
+              </button>
+              <button
+                className={`px-6 py-3 text-sm font-medium ${
+                  activeTab === 'password'
+                    ? 'border-b-2 border-green-500 text-green-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                onClick={() => setActiveTab('password')}
+              >
+                Изменить пароль
+              </button>
+            </nav>
+          </div>
+          
+          <div className="p-6">
+            {activeTab === 'add' ? (
+              currentAdmin?.is_superuser ? (
+                <AdminForm onSubmit={handleAddAdmin} />
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-6 text-center">
+                  <p className="text-gray-500">Только суперпользователи могут добавлять новых администраторов.</p>
+                </div>
+              )
+            ) : (
+              <PasswordChangeForm onSubmit={handleChangePassword} />
+            )}
+          </div>
         </div>
       </div>
 

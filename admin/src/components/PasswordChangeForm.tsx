@@ -63,8 +63,10 @@ const PasswordChangeForm = ({ onSubmit }: PasswordChangeFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Изменить пароль</h3>
+    <form onSubmit={handleSubmit} className="space-y-5 w-full">
+      <p className="text-sm text-gray-500 mb-4">
+        Здесь вы можете изменить свой текущий пароль. Введите текущий пароль и дважды новый пароль.
+      </p>
       
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -120,10 +122,10 @@ const PasswordChangeForm = ({ onSubmit }: PasswordChangeFormProps) => {
         )}
       </div>
       
-      <div>
+      <div className="pt-2">
         <button
           type="submit"
-          className="inline-flex justify-center rounded-md border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          className="inline-flex justify-center rounded-md border border-transparent bg-green-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
         >
           Изменить пароль
         </button>

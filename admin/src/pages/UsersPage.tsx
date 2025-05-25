@@ -4,8 +4,13 @@ import { userService } from '../services/user';
 import { loyaltyService } from '../services/loyalty';
 import UserForm from '../components/UserForm';
 import UserList from '../components/UserList';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const UsersPage = () => {
+  // For query parameters handling
+  const location = useLocation();
+  const navigate = useNavigate();
+  
   // User states
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,17 +31,62 @@ const UsersPage = () => {
   const [cityFilter, setCityFilter] = useState('');
   const [isRegisteredFilter, setIsRegisteredFilter] = useState<string>('all');
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+  
+  // Flag to track if we're loading a user from query params
+  const [isLoadingFromQueryParams, setIsLoadingFromQueryParams] = useState(false);
 
   // Calculate total pages
   const totalPages = Math.ceil(totalUsers / usersPerPage);
+
+  // Parse URL query parameters to get userId
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const userId = queryParams.get('userId');
+    
+    if (userId) {
+      setIsLoadingFromQueryParams(true);
+      loadUserById(userId);
+    }
+  }, [location.search]);
+
+  // Load a specific user by ID
+  const loadUserById = async (userId: string) => {
+    try {
+      setLoading(true);
+      const user = await userService.getById(userId);
+      
+      // Make sure loyalties are loaded before setting selected user
+      if (loyalties.length === 0) {
+        await fetchLoyalties();
+      }
+      
+      // Add loyalty object to the user
+      const loyaltyObj = loyalties.find(l => l.id === user.loyalty_id);
+      const userWithLoyalty = {
+        ...user,
+        loyalty: loyaltyObj
+      };
+      
+      setSelectedUser(userWithLoyalty);
+      setError(null);
+    } catch (err) {
+      setError('Ошибка при загрузке пользователя');
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setIsLoadingFromQueryParams(false);
+    }
+  };
 
   const fetchLoyalties = async () => {
     try {
       setLoadingLoyalty(true);
       const data = await loyaltyService.getAll();
       setLoyalties(data);
+      return data;
     } catch (err) {
       console.error('Error fetching loyalty levels:', err);
+      return [];
     } finally {
       setLoadingLoyalty(false);
     }
@@ -71,16 +121,28 @@ const UsersPage = () => {
   useEffect(() => {
     // First load loyalties, then load users
     const initData = async () => {
-      await fetchLoyalties();
-      await fetchUsers(currentPage);
+      const loadedLoyalties = await fetchLoyalties();
+      
+      // If we're not loading a specific user from query params, load the user list
+      if (!isLoadingFromQueryParams) {
+        await fetchUsers(currentPage);
+      }
+      
+      // If we have a userId in the URL, load that specific user
+      const queryParams = new URLSearchParams(location.search);
+      const userId = queryParams.get('userId');
+      
+      if (userId && loadedLoyalties.length > 0) {
+        loadUserById(userId);
+      }
     };
     
     initData();
   }, []); // Empty dependency array - only run once
 
   useEffect(() => {
-    // Re-fetch users when page changes
-    if (!loadingLoyalty && loyalties.length > 0) {
+    // Re-fetch users when page changes, but only if we're not loading a specific user
+    if (!loadingLoyalty && loyalties.length > 0 && !isLoadingFromQueryParams) {
       fetchUsers(currentPage);
     }
   }, [currentPage, loadingLoyalty]);
@@ -92,6 +154,9 @@ const UsersPage = () => {
       ...user,
       loyalty: loyaltyObj
     });
+    
+    // Update URL with the selected user ID
+    navigate(`/users?userId=${user.id}`, { replace: true });
   };
 
   const handleChangePage = (page: number) => {
@@ -239,7 +304,7 @@ const UsersPage = () => {
           </div>
           
           <div className="p-2">
-            {isLoading ? (
+            {isLoading && !isLoadingFromQueryParams ? (
               <p className="text-center py-4">Загрузка...</p>
             ) : filteredUsers.length > 0 ? (
               <UserList
@@ -278,7 +343,9 @@ const UsersPage = () => {
                   </div>
                   <div>
                     <p className="font-medium">{selectedUser.first_name} {selectedUser.second_name}</p>
-                    <p className="text-xs text-gray-500">ID: {selectedUser.telegram_id}</p>
+                    <p className="text-xs text-gray-500">
+                      {selectedUser.username ? `@${selectedUser.username}` : `ID: ${selectedUser.telegram_id}`}
+                    </p>
                   </div>
                 </div>
               </div>
