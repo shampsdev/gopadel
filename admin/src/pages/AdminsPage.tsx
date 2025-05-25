@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import AdminList from '../components/AdminList';
 import AdminForm from '../components/AdminForm';
 import PasswordChangeForm from '../components/PasswordChangeForm';
+import UserAssociationModal from '../components/UserAssociationModal';
 import { adminService } from '../services/admin';
 import type { AdminUser, CreateAdminRequest, PasswordChangeRequest } from '../services/admin';
 import { useUser } from '../context/UserContext';
@@ -16,6 +17,8 @@ const AdminsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [selectedAdminId, setSelectedAdminId] = useState<string | null>(null);
   const { currentAdmin } = useUser();
 
   const fetchAdmins = async () => {
@@ -90,6 +93,41 @@ const AdminsPage = () => {
     }
   };
 
+  const handleEditUserAssociation = (adminId: string) => {
+    setSelectedAdminId(adminId);
+    setShowUserModal(true);
+  };
+
+  const handleSaveUserAssociation = async (adminId: string, userId: string) => {
+    try {
+      setLoading(true);
+      await adminService.updateUserAssociation(adminId, userId);
+      await fetchAdmins();
+      setShowUserModal(false);
+      setSelectedAdminId(null);
+      setSuccessMessage('Пользователь успешно привязан к администратору');
+      setTimeout(() => setSuccessMessage(null), 3000);
+      setError(null);
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError<ErrorResponse>;
+      setError(axiosError.response?.data?.detail || 'Ошибка при привязке пользователя');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelUserAssociation = () => {
+    setShowUserModal(false);
+    setSelectedAdminId(null);
+  };
+
+  const getSelectedAdminUserId = () => {
+    if (!selectedAdminId) return undefined;
+    const admin = admins.find(a => a.id === selectedAdminId);
+    return admin?.user_id;
+  };
+
   return (
     <div className="p-4 md:p-6">
       <h1 className="text-xl md:text-2xl font-bold text-black mb-6">Администраторы</h1>
@@ -117,7 +155,11 @@ const AdminsPage = () => {
               {loading ? (
                 <p className="text-center py-4">Загрузка...</p>
               ) : admins.length > 0 ? (
-                <AdminList admins={admins} onDelete={handleDeleteAdmin} />
+                <AdminList 
+                  admins={admins} 
+                  onDelete={handleDeleteAdmin} 
+                  onEditUserAssociation={handleEditUserAssociation}
+                />
               ) : (
                 <p className="text-center py-4 text-gray-500">Нет доступных администраторов</p>
               )}
@@ -139,6 +181,16 @@ const AdminsPage = () => {
           )}
         </div>
       </div>
+
+      {/* User association modal */}
+      {showUserModal && selectedAdminId && (
+        <UserAssociationModal
+          adminId={selectedAdminId}
+          currentUserId={getSelectedAdminUserId()}
+          onCancel={handleCancelUserAssociation}
+          onSave={handleSaveUserAssociation}
+        />
+      )}
     </div>
   );
 };

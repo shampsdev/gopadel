@@ -22,6 +22,7 @@ def create_admin_user(
     last_name: str,
     is_superuser: bool = False,
     is_active: bool = True,
+    user_id: Optional[UUID] = None,
 ) -> AdminUser:
     admin = AdminUser(
         username=username,
@@ -30,6 +31,7 @@ def create_admin_user(
         last_name=last_name,
         is_superuser=is_superuser,
         is_active=is_active,
+        user_id=user_id,
     )
     db.add(admin)
     db.commit()
@@ -46,6 +48,7 @@ def update_admin_user(
     last_name: Optional[str] = None,
     is_superuser: Optional[bool] = None,
     is_active: Optional[bool] = None,
+    user_id: Optional[UUID] = None,
 ) -> Optional[AdminUser]:
     admin = db.query(AdminUser).filter(AdminUser.id == admin_id).first()
     if not admin:
@@ -63,6 +66,8 @@ def update_admin_user(
         admin.is_superuser = is_superuser
     if is_active is not None:
         admin.is_active = is_active
+    if user_id is not None:
+        admin.user_id = user_id
 
     db.commit()
     db.refresh(admin)

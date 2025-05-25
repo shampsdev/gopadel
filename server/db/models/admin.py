@@ -1,9 +1,13 @@
 import uuid
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
 from db import Base
-from sqlalchemy import Boolean, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Boolean, ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from db.models.user import User
 
 
 class AdminUser(Base):
@@ -16,6 +20,11 @@ class AdminUser(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     first_name: Mapped[str] = mapped_column(String(255), nullable=False)
     last_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    user_id: Mapped[Optional[UUID]] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+
+    user: Mapped[Optional["User"]] = relationship("User")
 
     def __repr__(self) -> str:
         return (

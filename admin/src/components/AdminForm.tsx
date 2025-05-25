@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { CreateAdminRequest } from "../services/admin";
 import { useUser } from "../context/UserContext";
+import UserAssociationModal from "./UserAssociationModal";
 
 interface AdminFormProps {
   onSubmit: (data: CreateAdminRequest) => void;
@@ -15,9 +16,11 @@ const AdminForm = ({ onSubmit }: AdminFormProps) => {
     last_name: '',
     is_superuser: false,
     is_active: true,
+    user_id: undefined,
   });
   
   const [errors, setErrors] = useState<Partial<Record<keyof CreateAdminRequest, string>>>({});
+  const [showUserModal, setShowUserModal] = useState(false);
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof CreateAdminRequest, string>> = {};
@@ -66,8 +69,32 @@ const AdminForm = ({ onSubmit }: AdminFormProps) => {
         last_name: '',
         is_superuser: false,
         is_active: true,
+        user_id: undefined,
       });
     }
+  };
+
+  const handleOpenUserModal = () => {
+    setShowUserModal(true);
+  };
+
+  const handleSaveUserAssociation = (_adminId: string, userId: string) => {
+    setFormData({
+      ...formData,
+      user_id: userId,
+    });
+    setShowUserModal(false);
+  };
+
+  const handleCancelUserAssociation = () => {
+    setShowUserModal(false);
+  };
+
+  const handleRemoveUserAssociation = () => {
+    setFormData({
+      ...formData,
+      user_id: undefined,
+    });
   };
 
   return (
@@ -149,37 +176,69 @@ const AdminForm = ({ onSubmit }: AdminFormProps) => {
           )}
         </div>
       </div>
-      
+
       {currentAdmin?.is_superuser && (
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center">
-            <input
-              id="is_superuser"
-              name="is_superuser"
-              type="checkbox"
-              checked={formData.is_superuser}
-              onChange={handleChange}
-              className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
-            />
-            <label htmlFor="is_superuser" className="ml-2 text-sm text-gray-700">
-              Суперпользователь
+        <>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Пользователь
             </label>
+            <div className="flex items-center space-x-2">
+              {formData.user_id ? (
+                <>
+                  <div className="bg-green-50 border border-green-200 rounded px-3 py-2 text-sm flex-grow">
+                    ID пользователя: {formData.user_id.substring(0, 8)}...
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveUserAssociation}
+                    className="text-red-600 hover:text-red-800 text-sm"
+                  >
+                    Удалить
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenUserModal}
+                  className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                >
+                  Выбрать пользователя
+                </button>
+              )}
+            </div>
           </div>
-          
-          <div className="flex items-center">
-            <input
-              id="is_active"
-              name="is_active"
-              type="checkbox"
-              checked={formData.is_active}
-              onChange={handleChange}
-              className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
-            />
-            <label htmlFor="is_active" className="ml-2 text-sm text-gray-700">
-              Активный
-            </label>
+        
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <input
+                id="is_superuser"
+                name="is_superuser"
+                type="checkbox"
+                checked={formData.is_superuser}
+                onChange={handleChange}
+                className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+              />
+              <label htmlFor="is_superuser" className="ml-2 text-sm text-gray-700">
+                Суперпользователь
+              </label>
+            </div>
+            
+            <div className="flex items-center">
+              <input
+                id="is_active"
+                name="is_active"
+                type="checkbox"
+                checked={formData.is_active}
+                onChange={handleChange}
+                className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+              />
+              <label htmlFor="is_active" className="ml-2 text-sm text-gray-700">
+                Активный
+              </label>
+            </div>
           </div>
-        </div>
+        </>
       )}
       
       <div>
@@ -190,6 +249,15 @@ const AdminForm = ({ onSubmit }: AdminFormProps) => {
           Добавить администратора
         </button>
       </div>
+
+      {showUserModal && (
+        <UserAssociationModal
+          adminId=""
+          currentUserId={formData.user_id}
+          onCancel={handleCancelUserAssociation}
+          onSave={handleSaveUserAssociation}
+        />
+      )}
     </form>
   );
 };

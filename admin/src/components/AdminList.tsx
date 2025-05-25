@@ -4,9 +4,10 @@ import { useUser } from "../context/UserContext";
 interface AdminListProps {
   admins: AdminUser[];
   onDelete: (adminId: string) => void;
+  onEditUserAssociation: (adminId: string) => void;
 }
 
-const AdminList = ({ admins, onDelete }: AdminListProps) => {
+const AdminList = ({ admins, onDelete, onEditUserAssociation }: AdminListProps) => {
   const { currentAdmin } = useUser();
 
   return (
@@ -22,6 +23,9 @@ const AdminList = ({ admins, onDelete }: AdminListProps) => {
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Фамилия
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Связанный пользователь
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Роль
@@ -49,6 +53,13 @@ const AdminList = ({ admins, onDelete }: AdminListProps) => {
                 {admin.last_name}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {admin.user_id ? (
+                  <span className="text-blue-600">{admin.user_id.substring(0, 8)}...</span>
+                ) : (
+                  <span className="text-gray-400">Не привязан</span>
+                )}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                   admin.is_superuser ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
                 }`}>
@@ -63,7 +74,15 @@ const AdminList = ({ admins, onDelete }: AdminListProps) => {
                 </span>
               </td>
               {currentAdmin?.is_superuser && (
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                  {/* Edit user association button */}
+                  <button
+                    onClick={() => onEditUserAssociation(admin.id)}
+                    className="text-blue-600 hover:text-blue-900 mr-2"
+                  >
+                    {admin.user_id ? 'Изменить' : 'Привязать'} пользователя
+                  </button>
+                
                   {/* Don't allow deleting current admin or if current admin is not superuser */}
                   {currentAdmin?.username !== admin.username && (
                     <button

@@ -7,6 +7,7 @@ export interface AdminUser {
   last_name: string;
   is_superuser: boolean;
   is_active: boolean;
+  user_id?: string;
 }
 
 export interface CreateAdminRequest {
@@ -16,6 +17,7 @@ export interface CreateAdminRequest {
   last_name: string;
   is_superuser?: boolean;
   is_active?: boolean;
+  user_id?: string;
 }
 
 export interface PasswordChangeRequest {
@@ -44,6 +46,11 @@ export const adminService = {
 
   getCurrentAdmin: async (): Promise<{ username: string; is_superuser: boolean }> => {
     const response = await api.get('/admin/auth/me');
+    return response.data;
+  },
+  
+  updateUserAssociation: async (adminId: string, userId: string): Promise<AdminUser> => {
+    const response = await api.patch(`/admin/${adminId}/user`, { user_id: userId });
     return response.data;
   }
 }; 

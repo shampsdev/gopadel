@@ -11,6 +11,7 @@ class AdminUserCreate(BaseModel):
     last_name: str
     is_superuser: Optional[bool] = False
     is_active: Optional[bool] = True
+    user_id: Optional[UUID] = None
 
     class Config:
         orm_mode = True
@@ -23,6 +24,7 @@ class AdminUserResponse(BaseModel):
     last_name: str
     is_superuser: bool
     is_active: bool
+    user_id: Optional[UUID] = None
 
     class Config:
         orm_mode = True
