@@ -21,6 +21,7 @@ import { formatPrice } from "@/utils/formatPrice"
 import { Registration } from "@/types/registration"
 import { RegistrationStatus } from "@/types/registration"
 import GreenButton from "@/components/ui/GreenButton"
+import PriceWithDiscount from "@/components/PriceWithDiscount"
 
 export default function TournamentPage() {
   const { id } = useParams<{ id: string }>()
@@ -158,7 +159,10 @@ export default function TournamentPage() {
             </span>
           </div>
           <div className="font-semibold">
-            <span>{formatPrice(tournament.price)}</span>
+            <PriceWithDiscount
+              price={tournament.price}
+              discount={userData?.loyalty?.discount ?? 0}
+            />
           </div>
         </div>
 

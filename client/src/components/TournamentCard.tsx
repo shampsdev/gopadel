@@ -10,11 +10,16 @@ import {
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { formatPrice } from "@/utils/formatPrice"
+import PriceWithDiscount from "./PriceWithDiscount"
+import useAuth from "@/hooks/useAuth"
+import useUserStore from "@/stores/userStore"
 type TournamentCardProps = {
   tournament: Tournament
 }
 
 export default function TournamentCard({ tournament }: TournamentCardProps) {
+  const { userData } = useUserStore()
+
   const formattedDate = format(
     new Date(tournament.start_time),
     "dd MMMM HH:mm",
@@ -59,7 +64,12 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
 
       <div className="flex justify-between mt-4 pt-2 border-t border-gray-200">
         <div className="flex items-center">
-          <span className="font-semibold">{formatPrice(tournament.price)}</span>
+          <span className="font-semibold">
+            <PriceWithDiscount
+              price={tournament.price}
+              discount={userData?.loyalty?.discount ?? 0}
+            />
+          </span>
         </div>
 
         <div className="flex items-center">

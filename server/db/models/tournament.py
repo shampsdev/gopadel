@@ -26,13 +26,9 @@ class Tournament(Base):
     rank_min: Mapped[float] = mapped_column(Float, nullable=False)
     rank_max: Mapped[float] = mapped_column(Float, nullable=False)
     max_users: Mapped[int] = mapped_column(Integer, nullable=False)
-    organizator_id: Mapped[UUID] = mapped_column(
-        ForeignKey("users.id"), nullable=False
-    )
+    organizator_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
 
-    organizator: Mapped["User"] = relationship(
-        "User", back_populates="tournaments"
-    )
+    organizator: Mapped["User"] = relationship("User", back_populates="tournaments")
 
     registrations: Mapped[list["Registration"]] = relationship(
         "Registration", back_populates="tournament"

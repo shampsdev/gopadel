@@ -55,11 +55,14 @@ def get_tournaments_with_participants(
 ) -> List[Tournament]:
     """Get all tournaments with eager loading of registrations and users"""
     now = datetime.now(ZoneInfo("Europe/Moscow"))
-    
+
     naive_now = now.replace(tzinfo=None)
-    query = db.query(Tournament).order_by(Tournament.start_time.desc()).filter(
-        Tournament.start_time > naive_now
-    ).options(joinedload(Tournament.registrations).joinedload(Registration.user))
+    query = (
+        db.query(Tournament)
+        .order_by(Tournament.start_time.desc())
+        .filter(Tournament.start_time > naive_now)
+        .options(joinedload(Tournament.registrations).joinedload(Registration.user))
+    )
 
     if available and user_rank is not None:
         query = query.filter(

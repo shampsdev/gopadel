@@ -39,8 +39,13 @@ def get_registration_by_user_and_tournament(
 ) -> Optional[Registration]:
     """Get a specific registration by user and tournament"""
     return (
-        db.query(Registration).filter(Registration.user_id == user_id, Registration.tournament_id == tournament_id).first()
+        db.query(Registration)
+        .filter(
+            Registration.user_id == user_id, Registration.tournament_id == tournament_id
+        )
+        .first()
     )
+
 
 def create_registration(
     db: Session,

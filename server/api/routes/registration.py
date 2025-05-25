@@ -21,27 +21,48 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
         raise HTTPException(status_code=404, detail="Tournament not found")
 
     registration = registration_crud.get_registration_by_user_and_tournament(
-        db,
-        user.id,
-        tournament_id
+        db, user.id, tournament_id
     )
-    is_free = tournament.price == 0
+    discount = user.loyalty.discount if user.loyalty else 0
+    price = round(tournament.price * (1 - discount / 100))
+    is_free = price == 0
 
     if registration:
         if registration.status == RegistrationStatus.PENDING:
             return registration
         elif registration.status == RegistrationStatus.ACTIVE:
-            raise HTTPException(status_code=400, detail="User already registered for this tournament")
+            raise HTTPException(
+                status_code=400, detail="User already registered for this tournament"
+            )
         else:
-            registration_crud.update_registration_status(db, registration.id, RegistrationStatus.PENDING)
-            payment = create_invoice(db, tournament, settings.FRONTEND_URL + "/tournament/" + str(tournament_id)) if not is_free else None
-            registration_crud.update_registration_payment(db, registration.id, payment.id if payment else None)
+            registration_crud.update_registration_status(
+                db, registration.id, RegistrationStatus.PENDING
+            )
+            payment = (
+                create_invoice(
+                    db,
+                    tournament,
+                    discount,
+                    settings.FRONTEND_URL + "/tournament/" + str(tournament_id),
+                )
+                if not is_free
+                else None
+            )
+            registration_crud.update_registration_payment(
+                db, registration.id, payment.id if payment else None
+            )
 
-
-
-    is_free = tournament.price == 0
-    payment = create_invoice(db, tournament, settings.FRONTEND_URL + "/tournament/" + str(tournament_id)) if not is_free else None
-
+    else:
+        payment = (
+            create_invoice(
+                db,
+                tournament,
+                discount,
+                settings.FRONTEND_URL + "/tournament/" + str(tournament_id),
+            )
+            if not is_free
+            else None
+        )
 
     registration = registration_crud.create_registration(
         db,
@@ -52,4 +73,3 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
     )
 
     return registration
-

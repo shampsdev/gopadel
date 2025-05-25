@@ -18,8 +18,11 @@ def configure_yookassa():
 def create_invoice(
     db: Session,
     tournament: Tournament,
+    discount: int,
     return_url: str,
 ) -> Payment:
+    final_price = round(tournament.price * (1 - discount / 100))
+
     """
     Create a payment invoice using YooKassa
 
@@ -36,7 +39,7 @@ def create_invoice(
     """
     # Create payment data
     payment_data = {
-        "amount": {"value": f"{tournament.price}.00", "currency": "RUB"},
+        "amount": {"value": f"{final_price}.00", "currency": "RUB"},
         "confirmation": {
             "type": "redirect",
             "return_url": return_url,
@@ -53,7 +56,7 @@ def create_invoice(
                 "description": "GoPadel Tournament",
                 "payment_subject": "commodity",
                 "amount": {
-                    "value": f"{tournament.price}.00",
+                    "value": f"{final_price}.00",
                     "currency": "RUB",
                 },
                 "vat_code": 1,
@@ -76,7 +79,7 @@ def create_invoice(
         id=uuid4(),
         payment_id=yoo_payment.id,
         date=datetime.now(ZoneInfo("Europe/Moscow")),
-        amount=tournament.price,
+        amount=final_price,
         payment_link=yoo_payment.confirmation.confirmation_url,
         status=yoo_payment.status,
     )
