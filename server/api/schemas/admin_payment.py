@@ -22,17 +22,17 @@ class RegistrationInfo(BaseModel):
     user_id: str
     tournament_id: str
     status: str
+    date: datetime
     user: Optional[UserInfo] = None
     tournament: Optional[TournamentInfo] = None
 
 
 class PaymentBase(BaseModel):
-    id: str
-    payment_id: str
-    date: datetime
-    amount: int
-    payment_link: str
+    id: UUID
+    amount: float
     status: str
+    payment_link: Optional[str] = None
+    date: datetime
 
 
 class PaymentWithRegistration(PaymentBase):

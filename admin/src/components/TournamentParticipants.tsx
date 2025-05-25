@@ -6,6 +6,23 @@ interface TournamentParticipantsProps {
   tournamentId: number | undefined;
 }
 
+const formatDate = (dateString: string | undefined) => {
+  if (!dateString) return '—';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '—';
+    return date.toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    return '—';
+  }
+};
+
 const TournamentParticipants: React.FC<TournamentParticipantsProps> = ({ tournamentId }) => {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -65,7 +82,7 @@ const TournamentParticipants: React.FC<TournamentParticipantsProps> = ({ tournam
                 <td className="py-2 px-4 border">
                   <div className="flex items-center">
                     <img 
-                      src={participant.user.avatar} 
+                      src={participant.user.avatar || '/default-avatar.png'} 
                       alt={`${participant.user.first_name} ${participant.user.second_name}`}
                       className="w-8 h-8 rounded-full mr-2" 
                     />
@@ -78,7 +95,7 @@ const TournamentParticipants: React.FC<TournamentParticipantsProps> = ({ tournam
                   {participant.status === 'canceled' && <span className="text-red-600">Отменен</span>}
                 </td>
                 <td className="py-2 px-4 border">
-                  {new Date(participant.date).toLocaleString('ru-RU')}
+                  {formatDate(participant.date)}
                 </td>
               </tr>
             ))}

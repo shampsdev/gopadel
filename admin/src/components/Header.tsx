@@ -20,7 +20,7 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
   return (
     <header className="bg-green-100 text-black p-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        <div className="font-bold text-xl">GO PADEL Admin</div>
+        <div className="font-bold text-xl">GO PADEL</div>
         
         {/* Mobile menu button */}
         <button 

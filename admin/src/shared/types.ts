@@ -46,7 +46,7 @@ export interface Participant {
   id: string
   user_id: string
   tournament_id: string
-  date: string
+  date: string | undefined
   status: string
   user: User
   payment?: Payment

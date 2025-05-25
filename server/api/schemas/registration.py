@@ -1,9 +1,11 @@
-from pydantic import BaseModel
+from datetime import datetime
 from typing import Optional
 from uuid import UUID
+
 from api.schemas.payment import PaymentBase
 from api.schemas.user import UserBase
 from db.models.registration import RegistrationStatus
+from pydantic import BaseModel
 
 
 class RegistrationResponse(BaseModel):
@@ -12,6 +14,7 @@ class RegistrationResponse(BaseModel):
     user_id: UUID
     user: UserBase
     status: RegistrationStatus
+    date: datetime
 
     class Config:
         from_attributes = True
