@@ -18,6 +18,7 @@ import Divider from "@/components/ui/Divider"
 import { Spinner } from "@/components/ui/Spinner"
 import useUserStore from "@/stores/userStore"
 import { formatPrice } from "@/utils/formatPrice"
+import { formatDateAndTime } from "@/utils/formatDate"
 import { Registration } from "@/types/registration"
 import { RegistrationStatus } from "@/types/registration"
 import GreenButton from "@/components/ui/GreenButton"
@@ -90,13 +91,9 @@ export default function TournamentPage() {
     )
   }
 
-  const formattedDate = format(new Date(tournament.start_time), "dd MMMM", {
-    locale: ru,
-  })
-
-  const formattedTime = format(new Date(tournament.start_time), "HH:mm", {
-    locale: ru,
-  })
+  const { date: formattedDate, time: formattedTime } = formatDateAndTime(
+    tournament.start_time
+  )
 
   // Check if user meets rank requirements
   const hasValidRank =

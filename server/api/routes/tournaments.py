@@ -3,7 +3,11 @@ from fastapi import APIRouter, HTTPException
 
 from api.deps import SessionDep, UserDep
 from api.schemas.registration import RegistrationResponse
-from api.schemas.tournament import TournamentResponse, ParticipantResponse
+from api.schemas.tournament import (
+    RegistrationWithTournamentResponse,
+    TournamentResponse,
+    ParticipantResponse,
+)
 from db.crud import tournament as tournament_crud, registration as registration_crud
 from uuid import UUID
 
@@ -16,6 +20,16 @@ async def get_tournaments(
 ):
     tournaments = tournament_crud.get_tournaments_with_participants(
         db, user.rank, available
+    )
+    return tournaments
+
+
+@router.get(
+    "/{tournament_id}/my", response_model=List[RegistrationWithTournamentResponse]
+)
+async def get_user_tournamets(db: SessionDep, tournament_id: UUID, user: UserDep):
+    tournaments = tournament_crud.get_registrations_with_tournaments_by_user(
+        db, user.id
     )
     return tournaments
 

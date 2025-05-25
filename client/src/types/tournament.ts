@@ -14,6 +14,7 @@ export type Tournament = {
   organizer: string // Name of the organizer
   registrations?: Registration[]
   organizator: UserBase
+  is_finished: boolean
 }
 
 export type Participant = {

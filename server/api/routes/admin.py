@@ -9,7 +9,6 @@ from db.crud.admin_user import create_admin_user, delete_admin_user
 from db.models.admin import AdminUser
 from fastapi import APIRouter, HTTPException, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.orm import Session
 
 router = APIRouter()
 security = HTTPBearer()

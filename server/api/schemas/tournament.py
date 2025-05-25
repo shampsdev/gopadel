@@ -1,10 +1,13 @@
+from zoneinfo import ZoneInfo
 from pydantic import BaseModel, computed_field
 from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from api.schemas.registration import RegistrationResponse
 from db.models.registration import RegistrationStatus
+
+
+from api.schemas.registration import RegistrationResponse
 
 
 class UserBase(BaseModel):
@@ -27,8 +30,13 @@ class TournamentBase(BaseModel):
     rank_min: float
     rank_max: float
     max_users: int
-
     organizator: UserBase
+
+    @computed_field
+    def is_finished(self) -> bool:
+        now = datetime.now(ZoneInfo("Europe/Moscow"))
+        naive_now = now.replace(tzinfo=None)
+        return self.start_time < naive_now
 
 
 class TournamentResponse(TournamentBase):
@@ -44,3 +52,7 @@ class TournamentResponse(TournamentBase):
                 )
             )
         )
+
+
+class RegistrationWithTournamentResponse(RegistrationResponse):
+    tournament: TournamentBase

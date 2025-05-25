@@ -12,6 +12,7 @@ import useAuth from "@/hooks/useAuth"
 import TournamentPage from "./pages/TournamentPage"
 import TournamentParticipantsPage from "./pages/TournamentParticipantsPage"
 import EditProfilePage from "./pages/EditProfilePage"
+import HistoryPage from "./pages/HistoryPage"
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -52,6 +53,7 @@ function App() {
               <Route path="profile">
                 <Route index element={<ProfilePage />} />
                 <Route path="edit" element={<EditProfilePage />} />
+                <Route path="history" element={<HistoryPage />} />
               </Route>
 
               <Route path="tournament/:id">

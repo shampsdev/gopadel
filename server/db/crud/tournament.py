@@ -2,11 +2,12 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 from zoneinfo import ZoneInfo
+from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
 
 from db.models.tournament import Tournament
-from db.models.registration import Registration
+from db.models.registration import Registration, RegistrationStatus
 
 
 def create_tournament(
@@ -139,3 +140,17 @@ def delete_tournament(db: Session, tournament_id: UUID) -> bool:
     except SQLAlchemyError:
         db.rollback()
         return False
+
+
+def get_registrations_with_tournaments_by_user(
+    db: Session, user_id: UUID, only_active: bool = True
+) -> List[Registration]:
+    query = db.query(Registration)
+    if only_active:
+        query = query.filter(Registration.status == RegistrationStatus.ACTIVE)
+    return (
+        query.filter(Registration.user_id == user_id)
+        .join(Tournament)
+        .order_by(desc(Tournament.start_time))
+        .all()
+    )
