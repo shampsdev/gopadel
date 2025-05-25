@@ -39,6 +39,14 @@ class DashboardService {
               path: '/tournaments' 
             },
             { 
+              title: 'Платежи', 
+              icon: '💰', 
+              description: 'Просмотр и управление платежами',
+              color: 'bg-indigo-50 border-indigo-200',
+              iconBg: 'bg-indigo-100',
+              path: '/payments' 
+            },
+            { 
               title: 'Программа лояльности', 
               icon: '🌟', 
               description: 'Управление уровнями лояльности',

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { Tournament, User } from '../shared/types';
 import { userService } from '../services/user';
+import { useUser } from '../context/UserContext';
+import { adminService } from '../services/admin';
 
 interface TournamentFormProps {
   tournament?: Tournament;
@@ -23,6 +25,8 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
   const [errors, setErrors] = useState<Partial<Record<keyof Tournament, string>>>({});
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const { currentAdmin } = useUser();
+  const [currentAdminUserId, setCurrentAdminUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (tournament) {
@@ -33,9 +37,45 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       };
       setFormData(formattedTournament);
     } else {
-      setFormData(defaultTournament);
+      // For new tournaments, set the default values
+      setFormData({
+        ...defaultTournament,
+        // If we have already fetched the admin's user and it exists, use it as default
+        organizator_id: currentAdminUserId || defaultTournament.organizator_id
+      });
     }
-  }, [tournament]);
+  }, [tournament, currentAdminUserId]);
+
+  // Fetch the current admin's full profile to get user_id
+  useEffect(() => {
+    const fetchCurrentAdminProfile = async () => {
+      if (!currentAdmin?.username) return;
+      
+      try {
+        // Get all admins
+        const admins = await adminService.getAll();
+        // Find the current admin by username
+        const foundAdmin = admins.find(admin => admin.username === currentAdmin.username);
+        
+        // If found and has a user_id, set it
+        if (foundAdmin && foundAdmin.user_id) {
+          setCurrentAdminUserId(foundAdmin.user_id);
+          
+          // If creating a new tournament, set the organizator_id
+          if (!tournament) {
+            setFormData(prev => ({
+              ...prev,
+              organizator_id: foundAdmin.user_id as string
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch current admin profile:', error);
+      }
+    };
+    
+    fetchCurrentAdminProfile();
+  }, [currentAdmin, tournament]);
 
   useEffect(() => {
     const fetchUsers = async () => {
