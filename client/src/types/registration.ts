@@ -6,6 +6,7 @@ export enum RegistrationStatus {
   PENDING = "pending",
   ACTIVE = "active",
   CANCELED = "canceled",
+  CANCELED_BY_USER = "canceled_by_user",
 }
 
 export interface Registration {

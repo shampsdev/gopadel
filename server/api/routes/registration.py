@@ -38,38 +38,42 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
             registration_crud.update_registration_status(
                 db, registration.id, RegistrationStatus.PENDING
             )
-            payment = (
-                create_invoice(
-                    db,
-                    tournament,
-                    discount,
-                    settings.FRONTEND_URL + "/tournament/" + str(tournament_id),
-                )
-                if not is_free
-                else None
-            )
-            registration_crud.update_registration_payment(
-                db, registration.id, payment.id if payment else None
-            )
-
-    else:
-        payment = (
-            create_invoice(
-                db,
-                tournament,
-                discount,
-                settings.FRONTEND_URL + "/tournament/" + str(tournament_id),
-            )
-            if not is_free
-            else None
+    payment = (
+        create_invoice(
+            db,
+            tournament,
+            discount,
+            settings.FRONTEND_URL + "/tournament/" + str(tournament_id),
+        )
+        if not is_free
+        else None
+    )
+    if registration:
+        registration_crud.update_registration_payment(
+            db, registration.id, payment.id if payment else None
         )
 
-    registration = registration_crud.create_registration(
-        db,
-        tournament_id,
-        user.id,
-        payment.id if payment else None,
-        RegistrationStatus.ACTIVE if is_free else RegistrationStatus.PENDING,
-    )
+    else:
+        registration = registration_crud.create_registration(
+            db,
+            tournament_id,
+            user.id,
+            payment.id if payment else None,
+            RegistrationStatus.ACTIVE if is_free else RegistrationStatus.PENDING,
+        )
 
+
+    return registration
+
+
+@router.delete("/{tournament_id}", response_model=RegistrationResponse)
+async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep):
+    registration = registration_crud.get_registration_by_user_and_tournament(
+        db, user.id, tournament_id
+    )
+    if not registration:
+        raise HTTPException(status_code=404, detail="Registration not found")
+    if registration.status != RegistrationStatus.ACTIVE:
+        raise HTTPException(status_code=400, detail="Registration is not active")
+    registration_crud.update_registration_status(db, registration.id, RegistrationStatus.CANCELED_BY_USER)
     return registration

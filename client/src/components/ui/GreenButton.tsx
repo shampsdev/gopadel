@@ -1,5 +1,6 @@
 import React from "react"
 import { Spinner } from "./Spinner"
+import { cn } from "@/lib/utils"
 
 interface GreenButtonProps {
   onClick: () => void
@@ -7,6 +8,7 @@ interface GreenButtonProps {
   isLoading?: boolean
   children: React.ReactNode
   className?: string
+  buttonClassName?: string
 }
 
 export default function GreenButton({
@@ -15,14 +17,20 @@ export default function GreenButton({
   isLoading = false,
   children,
   className = "",
+  buttonClassName = "",
 }: GreenButtonProps) {
   return (
     <button
       onClick={onClick}
       disabled={disabled || isLoading}
-      className={`py-3 px-6 rounded-xl font-semibold text-white transition-colors duration-200 relative pressable ${
-        !disabled && !isLoading ? "bg-green" : "bg-gray-400 cursor-not-allowed"
-      } ${className}`}
+      className={cn(
+        `py-3 px-6 rounded-xl font-semibold text-white transition-colors duration-200 relative pressable ${
+          !disabled && !isLoading
+            ? cn("bg-green", buttonClassName)
+            : "bg-gray-400 cursor-not-allowed"
+        }`,
+        className
+      )}
     >
       <span
         className={`transition-opacity duration-200 ${

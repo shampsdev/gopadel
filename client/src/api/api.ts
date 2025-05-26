@@ -125,3 +125,20 @@ export const getUserTournaments = async (
     return []
   }
 }
+
+export const deleteRegistration = async (
+  tournamentId: string
+): Promise<Registration | null> => {
+  try {
+    const response = await api.delete<Registration>(
+      `/registration/${tournamentId}`
+    )
+    return response.data
+  } catch (error) {
+    console.error(
+      `Error deleting registration for tournament ${tournamentId}:`,
+      error
+    )
+    return null
+  }
+}

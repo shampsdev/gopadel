@@ -8,13 +8,12 @@ from db.models.registration import RegistrationStatus
 from pydantic import BaseModel
 
 
-class RegistrationResponse(BaseModel):
+class RegistrationBase(BaseModel):
     id: UUID
-    payment: Optional[PaymentBase]
     user_id: UUID
     user: UserBase
     status: RegistrationStatus
     date: datetime
 
-    class Config:
-        from_attributes = True
+class RegistrationResponse(RegistrationBase):
+    payment: Optional[PaymentBase]

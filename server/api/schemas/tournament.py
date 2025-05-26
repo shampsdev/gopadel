@@ -7,7 +7,7 @@ from uuid import UUID
 from db.models.registration import RegistrationStatus
 
 
-from api.schemas.registration import RegistrationResponse
+from api.schemas.registration import RegistrationBase, RegistrationResponse
 
 
 class UserBase(BaseModel):
@@ -41,14 +41,14 @@ class TournamentBase(BaseModel):
 
 
 class TournamentResponse(TournamentBase):
-    registrations: List[RegistrationResponse] = []
+    registrations: List[RegistrationBase] = []
 
     @computed_field
     def current_users(self) -> int:
         return len(
             list(
                 filter(
-                    lambda x: x.status != RegistrationStatus.CANCELED,
+                    lambda x: x.status in [RegistrationStatus.ACTIVE, RegistrationStatus.PENDING],
                     self.registrations,
                 )
             )

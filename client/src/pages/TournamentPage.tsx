@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react"
 import { useParams, Link } from "react-router-dom"
-import { getTournament, getTournamentRegistration } from "@/api/api"
+import {
+  deleteRegistration,
+  getTournament,
+  getTournamentRegistration,
+} from "@/api/api"
 import { Tournament } from "@/types/tournament"
 import Header from "@/components/Header"
 import { format } from "date-fns"
@@ -23,6 +27,7 @@ import { Registration } from "@/types/registration"
 import { RegistrationStatus } from "@/types/registration"
 import GreenButton from "@/components/ui/GreenButton"
 import PriceWithDiscount from "@/components/PriceWithDiscount"
+import { openTelegramLink } from "@telegram-apps/sdk-react"
 
 export default function TournamentPage() {
   const { id } = useParams<{ id: string }>()
@@ -34,42 +39,49 @@ export default function TournamentPage() {
   >("none")
   const { userData } = useUserStore()
 
-  useEffect(() => {
-    const fetchTournament = async () => {
-      if (!id) return
-      setLoading(true)
-      try {
-        const data = await getTournament(id)
-        if (!data) return
+  const fetchTournament = async () => {
+    if (!id) return
+    setLoading(true)
+    try {
+      const data = await getTournament(id)
+      if (!data) return
 
-        setTournament(data)
+      setTournament(data)
 
-        if (userData?.id) {
-          const registrationData = await getTournamentRegistration(id)
-          setRegistration(registrationData)
+      if (userData?.id) {
+        const registrationData = await getTournamentRegistration(id)
+        setRegistration(registrationData)
 
-          // Set waitlist status based on registration status if available
-          if (registrationData?.status === RegistrationStatus.PENDING) {
-            setWaitlistStatus("inWaitlist")
-          } else if (data.current_users >= data.max_users) {
-            setWaitlistStatus("available")
-          } else {
-            setWaitlistStatus("none")
-          }
+        // Set waitlist status based on registration status if available
+        if (registrationData?.status === RegistrationStatus.PENDING) {
+          setWaitlistStatus("inWaitlist")
+        } else if (data.current_users >= data.max_users) {
+          setWaitlistStatus("available")
         } else {
-          // If no user data, reset registration state
-          setRegistration(null)
           setWaitlistStatus("none")
         }
-      } catch (error) {
-        console.error("Error fetching tournament:", error)
-      } finally {
-        setLoading(false)
+      } else {
+        // If no user data, reset registration state
+        setRegistration(null)
+        setWaitlistStatus("none")
       }
+    } catch (error) {
+      console.error("Error fetching tournament:", error)
+    } finally {
+      setLoading(false)
     }
-
+  }
+  useEffect(() => {
     fetchTournament()
   }, [id, userData?.id])
+
+  const handleDeleteRegistration = async () => {
+    if (!id) return
+    const response = await deleteRegistration(id)
+    if (response) {
+      fetchTournament()
+    }
+  }
 
   if (loading) {
     return (
@@ -173,9 +185,26 @@ export default function TournamentPage() {
         />
 
         <div className="mt-auto">
-          {registration?.status === RegistrationStatus.ACTIVE ? (
+          {registration?.status === RegistrationStatus.CANCELED_BY_USER ? (
+            <div className="mt-4 text-center">
+              Ваша регистрация отменена. По поводу возврата денег обращайтесь к{" "}
+              <span
+                className="font-bold text-blue-500"
+                onClick={() => openTelegramLink("https://t.me/@Alievskey")}
+              >
+                @Alievskey
+              </span>
+            </div>
+          ) : registration?.status === RegistrationStatus.ACTIVE ? (
             <div className="mt-4 text-center">
               <p className={`mb-2 text-green-600`}>Вы зарегистрированы</p>
+              <GreenButton
+                onClick={handleDeleteRegistration}
+                buttonClassName="bg-red-500"
+                className="w-full"
+              >
+                Отменить регистрацию
+              </GreenButton>
             </div>
           ) : !hasValidRank ? (
             <div className="mt-4 text-center">

@@ -18,6 +18,7 @@ class RegistrationStatus(str, enum.Enum):
     PENDING = "pending"
     ACTIVE = "active"
     CANCELED = "canceled"
+    CANCELED_BY_USER = "canceled_by_user"
 
 
 class Registration(Base):
