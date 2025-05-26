@@ -61,5 +61,13 @@ async def webhook(request: Request, event: WebhookEvent, db: SessionDep):
                 raise HTTPException(
                     status_code=500, detail="Failed to update registration status"
                 )
+    elif payment_status == PaymentStatus.CANCELED and payment.registration:
+        registration = update_registration_status(
+            db, payment.registration.id, RegistrationStatus.CANCELED
+        )
+        if not registration:
+            raise HTTPException(
+                status_code=500, detail="Failed to update registration status"
+            )
 
     return {"status": "success"}
