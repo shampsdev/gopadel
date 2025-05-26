@@ -81,11 +81,15 @@ def get_tournament_by_id(db: Session, tournament_id: UUID) -> Optional[Tournamen
 def get_tournament_with_participants_by_id(
     db: Session, tournament_id: UUID
 ) -> Optional[Tournament]:
-    """Get a specific tournament by ID with eager loading of registrations and users"""
+    """Get a specific tournament by ID with eager loading of active registrations and users"""
     return (
         db.query(Tournament)
-        .options(joinedload(Tournament.registrations).joinedload(Registration.user))
         .filter(Tournament.id == tournament_id)
+        .options(
+            joinedload(Tournament.registrations.and_(
+                Registration.status == RegistrationStatus.ACTIVE
+            )).joinedload(Registration.user)
+        )
         .first()
     )
 

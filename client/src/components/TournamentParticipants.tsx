@@ -73,7 +73,7 @@ export default function TournamentParticipants({
                   key={registration.user?.id}
                   className="flex flex-col items-center"
                 >
-                  <div className="w-10 h-10 rounded-full overflow-hidden mr-2 bg-gray-200">
+                  <div className="w-14 h-14 rounded-full overflow-hidden mb-1 bg-gray-200">
                     {registration.user?.avatar ? (
                       <img
                         src={registration.user.avatar}

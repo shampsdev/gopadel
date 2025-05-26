@@ -15,6 +15,7 @@ class UserBase(BaseModel):
     first_name: str
     second_name: str
     avatar: Optional[str] = None
+    rank: float
 
 
 class ParticipantResponse(BaseModel):

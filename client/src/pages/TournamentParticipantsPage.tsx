@@ -7,6 +7,7 @@ import { getTournament, getTournamentParticipants } from "@/api/api"
 import Header from "@/components/Header"
 import { IoIosArrowBack } from "react-icons/io"
 import { Spinner } from "@/components/ui/Spinner"
+import { Divider } from "@telegram-apps/telegram-ui"
 
 export default function TournamentParticipantsPage() {
   const { id } = useParams<{ id: string }>()
@@ -81,30 +82,40 @@ export default function TournamentParticipantsPage() {
             <p>Пока нет участников</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-x-6 gap-y-8">
+          <div className="flex flex-col gap-2">
+            <Divider />
             {registrations.map((registration) => (
-              <div
-                key={registration.user.id}
-                className="flex flex-col items-center"
-              >
-                <div className="w-10 h-10 rounded-full overflow-hidden mr-3 bg-gray-200">
-                  {registration.user.avatar ? (
-                    <img
-                      src={registration.user.avatar}
-                      alt={`${registration.user.first_name} ${registration.user.second_name}`}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-500">
-                      {registration.user.first_name.charAt(0)}
-                      {registration.user.second_name.charAt(0)}
+              <>
+                <div
+                  key={registration.user.id}
+                  className="flex justify-between items-center"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                      {registration.user.avatar ? (
+                        <img
+                          src={registration.user.avatar}
+                          alt={`${registration.user.first_name} ${registration.user.second_name}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-500">
+                          {registration.user.first_name.charAt(0)}
+                          {registration.user.second_name.charAt(0)}
+                        </div>
+                      )}
                     </div>
-                  )}
+                    <p className="text-center font-medium">
+                      {registration.user.second_name}{" "}
+                      {registration.user.first_name}
+                    </p>
+                  </div>
+                  <div className="opacity-50">
+                    ранг: {registration.user.rank}
+                  </div>
                 </div>
-                <p className="text-center font-medium">
-                  {registration.user.second_name} {registration.user.first_name}
-                </p>
-              </div>
+                <Divider />
+              </>
             ))}
           </div>
         )}
