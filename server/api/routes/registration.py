@@ -8,6 +8,9 @@ from uuid import UUID
 
 from db.models.registration import RegistrationStatus
 from services.payments import create_invoice
+from services.waitlist import notify_waitlist
+
+from bot.init_bot import bot
 
 router = APIRouter()
 
@@ -80,4 +83,5 @@ async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep
     if registration.status != RegistrationStatus.ACTIVE:
         raise HTTPException(status_code=400, detail="Registration is not active")
     registration_crud.update_registration_status(db, registration.id, RegistrationStatus.CANCELED_BY_USER)
+    await notify_waitlist(bot, db, tournament_id)
     return registration
