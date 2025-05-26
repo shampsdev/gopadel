@@ -1,7 +1,7 @@
 """add canceled_by_user to registration status enum
 
 Revision ID: b48fe1e71060
-Revises: 7e01fea4f4b4
+Revises: 5c9addaa70a5
 Create Date: 2025-05-26 15:12:21.755512
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = 'b48fe1e71060'
-down_revision: Union[str, None] = '7e01fea4f4b4'
+down_revision: Union[str, None] = '5c9addaa70a5'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
