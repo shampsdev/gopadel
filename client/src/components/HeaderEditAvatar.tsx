@@ -56,7 +56,7 @@ export default function HeaderEditAvatar({
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept="image/*"
+            accept="image/png,image/jpeg"
             className="hidden"
           />
           {displayPhotoUrl ? (
