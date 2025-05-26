@@ -9,11 +9,13 @@ type ParticipateButtonProps = {
   tournamentId: string
   registration: Registration | null
   disabled?: boolean
+  callback?: () => void
 }
 
 export default function ParticipateButton({
   tournamentId,
   registration,
+  callback,
 }: ParticipateButtonProps) {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -27,6 +29,7 @@ export default function ParticipateButton({
         window.location.href = registration.payment.payment_link
       } else {
         console.error("Failed to register for tournament")
+        callback?.()
       }
     } catch (error) {
       console.error("Error participating in tournament:", error)

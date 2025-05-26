@@ -225,6 +225,9 @@ export default function TournamentPage() {
             <ParticipateButton
               tournamentId={tournament.id}
               registration={registration}
+              callback={() => {
+                fetchTournament()
+              }}
             />
           )}
         </div>

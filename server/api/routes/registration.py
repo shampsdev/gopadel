@@ -27,6 +27,10 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
     price = round(tournament.price * (1 - discount / 100))
     is_free = price == 0
 
+    reserved_users = len([r for r in tournament.registrations if r.status in (RegistrationStatus.ACTIVE, RegistrationStatus.PENDING)])
+    if reserved_users >= tournament.max_users:
+        raise HTTPException(status_code=400, detail="Tournament is full")
+
     if registration:
         if registration.status == RegistrationStatus.PENDING:
             return registration
