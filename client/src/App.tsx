@@ -16,6 +16,7 @@ import HistoryPage from "./pages/HistoryPage"
 import BottomNavbar from "./components/BottomNavbar"
 import PeoplePage from "./pages/PeoplePage"
 import UserProfilePage from "./pages/UserProfilePage"
+import LoyaltyPage from "./pages/LoyaltyPage"
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -63,6 +64,8 @@ function App() {
                 <Route index element={<PeoplePage />} />
                 <Route path=":userId" element={<UserProfilePage />} />
               </Route>
+
+              <Route path="loyalty" element={<LoyaltyPage />} />
 
               <Route path="tournament/:id">
                 <Route index element={<TournamentPage />} />

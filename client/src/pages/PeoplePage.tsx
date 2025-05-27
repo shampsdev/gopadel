@@ -35,16 +35,12 @@ export default function PeoplePage() {
     <div className="p-4 bg-white min-h-screen pb-20">
       <Header />
 
-      <h1 className="text-center font-semibold text-2xl mb-6 mt-2 text-gray-800">
-        Люди
-      </h1>
-
       {loading ? (
         <div className="flex justify-center mt-10">
           <Spinner size="lg" />
         </div>
       ) : users.length > 0 ? (
-        <div className="flex flex-col">
+        <div className="flex flex-col mt-4">
           {users.map((user) => (
             <UserCard 
               key={user.id} 
