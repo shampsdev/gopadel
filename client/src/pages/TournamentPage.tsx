@@ -117,7 +117,7 @@ export default function TournamentPage() {
   const hasAvailableSpots = tournament.current_users < tournament.max_users
 
   return (
-    <div className="p-4 bg-white min-h-screen flex flex-col">
+    <div className="p-4 bg-white min-h-screen flex flex-col pb-20">
       <Header />
 
       <div className="w-full max-w-md mx-auto flex flex-col flex-1">

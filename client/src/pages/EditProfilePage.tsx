@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from "react"
-import { initData, openPopup, popup, showPopup } from "@telegram-apps/sdk-react"
+import { useEffect, useState } from "react"
+import { initData, showPopup } from "@telegram-apps/sdk-react"
 import InputField from "@/components/InputField"
 import SimpleCitySelector from "@/components/SimpleCitySelector"
 import { isValidDateFormat, formatDateForBackend } from "@/utils/date"
@@ -152,11 +152,11 @@ export default function EditProfilePage() {
       })
       checkAuth()
       navigate("/profile")
-    } catch (err: any) {
+    } catch (err: unknown) {
       showPopup({
         title: "Ошибка",
         message:
-          err.response?.data?.message || "Произошла ошибка при отправке данных",
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Произошла ошибка при отправке данных",
         buttons: [{ id: "ok", type: "ok" }],
       })
       console.error(err)
@@ -166,12 +166,12 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="p-4 flex flex-col min-h-screen">
+    <div className="p-4 min-h-screen pb-20">
       <HeaderEditAvatar
         onFileChange={handleFileChange}
         previewUrl={previewUrl}
       />
-      <div className="mt-10 flex flex-col gap-4 flex-1">
+      <div className="mt-6 flex flex-col gap-4 flex-1">
         <InputField
           onChangeFunction={setName}
           title="Имя"

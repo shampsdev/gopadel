@@ -1,4 +1,4 @@
-import HugeHeader from "@/components/HugeHeader"
+import Header from "@/components/Header"
 import Divider from "@/components/ui/Divider"
 import GreenButton from "@/components/ui/GreenButton"
 import useUserStore from "@/stores/userStore"
@@ -11,8 +11,8 @@ export default function ProfilePage() {
   const navigate = useNavigate()
 
   return (
-    <div className="p-4 min-h-screen flex flex-col">
-      <HugeHeader />
+    <div className="p-4 min-h-screen flex flex-col pb-20">
+      <Header />
       <h1 className="text-2xl font-bold text-center mt-4">Профиль</h1>
 
       <div className="flex flex-col gap-2 bg-form rounded-xl p-4 mt-6">

@@ -1,13 +1,7 @@
-import {
-  hapticFeedbackImpactOccurred,
-  initData,
-} from "@telegram-apps/sdk-react"
-import { Divider, Text } from "@telegram-apps/telegram-ui"
-import { Link } from "react-router-dom"
+import { initData } from "@telegram-apps/sdk-react"
 import blackLogo from "@/assets/logo-black.png"
 import useUserStore from "@/stores/userStore"
-import { useState, useRef, useEffect } from "react"
-import { IoIosArrowForward } from "react-icons/io"
+import { useRef } from "react"
 
 initData.restore()
 
@@ -40,13 +34,13 @@ export default function HeaderEditAvatar({
 
   return (
     <div>
-      <div className="flex justify-between">
-        <div className="flex flex-1 py-4 flex-col justify-between">
+      <div className="flex justify-between items-center">
+        <div className="flex flex-1 py-2 flex-col justify-between">
           <div>
-            <img src={blackLogo} className="h-7" alt="" />
+            <img src={blackLogo} className="h-6" alt="" />
           </div>
           {!!initData?.user()?.username && (
-            <span className="text-xl opacity-60 font-semibold">
+            <span className="text-lg opacity-60 font-semibold">
               @{userData?.username || initData?.user()?.username}
             </span>
           )}
@@ -62,12 +56,12 @@ export default function HeaderEditAvatar({
           {displayPhotoUrl ? (
             <img
               src={displayPhotoUrl}
-              className="w-24 h-24 rounded-full aspect-square object-cover cursor-pointer"
+              className="w-16 h-16 rounded-full aspect-square object-cover cursor-pointer"
               alt="profile photo"
             />
           ) : (
-            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer">
-              <span className="text-4xl text-gray-400">+</span>
+            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer">
+              <span className="text-3xl text-gray-400">+</span>
             </div>
           )}
           <span className="bg-green text-white absolute -bottom-0 font-semibold left-1/2 -translate-x-1/2 px-2 rounded-full text-xs cursor-pointer">

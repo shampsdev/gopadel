@@ -58,7 +58,7 @@ export default function TournamentParticipantsPage() {
   }
 
   return (
-    <div className="p-4 bg-white min-h-screen">
+    <div className="p-4 bg-white min-h-screen pb-20">
       <Header />
 
       <div className="w-full max-w-md mx-auto">

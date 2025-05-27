@@ -1,8 +1,8 @@
 import { getUserTournaments } from "@/api/api"
 import HistoryCard from "@/components/HistoryCard"
-import HugeHeader from "@/components/HugeHeader"
+import Header from "@/components/Header"
 import useUserStore from "@/stores/userStore"
-import { Registration, RegistrationWithTournament } from "@/types/registration"
+import { RegistrationWithTournament } from "@/types/registration"
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 
@@ -21,8 +21,8 @@ export default function HistoryPage() {
   }, [userData])
 
   return (
-    <div className="p-4 flex flex-col min-h-screen">
-      <HugeHeader />
+    <div className="p-4 bg-white min-h-screen pb-20">
+      <Header />
       <h1 className="text-2xl font-bold text-center mt-4">История участия</h1>
       <div className="mt-4">
         {registrations.map((registration) => (

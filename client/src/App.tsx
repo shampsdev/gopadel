@@ -13,6 +13,8 @@ import TournamentPage from "./pages/TournamentPage"
 import TournamentParticipantsPage from "./pages/TournamentParticipantsPage"
 import EditProfilePage from "./pages/EditProfilePage"
 import HistoryPage from "./pages/HistoryPage"
+import BottomNavbar from "./components/BottomNavbar"
+import PeoplePage from "./pages/PeoplePage"
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -56,6 +58,8 @@ function App() {
                 <Route path="history" element={<HistoryPage />} />
               </Route>
 
+              <Route path="people" element={<PeoplePage />} />
+
               <Route path="tournament/:id">
                 <Route index element={<TournamentPage />} />
                 <Route
@@ -69,6 +73,8 @@ function App() {
           </Routes>
         </motion.div>
       </AnimatePresence>
+      
+      {location.pathname !== "/register" && <BottomNavbar />}
     </div>
   )
 }
