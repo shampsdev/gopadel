@@ -1,29 +1,37 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { ArrowLeft, Award, Check } from "lucide-react"
+import { Check } from "lucide-react"
 import Divider from "@/components/ui/Divider"
 import useUserStore from "@/stores/userStore"
-import { LoyaltyDetails, mockLoyaltyLevels } from "@/types/loyalty"
+import { LoyaltyDetails } from "@/types/loyalty"
 import blackLogo from "@/assets/logo-black.png"
+import { getLoyaltyLevels } from "@/api/api"
+import LoyaltyBadge from "@/components/LoyaltyBadge"
 
 export default function LoyaltyPage() {
   const { userData } = useUserStore()
-  const navigate = useNavigate()
   const [loyaltyLevels, setLoyaltyLevels] = useState<LoyaltyDetails[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeLevel, setActiveLevel] = useState<number | null>(null)
 
   useEffect(() => {
-    // Simulate loading from API
+    // Load loyalty levels from API
     setLoading(true)
-    setTimeout(() => {
-      setLoyaltyLevels(mockLoyaltyLevels)
-      setLoading(false)
-    }, 500)
+    getLoyaltyLevels()
+      .then(levels => {
+        setLoyaltyLevels(levels)
+        setLoading(false)
+      })
+      .catch(() => {
+        setLoading(false)
+      })
   }, [])
 
-  const handleBack = () => {
-    navigate(-1)
-  }
+  useEffect(() => {
+    // Set user's current loyalty level as active by default
+    if (userData && userData.loyalty_id) {
+      setActiveLevel(userData.loyalty_id)
+    }
+  }, [userData])
 
   if (loading) {
     return (
@@ -43,6 +51,8 @@ export default function LoyaltyPage() {
     )
   }
 
+  const activeDetails = loyaltyLevels.find(level => level.id === activeLevel) || loyaltyLevels[0]
+
   return (
     <div className="p-4 min-h-screen flex flex-col pb-20">
       <div>
@@ -54,66 +64,68 @@ export default function LoyaltyPage() {
         </div>
       </div>
 
-      <div className="flex items-center mb-4">
-        <button 
-          onClick={handleBack}
-          className="p-2 rounded-full hover:bg-gray-100"
-        >
-          <ArrowLeft size={24} />
-        </button>
-        <h1 className="text-xl font-semibold ml-2">Уровни лояльности</h1>
-      </div>
-
       <p className="text-gray-600 mb-6">
         Программа лояльности GoPadel предлагает специальные привилегии постоянным участникам наших турниров.
       </p>
 
-      {loyaltyLevels.map((level) => (
-        <div 
-          key={level.id} 
-          className={`mb-6 rounded-lg overflow-hidden border ${userData?.loyalty_id === level.id ? 'border-green-500' : 'border-gray-200'}`}
-        >
-          <div className={`p-4 ${userData?.loyalty_id === level.id ? 'bg-green-50' : 'bg-white'}`}>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <Award size={24} className={`mr-2 ${userData?.loyalty_id === level.id ? 'text-green-600' : 'text-gray-400'}`} />
-                <h2 className="text-lg font-bold">{level.name}</h2>
+      {/* Responsive loyalty badges */}
+      <div className="mb-8">
+        <div className="grid grid-cols-5 gap-2">
+          {loyaltyLevels.map((level) => (
+            <div 
+              key={level.id} 
+              className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ${activeLevel === level.id ? 'opacity-100' : 'opacity-60'}`}
+              onClick={() => setActiveLevel(level.id)}
+            >
+              <div className="flex justify-center items-center">
+                <LoyaltyBadge 
+                  loyaltyId={level.id} 
+                  size="md"
+                />
               </div>
+              <span className={`mt-2 text-xs text-center ${activeLevel === level.id ? 'font-semibold' : ''}`}>
+                {level.name.split(' ').pop()}
+              </span>
               {userData?.loyalty_id === level.id && (
-                <span className="text-sm text-green-600 font-medium">Ваш текущий уровень</span>
+                <div className="mt-1 text-xs text-center text-green-600 font-medium">
+                  Ваш
+                </div>
               )}
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Active level description */}
+      {activeDetails && (
+        <div className="mb-6">
+          <div className="p-4 bg-white rounded-lg">
+            <div className="text-center">
+              <h2 className="text-xl font-bold">{activeDetails.name}</h2>
+              <p className="text-gray-600 mt-3">{activeDetails.description}</p>
+            </div>
             
-            <p className="text-gray-600 mt-2">{level.description}</p>
-            
-            {level.discount > 0 && (
-              <div className="mt-2 flex items-center">
-                <span className="text-sm font-medium mr-2">Скидка:</span>
-                <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                  {level.discount}%
+            {activeDetails.discount > 0 && (
+              <div className="flex justify-center mt-4">
+                <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
+                  Скидка {activeDetails.discount}%
                 </span>
               </div>
             )}
-            
-            <div className="mt-3">
-              <span className="text-sm font-medium">Требования:</span>
-              <p className="text-sm text-gray-600 mt-1">{level.requirements}</p>
-            </div>
           </div>
           
-          <div className="p-4 bg-gray-50">
-            <span className="text-sm font-medium">Преимущества:</span>
-            <ul className="mt-2">
-              {level.benefits.map((benefit, index) => (
-                <li key={index} className="flex items-start mb-2">
-                  <Check size={16} className="text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-gray-600">{benefit}</span>
+          <div className="mt-5">
+            <ul className="space-y-3">
+              {activeDetails.benefits.map((benefit, index) => (
+                <li key={index} className="flex items-start">
+                  <Check size={18} className="text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                  <span className="text-gray-700">{benefit}</span>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-      ))}
+      )}
     </div>
   )
 } 

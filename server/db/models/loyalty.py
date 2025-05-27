@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List
 
 from db import Base
 from sqlalchemy import JSON, SmallInteger, String, Text
@@ -15,6 +15,6 @@ class Loyalty(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     discount: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    requirements: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    requirements: Mapped[Dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
     users: Mapped[list["User"]] = relationship("User", back_populates="loyalty")

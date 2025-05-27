@@ -4,6 +4,7 @@ import { User } from "@/types/user"
 import { Tournament } from "@/types/tournament"
 import { Registration, RegistrationWithTournament } from "@/types/registration"
 import { initDataRaw } from "@telegram-apps/sdk-react"
+import { LoyaltyDetails, LoyaltyResponse } from "@/types/loyalty"
 
 export const api = axios.create({
   baseURL: `${API_URL}/api/v1`,
@@ -149,6 +150,27 @@ export const getUsers = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
+    return [];
+  }
+};
+
+export const getLoyaltyLevels = async (): Promise<LoyaltyDetails[]> => {
+  try {
+    const response = await api.get<LoyaltyResponse[]>("/users/loyalty-levels");
+    
+    // Transform API response to match our LoyaltyDetails interface
+    return response.data.map((loyalty: LoyaltyResponse) => ({
+      id: loyalty.id,
+      name: loyalty.name,
+      discount: loyalty.discount,
+      description: loyalty.description || "",
+      // Extract text from requirements or provide default
+      requirements: loyalty.requirements?.text || "Регистрация в приложении",
+      // Extract benefits list or provide default empty list
+      benefits: loyalty.requirements?.benefits || []
+    }));
+  } catch (error) {
+    console.error("Error fetching loyalty levels:", error);
     return [];
   }
 };

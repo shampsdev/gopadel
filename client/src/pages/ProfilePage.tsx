@@ -2,8 +2,9 @@ import Divider from "@/components/ui/Divider"
 import GreenButton from "@/components/ui/GreenButton"
 import useUserStore from "@/stores/userStore"
 import { useNavigate } from "react-router-dom"
-import { Edit, History, Trophy } from "lucide-react"
+import { ChevronRight, Edit, History, Trophy } from "lucide-react"
 import blackLogo from "@/assets/logo-black.png"
+import LoyaltyBadge from "@/components/LoyaltyBadge"
 
 export default function ProfilePage() {
   const { userData } = useUserStore()
@@ -28,20 +29,30 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Profile header with avatar and name */}
-      <div className="flex flex-col items-center mb-6 mt-4">
-        {userData.avatar ? (
-          <img 
-            src={userData.avatar} 
-            alt={`${userData.first_name} ${userData.second_name}`} 
-            className="w-24 h-24 rounded-full object-cover mb-3"
-          />
-        ) : (
-          <div className="w-24 h-24 rounded-full bg-red-500 flex items-center justify-center text-white font-medium mb-3">
-            {userData.first_name.charAt(0)}
-            {userData.second_name.charAt(0)}
+      {/* Profile header with avatar, loyalty badge and name */}
+      <div className="flex flex-col items-center mb-6 mt-4 relative">
+        <div className="relative">
+          {userData.avatar ? (
+            <img 
+              src={userData.avatar} 
+              alt={`${userData.first_name} ${userData.second_name}`} 
+              className="w-24 h-24 rounded-full object-cover mb-3"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-red-500 flex items-center justify-center text-white font-medium mb-3">
+              {userData.first_name.charAt(0)}
+              {userData.second_name.charAt(0)}
+            </div>
+          )}
+          
+          {/* Loyalty badge positioned at the bottom right of avatar */}
+          <div className="absolute -bottom-1 -right-1">
+            <LoyaltyBadge 
+              loyaltyId={userData.loyalty_id} 
+              size="md"
+            />
           </div>
-        )}
+        </div>
         <h2 className="text-2xl font-bold">{userData.first_name} {userData.second_name}</h2>
         {userData.username && <p className="text-gray-500">@{userData.username}</p>}
       </div>
@@ -60,17 +71,22 @@ export default function ProfilePage() {
         </div>
         <Divider />
         
-        <div className="flex justify-between items-center py-2">
-          <span className="text-gray-500">Уровень<br/> лояльности</span>
-          <div 
-            className="flex items-center cursor-pointer text-gray-600 hover:text-green-600"
-            onClick={() => navigate("/loyalty")}
-          >
-            <span className="font-medium">{userData.loyalty.name}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+        {/* Loyalty level section with enhanced styling */}
+        <div 
+          className="flex items-center py-3 cursor-pointer"
+          onClick={() => navigate("/loyalty")}
+        >
+          <div className="flex-1">
+            <span className="text-gray-500">Уровень лояльности</span>
+            <div className="flex items-center mt-1">
+              <LoyaltyBadge 
+                loyaltyId={userData.loyalty_id} 
+                size="sm" 
+              />
+              <span className="font-medium ml-2">{userData.loyalty.name}</span>
+            </div>
           </div>
+          <ChevronRight className="text-gray-400 h-5 w-5" />
         </div>
         
         {userData.birth_date_ru && (
