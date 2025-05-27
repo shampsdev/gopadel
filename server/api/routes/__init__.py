@@ -8,6 +8,7 @@ from api.routes import (
     auth,
     registration,
     tournaments,
+    users,
     webhook,
 )
 from fastapi import APIRouter
@@ -17,6 +18,7 @@ api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(
     tournaments.router, prefix="/tournaments", tags=["tournaments"]
 )
+api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 api_router.include_router(admin_auth.router, prefix="/admin/auth", tags=["admin"])
 api_router.include_router(admin_users.router, prefix="/admin/users", tags=["admin"])
