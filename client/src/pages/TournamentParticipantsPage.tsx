@@ -111,7 +111,7 @@ export default function TournamentParticipantsPage() {
                     </p>
                   </div>
                   <div className="opacity-50">
-                    ранг: {registration.user.rank}
+                    Рейтинг: {registration.user.rank}
                   </div>
                 </div>
                 <Divider />

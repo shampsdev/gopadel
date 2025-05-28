@@ -155,7 +155,7 @@ export default function TournamentPage() {
               <FaStar className="text-gray-600" />
             </div>
             <span>
-              ранг от {tournament.rank_min} до {tournament.rank_max}
+              Рейтинг от {tournament.rank_min} до {tournament.rank_max}
             </span>
           </div>
 
@@ -209,7 +209,7 @@ export default function TournamentPage() {
           ) : !hasValidRank ? (
             <div className="mt-4 text-center">
               <p className="opacity-50 mb-2">
-                Ваш ранг не соответствует требованиям турнира
+                Ваш рейтинг не соответствует требованиям турнира
               </p>
             </div>
           ) : !hasAvailableSpots && !registration ? (

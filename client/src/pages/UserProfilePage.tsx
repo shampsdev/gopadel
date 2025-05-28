@@ -101,7 +101,7 @@ export default function UserProfilePage() {
         <Divider />
         
         <div className="flex justify-between py-2">
-          <span className="text-gray-500">Ранг</span>
+          <span className="text-gray-500">Рейтинг</span>
           <span className="font-medium">{user.rank}</span>
         </div>
         <Divider />

@@ -53,7 +53,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
             <FaStar className="text-gray-600" />
           </div>
           <span className="text-sm">
-            ранг от {tournament.rank_min} до {tournament.rank_max}
+            Рейтинг от {tournament.rank_min} до {tournament.rank_max}
           </span>
         </div>
       </div>

@@ -189,7 +189,7 @@ export default function EditProfilePage() {
         <InputField
           onChangeFunction={handleRankChange}
           onBlur={handleRankBlur}
-          title="Ранг"
+          title="Рейтинг"
           value={rank}
           maxLength={3}
           validation={validateRank}

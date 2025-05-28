@@ -108,19 +108,19 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
     }
 
     if (formData.rank_min < 0) {
-      newErrors.rank_min = 'Минимальный ранг не может быть отрицательным';
+      newErrors.rank_min = 'Минимальный рейтинг не может быть отрицательным';
     }
 
     if (formData.rank_max < formData.rank_min) {
-      newErrors.rank_max = 'Максимальный ранг должен быть не меньше минимального';
+      newErrors.rank_max = 'Максимальный рейтинг должен быть не меньше минимального';
     }
 
     if (formData.rank_min > 7) {
-      newErrors.rank_min = 'Минимальный ранг не может быть больше 7';
+      newErrors.rank_min = 'Минимальный рейтинг не может быть больше 7';
     }
 
     if (formData.rank_max > 7) {
-      newErrors.rank_max = 'Максимальный ранг не может быть больше 7';
+      newErrors.rank_max = 'Максимальный рейтинг не может быть больше 7';
     }
 
     if (formData.price < 0) {
@@ -229,7 +229,7 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-700 mb-1">Минимальный ранг</label>
+          <label className="block text-gray-700 mb-1">Минимальный рейтинг</label>
           <input
             type="number"
             name="rank_min"
@@ -244,7 +244,7 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-1">Максимальный ранг</label>
+          <label className="block text-gray-700 mb-1">Максимальный рейтинг</label>
           <input
             type="number"
             name="rank_max"

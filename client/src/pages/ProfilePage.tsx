@@ -66,7 +66,7 @@ export default function ProfilePage() {
         <Divider />
         
         <div className="flex justify-between py-2">
-          <span className="text-gray-500">Ранг</span>
+          <span className="text-gray-500">Рейтинг</span>
           <span className="font-medium">{userData.rank}</span>
         </div>
         <Divider />
