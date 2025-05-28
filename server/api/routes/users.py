@@ -5,7 +5,7 @@ from api.schemas.loyalty import LoyaltyResponse
 from api.schemas.user import UserBase
 from db.crud.loyalty import get_loyalties
 from db.crud.user import get_all_users
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 router = APIRouter()
 

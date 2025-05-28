@@ -11,7 +11,6 @@ from aiogram.types import (
     InlineKeyboardMarkup,
     Message,
 )
-from aiogram.utils.markdown import hlink
 
 router = Router()
 logger = logging.getLogger(__name__)

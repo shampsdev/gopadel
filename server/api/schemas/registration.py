@@ -15,5 +15,6 @@ class RegistrationBase(BaseModel):
     status: RegistrationStatus
     date: datetime
 
+
 class RegistrationResponse(RegistrationBase):
     payment: Optional[PaymentBase]

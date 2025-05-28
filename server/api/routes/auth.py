@@ -2,8 +2,7 @@ import re
 from aiohttp import ClientSession
 from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
 from typing import Optional
-import json
-from datetime import date, datetime
+from datetime import datetime
 from db.crud import user
 from api.deps import SessionDep, UserDep
 from api.schemas.user import UserBase, UserRegister, UserUpdate
@@ -28,7 +27,7 @@ async def register(
     city: str = Form(...),
     birth_date: Optional[str] = Form(None),
     avatar: Optional[UploadFile] = File(None),
-    telegram_photo_url: Optional[str] = Form(None)
+    telegram_photo_url: Optional[str] = Form(None),
 ):
     if current_user.is_registered:
         raise HTTPException(status_code=400, detail="User already registered")
@@ -40,26 +39,26 @@ async def register(
         bio=bio,
         rank=rank,
         city=city,
-        birth_date=datetime.strptime(birth_date, "%Y-%m-%d").date() if birth_date else None
+        birth_date=datetime.strptime(birth_date, "%Y-%m-%d").date()
+        if birth_date
+        else None,
     )
 
     # Handle profile picture upload if provided
     avatar_url = None
-    
+
     # If avatar file is uploaded, process it
     if avatar:
         storage = Storage()
         avatar_content = await avatar.read()
         avatar_url = storage.save_image_by_bytes(
-            avatar_content,
-            f"profile/{current_user.id}"
+            avatar_content, f"profile/{current_user.id}"
         )
     # If Telegram photo URL is provided, store it
     elif telegram_photo_url:
         storage = Storage()
         avatar_url = storage.save_image_by_url(
-            telegram_photo_url,
-            f"profile/{current_user.id}"
+            telegram_photo_url, f"profile/{current_user.id}"
         )
 
     updated_user = user.register_user(db, current_user, register_data, avatar_url)
@@ -77,7 +76,7 @@ async def update_me(
     city: Optional[str] = Form(None),
     birth_date: Optional[str] = Form(None),
     avatar: Optional[UploadFile] = File(None),
-    telegram_photo_url: Optional[str] = Form(None)
+    telegram_photo_url: Optional[str] = Form(None),
 ):
     # Convert form data to UserUpdate model
     update_data = UserUpdate(
@@ -86,26 +85,26 @@ async def update_me(
         bio=bio,
         rank=rank,
         city=city,
-        birth_date=datetime.strptime(birth_date, "%Y-%m-%d").date() if birth_date else None
+        birth_date=datetime.strptime(birth_date, "%Y-%m-%d").date()
+        if birth_date
+        else None,
     )
 
     # Handle profile picture upload if provided
     avatar_url = None
-    
+
     # If avatar file is uploaded, process it
     if avatar:
         storage = Storage()
         avatar_content = await avatar.read()
         avatar_url = storage.save_image_by_bytes(
-            avatar_content,
-            f"profile/{current_user.id}"
+            avatar_content, f"profile/{current_user.id}"
         )
     # If Telegram photo URL is provided, store it
     elif telegram_photo_url:
         storage = Storage()
         avatar_url = storage.save_image_by_url(
-            telegram_photo_url,
-            f"profile/{current_user.id}"
+            telegram_photo_url, f"profile/{current_user.id}"
         )
 
     updated_user = user.update_user(db, current_user, update_data, avatar_url)
@@ -113,13 +112,10 @@ async def update_me(
 
 
 @router.get("/bio")
-async def get_bio(
-    username: str = Query()
-):
+async def get_bio(username: str = Query()):
     async with ClientSession() as session:
         async with session.get(f"https://t.me/{username}") as response:
             text = await response.text()
             print(text)
             bio = re.search(r'<div class="tgme_page_description.*">(.*?)</div>', text)
             return {"bio": (str(bio.group(1)) if bio else "")}
-

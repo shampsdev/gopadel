@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict
 
 from db import Base
 from sqlalchemy import JSON, SmallInteger, String, Text

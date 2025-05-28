@@ -86,9 +86,11 @@ def get_tournament_with_participants_by_id(
         db.query(Tournament)
         .filter(Tournament.id == tournament_id)
         .options(
-            joinedload(Tournament.registrations.and_(
-                Registration.status == RegistrationStatus.ACTIVE
-            )).joinedload(Registration.user)
+            joinedload(
+                Tournament.registrations.and_(
+                    Registration.status == RegistrationStatus.ACTIVE
+                )
+            ).joinedload(Registration.user)
         )
         .first()
     )

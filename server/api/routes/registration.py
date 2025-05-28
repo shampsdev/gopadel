@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException
 
 from api.deps import SessionDep, UserDep
 from api.schemas.registration import RegistrationResponse
-from config import settings
 from db.crud import tournament as tournament_crud, registration as registration_crud
 from uuid import UUID
 
@@ -30,7 +29,13 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
     price = round(tournament.price * (1 - discount / 100))
     is_free = price == 0
 
-    reserved_users = len([r for r in tournament.registrations if r.status in (RegistrationStatus.ACTIVE, RegistrationStatus.PENDING)])
+    reserved_users = len(
+        [
+            r
+            for r in tournament.registrations
+            if r.status in (RegistrationStatus.ACTIVE, RegistrationStatus.PENDING)
+        ]
+    )
     if reserved_users >= tournament.max_users:
         raise HTTPException(status_code=400, detail="Tournament is full")
 
@@ -68,7 +73,6 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
             RegistrationStatus.ACTIVE if is_free else RegistrationStatus.PENDING,
         )
 
-
     return registration
 
 
@@ -81,6 +85,8 @@ async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep
         raise HTTPException(status_code=404, detail="Registration not found")
     if registration.status != RegistrationStatus.ACTIVE:
         raise HTTPException(status_code=400, detail="Registration is not active")
-    registration_crud.update_registration_status(db, registration.id, RegistrationStatus.CANCELED_BY_USER)
+    registration_crud.update_registration_status(
+        db, registration.id, RegistrationStatus.CANCELED_BY_USER
+    )
     await notify_waitlist(bot, db, tournament_id)
     return registration

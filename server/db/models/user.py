@@ -3,7 +3,16 @@ from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 import uuid
 
-from sqlalchemy import BigInteger, Boolean, String, Float, Date, Integer, ForeignKey, Text
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    String,
+    Float,
+    Date,
+    Integer,
+    ForeignKey,
+    Text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db import Base

@@ -17,7 +17,7 @@ def get_or_create_user(db: Session, tg_id: int, username: str | None = None):
         first_name="",
         second_name="",
         bio="",
-        avatar='',
+        avatar="",
         rank=0,
         city="",
         birth_date=None,
@@ -29,7 +29,9 @@ def get_or_create_user(db: Session, tg_id: int, username: str | None = None):
     return user
 
 
-def register_user(db: Session, user: User, register_data: UserRegister, avatar: Optional[str] = None) -> User:
+def register_user(
+    db: Session, user: User, register_data: UserRegister, avatar: Optional[str] = None
+) -> User:
     """Update user data during registration"""
     user.first_name = register_data.first_name
     user.second_name = register_data.second_name
@@ -38,7 +40,7 @@ def register_user(db: Session, user: User, register_data: UserRegister, avatar: 
     user.city = register_data.city
     user.rank = register_data.rank
     user.is_registered = True
-    
+
     if avatar:
         user.avatar = avatar
 
@@ -47,7 +49,9 @@ def register_user(db: Session, user: User, register_data: UserRegister, avatar: 
     return user
 
 
-def update_user(db: Session, user: User, update_data: UserUpdate, avatar: Optional[str] = None) -> User:
+def update_user(
+    db: Session, user: User, update_data: UserUpdate, avatar: Optional[str] = None
+) -> User:
     """Update user data"""
     if update_data.first_name:
         user.first_name = update_data.first_name
@@ -61,7 +65,7 @@ def update_user(db: Session, user: User, update_data: UserUpdate, avatar: Option
         user.city = update_data.city
     if update_data.rank is not None:
         user.rank = update_data.rank
-    
+
     if avatar:
         user.avatar = avatar
 

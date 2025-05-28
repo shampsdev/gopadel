@@ -97,7 +97,7 @@ def create_widget_payment(
     discount: int,
 ) -> Payment:
     final_price = round(tournament.price * (1 - discount / 100))
-    
+
     """
     Create a payment for widget integration using YooKassa
 
@@ -148,7 +148,9 @@ def create_widget_payment(
         date=datetime.now(ZoneInfo("Europe/Moscow")),
         amount=final_price,
         payment_link="",  # Widget doesn't use payment_link
-        confirmation_token=yoo_payment.confirmation.confirmation_token if yoo_payment.confirmation else "",
+        confirmation_token=yoo_payment.confirmation.confirmation_token
+        if yoo_payment.confirmation
+        else "",
         status=yoo_payment.status,
     )
 
