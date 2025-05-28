@@ -151,7 +151,7 @@ export default function TournamentPage() {
               <FaStar className="text-gray-600" />
             </div>
             <span>
-              Рейтинг: {getRatingRangeDescription(tournament.rank_min, tournament.rank_max)}
+              {getRatingRangeDescription(tournament.rank_min, tournament.rank_max)}
             </span>
           </div>
 

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import React, { useEffect, useState } from "react"
+import { useParams, useNavigate } from "react-router-dom"
 
 import { Tournament } from "@/types/tournament"
 import { Registration } from "@/types/registration"
@@ -14,6 +14,17 @@ export default function TournamentParticipantsPage() {
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [registrations, setRegistrations] = useState<Registration[]>([])
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
+
+  // Function to truncate name if it's longer than 15 characters
+  const truncateName = (name: string, maxLength: number = 15) => {
+    return name.length > maxLength ? name.substring(0, maxLength) + "..." : name
+  }
+
+  // Function to navigate to user profile
+  const goToUserProfile = (userId: string) => {
+    navigate(`/people/${userId}`)
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,39 +95,44 @@ export default function TournamentParticipantsPage() {
         ) : (
           <div className="flex flex-col gap-2">
             <Divider />
-            {registrations.map((registration) => (
-              <>
-                <div
-                  key={registration.user.id}
-                  className="flex justify-between items-center"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-                      {registration.user.avatar ? (
-                        <img
-                          src={registration.user.avatar}
-                          alt={`${registration.user.first_name} ${registration.user.second_name}`}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-500">
-                          {registration.user.first_name.charAt(0)}
-                          {registration.user.second_name.charAt(0)}
-                        </div>
-                      )}
+            {registrations.map((registration) => {
+              // Combine first and last name
+              const fullName = `${registration.user.first_name} ${registration.user.second_name}`;
+              const displayName = truncateName(fullName);
+              
+              return (
+                <React.Fragment key={registration.user.id}>
+                  <div
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => goToUserProfile(registration.user.id)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                        {registration.user.avatar ? (
+                          <img
+                            src={registration.user.avatar}
+                            alt={fullName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-500">
+                            {registration.user.first_name.charAt(0)}
+                            {registration.user.second_name.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-center font-medium">
+                        {displayName}
+                      </p>
                     </div>
-                    <p className="text-center font-medium">
-                      {registration.user.second_name}{" "}
-                      {registration.user.first_name}
-                    </p>
+                    <div className="opacity-50">
+                      {getRatingWord(registration.user.rank)}
+                    </div>
                   </div>
-                  <div className="opacity-50">
-                    Рейтинг: {getRatingWord(registration.user.rank)}
-                  </div>
-                </div>
-                <Divider />
-              </>
-            ))}
+                  <Divider />
+                </React.Fragment>
+              );
+            })}
           </div>
         )}
       </div>

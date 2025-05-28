@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useRef } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { IoIosArrowForward } from "react-icons/io"
 import { Registration } from "@/types/registration"
 import "./TournamentParticipants.css"
-import { Spinner } from "./ui/Spinner"
 
 type TournamentParticipantsProps = {
   tournamentId: string
@@ -21,6 +20,18 @@ export default function TournamentParticipants({
   const [showLeftShadow, setShowLeftShadow] = useState(false)
   const [showRightShadow, setShowRightShadow] = useState(true)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+
+  // Function to truncate name if it's longer than 15 characters
+  const truncateName = (name: string, maxLength: number = 15) => {
+    return name.length > maxLength ? name.substring(0, maxLength) + "..." : name
+  }
+
+  // Function to navigate to user profile
+  const goToUserProfile = (userId: string, event: React.MouseEvent) => {
+    event.stopPropagation()
+    navigate(`/people/${userId}`)
+  }
 
   useEffect(() => {
     const checkScroll = () => {
@@ -68,32 +79,36 @@ export default function TournamentParticipants({
         >
           <div className="flex space-x-4 min-w-max py-2 scroll-smooth">
             {displayRegistrations.length > 0 ? (
-              displayRegistrations.map((registration) => (
-                <div
-                  key={registration.user?.id}
-                  className="flex flex-col items-center"
-                >
-                  <div className="w-14 h-14 rounded-full overflow-hidden mb-1 bg-gray-200">
-                    {registration.user?.avatar ? (
-                      <img
-                        src={registration.user.avatar}
-                        alt={registration.user.first_name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-500">
-                        {registration.user.first_name.charAt(0)}
-                        {registration.user.second_name.charAt(0)}
-                      </div>
-                    )}
+              displayRegistrations.map((registration) => {
+                // Combine first and last name
+                const fullName = `${registration.user.first_name} ${registration.user.second_name}`;
+                
+                return (
+                  <div
+                    key={registration.user?.id}
+                    className="flex flex-col items-center cursor-pointer"
+                    onClick={(e) => goToUserProfile(registration.user.id, e)}
+                  >
+                    <div className="w-16 h-16 rounded-full overflow-hidden mb-1 bg-gray-200 flex-shrink-0">
+                      {registration.user?.avatar ? (
+                        <img
+                          src={registration.user.avatar}
+                          alt={fullName}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-500">
+                          {registration.user.first_name.charAt(0)}
+                          {registration.user.second_name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-center text-xs">
+                      {truncateName(fullName)}
+                    </p>
                   </div>
-                  <p className="text-center text-xs">
-                    {registration.user?.second_name}
-                    <br />
-                    {registration.user?.first_name}
-                  </p>
-                </div>
-              ))
+                );
+              })
             ) : (
               <span className="text-center text-sm opacity-50">
                 На этот турнир пока никто не зарегистрировался

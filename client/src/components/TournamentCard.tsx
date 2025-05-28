@@ -66,7 +66,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
             <FaStar className="text-gray-600" />
           </div>
           <span className="text-sm">
-            Рейтинг: {getRatingRangeDescription(tournament.rank_min, tournament.rank_max)}
+            {getRatingRangeDescription(tournament.rank_min, tournament.rank_max)}
           </span>
         </div>
       </div>
