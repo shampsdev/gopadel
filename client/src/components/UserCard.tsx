@@ -1,5 +1,6 @@
 import { User } from "@/types/user";
 import { ChevronRight } from "lucide-react";
+import LoyaltyBadge from "@/components/LoyaltyBadge";
 
 interface UserCardProps {
   user: User;
@@ -12,7 +13,7 @@ export default function UserCard({ user, onClick }: UserCardProps) {
       className="bg-white rounded-lg shadow-sm p-4 mb-3 flex items-center cursor-pointer"
       onClick={onClick}
     >
-      <div className="flex-shrink-0 mr-4">
+      <div className="flex-shrink-0 mr-4 relative">
         {user.avatar ? (
           <img 
             src={user.avatar} 
@@ -25,13 +26,20 @@ export default function UserCard({ user, onClick }: UserCardProps) {
             {user.second_name.charAt(0)}
           </div>
         )}
+        
+        {/* Loyalty badge */}
+        <div className="absolute -bottom-1 -right-1">
+          <LoyaltyBadge 
+            loyaltyId={user.loyalty_id} 
+            size="sm"
+          />
+        </div>
       </div>
       
       <div className="flex-1">
         <h3 className="text-xl font-medium">{user.first_name} {user.second_name}</h3>
-        <div className="flex flex-col text-gray-500 text-sm">
+        <div className="flex items-center text-gray-500 text-sm">
           <span>{user.city}</span>
-          <span>Описание профиля</span>
         </div>
       </div>
       

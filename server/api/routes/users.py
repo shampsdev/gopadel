@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/",
+    "",
     response_model=List[UserBase],
     description="Get all users. Requires authentication.",
     responses={401: {"description": "Not authenticated"}},

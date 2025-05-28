@@ -8,6 +8,7 @@ import Divider from "@/components/ui/Divider"
 import { MessageCircle } from "lucide-react"
 import { openTelegramLink } from "@telegram-apps/sdk-react"
 import GreenButton from "@/components/ui/GreenButton"
+import LoyaltyBadge from "@/components/LoyaltyBadge"
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>()
@@ -65,19 +66,29 @@ export default function UserProfilePage() {
     <div className="p-4 bg-white min-h-screen pb-20">
       <Header />
 
-      <div className="flex flex-col items-center mb-6 mt-4">
-        {user.avatar ? (
-          <img 
-            src={user.avatar} 
-            alt={`${user.first_name} ${user.second_name}`} 
-            className="w-24 h-24 rounded-full object-cover mb-3"
-          />
-        ) : (
-          <div className="w-24 h-24 rounded-full bg-red-500 flex items-center justify-center text-white font-medium mb-3">
-            {user.first_name.charAt(0)}
-            {user.second_name.charAt(0)}
+      <div className="flex flex-col items-center mb-6 mt-4 relative">
+        <div className="relative">
+          {user.avatar ? (
+            <img 
+              src={user.avatar} 
+              alt={`${user.first_name} ${user.second_name}`} 
+              className="w-24 h-24 rounded-full object-cover mb-3"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-red-500 flex items-center justify-center text-white font-medium mb-3">
+              {user.first_name.charAt(0)}
+              {user.second_name.charAt(0)}
+            </div>
+          )}
+          
+          {/* Loyalty badge positioned at the bottom right of avatar */}
+          <div className="absolute -bottom-1 -right-1">
+            <LoyaltyBadge 
+              loyaltyId={user.loyalty_id} 
+              size="md"
+            />
           </div>
-        )}
+        </div>
         <h2 className="text-2xl font-bold">{user.first_name} {user.second_name}</h2>
         {user.username && <p className="text-gray-500">@{user.username}</p>}
       </div>
@@ -95,12 +106,20 @@ export default function UserProfilePage() {
         </div>
         <Divider />
         
-        <div className="flex justify-between py-2">
-          <span className="text-gray-500">Уровень лояльности</span>
-          <span className="font-medium">
-            {user.loyalty.name}
-            {user.loyalty.discount > 0 && ` (скидка ${user.loyalty.discount}%)`}
-          </span>
+        <div className="flex items-center py-3">
+          <div className="flex-1">
+            <span className="text-gray-500">Уровень лояльности</span>
+            <div className="flex items-center mt-1">
+              <LoyaltyBadge 
+                loyaltyId={user.loyalty_id} 
+                size="sm" 
+              />
+              <span className="font-medium ml-2">
+                {user.loyalty.name}
+                {user.loyalty.discount > 0 && ` (${user.loyalty.discount}%)`}
+              </span>
+            </div>
+          </div>
         </div>
         
         {user.birth_date_ru && (
