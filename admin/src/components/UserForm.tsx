@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { User, Loyalty } from '../shared/types';
+import RatingSelector from './RatingSelector';
 
 interface UserFormProps {
   user: User;
@@ -130,18 +131,13 @@ const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
       </div>
 
       <div>
-        <label className="block text-gray-700 mb-1">Рейтинг</label>
-        <input
-          type="number"
+        <RatingSelector
           name="rank"
-          step="0.1"
-          min="0"
-          max="7"
-          value={formData.rank === undefined ? '' : formData.rank}
+          label="Рейтинг"
+          value={formData.rank}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded ${errors.rank ? 'border-red-500' : 'border-gray-300'}`}
+          error={errors.rank}
         />
-        {errors.rank && <p className="text-red-500 text-sm mt-1">{errors.rank}</p>}
       </div>
 
       <div>

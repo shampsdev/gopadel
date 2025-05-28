@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { ChevronRight, Edit, History, Trophy } from "lucide-react"
 import blackLogo from "@/assets/logo-black.png"
 import LoyaltyBadge from "@/components/LoyaltyBadge"
+import { getRatingWord } from "@/utils/ratingUtils"
 
 export default function ProfilePage() {
   const { userData } = useUserStore()
@@ -67,7 +68,7 @@ export default function ProfilePage() {
         
         <div className="flex justify-between py-2">
           <span className="text-gray-500">Рейтинг</span>
-          <span className="font-medium">{userData.rank}</span>
+          <span className="font-medium">{getRatingWord(userData.rank)}</span>
         </div>
         <Divider />
         
@@ -101,7 +102,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Statistics card */}
-      <div className="bg-gray-50 rounded-lg p-4 mb-6">
+      {/* <div className="bg-gray-50 rounded-lg p-4 mb-6">
         <h3 className="font-semibold mb-2">Статистика</h3>
         <div className="flex justify-center">
           <div className="bg-white rounded p-3 text-center w-36">
@@ -112,7 +113,7 @@ export default function ProfilePage() {
             <div className="text-xs text-gray-500">Турниров</div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Action buttons */}
       <div className="flex flex-col gap-3 mt-auto">

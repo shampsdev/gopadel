@@ -1,4 +1,5 @@
 import type { User } from '../shared/types';
+import { getRatingWord } from '../utils/ratingUtils';
 
 interface UserListProps {
   users: User[];
@@ -54,7 +55,7 @@ const UserList = ({ users, selectedId, onSelect, currentPage, totalPages, onPage
                   <div className="mt-1 flex flex-col text-xs text-gray-500">
                     <span>ID: {user.telegram_id}</span>
                     <span>Город: {user.city || 'Не указан'}</span>
-                    <span>Рейтинг: {user.rank.toFixed(1)}</span>
+                    <span>Рейтинг: {getRatingWord(user.rank)}</span>
                     <span>
                       Лояльность: {user.loyalty ? (
                         <span className="px-1 py-0.5 bg-yellow-50 text-yellow-800 rounded-sm">

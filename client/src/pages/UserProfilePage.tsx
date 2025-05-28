@@ -9,6 +9,7 @@ import { MessageCircle } from "lucide-react"
 import { openTelegramLink } from "@telegram-apps/sdk-react"
 import GreenButton from "@/components/ui/GreenButton"
 import LoyaltyBadge from "@/components/LoyaltyBadge"
+import { getRatingWord } from "@/utils/ratingUtils"
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>()
@@ -102,7 +103,7 @@ export default function UserProfilePage() {
         
         <div className="flex justify-between py-2">
           <span className="text-gray-500">Рейтинг</span>
-          <span className="font-medium">{user.rank}</span>
+          <span className="font-medium">{getRatingWord(user.rank)}</span>
         </div>
         <Divider />
         

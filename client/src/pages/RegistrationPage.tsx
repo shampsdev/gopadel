@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from "react"
-import { initData, openPopup, popup, showPopup } from "@telegram-apps/sdk-react"
+import { useEffect, useState } from "react"
+import { initData, showPopup } from "@telegram-apps/sdk-react"
 import InputField from "@/components/InputField"
 import SimpleCitySelector from "@/components/SimpleCitySelector"
 import { isValidDateFormat, formatDateForBackend } from "@/utils/date"
@@ -9,6 +9,7 @@ import useAuth from "@/hooks/useAuth"
 import useUserStore from "@/stores/userStore"
 import GreenButton from "@/components/ui/GreenButton"
 import HeaderEditAvatar from "@/components/HeaderEditAvatar"
+import RatingSelector from "@/components/RatingSelector"
 import {
   addAvatarToFormData,
   handleAvatarFileChange,
@@ -66,45 +67,7 @@ export default function RegistrationPage() {
   }, [previewUrl])
 
   const handleRankChange = (value: string) => {
-    const sanitizedValue = value.replace(/[^\d.]/g, "")
-
-    const parts = sanitizedValue.split(".")
-    const formattedValue =
-      parts.length > 1
-        ? `${parts[0]}.${parts.slice(1).join("")}`
-        : sanitizedValue
-
-    if (parts.length > 1 && parts[1].length > 2) {
-      return
-    }
-
-    const numValue = parseFloat(formattedValue)
-    if (!isNaN(numValue)) {
-      if (numValue > 7.0) {
-        setRank("7.0")
-        return
-      }
-
-      if (numValue < 1.0) {
-        setRank("1.0")
-        return
-      }
-    }
-
-    setRank(formattedValue)
-  }
-
-  const handleRankBlur = () => {
-    if (rank) {
-      const value = parseFloat(rank)
-      if (!isNaN(value) && value >= 1.0 && value <= 7.0) {
-        if (!rank.includes(".")) {
-          setRank(`${rank}.0`)
-        } else if (rank.endsWith(".")) {
-          setRank(`${rank}0`)
-        }
-      }
-    }
+    setRank(value);
   }
 
   const handleFileChange = (file: File | null) => {
@@ -149,11 +112,11 @@ export default function RegistrationPage() {
         },
       })
       checkAuth()
-    } catch (err: any) {
+    } catch (err: unknown) {
       showPopup({
         title: "Ошибка регистрации",
         message:
-          err.response?.data?.message || "Произошла ошибка при отправке данных",
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Произошла ошибка при отправке данных",
         buttons: [{ id: "ok", type: "ok" }],
       })
       console.error(err)
@@ -185,14 +148,10 @@ export default function RegistrationPage() {
           maxLength={100}
         />
 
-        <InputField
-          onChangeFunction={handleRankChange}
-          onBlur={handleRankBlur}
+        <RatingSelector
+          onChange={handleRankChange}
           title="Рейтинг"
           value={rank}
-          maxLength={3}
-          validation={validateRank}
-          placeholder="1.0 - 7.0"
         />
 
         <SimpleCitySelector value={city} onChange={setCity} title="Город" />

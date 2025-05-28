@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { userService } from '../services/user';
 import type { User } from '../shared/types';
+import { getRatingWord } from '../utils/ratingUtils';
 
 interface UserAssociationModalProps {
   adminId: string;
@@ -123,7 +124,7 @@ const UserAssociationModal = ({
                             <span>ID: {user.telegram_id}</span>
                           )}
                         </div>
-                        <div className="text-sm text-gray-500">{user.city}, рейтинг: {user.rank}</div>
+                        <div className="text-sm text-gray-500">{user.city}, рейтинг: {getRatingWord(user.rank)}</div>
                       </div>
                     </div>
                   </div>

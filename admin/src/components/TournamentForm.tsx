@@ -3,6 +3,8 @@ import type { Tournament, User } from '../shared/types';
 import { userService } from '../services/user';
 import { useUser } from '../context/UserContext';
 import { adminService } from '../services/admin';
+import { getRatingRangeDescription } from '../utils/ratingUtils';
+import RatingSelector from './RatingSelector';
 
 interface TournamentFormProps {
   tournament?: Tournament;
@@ -228,35 +230,27 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-gray-700 mb-1">Минимальный рейтинг</label>
-          <input
-            type="number"
-            name="rank_min"
-            min="0"
-            max="7"
-            step="0.1"
-            value={formData.rank_min === undefined ? '' : formData.rank_min}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded ${errors.rank_min ? 'border-red-500' : 'border-gray-300'}`}
-          />
-          {errors.rank_min && <p className="text-red-500 text-sm mt-1">{errors.rank_min}</p>}
-        </div>
+        <RatingSelector
+          name="rank_min"
+          label="Минимальный рейтинг"
+          value={formData.rank_min}
+          onChange={handleChange}
+          error={errors.rank_min}
+        />
 
-        <div>
-          <label className="block text-gray-700 mb-1">Максимальный рейтинг</label>
-          <input
-            type="number"
-            name="rank_max"
-            min="0"
-            max="7"
-            step="0.1"
-            value={formData.rank_max === undefined ? '' : formData.rank_max}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded ${errors.rank_max ? 'border-red-500' : 'border-gray-300'}`}
-          />
-          {errors.rank_max && <p className="text-red-500 text-sm mt-1">{errors.rank_max}</p>}
-        </div>
+        <RatingSelector
+          name="rank_max"
+          label="Максимальный рейтинг"
+          value={formData.rank_max}
+          onChange={handleChange}
+          error={errors.rank_max}
+        />
+      </div>
+
+      <div>
+        <p className="text-sm text-gray-600 mb-2">
+          Диапазон рейтинга: {getRatingRangeDescription(formData.rank_min ?? 0, formData.rank_max ?? 0)}
+        </p>
       </div>
 
       <div>

@@ -4,14 +4,13 @@ import {
   FaCalendarAlt,
   FaMapMarkerAlt,
   FaStar,
-  FaRubleSign,
   FaUsers,
 } from "react-icons/fa"
 import { formatMoscowTime } from "@/utils/formatDate"
-import { formatPrice } from "@/utils/formatPrice"
 import PriceWithDiscount from "./PriceWithDiscount"
-import useAuth from "@/hooks/useAuth"
 import useUserStore from "@/stores/userStore"
+import { getRatingRangeDescription } from "@/utils/ratingUtils"
+
 type TournamentCardProps = {
   tournament: Tournament
 }
@@ -53,7 +52,7 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
             <FaStar className="text-gray-600" />
           </div>
           <span className="text-sm">
-            Рейтинг от {tournament.rank_min} до {tournament.rank_max}
+            Рейтинг: {getRatingRangeDescription(tournament.rank_min, tournament.rank_max)}
           </span>
         </div>
       </div>

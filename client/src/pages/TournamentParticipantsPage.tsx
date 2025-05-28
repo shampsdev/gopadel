@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useParams } from "react-router-dom"
 
 import { Tournament } from "@/types/tournament"
 import { Registration } from "@/types/registration"
 import { getTournament, getTournamentParticipants } from "@/api/api"
 import Header from "@/components/Header"
-import { IoIosArrowBack } from "react-icons/io"
 import { Spinner } from "@/components/ui/Spinner"
 import { Divider } from "@telegram-apps/telegram-ui"
+import { getRatingWord } from "@/utils/ratingUtils"
 
 export default function TournamentParticipantsPage() {
   const { id } = useParams<{ id: string }>()
@@ -111,7 +111,7 @@ export default function TournamentParticipantsPage() {
                     </p>
                   </div>
                   <div className="opacity-50">
-                    Рейтинг: {registration.user.rank}
+                    Рейтинг: {getRatingWord(registration.user.rank)}
                   </div>
                 </div>
                 <Divider />

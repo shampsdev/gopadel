@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import {
   deleteRegistration,
   getTournament,
@@ -7,8 +7,6 @@ import {
 } from "@/api/api"
 import { Tournament } from "@/types/tournament"
 import Header from "@/components/Header"
-import { format } from "date-fns"
-import { ru } from "date-fns/locale"
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
@@ -21,22 +19,19 @@ import ParticipateButton from "@/components/ParticipateButton"
 import Divider from "@/components/ui/Divider"
 import { Spinner } from "@/components/ui/Spinner"
 import useUserStore from "@/stores/userStore"
-import { formatPrice } from "@/utils/formatPrice"
 import { formatDateAndTime } from "@/utils/formatDate"
 import { Registration } from "@/types/registration"
 import { RegistrationStatus } from "@/types/registration"
 import GreenButton from "@/components/ui/GreenButton"
 import PriceWithDiscount from "@/components/PriceWithDiscount"
 import { openTelegramLink } from "@telegram-apps/sdk-react"
+import { getRatingRangeDescription } from "@/utils/ratingUtils"
 
 export default function TournamentPage() {
   const { id } = useParams<{ id: string }>()
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [registration, setRegistration] = useState<Registration | null>(null)
   const [loading, setLoading] = useState(true)
-  const [waitlistStatus, setWaitlistStatus] = useState<
-    "none" | "available" | "inWaitlist"
-  >("none")
   const { userData } = useUserStore()
 
   const fetchTournament = async () => {
@@ -51,19 +46,9 @@ export default function TournamentPage() {
       if (userData?.id) {
         const registrationData = await getTournamentRegistration(id)
         setRegistration(registrationData)
-
-        // Set waitlist status based on registration status if available
-        if (registrationData?.status === RegistrationStatus.PENDING) {
-          setWaitlistStatus("inWaitlist")
-        } else if (data.current_users >= data.max_users) {
-          setWaitlistStatus("available")
-        } else {
-          setWaitlistStatus("none")
-        }
       } else {
         // If no user data, reset registration state
         setRegistration(null)
-        setWaitlistStatus("none")
       }
     } catch (error) {
       console.error("Error fetching tournament:", error)
@@ -155,7 +140,7 @@ export default function TournamentPage() {
               <FaStar className="text-gray-600" />
             </div>
             <span>
-              Рейтинг от {tournament.rank_min} до {tournament.rank_max}
+              Рейтинг: {getRatingRangeDescription(tournament.rank_min, tournament.rank_max)}
             </span>
           </div>
 
