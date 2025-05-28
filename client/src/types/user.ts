@@ -7,6 +7,8 @@ export type UserBase = {
   first_name: string
   second_name: string
   avatar: string | null
+  username: string | null
+  rank: number
 }
 
 export interface User {

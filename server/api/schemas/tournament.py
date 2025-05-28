@@ -1,13 +1,11 @@
-from zoneinfo import ZoneInfo
-from pydantic import BaseModel, computed_field
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
-
-from db.models.registration import RegistrationStatus
-
+from zoneinfo import ZoneInfo
 
 from api.schemas.registration import RegistrationBase, RegistrationResponse
+from db.models.registration import RegistrationStatus
+from pydantic import BaseModel, computed_field
 
 
 class UserBase(BaseModel):
@@ -16,6 +14,7 @@ class UserBase(BaseModel):
     second_name: str
     avatar: Optional[str] = None
     rank: float
+    username: Optional[str] = None
 
 
 class ParticipantResponse(BaseModel):
@@ -48,7 +47,8 @@ class TournamentResponse(TournamentBase):
         return len(
             list(
                 filter(
-                    lambda x: x.status in [RegistrationStatus.ACTIVE, RegistrationStatus.PENDING],
+                    lambda x: x.status
+                    in [RegistrationStatus.ACTIVE, RegistrationStatus.PENDING],
                     self.registrations,
                 )
             )

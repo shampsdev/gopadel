@@ -13,6 +13,7 @@ import {
   FaStar,
   FaUsers,
   FaClock,
+  FaTelegramPlane,
 } from "react-icons/fa"
 import TournamentParticipants from "@/components/TournamentParticipants"
 import ParticipateButton from "@/components/ParticipateButton"
@@ -108,9 +109,19 @@ export default function TournamentPage() {
       <div className="w-full max-w-md mx-auto flex flex-col flex-1">
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">{tournament.name}</h1>
-          <p className="text-gray-700">
-            Организатор: {tournament.organizator.first_name}
-          </p>
+          <div className="flex justify-between items-center">
+            <p className="text-gray-700">
+              Организатор: {tournament.organizator.first_name}
+            </p>
+            {tournament.organizator.username && (
+              <button
+                className="flex items-center text-blue-500 gap-1 hover:text-blue-700 transition-colors"
+                onClick={() => openTelegramLink(`https://t.me/${tournament.organizator.username}`)}
+              >
+                <FaTelegramPlane size={24} />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="space-y-4">
