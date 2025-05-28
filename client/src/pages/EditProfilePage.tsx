@@ -18,6 +18,7 @@ import {
 export default function EditProfilePage() {
   const [name, setName] = useState(initData.user()?.first_name ?? "")
   const [secondName, setSecondName] = useState(initData.user()?.last_name ?? "")
+  const [bio, setBio] = useState("")
   const [rank, setRank] = useState("")
   const [city, setCity] = useState("")
   const [birthDate, setBirthDate] = useState("")
@@ -33,6 +34,7 @@ export default function EditProfilePage() {
   useEffect(() => {
     setName(userData?.first_name ?? "")
     setSecondName(userData?.second_name ?? "")
+    setBio(userData?.bio ?? "")
     setRank(userData?.rank.toString() ?? "")
     setCity(userData?.city ?? "")
     setBirthDate(userData?.birth_date_ru ?? "")
@@ -69,7 +71,7 @@ export default function EditProfilePage() {
     (birthDate === "" || isValidDateFormat(birthDate))
 
   const handleRankChange = (value: string) => {
-    setRank(value);
+    setRank(value)
   }
 
   const handleFileChange = (file: File | null) => {
@@ -90,6 +92,7 @@ export default function EditProfilePage() {
       const formData = new FormData()
       formData.append("first_name", name)
       formData.append("second_name", secondName)
+      formData.append("bio", bio)
       formData.append("rank", rank.toString())
       formData.append("city", city)
 
@@ -119,7 +122,8 @@ export default function EditProfilePage() {
       showPopup({
         title: "Ошибка",
         message:
-          (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Произошла ошибка при отправке данных",
+          (err as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || "Произошла ошибка при отправке данных",
         buttons: [{ id: "ok", type: "ok" }],
       })
       console.error(err)
@@ -147,6 +151,14 @@ export default function EditProfilePage() {
           title="Фамилия"
           value={secondName}
           maxLength={100}
+        />
+
+        <InputField
+          onChangeFunction={setBio}
+          title="О себе"
+          value={bio}
+          maxLength={500}
+          optional={true}
         />
 
         <RatingSelector

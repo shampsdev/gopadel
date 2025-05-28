@@ -16,6 +16,7 @@ def get_or_create_user(db: Session, tg_id: int, username: str | None = None):
         is_registered=False,
         first_name="",
         second_name="",
+        bio="",
         avatar='',
         rank=0,
         city="",
@@ -32,6 +33,7 @@ def register_user(db: Session, user: User, register_data: UserRegister, avatar: 
     """Update user data during registration"""
     user.first_name = register_data.first_name
     user.second_name = register_data.second_name
+    user.bio = register_data.bio
     user.birth_date = register_data.birth_date
     user.city = register_data.city
     user.rank = register_data.rank
@@ -51,6 +53,8 @@ def update_user(db: Session, user: User, update_data: UserUpdate, avatar: Option
         user.first_name = update_data.first_name
     if update_data.second_name:
         user.second_name = update_data.second_name
+    if update_data.bio is not None:
+        user.bio = update_data.bio
     if update_data.birth_date:
         user.birth_date = update_data.birth_date
     if update_data.city:

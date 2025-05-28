@@ -70,9 +70,9 @@ export default function UserProfilePage() {
       <div className="flex flex-col items-center mb-6 mt-4 relative">
         <div className="relative">
           {user.avatar ? (
-            <img 
-              src={user.avatar} 
-              alt={`${user.first_name} ${user.second_name}`} 
+            <img
+              src={user.avatar}
+              alt={`${user.first_name} ${user.second_name}`}
               className="w-24 h-24 rounded-full object-cover mb-3"
             />
           ) : (
@@ -81,16 +81,15 @@ export default function UserProfilePage() {
               {user.second_name.charAt(0)}
             </div>
           )}
-          
+
           {/* Loyalty badge positioned at the bottom right of avatar */}
           <div className="absolute -bottom-1 -right-1">
-            <LoyaltyBadge 
-              loyaltyId={user.loyalty_id} 
-              size="md"
-            />
+            <LoyaltyBadge loyaltyId={user.loyalty_id} size="md" />
           </div>
         </div>
-        <h2 className="text-2xl font-bold">{user.first_name} {user.second_name}</h2>
+        <h2 className="text-2xl font-bold">
+          {user.first_name} {user.second_name}
+        </h2>
         {user.username && <p className="text-gray-500">@{user.username}</p>}
       </div>
 
@@ -100,21 +99,23 @@ export default function UserProfilePage() {
           <span className="font-medium">{user.city}</span>
         </div>
         <Divider />
-        
+
         <div className="flex justify-between py-2">
           <span className="text-gray-500">Рейтинг</span>
           <span className="font-medium">{getRatingWord(user.rank)}</span>
         </div>
         <Divider />
-        
+        <div className="flex justify-between py-2 gap-4">
+          <span className="text-gray-500 text-nowrap">О себе</span>
+          <span className="font-medium">{user.bio}</span>
+        </div>
+        <Divider />
+
         <div className="flex items-center py-3">
           <div className="flex-1">
             <span className="text-gray-500">Уровень лояльности</span>
             <div className="flex items-center mt-1">
-              <LoyaltyBadge 
-                loyaltyId={user.loyalty_id} 
-                size="sm" 
-              />
+              <LoyaltyBadge loyaltyId={user.loyalty_id} size="sm" />
               <span className="font-medium ml-2">
                 {user.loyalty.name}
                 {user.loyalty.discount > 0 && ` (${user.loyalty.discount}%)`}
@@ -122,7 +123,7 @@ export default function UserProfilePage() {
             </div>
           </div>
         </div>
-        
+
         {user.birth_date_ru && (
           <>
             <Divider />
@@ -135,10 +136,7 @@ export default function UserProfilePage() {
       </div>
 
       {user.username && (
-        <GreenButton 
-          onClick={handleMessage}
-          className="w-full"
-        >
+        <GreenButton onClick={handleMessage} className="w-full">
           <div className="flex items-center justify-center gap-2">
             <MessageCircle size={20} />
             Написать сообщение
@@ -147,4 +145,4 @@ export default function UserProfilePage() {
       )}
     </div>
   )
-} 
+}

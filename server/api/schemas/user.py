@@ -15,6 +15,7 @@ class UserBase(BaseModel):
     username: str | None
     first_name: str
     second_name: str
+    bio: str = ""
     avatar: Optional[str] = None
     rank: float
     city: str
@@ -29,6 +30,7 @@ class UserBase(BaseModel):
 class UserRegister(BaseModel):
     first_name: str
     second_name: str
+    bio: str = ""
     rank: float
     city: str
     birth_date: Optional[date] = None
@@ -37,6 +39,7 @@ class UserRegister(BaseModel):
 class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     second_name: Optional[str] = None
+    bio: Optional[str] = None
     rank: Optional[float] = None
     city: Optional[str] = None
     birth_date: Optional[date] = None

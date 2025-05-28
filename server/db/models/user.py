@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 import uuid
 
-from sqlalchemy import BigInteger, Boolean, String, Float, Date, Integer, ForeignKey
+from sqlalchemy import BigInteger, Boolean, String, Float, Date, Integer, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db import Base
@@ -25,6 +25,7 @@ class User(Base):
     )
     first_name: Mapped[str] = mapped_column(String(255), nullable=False)
     second_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    bio: Mapped[str] = mapped_column(Text, nullable=False, default="")
     avatar: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     rank: Mapped[float] = mapped_column(Float, nullable=False)
     city: Mapped[str] = mapped_column(String(255), nullable=False)

@@ -6,6 +6,7 @@ export type UserBase = {
   id: string // UUID in TypeScript is represented as string
   first_name: string
   second_name: string
+  bio: string
   avatar: string | null
   username: string | null
   rank: number
@@ -17,6 +18,7 @@ export interface User {
   username: string | null
   first_name: string
   second_name: string
+  bio: string
   rank: number
   city: string
   birth_date: string | null
