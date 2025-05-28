@@ -24,6 +24,7 @@ class Payment(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
     payment_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    confirmation_token: Mapped[str] = mapped_column(String(255), nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
     payment_link: Mapped[str] = mapped_column(String(255), nullable=False)

@@ -89,3 +89,71 @@ def create_invoice(
     db.refresh(payment)
 
     return payment
+
+
+def create_widget_payment(
+    db: Session,
+    tournament: Tournament,
+    discount: int,
+) -> Payment:
+    final_price = round(tournament.price * (1 - discount / 100))
+    
+    """
+    Create a payment for widget integration using YooKassa
+
+    Args:
+        db: Database session
+        tournament: Tournament object
+        discount: Discount percentage
+        
+    Returns:
+        Payment object from database with payment details
+    """
+    # Create payment data for widget
+    payment_data = {
+        "amount": {"value": f"{final_price}.00", "currency": "RUB"},
+        "capture": True,
+        "description": f"GoPadel Tournament {tournament.name}",
+        "confirmation": {
+            "type": "embedded",
+        },
+    }
+
+    # Add receipt
+    payment_data["receipt"] = {
+        "customer": {"email": "TODO@aa.aa"},
+        "items": [
+            {
+                "description": "GoPadel Tournament",
+                "payment_subject": "commodity",
+                "amount": {
+                    "value": f"{final_price}.00",
+                    "currency": "RUB",
+                },
+                "vat_code": 1,
+                "quantity": 1,
+                "measure": "piece",
+                "payment_mode": "full_payment",
+            }
+        ],
+    }
+
+    # Create payment in YooKassa
+    yoo_payment = YooKassaPayment.create(payment_data, uuid4())
+
+    # Create payment record in database
+    payment = Payment(
+        id=uuid4(),
+        payment_id=yoo_payment.id,
+        date=datetime.now(ZoneInfo("Europe/Moscow")),
+        amount=final_price,
+        payment_link="",  # Widget doesn't use payment_link
+        confirmation_token=yoo_payment.confirmation.confirmation_token if yoo_payment.confirmation else "",
+        status=yoo_payment.status,
+    )
+
+    db.add(payment)
+    db.commit()
+    db.refresh(payment)
+
+    return payment

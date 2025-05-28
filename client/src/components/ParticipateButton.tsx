@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import GreenButton from "@/components/ui/GreenButton"
+import PaymentWidget from "@/components/PaymentWidget"
 import { registerForTournament } from "@/api/api"
 import { backButton } from "@telegram-apps/sdk-react"
 import { Registration, RegistrationStatus } from "@/types/registration"
@@ -18,18 +19,29 @@ export default function ParticipateButton({
   callback,
 }: ParticipateButtonProps) {
   const [loading, setLoading] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
+  const [currentRegistration, setCurrentRegistration] =
+    useState<Registration | null>(registration)
   const navigate = useNavigate()
 
   const handleParticipate = async () => {
     setLoading(true)
     backButton.hide()
     try {
-      const registration = await registerForTournament(tournamentId)
-      if (registration?.payment) {
-        window.location.href = registration.payment.payment_link
+      const newRegistration = await registerForTournament(tournamentId)
+      if (newRegistration) {
+        setCurrentRegistration(newRegistration)
+        if (
+          newRegistration.payment &&
+          newRegistration.status === RegistrationStatus.PENDING
+        ) {
+          setShowPayment(true)
+        } else {
+          // Free tournament or already active
+          callback?.()
+        }
       } else {
         console.error("Failed to register for tournament")
-        callback?.()
       }
     } catch (error) {
       console.error("Error participating in tournament:", error)
@@ -38,9 +50,52 @@ export default function ParticipateButton({
     }
   }
 
+  const handlePayClick = () => {
+    if (currentRegistration?.payment) {
+      setShowPayment(true)
+    }
+  }
+
+  const handlePaymentSuccess = () => {
+    setShowPayment(false)
+    callback?.()
+  }
+
+  const handlePaymentError = (error: any) => {
+    console.error("Payment failed:", error)
+    setShowPayment(false)
+  }
+
   const buttonText = () => {
-    if (registration?.status === RegistrationStatus.PENDING) return "Оплатить"
+    if (currentRegistration?.status === RegistrationStatus.PENDING)
+      return "Оплатить"
     return "Зарегистрироваться и оплатить"
+  }
+
+  // If we have a pending registration with payment, show payment option
+  if (
+    currentRegistration?.status === RegistrationStatus.PENDING &&
+    currentRegistration?.payment &&
+    !showPayment
+  ) {
+    return (
+      <GreenButton onClick={handlePayClick} className="w-full rounded-full">
+        Оплатить
+      </GreenButton>
+    )
+  }
+
+  if (showPayment && currentRegistration?.payment) {
+    return (
+      <div className="w-full space-y-4">
+        <PaymentWidget
+          confirmationToken={currentRegistration.payment.confirmation_token}
+          onSuccess={handlePaymentSuccess}
+          onError={handlePaymentError}
+          onClose={() => setShowPayment(false)}
+        />
+      </div>
+    )
   }
 
   return (

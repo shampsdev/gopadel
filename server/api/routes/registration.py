@@ -7,7 +7,7 @@ from db.crud import tournament as tournament_crud, registration as registration_
 from uuid import UUID
 
 from db.models.registration import RegistrationStatus
-from services.payments import create_invoice
+from services.payments import create_widget_payment
 from services.waitlist import notify_waitlist
 
 from bot.init_bot import bot
@@ -46,11 +46,10 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
                 db, registration.id, RegistrationStatus.PENDING
             )
     payment = (
-        create_invoice(
+        create_widget_payment(
             db,
             tournament,
             discount,
-            settings.FRONTEND_URL + "/tournament/" + str(tournament_id),
         )
         if not is_free
         else None

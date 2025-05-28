@@ -146,18 +146,18 @@ export const deleteRegistration = async (
 
 export const getUsers = async () => {
   try {
-    const response = await api.get("/users");
-    return response.data;
+    const response = await api.get("/users")
+    return response.data
   } catch (error) {
-    console.error("Error fetching users:", error);
-    return [];
+    console.error("Error fetching users:", error)
+    return []
   }
-};
+}
 
 export const getLoyaltyLevels = async (): Promise<LoyaltyDetails[]> => {
   try {
-    const response = await api.get<LoyaltyResponse[]>("/users/loyalty-levels");
-    
+    const response = await api.get<LoyaltyResponse[]>("/users/loyalty-levels")
+
     // Transform API response to match our LoyaltyDetails interface
     return response.data.map((loyalty: LoyaltyResponse) => ({
       id: loyalty.id,
@@ -167,10 +167,10 @@ export const getLoyaltyLevels = async (): Promise<LoyaltyDetails[]> => {
       // Extract text from requirements or provide default
       requirements: loyalty.requirements?.text || "Регистрация в приложении",
       // Extract benefits list or provide default empty list
-      benefits: loyalty.requirements?.benefits || []
-    }));
+      benefits: loyalty.requirements?.benefits || [],
+    }))
   } catch (error) {
-    console.error("Error fetching loyalty levels:", error);
-    return [];
+    console.error("Error fetching loyalty levels:", error)
+    return []
   }
-};
+}
