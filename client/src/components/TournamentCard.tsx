@@ -2,10 +2,12 @@ import React from "react"
 import { Tournament } from "@/types/tournament"
 import {
   FaCalendarAlt,
+  FaClock,
   FaMapMarkerAlt,
   FaStar,
   FaUsers,
   FaTelegramPlane,
+  FaInfoCircle,
 } from "react-icons/fa"
 import { formatMoscowTime } from "@/utils/formatDate"
 import PriceWithDiscount from "./PriceWithDiscount"
@@ -20,7 +22,8 @@ type TournamentCardProps = {
 export default function TournamentCard({ tournament }: TournamentCardProps) {
   const { userData } = useUserStore()
 
-  const formattedDate = formatMoscowTime(tournament.start_time)
+  const formattedStartDate = formatMoscowTime(tournament.start_time)
+  const formattedEndDate = tournament.end_time ? formatMoscowTime(tournament.end_time) : null
 
   return (
     <div className="w-full rounded-3xl border-2 border-gray-300 p-5 mb-3">
@@ -51,8 +54,17 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
           <div className="w-6 mr-2">
             <FaCalendarAlt className="text-gray-600" />
           </div>
-          <span className="text-sm">{formattedDate}</span>
+          <span className="text-sm">Начало: {formattedStartDate}</span>
         </div>
+
+        {formattedEndDate && (
+          <div className="flex items-center">
+            <div className="w-6 mr-2">
+              <FaClock className="text-gray-600" />
+            </div>
+            <span className="text-sm">Окончание: {formattedEndDate}</span>
+          </div>
+        )}
 
         <div className="flex items-center">
           <div className="w-6 mr-2">
@@ -70,6 +82,22 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
           </span>
         </div>
       </div>
+
+      {tournament.description && (
+        <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-start">
+            <div className="w-5 mr-2 mt-0.5">
+              <FaInfoCircle className="text-gray-600" />
+            </div>
+            <div>
+              <span className="text-sm font-medium text-gray-700">Описание:</span>
+              <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                {tournament.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex justify-between mt-4 pt-2 border-t border-gray-200">
         <div className="flex items-center">

@@ -25,18 +25,22 @@ class TournamentBase(BaseModel):
     id: UUID
     name: str
     start_time: datetime
+    end_time: Optional[datetime] = None
     price: int
     location: str
     rank_min: float
     rank_max: float
     max_users: int
+    description: Optional[str] = None
     organizator: UserBase
 
     @computed_field
     def is_finished(self) -> bool:
         now = datetime.now(ZoneInfo("Europe/Moscow"))
         naive_now = now.replace(tzinfo=None)
-        return self.start_time < naive_now
+        # If end_time is specified, use it; otherwise use start_time
+        finish_time = self.end_time if self.end_time else self.start_time
+        return finish_time < naive_now
 
 
 class TournamentResponse(TournamentBase):

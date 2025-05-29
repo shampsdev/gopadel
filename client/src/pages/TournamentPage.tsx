@@ -14,6 +14,7 @@ import {
   FaUsers,
   FaClock,
   FaTelegramPlane,
+  FaInfoCircle,
 } from "react-icons/fa"
 import TournamentParticipants from "@/components/TournamentParticipants"
 import ParticipateButton from "@/components/ParticipateButton"
@@ -92,6 +93,7 @@ export default function TournamentPage() {
   const { date: formattedDate, time: formattedTime } = formatDateAndTime(
     tournament.start_time
   )
+  const formattedEndTime = tournament.end_time ? formatDateAndTime(tournament.end_time) : null
 
   // Check if user meets rank requirements
   const hasValidRank =
@@ -129,15 +131,17 @@ export default function TournamentPage() {
             <div className="w-6 mr-2">
               <FaCalendarAlt className="text-gray-600" />
             </div>
-            <span>{formattedDate}</span>
+            <span>Начало: {formattedDate} в {formattedTime}</span>
           </div>
 
-          <div className="flex items-center">
-            <div className="w-6 mr-2">
-              <FaClock className="text-gray-600" />
+          {formattedEndTime && (
+            <div className="flex items-center">
+              <div className="w-6 mr-2">
+                <FaClock className="text-gray-600" />
+              </div>
+              <span>Окончание: {formattedEndTime.date} в {formattedEndTime.time}</span>
             </div>
-            <span>{formattedTime}</span>
-          </div>
+          )}
 
           <div className="flex items-center">
             <div className="w-6 mr-2">
@@ -170,6 +174,28 @@ export default function TournamentPage() {
             />
           </div>
         </div>
+
+        {tournament.description && (
+          <>
+            <div className="my-4">
+              <Divider />
+            </div>
+            
+            <div className="mb-4">
+              <div className="flex items-start">
+                <div className="w-6 mr-2 mt-0.5">
+                  <FaInfoCircle className="text-gray-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Описание турнира</h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {tournament.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="my-4">
           <Divider />
