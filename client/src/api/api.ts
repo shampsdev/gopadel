@@ -1,6 +1,6 @@
 import axios from "axios"
 import { API_URL } from "../shared/constants"
-import { User } from "@/types/user"
+import { User, PlayingPosition } from "@/types/user"
 import { Tournament } from "@/types/tournament"
 import { Registration, RegistrationWithTournament } from "@/types/registration"
 import { initDataRaw } from "@telegram-apps/sdk-react"
@@ -18,7 +18,14 @@ export const api = axios.create({
 export const getMe = async (): Promise<User | null> => {
   try {
     const response = await api.get<User>(`/auth/me`)
-    return response.data
+    const userData = response.data
+    
+    // Normalize playing_position to ensure it's always lowercase
+    if (userData.playing_position) {
+      userData.playing_position = userData.playing_position.toLowerCase() as PlayingPosition
+    }
+    
+    return userData
   } catch (error) {
     console.error("Ошибка при получении профиля текущего пользователя:", error)
     return null
@@ -147,7 +154,18 @@ export const deleteRegistration = async (
 export const getUsers = async () => {
   try {
     const response = await api.get("/users")
-    return response.data
+    const users = response.data
+    
+    // Normalize playing_position for all users
+    if (Array.isArray(users)) {
+      users.forEach((user: User) => {
+        if (user.playing_position) {
+          user.playing_position = user.playing_position.toLowerCase() as PlayingPosition
+        }
+      })
+    }
+    
+    return users
   } catch (error) {
     console.error("Error fetching users:", error)
     return []

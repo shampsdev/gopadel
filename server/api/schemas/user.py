@@ -1,7 +1,9 @@
 from datetime import date
-from pydantic import BaseModel
-from uuid import UUID
 from typing import Optional
+from uuid import UUID
+
+from db.models.user import PlayingPosition
+from pydantic import BaseModel
 
 
 class Loyalty(BaseModel):
@@ -21,6 +23,8 @@ class UserBase(BaseModel):
     city: str
     birth_date: date | None
     birth_date_ru: str | None
+    playing_position: Optional[PlayingPosition] = None
+    padel_profiles: Optional[str] = None
     loyalty_id: int
     loyalty: Loyalty
     is_registered: bool
@@ -34,6 +38,8 @@ class UserRegister(BaseModel):
     rank: float
     city: str
     birth_date: Optional[date] = None
+    playing_position: Optional[PlayingPosition] = None
+    padel_profiles: Optional[str] = None
 
 
 class UserUpdate(BaseModel):
@@ -43,3 +49,5 @@ class UserUpdate(BaseModel):
     rank: Optional[float] = None
     city: Optional[str] = None
     birth_date: Optional[date] = None
+    playing_position: Optional[PlayingPosition] = None
+    padel_profiles: Optional[str] = None

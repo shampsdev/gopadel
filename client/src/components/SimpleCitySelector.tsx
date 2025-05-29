@@ -72,7 +72,7 @@ const SimpleCitySelector: React.FC<SimpleCitySelectorProps> = ({
         </legend>
         <button
           type="button"
-          className="flex h-10 w-full items-center justify-between rounded-md bg-transparent px-3 pb-3 pt-1 text-sm focus:outline-none"
+          className="flex w-full items-center justify-between rounded-md bg-transparent pb-[12px] py-[3px] px-[16px] text-main focus:outline-none"
           onClick={handleToggleDropdown}
         >
           {value ? (

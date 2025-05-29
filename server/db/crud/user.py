@@ -39,6 +39,8 @@ def register_user(
     user.birth_date = register_data.birth_date
     user.city = register_data.city
     user.rank = register_data.rank
+    user.playing_position = register_data.playing_position
+    user.padel_profiles = register_data.padel_profiles
     user.is_registered = True
 
     if avatar:
@@ -65,6 +67,9 @@ def update_user(
         user.city = update_data.city
     if update_data.rank is not None:
         user.rank = update_data.rank
+
+    user.playing_position = update_data.playing_position
+    user.padel_profiles = update_data.padel_profiles
 
     if avatar:
         user.avatar = avatar

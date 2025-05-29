@@ -10,8 +10,9 @@ import useUserStore from "@/stores/userStore"
 import GreenButton from "@/components/ui/GreenButton"
 import HeaderEditAvatar from "@/components/HeaderEditAvatar"
 import RatingSelector from "@/components/RatingSelector"
+import PlayingPositionSelector from "@/components/PlayingPositionSelector"
+import { PlayingPosition } from "@/types/user"
 import {
-  addAvatarToFormData,
   handleAvatarFileChange,
 } from "@/utils/avatarUpload"
 
@@ -22,6 +23,8 @@ export default function RegistrationPage() {
   const [rank, setRank] = useState("")
   const [city, setCity] = useState("")
   const [birthDate, setBirthDate] = useState("")
+  const [playingPosition, setPlayingPosition] = useState<PlayingPosition | null>(null)
+  const [padelProfiles, setPadelProfiles] = useState("")
   const [profilePicture, setProfilePicture] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -98,27 +101,29 @@ export default function RegistrationPage() {
     setIsSubmitting(true)
 
     try {
-      const formData = new FormData()
-      formData.append("first_name", name)
-      formData.append("second_name", secondName)
-      formData.append("bio", bio)
-      formData.append("rank", rank.toString())
-      formData.append("city", city)
-
-      if (birthDate) {
-        const formattedDate = formatDateForBackend(birthDate)
-        if (formattedDate) {
-          formData.append("birth_date", formattedDate)
-        }
+      // Prepare user data as JSON
+      const userData = {
+        first_name: name,
+        second_name: secondName,
+        bio: bio,
+        rank: parseFloat(rank),
+        city: city,
+        birth_date: birthDate ? formatDateForBackend(birthDate) : null,
+        playing_position: playingPosition ? playingPosition.toLowerCase() : null,
+        padel_profiles: padelProfiles || null,
       }
 
-      // Add avatar to form data
-      addAvatarToFormData(
-        formData,
-        profilePicture,
-        useTelegramPhoto,
-        initData.user()?.photo_url
-      )
+      console.log("Sending registration data:", userData)
+
+      const formData = new FormData()
+      formData.append("user_data", JSON.stringify(userData))
+
+      // Handle avatar upload
+      if (profilePicture) {
+        formData.append("avatar", profilePicture)
+      } else if (useTelegramPhoto && initData.user()?.photo_url) {
+        formData.append("telegram_photo_url", initData.user()?.photo_url || "")
+      }
 
       await api.post("/auth/register", formData, {
         headers: {
@@ -180,6 +185,25 @@ export default function RegistrationPage() {
         />
 
         <SimpleCitySelector value={city} onChange={setCity} title="Город" />
+
+        <PlayingPositionSelector
+          value={playingPosition}
+          onChange={setPlayingPosition}
+          title="В каком квадрате играете?"
+          optional={true}
+        />
+
+        <InputField
+          onChangeFunction={setPadelProfiles}
+          title="Профили по падел"
+          value={padelProfiles}
+          maxLength={500}
+          placeholder="Ссылки на профили из других рейтинговых платформ
+По одной на строку"
+          optional={true}
+          multiline={true}
+          rows={3}
+        />
 
         <InputField
           onChangeFunction={setBirthDate}

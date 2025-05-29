@@ -10,6 +10,8 @@ import { openTelegramLink } from "@telegram-apps/sdk-react"
 import GreenButton from "@/components/ui/GreenButton"
 import LoyaltyBadge from "@/components/LoyaltyBadge"
 import { getRatingWord } from "@/utils/ratingUtils"
+import { getPlayingPositionText } from "@/utils/playingPosition"
+import PadelProfilesList from "@/components/PadelProfilesList"
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>()
@@ -105,11 +107,28 @@ export default function UserProfilePage() {
           <span className="font-medium">{getRatingWord(user.rank)}</span>
         </div>
         <Divider />
+
+        <div className="flex justify-between py-2">
+          <span className="text-gray-500">Квадрат игры</span>
+          <span className="font-medium">{getPlayingPositionText(user.playing_position)}</span>
+        </div>
+        <Divider />
+
         <div className="flex justify-between py-2 gap-4">
           <span className="text-gray-500 text-nowrap">О себе</span>
           <span className="font-medium">{user.bio}</span>
         </div>
         <Divider />
+
+        {user.padel_profiles && (
+          <>
+            <div className="py-2">
+              <span className="text-gray-500 block mb-2">Профили по падел</span>
+              <PadelProfilesList profilesText={user.padel_profiles} />
+            </div>
+            <Divider />
+          </>
+        )}
 
         <div className="flex items-center py-3">
           <div className="flex-1">

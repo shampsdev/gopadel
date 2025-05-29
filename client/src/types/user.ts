@@ -2,6 +2,8 @@ import { Loyalty } from "@/types/loyalty"
 import { Registration } from "@/types/registration"
 import { Waitlist } from "@/types/waitlist"
 
+export type PlayingPosition = "right" | "left" | "both"
+
 export type UserBase = {
   id: string // UUID in TypeScript is represented as string
   first_name: string
@@ -10,6 +12,8 @@ export type UserBase = {
   avatar: string | null
   username: string | null
   rank: number
+  playing_position?: PlayingPosition | null
+  padel_profiles?: string | null
 }
 
 export interface User {
@@ -24,6 +28,8 @@ export interface User {
   birth_date: string | null
   birth_date_ru: string | null
   avatar: string | null
+  playing_position?: PlayingPosition | null
+  padel_profiles?: string | null
   loyalty_id: number
   is_registered: boolean
 

@@ -2,10 +2,12 @@ import Divider from "@/components/ui/Divider"
 import GreenButton from "@/components/ui/GreenButton"
 import useUserStore from "@/stores/userStore"
 import { useNavigate } from "react-router-dom"
-import { ChevronRight, Edit, History, Trophy } from "lucide-react"
+import { ChevronRight, Edit, History } from "lucide-react"
 import blackLogo from "@/assets/logo-black.png"
 import LoyaltyBadge from "@/components/LoyaltyBadge"
 import { getRatingWord } from "@/utils/ratingUtils"
+import { getPlayingPositionText } from "@/utils/playingPosition"
+import PadelProfilesList from "@/components/PadelProfilesList"
 
 export default function ProfilePage() {
   const { userData } = useUserStore()
@@ -71,6 +73,22 @@ export default function ProfilePage() {
           <span className="font-medium">{getRatingWord(userData.rank)}</span>
         </div>
         <Divider />
+
+        <div className="flex justify-between py-2">
+          <span className="text-gray-500">Квадрат игры</span>
+          <span className="font-medium">{getPlayingPositionText(userData.playing_position)}</span>
+        </div>
+        <Divider />
+
+        {userData.padel_profiles && (
+          <>
+            <div className="py-2">
+              <span className="text-gray-500 block mb-2">Профили по падел</span>
+              <PadelProfilesList profilesText={userData.padel_profiles} />
+            </div>
+            <Divider />
+          </>
+        )}
         
         {/* Loyalty level section with enhanced styling */}
         <div 

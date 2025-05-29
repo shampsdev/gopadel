@@ -1,27 +1,34 @@
+import enum
+import uuid
 from datetime import date
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID
-import uuid
 
+from db import Base
 from sqlalchemy import (
     BigInteger,
     Boolean,
-    String,
-    Float,
     Date,
-    Integer,
+    Enum,
+    Float,
     ForeignKey,
+    Integer,
+    String,
     Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from db import Base
-
 if TYPE_CHECKING:
     from db.models.loyalty import Loyalty
-    from db.models.tournament import Tournament
     from db.models.registration import Registration
+    from db.models.tournament import Tournament
     from db.models.waitlist import Waitlist
+
+
+class PlayingPosition(str, enum.Enum):
+    right = "right"  # В правом
+    left = "left"  # В левом
+    both = "both"  # В обоих
 
 
 class User(Base):
@@ -39,6 +46,10 @@ class User(Base):
     rank: Mapped[float] = mapped_column(Float, nullable=False)
     city: Mapped[str] = mapped_column(String(255), nullable=False)
     birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    playing_position: Mapped[Optional[PlayingPosition]] = mapped_column(
+        Enum(PlayingPosition), nullable=True
+    )
+    padel_profiles: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     loyalty_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("loyalties.id"), nullable=False
     )
