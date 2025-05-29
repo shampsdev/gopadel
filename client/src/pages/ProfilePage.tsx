@@ -22,7 +22,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="p-4 min-h-screen flex flex-col pb-20">
+    <div className="p-4 bg-white min-h-screen flex flex-col pb-20">
       <div>
         <div className="flex items-center">
           <img src={blackLogo} className="h-5" alt="" />

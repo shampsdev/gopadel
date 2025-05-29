@@ -35,7 +35,7 @@ export default function LoyaltyPage() {
 
   if (loading) {
     return (
-      <div className="p-4 min-h-screen flex flex-col pb-20">
+      <div className="p-4 bg-white min-h-screen flex flex-col pb-20">
         <div>
           <div className="flex items-center">
             <img src={blackLogo} className="h-5" alt="" />
@@ -54,7 +54,7 @@ export default function LoyaltyPage() {
   const activeDetails = loyaltyLevels.find(level => level.id === activeLevel) || loyaltyLevels[0]
 
   return (
-    <div className="p-4 min-h-screen flex flex-col pb-20">
+    <div className="p-4 bg-white min-h-screen flex flex-col pb-20">
       <div>
         <div className="flex items-center">
           <img src={blackLogo} className="h-5" alt="" />

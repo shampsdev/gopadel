@@ -146,7 +146,7 @@ export default function RegistrationPage() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 bg-white min-h-screen">
       <HeaderEditAvatar
         onFileChange={handleFileChange}
         previewUrl={previewUrl}

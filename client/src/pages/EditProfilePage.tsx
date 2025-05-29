@@ -140,7 +140,7 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="p-4 min-h-screen pb-20">
+    <div className="p-4 bg-white min-h-screen pb-20">
       <HeaderEditAvatar
         onFileChange={handleFileChange}
         previewUrl={previewUrl}
