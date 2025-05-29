@@ -5,10 +5,15 @@ import { getTournaments } from "@/api/api"
 import { Link } from "react-router-dom"
 import { Spinner } from "./ui/Spinner"
 
-export default function TournamentList() {
+interface TournamentListProps {
+  showAvailableFilter?: boolean
+  availableOnly?: boolean
+}
+
+export default function TournamentList({ showAvailableFilter = true, availableOnly = false }: TournamentListProps) {
   const [tournaments, setTournaments] = useState<Tournament[]>([])
   const [loading, setLoading] = useState(true)
-  const [availableOnly, setAvailableOnly] = useState(false)
+  const [availableOnlyState, setAvailableOnlyState] = useState(availableOnly)
   const [filteredTournaments, setFilteredTournaments] = useState<Tournament[]>(
     []
   )
@@ -17,7 +22,8 @@ export default function TournamentList() {
     const fetchTournaments = async () => {
       setLoading(true)
       try {
-        const data = await getTournaments(availableOnly)
+        const shouldFilter = showAvailableFilter ? availableOnlyState : availableOnly
+        const data = await getTournaments(shouldFilter)
         setTournaments(data)
         setFilteredTournaments(data)
       } catch (error) {
@@ -28,10 +34,14 @@ export default function TournamentList() {
     }
 
     fetchTournaments()
-  }, [availableOnly])
+  }, [availableOnlyState, showAvailableFilter, availableOnly])
 
   useEffect(() => {
-    if (!availableOnly) {
+    // If showAvailableFilter is false and availableOnly is true, always show filtered
+    // If showAvailableFilter is true, use the state value
+    const shouldShowFiltered = showAvailableFilter ? availableOnlyState : availableOnly
+    
+    if (!shouldShowFiltered) {
       setFilteredTournaments(tournaments)
     } else {
       const filtered = tournaments.filter(
@@ -39,38 +49,35 @@ export default function TournamentList() {
       )
       setFilteredTournaments(filtered)
     }
-  }, [availableOnly, tournaments])
+  }, [availableOnlyState, tournaments, showAvailableFilter, availableOnly])
 
-  // Example of how to mark unused variables with an underscore
-  // This is just an example for demonstration - not for actual implementation
-  const exampleFunction = (_unusedParam: string) => {
-    const _unusedVariable = "This won't trigger a warning"
-
-    // Variables that you actually use don't need the underscore
-    const usedVariable = "This is used"
-    console.log(usedVariable)
-  }
+  // Update state when prop changes
+  useEffect(() => {
+    setAvailableOnlyState(availableOnly)
+  }, [availableOnly])
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="mb-5 flex items-center justify-between">
-        <span className="text-gray-700 font-medium">Доступные мне</span>
-        <div
-          className="relative inline-block w-12 h-6 cursor-pointer"
-          onClick={() => setAvailableOnly(!availableOnly)}
-        >
+      {showAvailableFilter && (
+        <div className="mb-5 flex items-center justify-between">
+          <span className="text-gray-700 font-medium">Доступные мне</span>
           <div
-            className={`w-full h-full rounded-full transition-colors duration-200 ease-in-out ${
-              availableOnly ? "bg-green" : "bg-gray-300"
-            }`}
-          ></div>
-          <div
-            className={`absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${
-              availableOnly ? "translate-x-6" : ""
-            }`}
-          ></div>
+            className="relative inline-block w-12 h-6 cursor-pointer"
+            onClick={() => setAvailableOnlyState(!availableOnlyState)}
+          >
+            <div
+              className={`w-full h-full rounded-full transition-colors duration-200 ease-in-out ${
+                availableOnlyState ? "bg-green" : "bg-gray-300"
+              }`}
+            ></div>
+            <div
+              className={`absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${
+                availableOnlyState ? "translate-x-6" : ""
+              }`}
+            ></div>
+          </div>
         </div>
-      </div>
+      )}
 
       {loading ? (
         <div className="text-center py-4">

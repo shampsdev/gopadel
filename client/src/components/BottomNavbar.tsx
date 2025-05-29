@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { User, Users, Trophy } from "lucide-react";
+import { User, Users, Home } from "lucide-react";
 
 export default function BottomNavbar() {
   const location = useLocation();
@@ -19,19 +19,19 @@ export default function BottomNavbar() {
       </Link>
       
       <Link 
+        to="/" 
+        className={`flex flex-col items-center justify-center w-1/3 py-1 ${(location.pathname === '/' || isActive('/tournament')) ? 'text-green-600' : 'text-gray-600'}`}
+      >
+        <Home size={24} />
+        <span className="text-xs mt-1">Главная</span>
+      </Link>
+
+      <Link 
         to="/people" 
         className={`flex flex-col items-center justify-center w-1/3 py-1 ${isActive('/people') ? 'text-green-600' : 'text-gray-600'}`}
       >
         <Users size={24} />
         <span className="text-xs mt-1">Люди</span>
-      </Link>
-      
-      <Link 
-        to="/" 
-        className={`flex flex-col items-center justify-center w-1/3 py-1 ${(location.pathname === '/' || isActive('/tournament')) ? 'text-green-600' : 'text-gray-600'}`}
-      >
-        <Trophy size={24} />
-        <span className="text-xs mt-1">Турниры</span>
       </Link>
     </div>
   );
