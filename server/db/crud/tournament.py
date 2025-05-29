@@ -2,12 +2,12 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 from zoneinfo import ZoneInfo
+
+from db.models.registration import Registration, RegistrationStatus
+from db.models.tournament import Tournament
 from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
-
-from db.models.tournament import Tournament
-from db.models.registration import Registration, RegistrationStatus
 
 
 def create_tournament(
@@ -20,15 +20,19 @@ def create_tournament(
     rank_max: float,
     max_users: int,
     organizator_id: UUID,
+    end_time: Optional[datetime] = None,
+    description: Optional[str] = None,
 ) -> Tournament:
     tournament = Tournament(
         name=name,
         start_time=start_time,
+        end_time=end_time,
         price=price,
         location=location,
         rank_min=rank_min,
         rank_max=rank_max,
         max_users=max_users,
+        description=description,
         organizator_id=organizator_id,
     )
     db.add(tournament)
@@ -101,11 +105,13 @@ def update_tournament(
     tournament_id: UUID,
     name: Optional[str] = None,
     start_time: Optional[datetime] = None,
+    end_time: Optional[datetime] = None,
     price: Optional[int] = None,
     location: Optional[str] = None,
     rank_min: Optional[float] = None,
     rank_max: Optional[float] = None,
     max_users: Optional[int] = None,
+    description: Optional[str] = None,
     organizator_id: Optional[UUID] = None,
 ) -> Optional[Tournament]:
     tournament = db.query(Tournament).filter(Tournament.id == tournament_id).first()
@@ -116,6 +122,8 @@ def update_tournament(
         tournament.name = name
     if start_time:
         tournament.start_time = start_time
+    if end_time is not None:
+        tournament.end_time = end_time
     if price:
         tournament.price = price
     if location:
@@ -126,6 +134,8 @@ def update_tournament(
         tournament.rank_max = rank_max
     if max_users:
         tournament.max_users = max_users
+    if description is not None:
+        tournament.description = description
     if organizator_id:
         tournament.organizator_id = organizator_id
 

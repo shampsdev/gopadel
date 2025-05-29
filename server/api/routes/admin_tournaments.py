@@ -96,11 +96,13 @@ async def create_tournament_admin(
         db=db,
         name=tournament_data.name,
         start_time=tournament_data.start_time,
+        end_time=tournament_data.end_time,
         price=tournament_data.price,
         location=tournament_data.location,
         rank_min=tournament_data.rank_min,
         rank_max=tournament_data.rank_max,
         max_users=tournament_data.max_users,
+        description=tournament_data.description,
         organizator_id=organizator_id,
     )
     return tournament
@@ -129,11 +131,13 @@ async def update_tournament_admin(
         tournament_id=tournament_id,
         name=tournament_data.name,
         start_time=tournament_data.start_time,
+        end_time=tournament_data.end_time,
         price=tournament_data.price,
         location=tournament_data.location,
         rank_min=tournament_data.rank_min,
         rank_max=tournament_data.rank_max,
         max_users=tournament_data.max_users,
+        description=tournament_data.description,
         organizator_id=tournament_data.organizator_id,
     )
     if not tournament:

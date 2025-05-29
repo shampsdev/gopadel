@@ -57,9 +57,17 @@ const TournamentList = ({ tournaments, selectedId, onSelect, onDelete }: Tournam
                     {isPast && <span className="ml-2 text-xs text-gray-500 font-normal">(прошедший)</span>}
                   </h3>
                   <div className="mt-1 flex flex-col text-xs text-gray-500">
-                    <span>Дата: {formatDate(tournament.start_time)}</span>
+                    <span>Начало: {formatDate(tournament.start_time)}</span>
+                    {tournament.end_time && (
+                      <span>Окончание: {formatDate(tournament.end_time)}</span>
+                    )}
                     <span>Локация: {tournament.location}</span>
                     <span>Цена: {tournament.price} ₽</span>
+                    {tournament.description && (
+                      <span className="truncate" title={tournament.description}>
+                        Описание: {tournament.description}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <button 

@@ -14,11 +14,13 @@ interface TournamentFormProps {
 const defaultTournament: Tournament = {
   name: '',
   start_time: new Date().toISOString().slice(0, 16),
+  end_time: '',
   price: 0,
   location: '',
   rank_min: 0,
   rank_max: 5,
   max_users: 0,
+  description: '',
   organizator_id: ''
 };
 
@@ -35,7 +37,8 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       // Convert ISO string to local datetime-local format
       const formattedTournament = {
         ...tournament,
-        start_time: tournament.start_time.slice(0, 16) // Format for datetime-local input
+        start_time: tournament.start_time.slice(0, 16), // Format for datetime-local input
+        end_time: tournament.end_time ? tournament.end_time.slice(0, 16) : ''
       };
       setFormData(formattedTournament);
     } else {
@@ -133,7 +136,7 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     
     // Special handling for rank fields to enforce limits
@@ -174,7 +177,9 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
         rank_min: formData.rank_min ?? 0,
         rank_max: formData.rank_max ?? 0,
         max_users: formData.max_users ?? 0,
-        start_time: new Date(formData.start_time).toISOString()
+        start_time: new Date(formData.start_time).toISOString(),
+        end_time: formData.end_time ? new Date(formData.end_time).toISOString() : undefined,
+        description: formData.description || undefined
       };
       onSave(tournamentToSave);
     }
@@ -206,6 +211,17 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       </div>
 
       <div>
+        <label className="block text-gray-700 mb-1">Дата и время окончания (опционально)</label>
+        <input
+          type="datetime-local"
+          name="end_time"
+          value={formData.end_time || ''}
+          onChange={handleChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded"
+        />
+      </div>
+
+      <div>
         <label className="block text-gray-700 mb-1">Стоимость участия</label>
         <input
           type="number"
@@ -227,6 +243,18 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
           className={`w-full px-3 py-2 border rounded ${errors.location ? 'border-red-500' : 'border-gray-300'}`}
         />
         {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
+      </div>
+
+      <div>
+        <label className="block text-gray-700 mb-1">Описание (опционально)</label>
+        <textarea
+          name="description"
+          value={formData.description || ''}
+          onChange={handleChange}
+          rows={4}
+          placeholder="Описание турнира, что будет, особенности..."
+          className="w-full px-3 py-2 border border-gray-300 rounded resize-vertical"
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">

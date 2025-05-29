@@ -11,6 +11,8 @@ class UserUpdateByAdmin(BaseModel):
     birth_date: Optional[date] = None
     city: Optional[str] = None
     rank: Optional[float] = None
+    playing_position: Optional[str] = None
+    padel_profiles: Optional[str] = None
     is_registered: Optional[bool] = None
     loyalty_id: Optional[int] = None
     avatar: Optional[str] = None
@@ -27,6 +29,8 @@ class UserResponse(BaseModel):
     city: str
     birth_date: Optional[date] = None
     birth_date_ru: Optional[str] = None
+    playing_position: Optional[str] = None
+    padel_profiles: Optional[str] = None
     loyalty_id: int
     is_registered: bool
 

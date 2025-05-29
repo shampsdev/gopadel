@@ -19,6 +19,8 @@ const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
       birth_date: user.birth_date ? user.birth_date.split('T')[0] : undefined,
       city: user.city,
       rank: user.rank,
+      playing_position: user.playing_position,
+      padel_profiles: user.padel_profiles,
       loyalty_id: user.loyalty_id,
       is_registered: user.is_registered
     });
@@ -43,7 +45,7 @@ const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
     
     if (name === 'rank' && type === 'number' && value !== '') {
@@ -137,6 +139,33 @@ const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
           value={formData.rank}
           onChange={handleChange}
           error={errors.rank}
+        />
+      </div>
+
+      <div>
+        <label className="block text-gray-700 mb-1">Позиция игры</label>
+        <select
+          name="playing_position"
+          value={formData.playing_position || ''}
+          onChange={handleChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded"
+        >
+          <option value="">Не указано</option>
+          <option value="right">В правом</option>
+          <option value="left">В левом</option>
+          <option value="both">В обоих</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-gray-700 mb-1">Профили по падел</label>
+        <textarea
+          name="padel_profiles"
+          value={formData.padel_profiles || ''}
+          onChange={handleChange}
+          rows={3}
+          placeholder="Ссылки на профили (по одной на строку)"
+          className="w-full px-3 py-2 border border-gray-300 rounded resize-vertical"
         />
       </div>
 

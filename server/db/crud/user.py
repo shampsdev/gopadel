@@ -101,6 +101,20 @@ def update_user_by_admin(db: Session, user: User, update_data) -> User:
         user.city = update_data.city
     if update_data.rank is not None:
         user.rank = update_data.rank
+    if update_data.playing_position is not None:
+        # Handle playing position enum conversion
+        if isinstance(update_data.playing_position, str):
+            position_lower = update_data.playing_position.lower()
+            if position_lower in ["right", "left", "both"]:
+                from db.models.user import PlayingPosition
+
+                user.playing_position = getattr(PlayingPosition, position_lower)
+            else:
+                user.playing_position = None
+        else:
+            user.playing_position = update_data.playing_position
+    if update_data.padel_profiles is not None:
+        user.padel_profiles = update_data.padel_profiles
     if update_data.is_registered is not None:
         user.is_registered = update_data.is_registered
     if update_data.loyalty_id is not None:

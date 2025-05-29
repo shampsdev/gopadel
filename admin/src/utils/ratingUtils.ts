@@ -71,4 +71,22 @@ export const ratingLevels = [
   { label: "Upper Intermediate", value: 4.0, min: 3.5 },
   { label: "Advanced", value: 5.5, min: 4.5 },
   { label: "Pro", value: 6.5, min: 6.0 }
-]; 
+];
+
+/**
+ * Converts playing position to Russian text
+ * @param position Playing position value
+ * @returns String representation of the playing position in Russian
+ */
+export function getPlayingPositionText(position: string): string {
+  switch (position) {
+    case 'right':
+      return 'В правом';
+    case 'left':
+      return 'В левом';
+    case 'both':
+      return 'В обоих';
+    default:
+      return position;
+  }
+} 

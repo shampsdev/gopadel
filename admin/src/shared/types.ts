@@ -2,11 +2,13 @@ export interface Tournament {
   id?: number
   name: string
   start_time: string
+  end_time?: string
   price: number
   location: string
   rank_min: number
   rank_max: number
   max_users: number
+  description?: string
   organizator_id: string // UUID
 }
 
@@ -21,6 +23,8 @@ export interface User {
   city: string
   birth_date?: string
   birth_date_ru?: string
+  playing_position?: 'right' | 'left' | 'both'
+  padel_profiles?: string
   loyalty_id: number
   loyalty?: Loyalty
   is_registered: boolean

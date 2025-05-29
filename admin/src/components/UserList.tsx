@@ -1,5 +1,5 @@
 import type { User } from '../shared/types';
-import { getRatingWord } from '../utils/ratingUtils';
+import { getRatingWord, getPlayingPositionText } from '../utils/ratingUtils';
 
 interface UserListProps {
   users: User[];
@@ -56,6 +56,16 @@ const UserList = ({ users, selectedId, onSelect, currentPage, totalPages, onPage
                     <span>ID: {user.telegram_id}</span>
                     <span>Город: {user.city || 'Не указан'}</span>
                     <span>Рейтинг: {getRatingWord(user.rank)}</span>
+                    {user.playing_position && (
+                      <span>
+                        Позиция: {getPlayingPositionText(user.playing_position)}
+                      </span>
+                    )}
+                    {user.padel_profiles && (
+                      <span className="truncate" title={user.padel_profiles}>
+                        Профили: {user.padel_profiles}
+                      </span>
+                    )}
                     <span>
                       Лояльность: {user.loyalty ? (
                         <span className="px-1 py-0.5 bg-yellow-50 text-yellow-800 rounded-sm">
