@@ -169,6 +169,8 @@ export default function RegistrationPage() {
           value={bio}
           maxLength={500}
           optional={true}
+          multiline={true}
+          rows={4}
         />
 
         <RatingSelector

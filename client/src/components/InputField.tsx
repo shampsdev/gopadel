@@ -11,6 +11,8 @@ export interface InputFieldComponentProps {
   type?: "text" | "date"
   placeholder?: string
   optional?: boolean
+  multiline?: boolean
+  rows?: number
 }
 
 const InputField = (props: InputFieldComponentProps) => {
@@ -101,6 +103,19 @@ const InputField = (props: InputFieldComponentProps) => {
             maxLength={10}
             placeholder={props.placeholder || "дд.мм.гггг"}
             className="w-full text-main outline-none pb-[12px] py-[3px] px-[16px] bg-transparent"
+          />
+        ) : props.multiline ? (
+          <textarea
+            onBlur={props.onBlur}
+            onFocus={props.onFocus}
+            onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+              props.onChangeFunction(event.target.value)
+            }
+            value={props.value}
+            maxLength={props.maxLength}
+            placeholder={props.placeholder}
+            rows={props.rows || 4}
+            className="w-full text-main outline-none pb-[12px] py-[3px] px-[16px] bg-transparent resize-none"
           />
         ) : (
           <input
