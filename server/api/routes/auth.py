@@ -1,8 +1,10 @@
+import asyncio
+import logging
 import re
 from datetime import datetime
 from typing import Optional
 
-from aiohttp import ClientSession
+from aiohttp import ClientError, ClientSession, ClientTimeout
 from api.deps import SessionDep, UserDep
 from api.schemas.user import UserBase, UserRegister, UserUpdate
 from db.crud import user
@@ -11,6 +13,9 @@ from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 from services.storage import Storage
 
 router = APIRouter()
+
+# Configure logger for this module
+logger = logging.getLogger(__name__)
 
 
 @router.get("/me", response_model=UserBase)
@@ -163,9 +168,65 @@ async def update_me(
 
 @router.get("/bio")
 async def get_bio(username: str = Query()):
-    async with ClientSession() as session:
-        async with session.get(f"https://t.me/{username}") as response:
-            text = await response.text()
-            print(text)
-            bio = re.search(r'<div class="tgme_page_description.*">(.*?)</div>', text)
-            return {"bio": (str(bio.group(1)) if bio else "")}
+    """
+    Get user bio from Telegram profile page with error handling and retries.
+    """
+    max_retries = 3
+    retry_delay = 1.0
+    timeout = ClientTimeout(total=10)  # 10 seconds timeout
+
+    for attempt in range(max_retries):
+        try:
+            async with ClientSession(timeout=timeout) as session:
+                async with session.get(f"https://t.me/{username}") as response:
+                    if response.status != 200:
+                        logger.warning(f"HTTP {response.status} for user {username}")
+                        return {"bio": ""}
+
+                    text = await response.text()
+
+                    # Extract bio from HTML using regex
+                    bio_match = re.search(
+                        r'<div class="tgme_page_description.*?">(.*?)</div>',
+                        text,
+                        re.DOTALL,
+                    )
+                    if bio_match:
+                        bio_text = bio_match.group(1)
+                        # Clean up HTML tags and decode entities
+                        bio_text = re.sub(r"<[^>]+>", "", bio_text)  # Remove HTML tags
+                        bio_text = (
+                            bio_text.replace("&lt;", "<")
+                            .replace("&gt;", ">")
+                            .replace("&amp;", "&")
+                        )
+                        bio_text = bio_text.strip()
+                        logger.info(f"Successfully extracted bio for user {username}")
+                        return {"bio": bio_text}
+                    else:
+                        logger.info(f"No bio found for user {username}")
+                        return {"bio": ""}
+
+        except asyncio.TimeoutError:
+            logger.warning(
+                f"Timeout error for user {username}, attempt {attempt + 1}/{max_retries}"
+            )
+        except ClientError as e:
+            logger.warning(
+                f"Client error for user {username}, attempt {attempt + 1}/{max_retries}: {e}"
+            )
+        except Exception as e:
+            logger.error(
+                f"Unexpected error for user {username}, attempt {attempt + 1}/{max_retries}: {e}"
+            )
+
+        # If not the last attempt, wait before retrying
+        if attempt < max_retries - 1:
+            await asyncio.sleep(retry_delay)
+            retry_delay *= 2  # Exponential backoff
+
+    # All retries failed
+    logger.error(
+        f"Failed to fetch bio for user {username} after {max_retries} attempts"
+    )
+    return {"bio": ""}

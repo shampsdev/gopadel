@@ -31,7 +31,7 @@ export default function BottomNavbar() {
         className={`flex flex-col items-center justify-center w-1/3 py-1 ${isActive('/people') ? 'text-green-600' : 'text-gray-600'}`}
       >
         <Users size={24} />
-        <span className="text-xs mt-1">Люди</span>
+        <span className="text-xs mt-1">Игроки</span>
       </Link>
     </div>
   );
