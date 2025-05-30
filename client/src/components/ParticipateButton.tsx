@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import GreenButton from "@/components/ui/GreenButton"
 import PaymentWidget from "@/components/PaymentWidget"
 import { registerForTournament } from "@/api/api"
@@ -22,7 +21,6 @@ export default function ParticipateButton({
   const [showPayment, setShowPayment] = useState(false)
   const [currentRegistration, setCurrentRegistration] =
     useState<Registration | null>(registration)
-  const navigate = useNavigate()
 
   const handleParticipate = async () => {
     setLoading(true)
@@ -61,7 +59,7 @@ export default function ParticipateButton({
     callback?.()
   }
 
-  const handlePaymentError = (error: any) => {
+  const handlePaymentError = (error: unknown) => {
     console.error("Payment failed:", error)
     setShowPayment(false)
   }

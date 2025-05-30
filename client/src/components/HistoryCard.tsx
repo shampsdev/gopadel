@@ -1,52 +1,47 @@
-import React from "react"
-import { Tournament } from "@/types/tournament"
+import { RegistrationWithTournament, RegistrationStatus } from "@/types/registration"
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
-  FaStar,
-  FaRubleSign,
-  FaUsers,
 } from "react-icons/fa"
-import { formatMoscowTime } from "@/utils/formatDate"
-import { formatPrice } from "@/utils/formatPrice"
-import PriceWithDiscount from "./PriceWithDiscount"
-import useAuth from "@/hooks/useAuth"
-import useUserStore from "@/stores/userStore"
-import { RegistrationWithTournament } from "@/types/registration"
+import { formatDateAndTime } from "@/utils/formatDate"
 
-export default function TournamentCard({
-  registration,
-}: {
+interface HistoryCardProps {
   registration: RegistrationWithTournament
-}) {
-  const { userData } = useUserStore()
+}
 
-  const formattedDate = formatMoscowTime(registration.tournament.start_time)
+export default function HistoryCard({ registration }: HistoryCardProps) {
+  const tournament = registration.tournament
+
+  const { date, time } = formatDateAndTime(tournament.start_time)
 
   return (
-    <div className="w-full rounded-3xl border-2 border-gray-300 p-5 mb-3">
-      <div className="flex justify-between items-center">
-        <h3 className="font-semibold text-xl mb-1">
-          {registration.tournament.name}
-        </h3>
-        {registration.tournament.is_finished && (
-          <span className="text-sm opacity-50">Завершен</span>
-        )}
+    <div className="bg-white rounded-lg border p-4 mb-3">
+      <h3 className="font-semibold text-lg mb-2">{tournament.name}</h3>
+      
+      <div className="space-y-2 text-sm text-gray-600">
+        <div className="flex items-center">
+          <FaCalendarAlt className="mr-2" />
+          <span>{date} в {time}</span>
+        </div>
+        
+        <div className="flex items-center">
+          <FaMapMarkerAlt className="mr-2" />
+          <span>{tournament.location}</span>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center">
-          <div className="w-6 mr-2">
-            <FaCalendarAlt className="text-gray-600" />
-          </div>
-          <span className="text-sm">{formattedDate}</span>
-        </div>
-
-        <div className="flex items-center">
-          <div className="w-6 mr-2">
-            <FaMapMarkerAlt className="text-gray-600" />
-          </div>
-          <span className="text-sm">{registration.tournament.location}</span>
+      <div className="mt-3 pt-3 border-t border-gray-200">
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-500">Статус:</span>
+          <span className={`text-sm font-medium ${
+            registration.status === RegistrationStatus.ACTIVE ? 'text-green-600' : 
+            registration.status === RegistrationStatus.PENDING ? 'text-yellow-600' : 
+            'text-red-600'
+          }`}>
+            {registration.status === RegistrationStatus.ACTIVE ? 'Активная' :
+             registration.status === RegistrationStatus.PENDING ? 'В ожидании' :
+             'Отменена'}
+          </span>
         </div>
       </div>
     </div>

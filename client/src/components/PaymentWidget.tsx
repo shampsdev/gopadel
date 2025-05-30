@@ -1,15 +1,15 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useCallback } from "react"
 
 interface PaymentWidgetProps {
   confirmationToken: string
   onSuccess: () => void
-  onError: (error: any) => void
+  onError: (error: unknown) => void
   onClose: () => void
 }
 
 declare global {
   interface Window {
-    YooMoneyCheckoutWidget: any
+    YooMoneyCheckoutWidget: unknown
   }
 }
 
@@ -20,39 +20,26 @@ export default function PaymentWidget({
   onClose,
 }: PaymentWidgetProps) {
   const widgetRef = useRef<HTMLDivElement>(null)
-  const checkoutRef = useRef<any>(null)
+  const checkoutRef = useRef<unknown>(null)
 
-  useEffect(() => {
-    // Load YooKassa widget script if not loaded
-    if (!window.YooMoneyCheckoutWidget) {
-      const script = document.createElement("script")
-      script.src = "https://yookassa.ru/checkout-widget/v1/checkout-widget.js"
-      script.async = true
-      script.onload = () => {
-        initializeWidget()
-      }
-      document.head.appendChild(script)
-    } else {
-      initializeWidget()
-    }
-
-    return () => {
-      // Clean up widget if component unmounts
-      if (checkoutRef.current) {
-        try {
-          checkoutRef.current.destroy?.()
-        } catch (error) {
-          console.warn("Error destroying widget:", error)
-        }
-      }
-    }
-  }, [confirmationToken])
-
-  const initializeWidget = () => {
+  const initializeWidget = useCallback(() => {
     if (!widgetRef.current || !window.YooMoneyCheckoutWidget) return
 
     try {
-      const checkout = new window.YooMoneyCheckoutWidget({
+      const checkout = new (window.YooMoneyCheckoutWidget as unknown as new (config: {
+        confirmation_token: string
+        customization: {
+          modal: boolean
+          colors: {
+            control_primary: string
+          }
+        }
+        error_callback: (error: unknown) => void
+      }) => {
+        render: (elementId: string) => void
+        on: (event: string, callback: () => void) => void
+        destroy?: () => void
+      })({
         confirmation_token: confirmationToken,
         customization: {
           modal: true,
@@ -60,7 +47,7 @@ export default function PaymentWidget({
             control_primary: "#00b956", // Green color to match app theme
           },
         },
-        error_callback: function (error: any) {
+        error_callback: function (error: unknown) {
           console.error("Payment error:", error)
           onError(error)
         },
@@ -87,7 +74,34 @@ export default function PaymentWidget({
       console.error("Error initializing widget:", error)
       onError(error)
     }
-  }
+  }, [confirmationToken, onSuccess, onError, onClose])
+
+  useEffect(() => {
+    // Load YooKassa widget script if not loaded
+    if (!window.YooMoneyCheckoutWidget) {
+      const script = document.createElement("script")
+      script.src = "https://yookassa.ru/checkout-widget/v1/checkout-widget.js"
+      script.async = true
+      script.onload = () => {
+        initializeWidget()
+      }
+      document.head.appendChild(script)
+    } else {
+      initializeWidget()
+    }
+
+    return () => {
+      // Clean up widget if component unmounts
+      if (checkoutRef.current) {
+        try {
+          const checkout = checkoutRef.current as { destroy?: () => void }
+          checkout.destroy?.()
+        } catch (error) {
+          console.warn("Error destroying widget:", error)
+        }
+      }
+    }
+  }, [initializeWidget])
 
   return (
     <div className="w-full">

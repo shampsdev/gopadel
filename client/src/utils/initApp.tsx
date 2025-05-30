@@ -1,6 +1,5 @@
 import {
   backButton,
-  bindMiniAppCssVars,
   init,
   initData,
   miniApp,
