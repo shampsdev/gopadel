@@ -15,7 +15,8 @@ def create_tournament(
     name: str,
     start_time: datetime,
     price: int,
-    location: str,
+    club_id: UUID,
+    tournament_type: str,
     rank_min: float,
     rank_max: float,
     max_users: int,
@@ -28,7 +29,8 @@ def create_tournament(
         start_time=start_time,
         end_time=end_time,
         price=price,
-        location=location,
+        club_id=club_id,
+        tournament_type=tournament_type,
         rank_min=rank_min,
         rank_max=rank_max,
         max_users=max_users,
@@ -45,7 +47,7 @@ def get_tournaments(
     db: Session, user_rank: Optional[float] = None, available: Optional[bool] = None
 ) -> List[Tournament]:
     """Get all tournaments, optionally filtered by user rank if available=True"""
-    query = db.query(Tournament)
+    query = db.query(Tournament).options(joinedload(Tournament.club))
 
     if available and user_rank is not None:
         query = query.filter(
@@ -66,7 +68,10 @@ def get_tournaments_with_participants(
         db.query(Tournament)
         .order_by(Tournament.start_time.desc())
         .filter(Tournament.start_time > naive_now)
-        .options(joinedload(Tournament.registrations).joinedload(Registration.user))
+        .options(
+            joinedload(Tournament.registrations).joinedload(Registration.user),
+            joinedload(Tournament.club),
+        )
     )
 
     if available and user_rank is not None:
@@ -79,7 +84,12 @@ def get_tournaments_with_participants(
 
 def get_tournament_by_id(db: Session, tournament_id: UUID) -> Optional[Tournament]:
     """Get a specific tournament by ID"""
-    return db.query(Tournament).filter(Tournament.id == tournament_id).first()
+    return (
+        db.query(Tournament)
+        .options(joinedload(Tournament.club))
+        .filter(Tournament.id == tournament_id)
+        .first()
+    )
 
 
 def get_tournament_with_participants_by_id(
@@ -94,7 +104,8 @@ def get_tournament_with_participants_by_id(
                 Tournament.registrations.and_(
                     Registration.status == RegistrationStatus.ACTIVE
                 )
-            ).joinedload(Registration.user)
+            ).joinedload(Registration.user),
+            joinedload(Tournament.club),
         )
         .first()
     )
@@ -107,7 +118,8 @@ def update_tournament(
     start_time: Optional[datetime] = None,
     end_time: Optional[datetime] = None,
     price: Optional[int] = None,
-    location: Optional[str] = None,
+    club_id: Optional[UUID] = None,
+    tournament_type: Optional[str] = None,
     rank_min: Optional[float] = None,
     rank_max: Optional[float] = None,
     max_users: Optional[int] = None,
@@ -126,8 +138,10 @@ def update_tournament(
         tournament.end_time = end_time
     if price:
         tournament.price = price
-    if location:
-        tournament.location = location
+    if club_id:
+        tournament.club_id = club_id
+    if tournament_type:
+        tournament.tournament_type = tournament_type
     if rank_min is not None:
         tournament.rank_min = rank_min
     if rank_max is not None:

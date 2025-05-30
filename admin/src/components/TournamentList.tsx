@@ -61,7 +61,7 @@ const TournamentList = ({ tournaments, selectedId, onSelect, onDelete }: Tournam
                     {tournament.end_time && (
                       <span>Окончание: {formatDate(tournament.end_time)}</span>
                     )}
-                    <span>Локация: {tournament.location}</span>
+                    <span>Тип: {tournament.tournament_type}</span>
                     <span>Цена: {tournament.price} ₽</span>
                     {tournament.description && (
                       <span className="truncate" title={tournament.description}>

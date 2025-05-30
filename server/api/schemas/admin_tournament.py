@@ -10,7 +10,8 @@ class TournamentCreate(BaseModel):
     start_time: datetime
     end_time: Optional[datetime] = None
     price: int
-    location: str
+    club_id: UUID
+    tournament_type: str
     rank_min: float
     rank_max: float
     max_users: int
@@ -23,7 +24,8 @@ class TournamentUpdate(BaseModel):
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
     price: Optional[int] = None
-    location: Optional[str] = None
+    club_id: Optional[UUID] = None
+    tournament_type: Optional[str] = None
     rank_min: Optional[float] = None
     rank_max: Optional[float] = None
     max_users: Optional[int] = None
@@ -37,7 +39,8 @@ class AdminTournamentResponse(BaseModel):
     start_time: datetime
     end_time: Optional[datetime] = None
     price: int
-    location: str
+    club_id: UUID
+    tournament_type: str
     rank_min: float
     rank_max: float
     max_users: int

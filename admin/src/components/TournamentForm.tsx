@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import type { Tournament, User } from '../shared/types';
+import type { Tournament, User, Club } from '../shared/types';
 import { userService } from '../services/user';
+import { clubService } from '../services/club';
 import { useUser } from '../context/UserContext';
 import { adminService } from '../services/admin';
 import { getRatingRangeDescription } from '../utils/ratingUtils';
@@ -16,7 +17,8 @@ const defaultTournament: Tournament = {
   start_time: new Date().toISOString().slice(0, 16),
   end_time: '',
   price: 0,
-  location: '',
+  club_id: '',
+  tournament_type: '',
   rank_min: 0,
   rank_max: 5,
   max_users: 0,
@@ -26,11 +28,23 @@ const defaultTournament: Tournament = {
 
 const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
   const [formData, setFormData] = useState<Tournament>(tournament || defaultTournament);
-  const [errors, setErrors] = useState<Partial<Record<keyof Tournament, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof Tournament | 'club_id' | 'tournament_type', string>>>({});
   const [users, setUsers] = useState<User[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingClubs, setLoadingClubs] = useState(false);
   const { currentAdmin } = useUser();
   const [currentAdminUserId, setCurrentAdminUserId] = useState<string | null>(null);
+  
+  // New states for tournament type handling
+  const [isCustomType, setIsCustomType] = useState(false);
+  const [customTypeValue, setCustomTypeValue] = useState('');
+
+  const tournamentTypes = [
+    { value: 'Американо', label: 'Американо' },
+    { value: 'Мексиканка', label: 'Мексиканка' },
+    { value: 'Без типа', label: 'Без типа' },
+  ];
 
   useEffect(() => {
     if (tournament) {
@@ -41,6 +55,13 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
         end_time: tournament.end_time ? tournament.end_time.slice(0, 16) : ''
       };
       setFormData(formattedTournament);
+      
+      // Check if tournament type is custom (not in predefined list)
+      const isPredefined = tournamentTypes.some(type => type.value === tournament.tournament_type);
+      if (!isPredefined && tournament.tournament_type) {
+        setIsCustomType(true);
+        setCustomTypeValue(tournament.tournament_type);
+      }
     } else {
       // For new tournaments, set the default values
       setFormData({
@@ -97,15 +118,34 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    const fetchClubs = async () => {
+      setLoadingClubs(true);
+      try {
+        const clubsData = await clubService.getAll();
+        setClubs(clubsData);
+      } catch {
+        setClubs([]);
+      } finally {
+        setLoadingClubs(false);
+      }
+    };
+    fetchClubs();
+  }, []);
+
   const validate = (): boolean => {
-    const newErrors: Partial<Record<keyof Tournament, string>> = {};
+    const newErrors: Partial<Record<keyof Tournament | 'club_id' | 'tournament_type', string>> = {};
     
     if (!formData.name.trim()) {
       newErrors.name = 'Название турнира обязательно';
     }
     
-    if (!formData.location.trim()) {
-      newErrors.location = 'Локация обязательна';
+    if (!formData.club_id) {
+      newErrors.club_id = 'Клуб обязателен';
+    }
+
+    if (!formData.tournament_type) {
+      newErrors.tournament_type = 'Тип турнира обязателен';
     }
     
     if (formData.max_users <= 0) {
@@ -159,6 +199,24 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       }
     }
     
+    // Special handling for tournament type
+    if (name === 'tournament_type') {
+      if (value === 'custom') {
+        setIsCustomType(true);
+        setFormData({
+          ...formData,
+          tournament_type: customTypeValue
+        });
+      } else {
+        setIsCustomType(false);
+        setFormData({
+          ...formData,
+          tournament_type: value
+        });
+      }
+      return;
+    }
+    
     setFormData({
       ...formData,
       [name]: type === 'number' ? (value === '' ? undefined : Number(value)) : value
@@ -183,6 +241,26 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       };
       onSave(tournamentToSave);
     }
+  };
+
+  // Handler for custom tournament type input
+  const handleCustomTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCustomTypeValue(value);
+    setFormData({
+      ...formData,
+      tournament_type: value
+    });
+  };
+
+  // Handler to switch back to predefined types
+  const handleBackToPresets = () => {
+    setIsCustomType(false);
+    setCustomTypeValue('');
+    setFormData({
+      ...formData,
+      tournament_type: ''
+    });
   };
 
   return (
@@ -234,15 +312,68 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       </div>
 
       <div>
-        <label className="block text-gray-700 mb-1">Локация</label>
-        <input
-          type="text"
-          name="location"
-          value={formData.location}
+        <label className="block text-gray-700 mb-1">Клуб</label>
+        <select
+          name="club_id"
+          value={formData.club_id}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded ${errors.location ? 'border-red-500' : 'border-gray-300'}`}
-        />
-        {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
+          className={`w-full px-3 py-2 border rounded ${errors.club_id ? 'border-red-500' : 'border-gray-300'}`}
+          disabled={loadingClubs}
+        >
+          <option value="">Выберите клуб</option>
+          {clubs.map((club) => (
+            <option key={club.id} value={club.id}>
+              {club.name}
+            </option>
+          ))}
+        </select>
+        {errors.club_id && <p className="text-red-500 text-sm mt-1">{errors.club_id}</p>}
+      </div>
+
+      <div>
+        <label className="block text-gray-700 mb-1">Тип турнира</label>
+        {!isCustomType ? (
+          <div className="space-y-2">
+            <select
+              name="tournament_type"
+              value={formData.tournament_type}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded ${errors.tournament_type ? 'border-red-500' : 'border-gray-300'}`}
+            >
+              <option value="">Выберите тип турнира</option>
+              {tournamentTypes.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
+              <option value="custom">Свой вариант...</option>
+            </select>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customTypeValue}
+                onChange={handleCustomTypeChange}
+                placeholder="Введите тип турнира"
+                className={`flex-1 px-3 py-2 border rounded ${errors.tournament_type ? 'border-red-500' : 'border-gray-300'}`}
+              />
+              <button
+                type="button"
+                onClick={handleBackToPresets}
+                className="px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded hover:bg-gray-200 transition-colors"
+                title="Вернуться к списку"
+              >
+                ↺
+              </button>
+            </div>
+            <p className="text-sm text-gray-600">
+              Введите свой вариант типа турнира или нажмите ↺ чтобы выбрать из списка
+            </p>
+          </div>
+        )}
+        {errors.tournament_type && <p className="text-red-500 text-sm mt-1">{errors.tournament_type}</p>}
       </div>
 
       <div>

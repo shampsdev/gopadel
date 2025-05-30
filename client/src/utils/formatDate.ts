@@ -27,3 +27,26 @@ export const formatDateAndTime = (dateString: string) => {
     time: formatMoscowTime(dateString, "HH:mm"),
   }
 }
+
+/**
+ * Format tournament date and time range in the format: "05 июня (сб), 12:00 – 15:00"
+ * @param startTime ISO date string for start time
+ * @param endTime ISO date string for end time (optional)
+ * @returns Formatted tournament date and time string
+ */
+export const formatTournamentDateTime = (
+  startTime: string,
+  endTime?: string
+): string => {
+  const startDate = addHours(new Date(startTime), 3)
+  const dateWithDay = format(startDate, "dd MMMM (EEE)", { locale: ru })
+  const startTimeFormatted = format(startDate, "HH:mm", { locale: ru })
+  
+  if (endTime) {
+    const endDate = addHours(new Date(endTime), 3)
+    const endTimeFormatted = format(endDate, "HH:mm", { locale: ru })
+    return `${dateWithDay}, ${startTimeFormatted} – ${endTimeFormatted}`
+  }
+  
+  return `${dateWithDay}, ${startTimeFormatted}`
+}

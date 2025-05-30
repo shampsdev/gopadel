@@ -12,7 +12,6 @@ import {
   FaMapMarkerAlt,
   FaStar,
   FaUsers,
-  FaClock,
   FaTelegramPlane,
   FaInfoCircle,
 } from "react-icons/fa"
@@ -22,7 +21,7 @@ import Divider from "@/components/ui/Divider"
 import { Spinner } from "@/components/ui/Spinner"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
 import useUserStore from "@/stores/userStore"
-import { formatDateAndTime } from "@/utils/formatDate"
+import { formatTournamentDateTime } from "@/utils/formatDate"
 import { Registration } from "@/types/registration"
 import { RegistrationStatus } from "@/types/registration"
 import GreenButton from "@/components/ui/GreenButton"
@@ -111,10 +110,10 @@ export default function TournamentPage() {
     )
   }
 
-  const { date: formattedDate, time: formattedTime } = formatDateAndTime(
-    tournament.start_time
+  const formattedDateTime = formatTournamentDateTime(
+    tournament.start_time,
+    tournament.end_time || undefined
   )
-  const formattedEndTime = tournament.end_time ? formatDateAndTime(tournament.end_time) : null
 
   // Check if user meets rank requirements
   const hasValidRank =
@@ -139,23 +138,24 @@ export default function TournamentPage() {
             <div className="w-6 mr-2">
               <FaCalendarAlt className="text-gray-600" />
             </div>
-            <span>Начало: {formattedDate} в {formattedTime}</span>
+            {formattedDateTime}
           </div>
-
-          {formattedEndTime && (
-            <div className="flex items-center">
-              <div className="w-6 mr-2">
-                <FaClock className="text-gray-600" />
-              </div>
-              <span>Окончание: {formattedEndTime.date} в {formattedEndTime.time}</span>
-            </div>
-          )}
 
           <div className="flex items-center">
             <div className="w-6 mr-2">
               <FaMapMarkerAlt className="text-gray-600" />
             </div>
-            <span>{tournament.location}</span>
+            <div className="flex">
+              <div>{tournament.club.name}</div>
+              <div className="text-gray-500 ml-2">{tournament.club.address}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            <div className="w-6 mr-2">
+              <FaTelegramPlane className="text-gray-600" />
+            </div>
+            <span>Тип: {tournament.tournament_type}</span>
           </div>
 
           <div className="flex items-center">

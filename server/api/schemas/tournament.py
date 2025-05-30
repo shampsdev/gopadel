@@ -3,6 +3,7 @@ from typing import List, Optional
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
+from api.schemas.club import Club
 from api.schemas.registration import RegistrationBase, RegistrationResponse
 from db.models.registration import RegistrationStatus
 from pydantic import BaseModel, computed_field
@@ -27,7 +28,8 @@ class TournamentBase(BaseModel):
     start_time: datetime
     end_time: Optional[datetime] = None
     price: int
-    location: str
+    club: Club
+    tournament_type: str
     rank_min: float
     rank_max: float
     max_users: int

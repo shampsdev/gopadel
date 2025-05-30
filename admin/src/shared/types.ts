@@ -1,10 +1,17 @@
+export interface Club {
+  id: string
+  name: string
+  address: string
+}
+
 export interface Tournament {
   id?: number
   name: string
   start_time: string
   end_time?: string
   price: number
-  location: string
+  club_id: string
+  tournament_type: string
   rank_min: number
   rank_max: number
   max_users: number

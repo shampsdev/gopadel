@@ -1,13 +1,20 @@
 import { Registration } from "./registration"
 import { UserBase } from "./user"
 
+export type Club = {
+  id: string
+  name: string
+  address: string
+}
+
 export type Tournament = {
   id: string // UUID
   name: string
   start_time: string // ISO date string
   end_time?: string | null // ISO date string, optional
   price: number
-  location: string
+  club: Club
+  tournament_type: string
   rank_min: number
   rank_max: number
   max_users: number

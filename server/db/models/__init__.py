@@ -1,5 +1,6 @@
 from db import Base
 from db.models.admin import AdminUser
+from db.models.club import Club
 from db.models.loyalty import Loyalty
 from db.models.payment import Payment
 from db.models.registration import Registration
@@ -16,4 +17,5 @@ __all__ = [
     "Registration",
     "Waitlist",
     "AdminUser",
+    "Club",
 ]

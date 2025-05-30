@@ -48,6 +48,9 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
             <button onClick={() => navigate('/tournaments')} className="hover:text-gray-600 transition">
               Турниры
             </button>
+            <button onClick={() => navigate('/clubs')} className="hover:text-gray-600 transition">
+              Клубы
+            </button>
             <button onClick={() => navigate('/payments')} className="hover:text-gray-600 transition">
               Платежи
             </button>
@@ -105,6 +108,15 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
               className="py-2 px-1 hover:bg-green-200 rounded transition"
             >
               Турниры
+            </button>
+            <button 
+              onClick={() => {
+                navigate('/clubs');
+                setIsMenuOpen(false);
+              }} 
+              className="py-2 px-1 hover:bg-green-200 rounded transition"
+            >
+              Клубы
             </button>
             <button 
               onClick={() => {
