@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import Header from "@/components/Header"
 import UserCard from "@/components/UserCard"
 import { getUsers } from "@/api/api"
 import { User } from "@/types/user"
@@ -50,6 +51,8 @@ export default function PeoplePage() {
 
   return (
     <div className="p-4 bg-white min-h-screen pb-20">
+      <Header />
+      
       {/* Search bar */}
       <div className="mt-4 mb-6 relative">
         <div className="relative">

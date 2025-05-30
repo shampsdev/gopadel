@@ -6,6 +6,7 @@ import {
   getTournamentRegistration,
 } from "@/api/api"
 import { Tournament } from "@/types/tournament"
+import Header from "@/components/Header"
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
@@ -72,6 +73,7 @@ export default function TournamentPage() {
   if (loading) {
     return (
       <div className="p-4 bg-white min-h-screen">
+        <Header />
         <div className="text-center py-4">
           <Spinner size="lg" />
         </div>
@@ -82,6 +84,7 @@ export default function TournamentPage() {
   if (!tournament) {
     return (
       <div className="p-4 bg-white min-h-screen">
+        <Header />
         <div className="text-center py-4">Турнир не найден</div>
       </div>
     )
@@ -103,6 +106,8 @@ export default function TournamentPage() {
 
   return (
     <div className="p-4 bg-white min-h-screen flex flex-col pb-20">
+      <Header />
+
       <div className="w-full max-w-md mx-auto flex flex-col flex-1">
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">{tournament.name}</h1>

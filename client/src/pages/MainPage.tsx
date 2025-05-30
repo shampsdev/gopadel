@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import Header from "@/components/Header"
 import TournamentList from "@/components/TournamentList"
 import { Trophy, Calendar, Gamepad2, Target } from "lucide-react"
 
@@ -43,6 +44,8 @@ export default function MainPage() {
 
   return (
     <div className="p-4 bg-white min-h-screen pb-20">
+      <Header />
+      
       {/* Content Type Navigation */}
       <div className="mb-4">
         <div className="flex bg-gray-100 rounded-lg p-1 max-w-md mx-auto">
