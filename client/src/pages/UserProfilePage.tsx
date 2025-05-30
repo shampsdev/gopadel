@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import Header from "@/components/Header"
 import { User } from "@/types/user"
 import { Spinner } from "@/components/ui/Spinner"
 import { getUsers } from "@/api/api"
@@ -46,7 +45,6 @@ export default function UserProfilePage() {
   if (loading) {
     return (
       <div className="p-4 bg-white min-h-screen pb-20">
-        <Header />
         <div className="flex justify-center mt-10">
           <Spinner size="lg" />
         </div>
@@ -57,7 +55,6 @@ export default function UserProfilePage() {
   if (!user) {
     return (
       <div className="p-4 bg-white min-h-screen pb-20">
-        <Header />
         <div className="flex flex-col items-center justify-center mt-10">
           <p className="text-gray-500">Пользователь не найден</p>
         </div>
@@ -67,8 +64,6 @@ export default function UserProfilePage() {
 
   return (
     <div className="p-4 bg-white min-h-screen pb-20">
-      <Header />
-
       <div className="flex flex-col items-center mb-6 mt-4 relative">
         <div className="relative">
           {user.avatar ? (

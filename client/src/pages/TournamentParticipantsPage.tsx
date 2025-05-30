@@ -4,7 +4,6 @@ import { useParams, useNavigate } from "react-router-dom"
 import { Tournament } from "@/types/tournament"
 import { Registration } from "@/types/registration"
 import { getTournament, getTournamentParticipants } from "@/api/api"
-import Header from "@/components/Header"
 import { Spinner } from "@/components/ui/Spinner"
 import { Divider } from "@telegram-apps/telegram-ui"
 import { getRatingWord } from "@/utils/ratingUtils"
@@ -51,7 +50,6 @@ export default function TournamentParticipantsPage() {
   if (loading) {
     return (
       <div className="p-4 bg-white min-h-screen">
-        <Header />
         <div className="text-center py-4">
           <Spinner className="mx-auto text-green-500" />
         </div>
@@ -62,7 +60,6 @@ export default function TournamentParticipantsPage() {
   if (!tournament) {
     return (
       <div className="p-4 bg-white min-h-screen">
-        <Header />
         <div className="text-center py-4">Турнир не найден</div>
       </div>
     )
@@ -70,8 +67,6 @@ export default function TournamentParticipantsPage() {
 
   return (
     <div className="p-4 bg-white min-h-screen pb-20">
-      <Header />
-
       <div className="w-full max-w-md mx-auto">
         <h1 className="text-2xl font-bold mb-6">Участники турнира</h1>
 
