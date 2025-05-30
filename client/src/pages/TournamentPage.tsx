@@ -20,6 +20,7 @@ import TournamentParticipants from "@/components/TournamentParticipants"
 import ParticipateButton from "@/components/ParticipateButton"
 import Divider from "@/components/ui/Divider"
 import { Spinner } from "@/components/ui/Spinner"
+import ConfirmDialog from "@/components/ui/ConfirmDialog"
 import useUserStore from "@/stores/userStore"
 import { formatDateAndTime } from "@/utils/formatDate"
 import { Registration } from "@/types/registration"
@@ -34,6 +35,8 @@ export default function TournamentPage() {
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [registration, setRegistration] = useState<Registration | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [cancelLoading, setCancelLoading] = useState(false)
   const { userData } = useUserStore()
 
   const fetchTournament = async () => {
@@ -62,11 +65,29 @@ export default function TournamentPage() {
     fetchTournament()
   }, [id, userData?.id])
 
-  const handleDeleteRegistration = async () => {
+  const handleCancelClick = () => {
+    setShowCancelDialog(true)
+  }
+
+  const handleConfirmCancel = async () => {
     if (!id) return
-    const response = await deleteRegistration(id)
-    if (response) {
-      fetchTournament()
+    setCancelLoading(true)
+    try {
+      const response = await deleteRegistration(id)
+      if (response) {
+        fetchTournament()
+        setShowCancelDialog(false)
+      }
+    } catch (error) {
+      console.error("Error canceling registration:", error)
+    } finally {
+      setCancelLoading(false)
+    }
+  }
+
+  const handleCancelDialogClose = () => {
+    if (!cancelLoading) {
+      setShowCancelDialog(false)
     }
   }
 
@@ -111,19 +132,6 @@ export default function TournamentPage() {
       <div className="w-full max-w-md mx-auto flex flex-col flex-1">
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">{tournament.name}</h1>
-          <div className="flex justify-between items-center">
-            <p className="text-gray-700">
-              Организатор: {tournament.organizator.first_name}
-            </p>
-            {tournament.organizator.username && (
-              <button
-                className="flex items-center text-blue-500 gap-1 hover:text-blue-700 transition-colors"
-                onClick={() => openTelegramLink(`https://t.me/${tournament.organizator.username}`)}
-              >
-                <FaTelegramPlane size={24} />
-              </button>
-            )}
-          </div>
         </div>
 
         <div className="space-y-4">
@@ -197,6 +205,16 @@ export default function TournamentPage() {
           </>
         )}
 
+        {tournament.organizator.username && (
+            <button
+              className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-blue-200"
+              onClick={() => openTelegramLink(`https://t.me/${tournament.organizator.username}`)}
+            >
+              <FaTelegramPlane size={16} />
+              <span className="text-sm font-medium">Написать организатору</span>
+            </button>
+          )}
+
         <div className="my-4">
           <Divider />
         </div>
@@ -221,7 +239,7 @@ export default function TournamentPage() {
             <div className="mt-4 text-center">
               <p className={`mb-2 text-green-600`}>Вы зарегистрированы</p>
               <GreenButton
-                onClick={handleDeleteRegistration}
+                onClick={handleCancelClick}
                 buttonClassName="bg-red-500"
                 className="w-full"
               >
@@ -254,6 +272,17 @@ export default function TournamentPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showCancelDialog}
+        title="Отменить участие"
+        message="Вы точно уверены, что хотите отменить участие в турнире?"
+        confirmText="Да, отменить"
+        cancelText="Нет"
+        onConfirm={handleConfirmCancel}
+        onCancel={handleCancelDialogClose}
+        isLoading={cancelLoading}
+      />
     </div>
   )
 }
