@@ -3,7 +3,7 @@ import {
   FaCalendarAlt,
   FaMapMarkerAlt,
 } from "react-icons/fa"
-import { formatDateAndTime } from "@/utils/formatDate"
+import { formatTournamentDateTime } from "@/utils/formatDate"
 
 interface HistoryCardProps {
   registration: RegistrationWithTournament
@@ -12,7 +12,10 @@ interface HistoryCardProps {
 export default function HistoryCard({ registration }: HistoryCardProps) {
   const tournament = registration.tournament
 
-  const { date, time } = formatDateAndTime(tournament.start_time)
+  const formattedDateTime = formatTournamentDateTime(
+    tournament.start_time,
+    tournament.end_time || undefined
+  )
 
   return (
     <div className="bg-white rounded-lg border p-4 mb-3">
@@ -21,12 +24,15 @@ export default function HistoryCard({ registration }: HistoryCardProps) {
       <div className="space-y-2 text-sm text-gray-600">
         <div className="flex items-center">
           <FaCalendarAlt className="mr-2" />
-          <span>{date} в {time}</span>
+          <span>{formattedDateTime}</span>
         </div>
         
         <div className="flex items-center">
           <FaMapMarkerAlt className="mr-2" />
-          <span>{tournament.location}</span>
+          <div className="flex">
+            <span className="font-medium">{tournament.club.name}</span>
+            <span className="text-gray-500 ml-2">{tournament.club.address}</span>
+          </div>
         </div>
       </div>
 
