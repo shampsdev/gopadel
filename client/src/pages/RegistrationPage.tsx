@@ -12,9 +12,7 @@ import HeaderEditAvatar from "@/components/HeaderEditAvatar"
 import RatingSelector from "@/components/RatingSelector"
 import PlayingPositionSelector from "@/components/PlayingPositionSelector"
 import { PlayingPosition } from "@/types/user"
-import {
-  handleAvatarFileChange,
-} from "@/utils/avatarUpload"
+import { handleAvatarFileChange } from "@/utils/avatarUpload"
 
 export default function RegistrationPage() {
   const [name, setName] = useState(initData.user()?.first_name ?? "")
@@ -23,7 +21,8 @@ export default function RegistrationPage() {
   const [rank, setRank] = useState("")
   const [city, setCity] = useState("")
   const [birthDate, setBirthDate] = useState("")
-  const [playingPosition, setPlayingPosition] = useState<PlayingPosition | null>(null)
+  const [playingPosition, setPlayingPosition] =
+    useState<PlayingPosition | null>(null)
   const [padelProfiles, setPadelProfiles] = useState("")
   const [profilePicture, setProfilePicture] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -109,7 +108,9 @@ export default function RegistrationPage() {
         rank: parseFloat(rank),
         city: city,
         birth_date: birthDate ? formatDateForBackend(birthDate) : null,
-        playing_position: playingPosition ? playingPosition.toLowerCase() : null,
+        playing_position: playingPosition
+          ? playingPosition.toLowerCase()
+          : null,
         padel_profiles: padelProfiles || null,
       }
 

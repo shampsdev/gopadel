@@ -102,7 +102,9 @@ def get_tournament_with_participants_by_id(
         .options(
             joinedload(
                 Tournament.registrations.and_(
-                    Registration.status == RegistrationStatus.ACTIVE
+                    Registration.status.in_(
+                        [RegistrationStatus.ACTIVE, RegistrationStatus.PENDING]
+                    )
                 )
             ).joinedload(Registration.user),
             joinedload(Tournament.club),

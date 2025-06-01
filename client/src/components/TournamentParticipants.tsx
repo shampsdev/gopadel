@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { IoIosArrowForward } from "react-icons/io"
-import { Registration } from "@/types/registration"
+import { Registration, RegistrationStatus } from "@/types/registration"
 import "./TournamentParticipants.css"
+import { cn } from "@/lib/utils"
 
 type TournamentParticipantsProps = {
   tournamentId: string
@@ -15,7 +16,7 @@ export default function TournamentParticipants({
   tournamentId,
   registrations = [],
   showAll = false,
-  maxDisplay = 4,
+  maxDisplay = 10,
 }: TournamentParticipantsProps) {
   const [showLeftShadow, setShowLeftShadow] = useState(false)
   const [showRightShadow, setShowRightShadow] = useState(true)
@@ -81,12 +82,15 @@ export default function TournamentParticipants({
             {displayRegistrations.length > 0 ? (
               displayRegistrations.map((registration) => {
                 // Combine first and last name
-                const fullName = `${registration.user.first_name} ${registration.user.second_name}`;
-                
+                const fullName = `${registration.user.first_name} ${registration.user.second_name}`
                 return (
                   <div
                     key={registration.user?.id}
-                    className="flex flex-col items-center cursor-pointer"
+                    className={cn(
+                      "flex flex-col items-center cursor-pointer",
+                      registration.status === RegistrationStatus.PENDING &&
+                        "opacity-50"
+                    )}
                     onClick={(e) => goToUserProfile(registration.user.id, e)}
                   >
                     <div className="w-16 h-16 rounded-full overflow-hidden mb-1 bg-gray-200 flex-shrink-0">
@@ -107,7 +111,7 @@ export default function TournamentParticipants({
                       {truncateName(fullName)}
                     </p>
                   </div>
-                );
+                )
               })
             ) : (
               <span className="text-center text-sm opacity-50">

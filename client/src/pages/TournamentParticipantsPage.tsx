@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 
 import { Tournament } from "@/types/tournament"
-import { Registration } from "@/types/registration"
+import { Registration, RegistrationStatus } from "@/types/registration"
 import { getTournament, getTournamentParticipants } from "@/api/api"
 import Header from "@/components/Header"
 import { Spinner } from "@/components/ui/Spinner"
 import { Divider } from "@telegram-apps/telegram-ui"
 import { getRatingWord } from "@/utils/ratingUtils"
+import { cn } from "@/lib/utils"
 
 export default function TournamentParticipantsPage() {
   const { id } = useParams<{ id: string }>()
@@ -97,16 +98,22 @@ export default function TournamentParticipantsPage() {
             <Divider />
             {registrations.map((registration) => {
               // Combine first and last name
-              const fullName = `${registration.user.first_name} ${registration.user.second_name}`;
-              const displayName = truncateName(fullName);
-              
+              const fullName = `${registration.user.first_name} ${registration.user.second_name}`
+              const displayName = truncateName(fullName)
+
               return (
                 <React.Fragment key={registration.user.id}>
                   <div
                     className="flex justify-between items-center cursor-pointer"
                     onClick={() => goToUserProfile(registration.user.id)}
                   >
-                    <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        "flex items-center gap-3",
+                        registration.status === RegistrationStatus.PENDING &&
+                          "opacity-50"
+                      )}
+                    >
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
                         {registration.user.avatar ? (
                           <img
@@ -121,9 +128,7 @@ export default function TournamentParticipantsPage() {
                           </div>
                         )}
                       </div>
-                      <p className="text-center font-medium">
-                        {displayName}
-                      </p>
+                      <p className="text-center font-medium">{displayName}</p>
                     </div>
                     <div className="opacity-50">
                       {getRatingWord(registration.user.rank)}
@@ -131,7 +136,7 @@ export default function TournamentParticipantsPage() {
                   </div>
                   <Divider />
                 </React.Fragment>
-              );
+              )
             })}
           </div>
         )}

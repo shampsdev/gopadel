@@ -22,7 +22,23 @@ export default function ParticipateButton({
   const [currentRegistration, setCurrentRegistration] =
     useState<Registration | null>(registration)
 
-  const handleParticipate = async () => {
+  const handleRegister = async () => {
+    setLoading(true)
+    backButton.hide()
+    try {
+      const newRegistration = await registerForTournament(tournamentId)
+      if (newRegistration) {
+        setCurrentRegistration(newRegistration)
+      } else {
+        console.error("Failed to register for tournament")
+      }
+    } catch (error) {
+      console.error("Error participating in tournament:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+  const handlePay = async () => {
     setLoading(true)
     backButton.hide()
     try {
@@ -67,7 +83,7 @@ export default function ParticipateButton({
   const buttonText = () => {
     if (currentRegistration?.status === RegistrationStatus.PENDING)
       return "Оплатить"
-    return "Зарегистрироваться и оплатить"
+    return "Зарегистрироваться"
   }
 
   // If we have a pending registration with payment, show payment option
@@ -98,7 +114,11 @@ export default function ParticipateButton({
 
   return (
     <GreenButton
-      onClick={handleParticipate}
+      onClick={
+        currentRegistration?.status === RegistrationStatus.PENDING
+          ? handlePay
+          : handleRegister
+      }
       isLoading={loading}
       className="w-full rounded-full"
     >

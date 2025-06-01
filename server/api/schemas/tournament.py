@@ -20,6 +20,7 @@ class UserBase(BaseModel):
 
 class ParticipantResponse(BaseModel):
     user: UserBase
+    status: RegistrationStatus
 
 
 class TournamentBase(BaseModel):
