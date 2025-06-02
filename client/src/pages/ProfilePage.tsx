@@ -24,8 +24,15 @@ export default function ProfilePage() {
   return (
     <div className="p-4 bg-white min-h-screen flex flex-col pb-20">
       <div>
-        <div className="flex items-center">
+        <div className="flex items-center justify-between">
           <img src={blackLogo} className="h-5" alt="" />
+          <button
+            onClick={() => navigate("/profile/edit")}
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Редактировать профиль"
+          >
+            <Edit size={20} className="text-gray-600" />
+          </button>
         </div>
         <div className="my-4">
           <Divider />
@@ -142,15 +149,6 @@ export default function ProfilePage() {
           <div className="flex items-center justify-center gap-2">
             <History size={18} />
             История турниров
-          </div>
-        </GreenButton>
-        
-        <GreenButton
-          onClick={() => navigate("/profile/edit")}
-        >
-          <div className="flex items-center justify-center gap-2">
-            <Edit size={18} />
-            Редактировать профиль
           </div>
         </GreenButton>
       </div>

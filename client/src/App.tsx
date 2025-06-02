@@ -17,6 +17,7 @@ import BottomNavbar from "./components/BottomNavbar"
 import PeoplePage from "./pages/PeoplePage"
 import UserProfilePage from "./pages/UserProfilePage"
 import LoyaltyPage from "./pages/LoyaltyPage"
+import LeaguePage from "./pages/LeaguePage"
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -64,6 +65,8 @@ function App() {
                 <Route index element={<PeoplePage />} />
                 <Route path=":userId" element={<UserProfilePage />} />
               </Route>
+
+              <Route path="league" element={<LeaguePage />} />
 
               <Route path="loyalty" element={<LoyaltyPage />} />
 
