@@ -9,7 +9,7 @@ export default function BottomNavbar() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-16 shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-16 shadow-lg pb-safe">
       <Link 
         to="/" 
         className={`flex flex-col items-center justify-center w-1/4 py-1 ${(location.pathname === '/' || isActive('/tournament')) ? 'text-green-600' : 'text-gray-600'}`}

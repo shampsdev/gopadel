@@ -3,18 +3,17 @@ import videoFile from "@/assets/IMG_8675.MP4?url"
 export default function LeaguePage() {
   return (
     <div className="p-4 bg-white min-h-screen flex flex-col pb-20">
-      {/* League content placeholder */}
-      <div className="bg-gray-50 rounded-lg p-6 text-center">
+      <div className="text-center">
         {/* Responsive video container */}
         <div className="relative w-full max-w-2xl mx-auto mb-4">
           <video
             className="w-full h-auto rounded-lg shadow-md"
             controls
             preload="metadata"
-            poster=""
             autoPlay
             muted
             playsInline
+            loop
           >
             <source src={videoFile} type="video/mp4" />
             Ваш браузер не поддерживает воспроизведение видео.
