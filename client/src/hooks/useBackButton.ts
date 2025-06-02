@@ -8,15 +8,12 @@ export default function useBackButton() {
   
   useEffect(() => {
     const currentPath = location.pathname
-    console.log("Current location:", currentPath)
 
     if (currentPath === "/") {
-      console.log("On main page, hiding back button")
       backButton.hide()
       return
     }
 
-    console.log("Showing back button")
     backButton.show()
 
     const handleBackClick = () => {
@@ -43,14 +40,12 @@ export default function useBackButton() {
         }
       }
 
-      console.log(`Navigating from ${currentPath} to ${targetPath}`)
       navigate(targetPath)
     }
 
     backButton.onClick(handleBackClick)
 
     return () => {
-      console.log("Cleaning up back button handler")
       backButton.offClick(handleBackClick)
     }
   }, [location.pathname, navigate])
