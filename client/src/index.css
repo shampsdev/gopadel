@@ -20,6 +20,15 @@
   padding-right: env(safe-area-inset-right);
 }
 
+/* Navigation bottom padding */
+.pb-nav {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+}
+
+.pb-nav-safe {
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
+
 /* Telegram Theme Support */
 
 @theme {

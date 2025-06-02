@@ -5,6 +5,10 @@ export default function BottomNavbar() {
   const location = useLocation();
   
   const isActive = (path: string) => {
+    if (path === "/") {
+      // Главная активна только на самой главной странице и на страницах турниров
+      return location.pathname === "/" || location.pathname.startsWith("/tournament")
+    }
     return location.pathname.startsWith(path);
   };
 
@@ -12,7 +16,7 @@ export default function BottomNavbar() {
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-16 shadow-lg pb-safe">
       <Link 
         to="/" 
-        className={`flex flex-col items-center justify-center w-1/4 py-1 ${(location.pathname === '/' || isActive('/tournament')) ? 'text-green-600' : 'text-gray-600'}`}
+        className={`flex flex-col items-center justify-center w-1/4 py-1 transition-colors ${isActive('/') ? 'text-green-600' : 'text-gray-600'}`}
       >
         <Home size={24} />
         <span className="text-xs mt-1">Главная</span>
@@ -20,7 +24,7 @@ export default function BottomNavbar() {
 
       <Link 
         to="/people" 
-        className={`flex flex-col items-center justify-center w-1/4 py-1 ${isActive('/people') ? 'text-green-600' : 'text-gray-600'}`}
+        className={`flex flex-col items-center justify-center w-1/4 py-1 transition-colors ${isActive('/people') ? 'text-green-600' : 'text-gray-600'}`}
       >
         <Users size={24} />
         <span className="text-xs mt-1">Игроки</span>
@@ -28,7 +32,7 @@ export default function BottomNavbar() {
 
       <Link 
         to="/league" 
-        className={`flex flex-col items-center justify-center w-1/4 py-1 ${isActive('/league') ? 'text-green-600' : 'text-gray-600'}`}
+        className={`flex flex-col items-center justify-center w-1/4 py-1 transition-colors ${isActive('/league') ? 'text-green-600' : 'text-gray-600'}`}
       >
         <Trophy size={24} />
         <span className="text-xs mt-1">Лига</span>
@@ -36,7 +40,7 @@ export default function BottomNavbar() {
       
       <Link 
         to="/profile" 
-        className={`flex flex-col items-center justify-center w-1/4 py-1 ${isActive('/profile') ? 'text-green-600' : 'text-gray-600'}`}
+        className={`flex flex-col items-center justify-center w-1/4 py-1 transition-colors ${isActive('/profile') ? 'text-green-600' : 'text-gray-600'}`}
       >
         <User size={24} />
         <span className="text-xs mt-1">Профиль</span>

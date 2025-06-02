@@ -1,8 +1,7 @@
 import "./App.css"
-import { Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import { Route, Routes, useLocation } from "react-router-dom"
 import MainPage from "@/pages/MainPage"
 import { useEffect } from "react"
-import { backButton } from "@telegram-apps/sdk-react"
 import { AnimatePresence, motion } from "framer-motion"
 import ProfilePage from "@/pages/ProfilePage"
 import RegistrationPage from "@/pages/RegistrationPage"
@@ -26,16 +25,13 @@ const pageVariants = {
 }
 
 function App() {
-  const navigate = useNavigate()
   const location = useLocation()
 
   useBackButton()
   const { checkAuth } = useAuth()
+  
   useEffect(() => {
     checkAuth()
-    backButton.onClick(() => {
-      navigate(-1)
-    })
   }, [])
 
   return (
