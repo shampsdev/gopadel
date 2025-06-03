@@ -22,8 +22,8 @@ export default function TournamentList({ showAvailableFilter = true, availableOn
     const fetchTournaments = async () => {
       setLoading(true)
       try {
-        const shouldFilter = showAvailableFilter ? availableOnlyState : availableOnly
-        const data = await getTournaments(shouldFilter)
+        // Всегда загружаем все турниры (доступные пользователю по рангу)
+        const data = await getTournaments(true) // true = только доступные по рангу
         setTournaments(data)
         setFilteredTournaments(data)
       } catch (error) {
@@ -37,13 +37,14 @@ export default function TournamentList({ showAvailableFilter = true, availableOn
   }, [availableOnlyState, showAvailableFilter, availableOnly])
 
   useEffect(() => {
-    // If showAvailableFilter is false and availableOnly is true, always show filtered
-    // If showAvailableFilter is true, use the state value
+    // Применяем фильтр только по наличию свободных мест если включен переключатель
     const shouldShowFiltered = showAvailableFilter ? availableOnlyState : availableOnly
     
     if (!shouldShowFiltered) {
+      // Показываем все турниры
       setFilteredTournaments(tournaments)
     } else {
+      // Показываем только турниры со свободными местами
       const filtered = tournaments.filter(
         (tournament) => tournament.current_users < tournament.max_users
       )
@@ -60,7 +61,7 @@ export default function TournamentList({ showAvailableFilter = true, availableOn
     <div className="w-full max-w-md mx-auto">
       {showAvailableFilter && (
         <div className="mb-5 flex items-center justify-between">
-          <span className="text-gray-700 font-medium">Доступные мне</span>
+          <span className="text-gray-700 font-medium">Только со свободными местами</span>
           <div
             className="relative inline-block w-12 h-6 cursor-pointer"
             onClick={() => setAvailableOnlyState(!availableOnlyState)}

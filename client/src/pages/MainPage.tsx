@@ -18,9 +18,9 @@ export default function MainPage() {
   const renderContent = () => {
     switch (activeTab) {
       case 'all':
-        return <TournamentList showAvailableFilter={false} availableOnly={true} />
+        return <TournamentList showAvailableFilter={true} availableOnly={false} />
       case 'tournaments':
-        return <TournamentList showAvailableFilter={false} availableOnly={true} />
+        return <TournamentList showAvailableFilter={true} availableOnly={false} />
       case 'games':
         return (
           <div className="w-full max-w-md mx-auto text-center py-8">
@@ -38,7 +38,7 @@ export default function MainPage() {
           </div>
         )
       default:
-        return <TournamentList showAvailableFilter={false} availableOnly={true} />
+        return <TournamentList showAvailableFilter={true} availableOnly={false} />
     }
   }
 

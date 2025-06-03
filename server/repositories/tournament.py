@@ -5,6 +5,7 @@ from uuid import UUID
 from db.models.registration import Registration
 from db.models.tournament import Tournament
 from db.models.user import User
+from db.models.waitlist import Waitlist
 from repositories.base import BaseRepository
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session, joinedload
@@ -15,6 +16,28 @@ class TournamentRepository(BaseRepository[Tournament]):
 
     def __init__(self):
         super().__init__(Tournament)
+
+    def get(self, db: Session, id: UUID) -> Optional[Tournament]:
+        """Get tournament by ID with all related data"""
+        return (
+            db.query(Tournament)
+            .options(
+                joinedload(Tournament.club),
+                joinedload(Tournament.organizator),
+                joinedload(Tournament.registrations),
+            )
+            .filter(Tournament.id == id)
+            .first()
+        )
+
+    def get_waitlist_count(self, db: Session, tournament_id: UUID) -> int:
+        """Get count of users in waitlist for a tournament"""
+        return (
+            db.query(func.count(Waitlist.id))
+            .filter(Waitlist.tournament_id == tournament_id)
+            .scalar()
+            or 0
+        )
 
     def create_tournament(
         self,
@@ -76,12 +99,13 @@ class TournamentRepository(BaseRepository[Tournament]):
         # First get all future tournaments
         all_tournaments = (
             db.query(Tournament)
+            .options(joinedload(Tournament.club))
             .filter(Tournament.start_time >= datetime.now())
             .order_by(Tournament.start_time)
             .all()
         )
 
-        # Then filter by rank restriction
+        # Then filter by rank restriction only
         available_tournaments = []
         for tournament in all_tournaments:
             if (

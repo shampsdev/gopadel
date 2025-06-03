@@ -4,8 +4,10 @@ import {
   deleteRegistration,
   getTournament,
   getTournamentRegistration,
+  getTournamentWaitlistStatus,
 } from "@/api/api"
 import { Tournament } from "@/types/tournament"
+import { Waitlist } from "@/types/waitlist"
 import Header from "@/components/Header"
 import {
   FaCalendarAlt,
@@ -17,6 +19,7 @@ import {
 } from "react-icons/fa"
 import TournamentParticipants from "@/components/TournamentParticipants"
 import ParticipateButton from "@/components/ParticipateButton"
+import WaitlistButton from "@/components/WaitlistButton"
 import Divider from "@/components/ui/Divider"
 import { Spinner } from "@/components/ui/Spinner"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
@@ -33,6 +36,7 @@ export default function TournamentPage() {
   const { id } = useParams<{ id: string }>()
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [registration, setRegistration] = useState<Registration | null>(null)
+  const [waitlistEntry, setWaitlistEntry] = useState<Waitlist | null>(null)
   const [loading, setLoading] = useState(true)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
@@ -50,9 +54,18 @@ export default function TournamentPage() {
       if (userData?.id) {
         const registrationData = await getTournamentRegistration(id)
         setRegistration(registrationData)
+        
+        // Check waitlist status only if not registered
+        if (!registrationData || registrationData.status === RegistrationStatus.CANCELED_BY_USER) {
+          const waitlistData = await getTournamentWaitlistStatus(id)
+          setWaitlistEntry(waitlistData)
+        } else {
+          setWaitlistEntry(null)
+        }
       } else {
-        // If no user data, reset registration state
+        // If no user data, reset registration and waitlist state
         setRegistration(null)
+        setWaitlistEntry(null)
       }
     } catch (error) {
       console.error("Error fetching tournament:", error)
@@ -242,6 +255,17 @@ export default function TournamentPage() {
                   Нет свободных мест для возврата в турнир
                 </p>
               )}
+              {!hasAvailableSpots && (
+                <div className="mt-2">
+                  <WaitlistButton
+                    tournamentId={tournament.id}
+                    waitlistEntry={waitlistEntry}
+                    callback={() => {
+                      fetchTournament()
+                    }}
+                  />
+                </div>
+              )}
               <p className="mt-2 text-xs text-gray-500">
                 Для возврата обращайтесь к{" "}
                 <span
@@ -269,14 +293,48 @@ export default function TournamentPage() {
                 Ваш рейтинг не соответствует требованиям турнира
               </p>
             </div>
+          ) : waitlistEntry && hasAvailableSpots ? (
+            <div className="mt-4 text-center">
+              <p className="text-green-600 mb-2">
+                Освободилось место! Теперь вы можете зарегистрироваться
+              </p>
+              <ParticipateButton
+                tournamentId={tournament.id}
+                registration={registration}
+                callback={() => {
+                  fetchTournament()
+                }}
+              />
+            </div>
           ) : !hasAvailableSpots && !registration ? (
             <div className="mt-4 text-center">
-              <p className="text-amber-600 mb-2">
-                Мест нет, но вы можете записаться в лист ожидания
-              </p>
-              <GreenButton onClick={() => {}}>
-                Записаться в лист ожидания
-              </GreenButton>
+              {waitlistEntry ? (
+                <>
+                  <p className="text-blue-600 mb-2">
+                    Вы записаны в лист ожидания
+                  </p>
+                  <WaitlistButton
+                    tournamentId={tournament.id}
+                    waitlistEntry={waitlistEntry}
+                    callback={() => {
+                      fetchTournament()
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  <p className="text-amber-600 mb-2">
+                    Мест нет, но вы можете записаться в лист ожидания
+                  </p>
+                  <WaitlistButton
+                    tournamentId={tournament.id}
+                    waitlistEntry={waitlistEntry}
+                    callback={() => {
+                      fetchTournament()
+                    }}
+                  />
+                </>
+              )}
             </div>
           ) : (
             <ParticipateButton

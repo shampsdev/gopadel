@@ -110,27 +110,46 @@ export default function TournamentParticipantsPage() {
                     <div
                       className={cn(
                         "flex items-center gap-3",
-                        registration.status === RegistrationStatus.PENDING &&
-                          "opacity-50"
+                        registration.status === RegistrationStatus.PENDING && "opacity-50",
+                        registration.status === RegistrationStatus.CANCELED_BY_USER && "opacity-75"
                       )}
                     >
-                      <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                      <div className={cn(
+                        "w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0",
+                        registration.status === RegistrationStatus.CANCELED_BY_USER && "ring-2 ring-red-400"
+                      )}>
                         {registration.user.avatar ? (
                           <img
                             src={registration.user.avatar}
                             alt={fullName}
-                            className="w-full h-full object-cover"
+                            className={cn(
+                              "w-full h-full object-cover",
+                              registration.status === RegistrationStatus.CANCELED_BY_USER && "filter grayscale"
+                            )}
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-500">
+                          <div className={cn(
+                            "w-full h-full flex items-center justify-center",
+                            registration.status === RegistrationStatus.CANCELED_BY_USER
+                              ? "text-red-500 bg-red-100"
+                              : "text-gray-500"
+                          )}>
                             {registration.user.first_name.charAt(0)}
                             {registration.user.second_name.charAt(0)}
                           </div>
                         )}
                       </div>
-                      <p className="text-center font-medium">{displayName}</p>
+                      <p className={cn(
+                        "text-center font-medium",
+                        registration.status === RegistrationStatus.CANCELED_BY_USER && "text-red-500"
+                      )}>
+                        {displayName}
+                      </p>
                     </div>
-                    <div className="opacity-50">
+                    <div className={cn(
+                      "opacity-50",
+                      registration.status === RegistrationStatus.CANCELED_BY_USER && "text-red-400"
+                    )}>
                       {getRatingWord(registration.user.rank)}
                     </div>
                   </div>

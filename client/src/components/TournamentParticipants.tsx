@@ -88,26 +88,40 @@ export default function TournamentParticipants({
                     key={registration.user?.id}
                     className={cn(
                       "flex flex-col items-center cursor-pointer",
-                      registration.status === RegistrationStatus.PENDING &&
-                        "opacity-50"
+                      registration.status === RegistrationStatus.PENDING && "opacity-50",
+                      registration.status === RegistrationStatus.CANCELED_BY_USER && "opacity-75"
                     )}
                     onClick={(e) => goToUserProfile(registration.user.id, e)}
                   >
-                    <div className="w-16 h-16 rounded-full overflow-hidden mb-1 bg-gray-200 flex-shrink-0">
+                    <div className={cn(
+                      "w-16 h-16 rounded-full overflow-hidden mb-1 bg-gray-200 flex-shrink-0",
+                      registration.status === RegistrationStatus.CANCELED_BY_USER && "ring-2 ring-red-400"
+                    )}>
                       {registration.user?.avatar ? (
                         <img
                           src={registration.user.avatar}
                           alt={fullName}
-                          className="w-full h-full object-cover"
+                          className={cn(
+                            "w-full h-full object-cover",
+                            registration.status === RegistrationStatus.CANCELED_BY_USER && "filter grayscale"
+                          )}
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-500">
+                        <div className={cn(
+                          "w-full h-full flex items-center justify-center",
+                          registration.status === RegistrationStatus.CANCELED_BY_USER 
+                            ? "text-red-500 bg-red-100" 
+                            : "text-gray-500"
+                        )}>
                           {registration.user.first_name.charAt(0)}
                           {registration.user.second_name.charAt(0)}
                         </div>
                       )}
                     </div>
-                    <p className="text-center text-xs">
+                    <p className={cn(
+                      "text-center text-xs",
+                      registration.status === RegistrationStatus.CANCELED_BY_USER && "text-red-500"
+                    )}>
                       {truncateName(fullName)}
                     </p>
                   </div>

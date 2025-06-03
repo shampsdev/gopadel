@@ -23,6 +23,7 @@ async def get_tournaments(
         tournaments = tournament_repository.get_available_tournaments(db, user)
     else:
         tournaments = tournament_repository.get_tournaments(db)
+
     return tournaments
 
 
@@ -62,9 +63,5 @@ async def get_tournament_participants(db: SessionDep, tournament_id: UUID):
         db, tournament_id
     )
 
-    # Filter only active registrations
-    active_registrations = [
-        r for r in registrations if r.status == RegistrationStatus.ACTIVE
-    ]
-
-    return active_registrations
+    # Return all registrations (including PENDING) to show their status
+    return registrations

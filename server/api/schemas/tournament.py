@@ -17,10 +17,16 @@ class UserBase(BaseModel):
     rank: float
     username: Optional[str] = None
 
+    class Config:
+        from_attributes = True
+
 
 class ParticipantResponse(BaseModel):
     user: UserBase
     status: RegistrationStatus
+
+    class Config:
+        from_attributes = True
 
 
 class TournamentBase(BaseModel):
@@ -45,6 +51,9 @@ class TournamentBase(BaseModel):
         finish_time = self.end_time if self.end_time else self.start_time
         return finish_time < naive_now
 
+    class Config:
+        from_attributes = True
+
 
 class TournamentResponse(TournamentBase):
     registrations: List[RegistrationBase] = []
@@ -61,6 +70,16 @@ class TournamentResponse(TournamentBase):
             )
         )
 
+    @computed_field
+    def is_full(self) -> bool:
+        return self.current_users >= self.max_users
+
+    class Config:
+        from_attributes = True
+
 
 class RegistrationWithTournamentResponse(RegistrationResponse):
     tournament: TournamentBase
+
+    class Config:
+        from_attributes = True

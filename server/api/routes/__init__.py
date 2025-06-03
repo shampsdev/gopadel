@@ -10,6 +10,7 @@ from api.routes import (
     registration,
     tournaments,
     users,
+    waitlist,
     webhook,
 )
 from fastapi import APIRouter
@@ -20,6 +21,10 @@ api_router.include_router(
     tournaments.router, prefix="/tournaments", tags=["tournaments"]
 )
 api_router.include_router(users.router, prefix="/users", tags=["users"])
+api_router.include_router(
+    registration.router, prefix="/registration", tags=["registration"]
+)
+api_router.include_router(waitlist.router, prefix="/waitlist", tags=["waitlist"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 api_router.include_router(admin_auth.router, prefix="/admin/auth", tags=["admin"])
 api_router.include_router(admin_users.router, prefix="/admin/users", tags=["admin"])
@@ -30,8 +35,5 @@ api_router.include_router(admin_clubs.router, prefix="/admin/clubs", tags=["admi
 api_router.include_router(admin_loyalty.router, prefix="/admin/loyalty", tags=["admin"])
 api_router.include_router(
     admin_payments.router, prefix="/admin/payments", tags=["admin"]
-)
-api_router.include_router(
-    registration.router, prefix="/registration", tags=["registration"]
 )
 api_router.include_router(webhook.router, prefix="/yookassa_webhook", tags=["webhook"])
