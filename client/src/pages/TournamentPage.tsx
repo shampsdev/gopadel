@@ -16,6 +16,7 @@ import {
   FaUsers,
   FaTelegramPlane,
   FaInfoCircle,
+  FaShare,
 } from "react-icons/fa"
 import TournamentParticipants from "@/components/TournamentParticipants"
 import ParticipateButton from "@/components/ParticipateButton"
@@ -29,7 +30,7 @@ import { Registration } from "@/types/registration"
 import { RegistrationStatus } from "@/types/registration"
 import GreenButton from "@/components/ui/GreenButton"
 import PriceWithDiscount from "@/components/PriceWithDiscount"
-import { openTelegramLink } from "@telegram-apps/sdk-react"
+import { openTelegramLink, shareURL } from "@telegram-apps/sdk-react"
 import { getRatingRangeDescription } from "@/utils/ratingUtils"
 
 export default function TournamentPage() {
@@ -230,7 +231,17 @@ export default function TournamentPage() {
               <span className="text-sm font-medium">Написать организатору</span>
             </button>
           )}
-
+        <button
+          className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-700 rounded-lg transition-colors duration-200 border border-green-200 mt-2"
+          onClick={() =>
+            shareURL(
+              `https://t.me/gopadel_league_bot/app?startapp=t-${tournament.id}`
+            )
+          }
+        >
+          <FaShare size={16} />
+          <span className="text-sm font-medium">Поделиться турниром</span>
+        </button>
         <div className="my-4">
           <Divider />
         </div>

@@ -1,5 +1,5 @@
 import "./App.css"
-import { Route, Routes, useLocation } from "react-router-dom"
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import MainPage from "@/pages/MainPage"
 import { useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
@@ -17,6 +17,7 @@ import PeoplePage from "./pages/PeoplePage"
 import UserProfilePage from "./pages/UserProfilePage"
 import LoyaltyPage from "./pages/LoyaltyPage"
 import LeaguePage from "./pages/LeaguePage"
+import { initData, InitData } from "@telegram-apps/sdk-react"
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -29,7 +30,19 @@ function App() {
 
   useBackButton()
   const { checkAuth } = useAuth()
-  
+
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const startParam = initData.startParam()
+    if (startParam) {
+      if (startParam.startsWith("t-")) {
+        const tournamentId = startParam.substring(2)
+        navigate(`/tournament/${tournamentId}`)
+      }
+    }
+  }, [])
+
   useEffect(() => {
     checkAuth()
   }, [])
@@ -79,7 +92,7 @@ function App() {
           </Routes>
         </motion.div>
       </AnimatePresence>
-      
+
       {location.pathname !== "/register" && <BottomNavbar />}
     </div>
   )
