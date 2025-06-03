@@ -227,13 +227,30 @@ export default function TournamentPage() {
         <div className="mt-auto">
           {registration?.status === RegistrationStatus.CANCELED_BY_USER ? (
             <div className="mt-4 text-center">
-              Ваша регистрация отменена. По поводу возврата денег обращайтесь к{" "}
-              <span
-                className="font-bold text-blue-500"
-                onClick={() => openTelegramLink("https://t.me/@Alievskey")}
-              >
-                @Alievskey
-              </span>
+              <p className="mb-2 text-gray-600">Ваша регистрация была отменена</p>
+              {hasAvailableSpots ? (
+                <ParticipateButton
+                  tournamentId={tournament.id}
+                  registration={null}
+                  isReturning={true}
+                  callback={() => {
+                    fetchTournament()
+                  }}
+                />
+              ) : (
+                <p className="mb-2 text-amber-600">
+                  Нет свободных мест для возврата в турнир
+                </p>
+              )}
+              <p className="mt-2 text-xs text-gray-500">
+                Для возврата обращайтесь к{" "}
+                <span
+                  className="font-bold text-blue-500"
+                  onClick={() => openTelegramLink("https://t.me/@Alievskey")}
+                >
+                  @Alievskey
+                </span>
+              </p>
             </div>
           ) : registration?.status === RegistrationStatus.ACTIVE ? (
             <div className="mt-4 text-center">

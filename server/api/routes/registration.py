@@ -1,15 +1,14 @@
-from fastapi import APIRouter, HTTPException
+from uuid import UUID
 
 from api.deps import SessionDep, UserDep
 from api.schemas.registration import RegistrationResponse
-from db.crud import tournament as tournament_crud, registration as registration_crud
-from uuid import UUID
-
+from bot.init_bot import bot
+from db.crud import registration as registration_crud
+from db.crud import tournament as tournament_crud
 from db.models.registration import RegistrationStatus
+from fastapi import APIRouter, HTTPException
 from services.payments import create_widget_payment
 from services.waitlist import notify_waitlist
-
-from bot.init_bot import bot
 
 router = APIRouter()
 
@@ -45,6 +44,10 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
         elif registration.status == RegistrationStatus.ACTIVE:
             raise HTTPException(
                 status_code=400, detail="User already registered for this tournament"
+            )
+        elif registration.status in (RegistrationStatus.CANCELED_BY_USER,):
+            registration_crud.update_registration_status(
+                db, registration.id, RegistrationStatus.ACTIVE
             )
         else:
             registration_crud.update_registration_status(

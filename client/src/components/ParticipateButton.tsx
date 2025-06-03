@@ -10,12 +10,14 @@ type ParticipateButtonProps = {
   registration: Registration | null
   disabled?: boolean
   callback?: () => void
+  isReturning?: boolean
 }
 
 export default function ParticipateButton({
   tournamentId,
   registration,
   callback,
+  isReturning = false,
 }: ParticipateButtonProps) {
   const [loading, setLoading] = useState(false)
   const [showPayment, setShowPayment] = useState(false)
@@ -29,6 +31,7 @@ export default function ParticipateButton({
       const newRegistration = await registerForTournament(tournamentId)
       if (newRegistration) {
         setCurrentRegistration(newRegistration)
+        callback?.()
       } else {
         console.error("Failed to register for tournament")
       }
@@ -83,7 +86,7 @@ export default function ParticipateButton({
   const buttonText = () => {
     if (currentRegistration?.status === RegistrationStatus.PENDING)
       return "Оплатить"
-    return "Зарегистрироваться"
+    return isReturning ? "Вернуться" : "Зарегистрироваться"
   }
 
   // If we have a pending registration with payment, show payment option
