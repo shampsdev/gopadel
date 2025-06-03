@@ -17,11 +17,6 @@ export default function TournamentParticipantsPage() {
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
-  // Function to truncate name if it's longer than 15 characters
-  const truncateName = (name: string, maxLength: number = 15) => {
-    return name.length > maxLength ? name.substring(0, maxLength) + "..." : name
-  }
-
   // Function to navigate to user profile
   const goToUserProfile = (userId: string) => {
     navigate(`/people/${userId}`)
@@ -99,7 +94,6 @@ export default function TournamentParticipantsPage() {
             {registrations.map((registration) => {
               // Combine first and last name
               const fullName = `${registration.user.first_name} ${registration.user.second_name}`
-              const displayName = truncateName(fullName)
 
               return (
                 <React.Fragment key={registration.user.id}>
@@ -139,18 +133,13 @@ export default function TournamentParticipantsPage() {
                           </div>
                         )}
                       </div>
-                      <p className={cn(
-                        "text-center font-medium",
+                      <div className={cn(
+                        "leading-tight",
                         registration.status === RegistrationStatus.CANCELED_BY_USER && "text-red-500"
                       )}>
-                        {displayName}
-                      </p>
-                    </div>
-                    <div className={cn(
-                      "opacity-50",
-                      registration.status === RegistrationStatus.CANCELED_BY_USER && "text-red-400"
-                    )}>
-                      {getRatingWord(registration.user.rank)}
+                        <div className="font-medium text-base">{registration.user.first_name} {registration.user.second_name}</div>
+                        <div className="text-sm text-gray-600">{getRatingWord(registration.user.rank)}</div>
+                      </div>
                     </div>
                   </div>
                   <Divider />

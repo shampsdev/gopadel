@@ -14,7 +14,7 @@ interface TournamentFormProps {
 
 const defaultTournament: Tournament = {
   name: '',
-  start_time: new Date().toISOString().slice(0, 16),
+  start_time: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString().slice(0, 16),
   end_time: '',
   price: 0,
   club_id: '',
@@ -48,11 +48,15 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
 
   useEffect(() => {
     if (tournament) {
-      // Convert ISO string to local datetime-local format
+      // Convert ISO string to local datetime-local format with Moscow timezone adjustment
+      const moscowOffset = 3 * 60 * 60 * 1000; // +3 hours in milliseconds
+      const startDate = new Date(tournament.start_time);
+      const endDate = tournament.end_time ? new Date(tournament.end_time) : null;
+      
       const formattedTournament = {
         ...tournament,
-        start_time: tournament.start_time.slice(0, 16), // Format for datetime-local input
-        end_time: tournament.end_time ? tournament.end_time.slice(0, 16) : ''
+        start_time: new Date(startDate.getTime() + moscowOffset).toISOString().slice(0, 16),
+        end_time: endDate ? new Date(endDate.getTime() + moscowOffset).toISOString().slice(0, 16) : ''
       };
       setFormData(formattedTournament);
       
@@ -227,7 +231,9 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
     e.preventDefault();
     
     if (validate()) {
-      // Format datetime to ISO string for API
+      // Format datetime to ISO string for API with Moscow timezone adjustment
+      const moscowOffset = 3 * 60 * 60 * 1000; // +3 hours in milliseconds
+      
       // Ensure all number fields have valid values (default to 0 if undefined)
       const tournamentToSave = {
         ...formData,
@@ -235,8 +241,8 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
         rank_min: formData.rank_min ?? 0,
         rank_max: formData.rank_max ?? 0,
         max_users: formData.max_users ?? 0,
-        start_time: new Date(formData.start_time).toISOString(),
-        end_time: formData.end_time ? new Date(formData.end_time).toISOString() : undefined,
+        start_time: new Date(new Date(formData.start_time).getTime() - moscowOffset).toISOString(),
+        end_time: formData.end_time ? new Date(new Date(formData.end_time).getTime() - moscowOffset).toISOString() : undefined,
         description: formData.description || undefined
       };
       onSave(tournamentToSave);
@@ -264,193 +270,202 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-gray-700 mb-1">Название</label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
-        />
-        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-      </div>
+    <div className="p-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div>
+          <label className="block text-gray-700 mb-1">Название</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className={`w-full px-3 py-2 border rounded ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+          />
+          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+        </div>
 
-      <div>
-        <label className="block text-gray-700 mb-1">Дата и время начала</label>
-        <input
-          type="datetime-local"
-          name="start_time"
-          value={formData.start_time}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      <div>
-        <label className="block text-gray-700 mb-1">Дата и время окончания (опционально)</label>
-        <input
-          type="datetime-local"
-          name="end_time"
-          value={formData.end_time || ''}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      <div>
-        <label className="block text-gray-700 mb-1">Стоимость участия</label>
-        <input
-          type="number"
-          name="price"
-          value={formData.price === undefined ? '' : formData.price}
-          onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded ${errors.price ? 'border-red-500' : 'border-gray-300'}`}
-        />
-        {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
-      </div>
-
-      <div>
-        <label className="block text-gray-700 mb-1">Клуб</label>
-        <select
-          name="club_id"
-          value={formData.club_id}
-          onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded ${errors.club_id ? 'border-red-500' : 'border-gray-300'}`}
-          disabled={loadingClubs}
-        >
-          <option value="">Выберите клуб</option>
-          {clubs.map((club) => (
-            <option key={club.id} value={club.id}>
-              {club.name}
-            </option>
-          ))}
-        </select>
-        {errors.club_id && <p className="text-red-500 text-sm mt-1">{errors.club_id}</p>}
-      </div>
-
-      <div>
-        <label className="block text-gray-700 mb-1">Тип турнира</label>
-        {!isCustomType ? (
-          <div className="space-y-2">
-            <select
-              name="tournament_type"
-              value={formData.tournament_type}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-gray-700 mb-1">Дата и время начала</label>
+            <input
+              type="datetime-local"
+              name="start_time"
+              value={formData.start_time}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded ${errors.tournament_type ? 'border-red-500' : 'border-gray-300'}`}
+              className="w-full px-3 py-2 border border-gray-300 rounded"
+            />
+            <p className="text-xs text-gray-500 mt-1">Время указывается по Москве (UTC+3)</p>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-1">Дата и время окончания (опционально)</label>
+            <input
+              type="datetime-local"
+              name="end_time"
+              value={formData.end_time || ''}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-gray-700 mb-1">Стоимость участия</label>
+            <input
+              type="number"
+              name="price"
+              value={formData.price === undefined ? '' : formData.price}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded ${errors.price ? 'border-red-500' : 'border-gray-300'}`}
+            />
+            {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-1">Макс. участников</label>
+            <input
+              type="number"
+              name="max_users"
+              value={formData.max_users === undefined ? '' : formData.max_users}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded ${errors.max_users ? 'border-red-500' : 'border-gray-300'}`}
+            />
+            {errors.max_users && <p className="text-red-500 text-sm mt-1">{errors.max_users}</p>}
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-1">Организатор</label>
+            <select
+              name="organizator_id"
+              value={formData.organizator_id}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded"
+              disabled={loadingUsers}
             >
-              <option value="">Выберите тип турнира</option>
-              {tournamentTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
+              <option value="">Выберите организатора</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.first_name} {user.second_name} {user.username ? `(@${user.username})` : ''}
                 </option>
               ))}
-              <option value="custom">Свой вариант...</option>
             </select>
           </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={customTypeValue}
-                onChange={handleCustomTypeChange}
-                placeholder="Введите тип турнира"
-                className={`flex-1 px-3 py-2 border rounded ${errors.tournament_type ? 'border-red-500' : 'border-gray-300'}`}
-              />
-              <button
-                type="button"
-                onClick={handleBackToPresets}
-                className="px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded hover:bg-gray-200 transition-colors"
-                title="Вернуться к списку"
-              >
-                ↺
-              </button>
-            </div>
-            <p className="text-sm text-gray-600">
-              Введите свой вариант типа турнира или нажмите ↺ чтобы выбрать из списка
-            </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-gray-700 mb-1">Клуб</label>
+            <select
+              name="club_id"
+              value={formData.club_id}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded ${errors.club_id ? 'border-red-500' : 'border-gray-300'}`}
+              disabled={loadingClubs}
+            >
+              <option value="">Выберите клуб</option>
+              {clubs.map((club) => (
+                <option key={club.id} value={club.id}>
+                  {club.name}
+                </option>
+              ))}
+            </select>
+            {errors.club_id && <p className="text-red-500 text-sm mt-1">{errors.club_id}</p>}
           </div>
-        )}
-        {errors.tournament_type && <p className="text-red-500 text-sm mt-1">{errors.tournament_type}</p>}
-      </div>
 
-      <div>
-        <label className="block text-gray-700 mb-1">Описание (опционально)</label>
-        <textarea
-          name="description"
-          value={formData.description || ''}
-          onChange={handleChange}
-          rows={4}
-          placeholder="Описание турнира, что будет, особенности..."
-          className="w-full px-3 py-2 border border-gray-300 rounded resize-vertical"
-        />
-      </div>
+          <div>
+            <label className="block text-gray-700 mb-1">Тип турнира</label>
+            {!isCustomType ? (
+              <div className="space-y-2">
+                <select
+                  name="tournament_type"
+                  value={formData.tournament_type}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2 border rounded ${errors.tournament_type ? 'border-red-500' : 'border-gray-300'}`}
+                >
+                  <option value="">Выберите тип турнира</option>
+                  {tournamentTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                  <option value="custom">Свой вариант...</option>
+                </select>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={customTypeValue}
+                    onChange={handleCustomTypeChange}
+                    placeholder="Введите тип турнира"
+                    className={`flex-1 px-3 py-2 border rounded ${errors.tournament_type ? 'border-red-500' : 'border-gray-300'}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleBackToPresets}
+                    className="px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded hover:bg-gray-200 transition-colors"
+                    title="Вернуться к списку"
+                  >
+                    ↺
+                  </button>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Введите свой вариант типа турнира или нажмите ↺ чтобы выбрать из списка
+                </p>
+              </div>
+            )}
+            {errors.tournament_type && <p className="text-red-500 text-sm mt-1">{errors.tournament_type}</p>}
+          </div>
+        </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <RatingSelector
-          name="rank_min"
-          label="Минимальный рейтинг"
-          value={formData.rank_min}
-          onChange={handleChange}
-          error={errors.rank_min}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <RatingSelector
+            name="rank_min"
+            label="Минимальный рейтинг"
+            value={formData.rank_min}
+            onChange={handleChange}
+            error={errors.rank_min}
+          />
 
-        <RatingSelector
-          name="rank_max"
-          label="Максимальный рейтинг"
-          value={formData.rank_max}
-          onChange={handleChange}
-          error={errors.rank_max}
-        />
-      </div>
+          <RatingSelector
+            name="rank_max"
+            label="Максимальный рейтинг"
+            value={formData.rank_max}
+            onChange={handleChange}
+            error={errors.rank_max}
+          />
+        </div>
 
-      <div>
-        <p className="text-sm text-gray-600 mb-2">
-          Диапазон рейтинга: {getRatingRangeDescription(formData.rank_min ?? 0, formData.rank_max ?? 0)}
-        </p>
-      </div>
+        <div>
+          <p className="text-sm text-gray-600 mb-2">
+            Диапазон рейтинга: {getRatingRangeDescription(formData.rank_min ?? 0, formData.rank_max ?? 0)}
+          </p>
+        </div>
 
-      <div>
-        <label className="block text-gray-700 mb-1">Максимальное количество участников</label>
-        <input
-          type="number"
-          name="max_users"
-          value={formData.max_users === undefined ? '' : formData.max_users}
-          onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded ${errors.max_users ? 'border-red-500' : 'border-gray-300'}`}
-        />
-        {errors.max_users && <p className="text-red-500 text-sm mt-1">{errors.max_users}</p>}
-      </div>
+        <div>
+          <label className="block text-gray-700 mb-1">Описание (опционально)</label>
+          <textarea
+            name="description"
+            value={formData.description || ''}
+            onChange={handleChange}
+            rows={3}
+            placeholder="Описание турнира, что будет, особенности..."
+            className="w-full px-3 py-2 border border-gray-300 rounded resize-vertical"
+          />
+        </div>
 
-      <div>
-        <label className="block text-gray-700 mb-1">Организатор</label>
-        <select
-          name="organizator_id"
-          value={formData.organizator_id}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded"
-          disabled={loadingUsers}
-        >
-          <option value="">Выберите организатора</option>
-          {users.map((user) => (
-            <option key={user.id} value={user.id}>
-              {user.first_name} {user.second_name} {user.username ? `(@${user.username})` : ''}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-        >
-          Сохранить
-        </button>
-      </div>
-    </form>
+        <div className="flex justify-end pt-2">
+          <button
+            type="submit"
+            className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Сохранить
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

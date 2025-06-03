@@ -11,6 +11,7 @@ const TournamentsPage = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [showPastTournaments, setShowPastTournaments] = useState(false);
@@ -66,17 +67,32 @@ const TournamentsPage = () => {
   const handleSave = async (tournament: Tournament) => {
     try {
       setLoading(true);
+      setError(null);
+      setSuccessMessage(null);
+      let savedTournament: Tournament;
+      
       if (isCreating) {
-        await tournamentService.create(tournament);
+        savedTournament = await tournamentService.create(tournament);
+        // После создания оставляем пользователя на форме редактирования созданного турнира
+        setIsCreating(false);
+        setSelectedTournament(savedTournament);
+        setSuccessMessage('Турнир успешно создан!');
       } else if (selectedTournament?.id) {
-        await tournamentService.update({
+        savedTournament = await tournamentService.update({
           ...tournament,
           id: selectedTournament.id
         });
+        // После обновления оставляем пользователя на той же форме редактирования
+        setSelectedTournament(savedTournament);
+        setSuccessMessage('Турнир успешно обновлён!');
       }
+      
       await fetchTournaments();
-      setIsCreating(false);
-      setSelectedTournament(null);
+      
+      // Скрыть уведомление через 3 секунды
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
     } catch (err) {
       setError('Ошибка при сохранении турнира');
       console.error(err);
@@ -215,6 +231,12 @@ const TournamentsPage = () => {
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {successMessage}
         </div>
       )}
 

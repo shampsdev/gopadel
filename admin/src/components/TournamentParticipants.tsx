@@ -18,7 +18,7 @@ const formatDate = (dateString: string | undefined) => {
       hour: '2-digit',
       minute: '2-digit'
     });
-  } catch (e) {
+  } catch {
     return '—';
   }
 };
@@ -86,7 +86,10 @@ const TournamentParticipants: React.FC<TournamentParticipantsProps> = ({ tournam
                       alt={`${participant.user.first_name} ${participant.user.second_name}`}
                       className="w-8 h-8 rounded-full mr-2" 
                     />
-                    <span>{participant.user.first_name} {participant.user.second_name}</span>
+                    <div className="leading-tight">
+                      <div className="font-medium">{participant.user.first_name} {participant.user.second_name}</div>
+                      <div className="text-sm text-gray-600">@{participant.user.username || 'без имени пользователя'}</div>
+                    </div>
                   </div>
                 </td>
                 <td className="py-2 px-4 border">

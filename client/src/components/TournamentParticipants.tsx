@@ -23,11 +23,6 @@ export default function TournamentParticipants({
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
-  // Function to truncate name if it's longer than 15 characters
-  const truncateName = (name: string, maxLength: number = 15) => {
-    return name.length > maxLength ? name.substring(0, maxLength) + "..." : name
-  }
-
   // Function to navigate to user profile
   const goToUserProfile = (userId: string, event: React.MouseEvent) => {
     event.stopPropagation()
@@ -119,10 +114,11 @@ export default function TournamentParticipants({
                       )}
                     </div>
                     <p className={cn(
-                      "text-center text-xs",
+                      "text-center text-xs leading-tight",
                       registration.status === RegistrationStatus.CANCELED_BY_USER && "text-red-500"
                     )}>
-                      {truncateName(fullName)}
+                      <div className="font-medium">{registration.user.first_name}</div>
+                      <div>{registration.user.second_name}</div>
                     </p>
                   </div>
                 )
