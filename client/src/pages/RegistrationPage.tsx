@@ -13,12 +13,13 @@ import RatingSelector from "@/components/RatingSelector"
 import PlayingPositionSelector from "@/components/PlayingPositionSelector"
 import { PlayingPosition } from "@/types/user"
 import { handleAvatarFileChange } from "@/utils/avatarUpload"
+import { handlePendingStartParam } from "@/utils/startParamHandler"
 
 export default function RegistrationPage() {
   const [name, setName] = useState(initData.user()?.first_name ?? "")
   const [secondName, setSecondName] = useState(initData.user()?.last_name ?? "")
   const [bio, setBio] = useState("")
-  const [rank, setRank] = useState("")
+  const [rank, setRank] = useState("1.0")
   const [city, setCity] = useState("")
   const [birthDate, setBirthDate] = useState("")
   const [playingPosition, setPlayingPosition] =
@@ -68,9 +69,15 @@ export default function RegistrationPage() {
 
   useEffect(() => {
     if (userData?.is_registered) {
-      navigate("/")
+      // Обрабатываем отложенный startParam после успешной регистрации
+      handlePendingStartParam(navigate)
+      // Если нет отложенного startParam, переходим на главную
+      const pendingStartParam = sessionStorage.getItem('pendingStartParam')
+      if (!pendingStartParam) {
+        navigate("/")
+      }
     }
-  }, [userData])
+  }, [userData, navigate])
 
   useEffect(() => {
     // Clean up URL objects when component unmounts

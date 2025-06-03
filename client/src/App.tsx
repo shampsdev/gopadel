@@ -17,7 +17,9 @@ import PeoplePage from "./pages/PeoplePage"
 import UserProfilePage from "./pages/UserProfilePage"
 import LoyaltyPage from "./pages/LoyaltyPage"
 import LeaguePage from "./pages/LeaguePage"
-import { initData, InitData } from "@telegram-apps/sdk-react"
+import { initData } from "@telegram-apps/sdk-react"
+import { handleStartParam } from "@/utils/startParamHandler"
+import useUserStore from "@/stores/userStore"
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -30,22 +32,20 @@ function App() {
 
   useBackButton()
   const { checkAuth } = useAuth()
+  const { isAuthenticated, isLoading } = useUserStore()
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    const startParam = initData.startParam()
-    if (startParam) {
-      if (startParam.startsWith("t-")) {
-        const tournamentId = startParam.substring(2)
-        navigate(`/tournament/${tournamentId}`)
-      }
-    }
+    checkAuth()
   }, [])
 
   useEffect(() => {
-    checkAuth()
-  }, [])
+    if (!isLoading) {
+      const startParam = initData.startParam() || null
+      handleStartParam(startParam, navigate, isAuthenticated)
+    }
+  }, [navigate, isAuthenticated, isLoading])
 
   return (
     <div className="bg-main w-[100vw] h-[100vh] overflow-y-auto">

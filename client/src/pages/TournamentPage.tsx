@@ -32,6 +32,7 @@ import GreenButton from "@/components/ui/GreenButton"
 import PriceWithDiscount from "@/components/PriceWithDiscount"
 import { openTelegramLink, shareURL } from "@telegram-apps/sdk-react"
 import { getRatingRangeDescription } from "@/utils/ratingUtils"
+import { createBotLink } from "@/utils/botUtils"
 
 export default function TournamentPage() {
   const { id } = useParams<{ id: string }>()
@@ -235,7 +236,7 @@ export default function TournamentPage() {
           className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-700 rounded-lg transition-colors duration-200 border border-green-200 mt-2"
           onClick={() =>
             shareURL(
-              `https://t.me/gopadel_league_bot/app?startapp=t-${tournament.id}`
+              createBotLink(`t-${tournament.id}`)
             )
           }
         >
