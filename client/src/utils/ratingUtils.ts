@@ -5,17 +5,17 @@
  */
 export function getRatingWord(rating: number): string {
   if (rating >= 0 && rating < 1.7) {
-    return `Beginner (${rating})`;
+    return `Beginner`;
   } else if (rating >= 1.7 && rating < 2.7) {
-    return `Upper Beginner (${rating})`;
+    return `Upper Beginner`;
   } else if (rating >= 2.7 && rating < 3.5) {
-    return `Intermediate (${rating})`;
+    return `Intermediate`;
   } else if (rating >= 3.5 && rating < 4.5) {
-    return `Upper Intermediate (${rating})`;
+    return `Upper Intermediate`;
   } else if (rating >= 4.5 && rating < 6.0) {
-    return `Advanced (${rating})`;
+    return `Advanced`;
   } else if (rating >= 6.0) {
-    return `Pro (${rating})`;
+    return `Pro`;
   } else {
     return `${rating}`;
   }

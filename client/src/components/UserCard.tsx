@@ -1,5 +1,5 @@
 import { User } from "@/types/user";
-import { ChevronRight, MapPin, User as UserIcon, Star, Target } from "lucide-react";
+import { ChevronRight, MapPin, User as UserIcon, Star, Square } from "lucide-react";
 import LoyaltyBadge from "@/components/LoyaltyBadge";
 import { getRatingWord } from "@/utils/ratingUtils";
 import { getPlayingPositionText } from "@/utils/playingPosition";
@@ -56,7 +56,7 @@ export default function UserCard({ user, onClick }: UserCardProps) {
           
           {user.playing_position && (
             <div className="flex items-center text-gray-500 text-sm">
-              <Target size={14} className="mr-1.5 text-gray-400" />
+              <Square size={14} className="mr-1.5 text-gray-400" />
               <span>{getPlayingPositionText(user.playing_position)}</span>
             </div>
           )}

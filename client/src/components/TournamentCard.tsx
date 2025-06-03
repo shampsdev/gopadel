@@ -46,9 +46,9 @@ export default function TournamentCard({ tournament }: TournamentCardProps) {
           <div className="w-6 mr-2">
             <FaMapMarkerAlt className="text-gray-600" />
           </div>
-          <div className="text-sm flex">
-            <div>{tournament.club.name}</div>
-            <div className="text-gray-500 ml-2">{tournament.club.address}</div>
+          <div className="text-sm">
+            <span className="font-medium">{tournament.club.name}</span> <br />
+            <span className="text-gray-500 text-xs">{tournament.club.address}</span>
           </div>
         </div>
 

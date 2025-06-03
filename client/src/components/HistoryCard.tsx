@@ -29,9 +29,9 @@ export default function HistoryCard({ registration }: HistoryCardProps) {
         
         <div className="flex items-center">
           <FaMapMarkerAlt className="mr-2" />
-          <div className="flex">
-            <span className="font-medium">{tournament.club.name}</span>
-            <span className="text-gray-500 ml-2">{tournament.club.address}</span>
+          <div className="text-sm">
+            <span className="font-medium">{tournament.club.name}</span> <br />
+            <span className="text-gray-500 text-xs">{tournament.club.address}</span>
           </div>
         </div>
       </div>
