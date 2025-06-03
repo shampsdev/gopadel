@@ -85,7 +85,15 @@ class TournamentRepository(BaseRepository[Tournament]):
         query = db.query(Tournament).options(joinedload(Tournament.club))
 
         if filter_old:
-            query = query.filter(Tournament.start_time >= datetime.now())
+            # Filter out finished tournaments
+            # A tournament is finished if its end_time (or start_time if no end_time) has passed
+            now = datetime.now()
+            query = query.filter(
+                or_(
+                    and_(Tournament.end_time.is_not(None), Tournament.end_time >= now),
+                    and_(Tournament.end_time.is_(None), Tournament.start_time >= now),
+                )
+            )
 
         if club_id:
             query = query.filter(Tournament.club_id == club_id)
@@ -96,11 +104,17 @@ class TournamentRepository(BaseRepository[Tournament]):
         self, db: Session, user: User, skip: int = 0, limit: int = 10
     ) -> List[Tournament]:
         """Get tournaments available for user registration"""
-        # First get all future tournaments
+        # First get all future tournaments (not finished)
+        now = datetime.now()
         all_tournaments = (
             db.query(Tournament)
             .options(joinedload(Tournament.club))
-            .filter(Tournament.start_time >= datetime.now())
+            .filter(
+                or_(
+                    and_(Tournament.end_time.is_not(None), Tournament.end_time >= now),
+                    and_(Tournament.end_time.is_(None), Tournament.start_time >= now),
+                )
+            )
             .order_by(Tournament.start_time)
             .all()
         )
@@ -138,13 +152,19 @@ class TournamentRepository(BaseRepository[Tournament]):
         self, db: Session, skip: int = 0, limit: int = 10
     ) -> List[Tournament]:
         """Get tournaments sorted by registration count"""
+        now = datetime.now()
         return (
             db.query(
                 Tournament,
                 func.count(Registration.id).label("registration_count"),
             )
             .outerjoin(Registration)
-            .filter(Tournament.start_time >= datetime.now())
+            .filter(
+                or_(
+                    and_(Tournament.end_time.is_not(None), Tournament.end_time >= now),
+                    and_(Tournament.end_time.is_(None), Tournament.start_time >= now),
+                )
+            )
             .group_by(Tournament.id)
             .order_by(func.count(Registration.id).desc())
             .offset(skip)

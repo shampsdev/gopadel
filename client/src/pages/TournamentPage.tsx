@@ -137,6 +137,9 @@ export default function TournamentPage() {
   // Check if tournament has available spots
   const hasAvailableSpots = tournament.current_users < tournament.max_users
 
+  // Check if tournament is finished
+  const isFinished = tournament.is_finished
+
   return (
     <div className="p-4 bg-white min-h-screen flex flex-col pb-20">
       <Header />
@@ -238,7 +241,14 @@ export default function TournamentPage() {
         />
 
         <div className="mt-auto">
-          {registration?.status === RegistrationStatus.CANCELED_BY_USER ? (
+          {isFinished ? (
+            <div className="mt-4 text-center">
+              <p className="mb-2 text-gray-600">Турнир завершен</p>
+              {registration?.status === RegistrationStatus.ACTIVE && (
+                <p className="text-sm text-gray-500">Вы участвовали в этом турнире</p>
+              )}
+            </div>
+          ) : registration?.status === RegistrationStatus.CANCELED_BY_USER ? (
             <div className="mt-4 text-center">
               <p className="mb-2 text-gray-600">Ваша регистрация была отменена</p>
               {hasAvailableSpots ? (

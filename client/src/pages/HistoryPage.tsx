@@ -19,7 +19,37 @@ export default function HistoryPage() {
       setLoading(true)
       getUserTournamentHistory()
         .then((registrations) => {
-          setRegistrations(registrations || [])
+          if (registrations) {
+            // Сортируем турниры: сначала активные, потом завершенные
+            // Внутри каждой группы сортируем по дате турнира
+            const sortedRegistrations = [...registrations].sort((a, b) => {
+              const aFinished = a.tournament.is_finished
+              const bFinished = b.tournament.is_finished
+              
+              // Сначала активные турниры (незавершенные)
+              if (aFinished !== bFinished) {
+                return aFinished ? 1 : -1
+              }
+              
+              // Внутри каждой группы сортируем по дате начала турнира
+              // Для активных турниров - по возрастанию (ближайшие первыми)
+              // Для завершенных турниров - по убыванию (недавние первыми)
+              const aDate = new Date(a.tournament.start_time).getTime()
+              const bDate = new Date(b.tournament.start_time).getTime()
+              
+              if (aFinished) {
+                // Завершенные турниры: новые первыми
+                return bDate - aDate
+              } else {
+                // Активные турниры: ближайшие первыми
+                return aDate - bDate
+              }
+            })
+            
+            setRegistrations(sortedRegistrations)
+          } else {
+            setRegistrations([])
+          }
         })
         .catch((error) => {
           console.error("Error fetching tournaments:", error)
@@ -50,14 +80,51 @@ export default function HistoryPage() {
       
       <div className="mt-4">
         {registrations.length > 0 ? (
-          registrations.map((registration) => (
-            <Link
-              key={registration.id}
-              to={`/tournament/${registration.tournament.id}`}
-            >
-              <HistoryCard registration={registration} />
-            </Link>
-          ))
+          <>
+            {(() => {
+              // Разделяем регистрации на активные и завершенные
+              const activeRegistrations = registrations.filter(r => !r.tournament.is_finished)
+              const finishedRegistrations = registrations.filter(r => r.tournament.is_finished)
+              
+              return (
+                <>
+                  {/* Активные турниры */}
+                  {activeRegistrations.length > 0 && (
+                    <div className="mb-6">
+                      <h2 className="text-lg font-semibold text-gray-900 mb-3 px-1">
+                        Активные турниры ({activeRegistrations.length})
+                      </h2>
+                      {activeRegistrations.map((registration) => (
+                        <Link
+                          key={registration.id}
+                          to={`/tournament/${registration.tournament.id}`}
+                        >
+                          <HistoryCard registration={registration} />
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Завершенные турниры */}
+                  {finishedRegistrations.length > 0 && (
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900 mb-3 px-1">
+                        Завершенные турниры ({finishedRegistrations.length})
+                      </h2>
+                      {finishedRegistrations.map((registration) => (
+                        <Link
+                          key={registration.id}
+                          to={`/tournament/${registration.tournament.id}`}
+                        >
+                          <HistoryCard registration={registration} />
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )
+            })()}
+          </>
         ) : (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-4">

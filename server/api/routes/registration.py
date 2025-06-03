@@ -3,6 +3,7 @@ from uuid import UUID
 from api.deps import SessionDep, UserDep
 from api.schemas.registration import RegistrationResponse
 from api.schemas.waitlist import WaitlistResponse
+from api.utils.tournament import is_tournament_finished
 from bot.init_bot import bot
 from db.models.registration import RegistrationStatus
 from fastapi import APIRouter, HTTPException
@@ -22,6 +23,12 @@ async def register_for_tournament(db: SessionDep, tournament_id: UUID, user: Use
     tournament = tournament_repository.get(db, tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
+
+    # Check if tournament is finished
+    if is_tournament_finished(tournament):
+        raise HTTPException(
+            status_code=400, detail="Cannot register for a finished tournament"
+        )
 
     registration = registration_repository.get_user_tournament_registration(
         db, user.id, tournament_id
@@ -113,6 +120,17 @@ async def register_for_tournament(db: SessionDep, tournament_id: UUID, user: Use
 
 @router.delete("/{tournament_id}", response_model=RegistrationResponse)
 async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep):
+    tournament = tournament_repository.get(db, tournament_id)
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Tournament not found")
+
+    # Check if tournament is finished
+    if is_tournament_finished(tournament):
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot cancel registration for a finished tournament",
+        )
+
     registration = registration_repository.get_user_tournament_registration(
         db, user.id, tournament_id
     )
