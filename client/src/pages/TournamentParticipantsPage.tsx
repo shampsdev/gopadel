@@ -33,7 +33,11 @@ export default function TournamentParticipantsPage() {
         ])
 
         setTournament(tournamentData)
-        setRegistrations(registrationsData)
+        // Filter out participants with CANCELED status
+        const activeRegistrations = registrationsData.filter(
+          (registration) => registration.status !== RegistrationStatus.CANCELED
+        )
+        setRegistrations(activeRegistrations)
       } catch (error) {
         console.error("Error fetching data:", error)
       } finally {

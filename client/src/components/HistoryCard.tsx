@@ -66,6 +66,7 @@ export default function HistoryCard({ registration }: HistoryCardProps) {
             {registration.status === RegistrationStatus.ACTIVE ? 
               (isFinished ? 'Участвовал' : 'Активная') :
              registration.status === RegistrationStatus.PENDING ? 'В ожидании' :
+             registration.status === RegistrationStatus.CANCELED_BY_USER ? 'Отменена пользователем' :
              'Отменена'}
           </span>
         </div>

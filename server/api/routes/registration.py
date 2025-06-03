@@ -118,6 +118,47 @@ async def register_for_tournament(db: SessionDep, tournament_id: UUID, user: Use
     return registration
 
 
+@router.delete(
+    "/{tournament_id}/cancel-before-payment", response_model=RegistrationResponse
+)
+async def cancel_registration_before_payment(
+    db: SessionDep, tournament_id: UUID, user: UserDep
+):
+    """Cancel registration before payment with CANCELED status (not CANCELED_BY_USER)"""
+    tournament = tournament_repository.get(db, tournament_id)
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Tournament not found")
+
+    # Check if tournament is finished
+    if is_tournament_finished(tournament):
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot cancel registration for a finished tournament",
+        )
+
+    registration = registration_repository.get_user_tournament_registration(
+        db, user.id, tournament_id
+    )
+    if not registration:
+        raise HTTPException(status_code=404, detail="Registration not found")
+
+    # Only allow cancellation for pending registrations (before payment)
+    if registration.status != RegistrationStatus.PENDING:
+        raise HTTPException(
+            status_code=400,
+            detail="Can only cancel pending registrations before payment",
+        )
+
+    # Set status to CANCELED (not CANCELED_BY_USER)
+    registration_repository.update_registration_status(
+        db, registration.id, RegistrationStatus.CANCELED
+    )
+
+    # Уведомляем всех пользователей из waitlist о том, что освободилось место
+    await notify_waitlist_users(bot, db, tournament_id)
+    return registration
+
+
 @router.delete("/{tournament_id}", response_model=RegistrationResponse)
 async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep):
     tournament = tournament_repository.get(db, tournament_id)

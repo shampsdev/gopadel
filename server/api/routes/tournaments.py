@@ -63,5 +63,11 @@ async def get_tournament_participants(db: SessionDep, tournament_id: UUID):
         db, tournament_id
     )
 
-    # Return all registrations (including PENDING) to show their status
-    return registrations
+    # Filter out participants with CANCELED status - don't show them in the list
+    active_registrations = [
+        registration
+        for registration in registrations
+        if registration.status != RegistrationStatus.CANCELED
+    ]
+
+    return active_registrations

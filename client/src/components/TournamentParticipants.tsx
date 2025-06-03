@@ -19,9 +19,19 @@ export default function TournamentParticipants({
   maxDisplay = 10,
 }: TournamentParticipantsProps) {
   const [showLeftShadow, setShowLeftShadow] = useState(false)
-  const [showRightShadow, setShowRightShadow] = useState(true)
+  const [showRightShadow, setShowRightShadow] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+
+  // Filter out participants with CANCELED status
+  const activeRegistrations = registrations.filter(
+    (registration) => registration.status !== RegistrationStatus.CANCELED
+  )
+
+  // Show either all active registrations or a limited number
+  const displayRegistrations = showAll
+    ? activeRegistrations
+    : activeRegistrations.slice(0, maxDisplay)
 
   // Function to navigate to user profile
   const goToUserProfile = (userId: string, event: React.MouseEvent) => {
@@ -50,10 +60,6 @@ export default function TournamentParticipants({
       return () => container.removeEventListener("scroll", checkScroll)
     }
   }, [registrations])
-
-  const displayRegistrations = showAll
-    ? registrations
-    : registrations.slice(0, maxDisplay)
 
   return (
     <div>

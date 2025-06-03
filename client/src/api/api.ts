@@ -150,6 +150,23 @@ export const deleteRegistration = async (
   }
 }
 
+export const cancelRegistrationBeforePayment = async (
+  tournamentId: string
+): Promise<Registration | null> => {
+  try {
+    const response = await api.delete<Registration>(
+      `/registration/${tournamentId}/cancel-before-payment`
+    )
+    return response.data
+  } catch (error) {
+    console.error(
+      `Error canceling registration before payment for tournament ${tournamentId}:`,
+      error
+    )
+    return null
+  }
+}
+
 export const getUsers = async () => {
   try {
     const response = await api.get("/users")

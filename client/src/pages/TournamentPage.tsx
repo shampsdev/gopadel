@@ -56,7 +56,7 @@ export default function TournamentPage() {
         setRegistration(registrationData)
         
         // Check waitlist status only if not registered
-        if (!registrationData || registrationData.status === RegistrationStatus.CANCELED_BY_USER) {
+        if (!registrationData || registrationData.status === RegistrationStatus.CANCELED_BY_USER || registrationData.status === RegistrationStatus.CANCELED) {
           const waitlistData = await getTournamentWaitlistStatus(id)
           setWaitlistEntry(waitlistData)
         } else {
@@ -285,6 +285,32 @@ export default function TournamentPage() {
                   @Alievskey
                 </span>
               </p>
+            </div>
+          ) : registration?.status === RegistrationStatus.CANCELED ? (
+            <div className="mt-4 text-center">
+              <p className="mb-2 text-gray-600">Регистрация была отменена</p>
+              {hasAvailableSpots ? (
+                <ParticipateButton
+                  tournamentId={tournament.id}
+                  registration={null}
+                  callback={() => {
+                    fetchTournament()
+                  }}
+                />
+              ) : (
+                <>
+                  <p className="mb-2 text-amber-600">
+                    Нет свободных мест
+                  </p>
+                  <WaitlistButton
+                    tournamentId={tournament.id}
+                    waitlistEntry={waitlistEntry}
+                    callback={() => {
+                      fetchTournament()
+                    }}
+                  />
+                </>
+              )}
             </div>
           ) : registration?.status === RegistrationStatus.ACTIVE ? (
             <div className="mt-4 text-center">

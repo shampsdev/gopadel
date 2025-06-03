@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import GreenButton from "@/components/ui/GreenButton"
 import PaymentWidget from "@/components/PaymentWidget"
-import { registerForTournament } from "@/api/api"
+import { registerForTournament, cancelRegistrationBeforePayment } from "@/api/api"
 import { backButton } from "@telegram-apps/sdk-react"
 import { Registration, RegistrationStatus } from "@/types/registration"
 
@@ -41,6 +41,7 @@ export default function ParticipateButton({
       setLoading(false)
     }
   }
+  
   const handlePay = async () => {
     setLoading(true)
     backButton.hide()
@@ -73,6 +74,23 @@ export default function ParticipateButton({
     }
   }
 
+  const handleCancelBeforePayment = async () => {
+    setLoading(true)
+    try {
+      const result = await cancelRegistrationBeforePayment(tournamentId)
+      if (result) {
+        setCurrentRegistration(null)
+        callback?.()
+      } else {
+        console.error("Failed to cancel registration")
+      }
+    } catch (error) {
+      console.error("Error canceling registration:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handlePaymentSuccess = () => {
     setShowPayment(false)
     callback?.()
@@ -89,16 +107,26 @@ export default function ParticipateButton({
     return isReturning ? "Вернуться" : "Зарегистрироваться"
   }
 
-  // If we have a pending registration with payment, show payment option
+  // If we have a pending registration with payment, show payment and cancel options
   if (
     currentRegistration?.status === RegistrationStatus.PENDING &&
     currentRegistration?.payment &&
     !showPayment
   ) {
     return (
-      <GreenButton onClick={handlePayClick} className="w-full rounded-full">
-        Оплатить
-      </GreenButton>
+      <div className="w-full space-y-2">
+        <GreenButton onClick={handlePayClick} className="w-full rounded-full">
+          Оплатить
+        </GreenButton>
+        <GreenButton 
+          onClick={handleCancelBeforePayment} 
+          isLoading={loading}
+          buttonClassName="bg-red-500 hover:bg-red-600"
+          className="w-full rounded-full"
+        >
+          Отменить регистрацию
+        </GreenButton>
+      </div>
     )
   }
 

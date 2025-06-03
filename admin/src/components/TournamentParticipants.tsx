@@ -96,6 +96,7 @@ const TournamentParticipants: React.FC<TournamentParticipantsProps> = ({ tournam
                   {participant.status === 'active' && <span className="text-green-600">Активный</span>}
                   {participant.status === 'pending' && <span className="text-yellow-600">В ожидании</span>}
                   {participant.status === 'canceled' && <span className="text-red-600">Отменен</span>}
+                  {participant.status === 'canceled_by_user' && <span className="text-red-600">Отменен пользователем</span>}
                 </td>
                 <td className="py-2 px-4 border">
                   {formatDate(participant.date)}
