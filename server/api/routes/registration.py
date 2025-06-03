@@ -3,10 +3,9 @@ from uuid import UUID
 from api.deps import SessionDep, UserDep
 from api.schemas.registration import RegistrationResponse
 from bot.init_bot import bot
-from db.crud import registration as registration_crud
-from db.crud import tournament as tournament_crud
 from db.models.registration import RegistrationStatus
 from fastapi import APIRouter, HTTPException
+from repositories import registration_repository, tournament_repository
 from services.payments import create_widget_payment
 from services.waitlist import notify_waitlist
 
@@ -15,23 +14,25 @@ router = APIRouter()
 
 @router.post("/{tournament_id}", response_model=RegistrationResponse)
 async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
-    tournament = tournament_crud.get_tournament_with_participants_by_id(
-        db, tournament_id
-    )
+    tournament = tournament_repository.get(db, tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
 
-    registration = registration_crud.get_registration_by_user_and_tournament(
+    registration = registration_repository.get_user_tournament_registration(
         db, user.id, tournament_id
     )
     discount = user.loyalty.discount if user.loyalty else 0
     price = round(tournament.price * (1 - discount / 100))
     is_free = price == 0
 
+    # Get tournament registrations to check if full
+    tournament_registrations = registration_repository.get_tournament_registrations(
+        db, tournament_id
+    )
     reserved_users = len(
         [
             r
-            for r in tournament.registrations
+            for r in tournament_registrations
             if r.status in (RegistrationStatus.ACTIVE, RegistrationStatus.PENDING)
         ]
     )
@@ -46,11 +47,11 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
                 status_code=400, detail="User already registered for this tournament"
             )
         elif registration.status in (RegistrationStatus.CANCELED_BY_USER,):
-            registration_crud.update_registration_status(
+            registration_repository.update_registration_status(
                 db, registration.id, RegistrationStatus.ACTIVE
             )
         else:
-            registration_crud.update_registration_status(
+            registration_repository.update_registration_status(
                 db, registration.id, RegistrationStatus.PENDING
             )
     payment = (
@@ -63,17 +64,17 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
         else None
     )
     if registration:
-        registration_crud.update_registration_payment(
+        registration_repository.update_registration_payment(
             db, registration.id, payment.id if payment else None
         )
 
     else:
-        registration = registration_crud.create_registration(
+        registration = registration_repository.create_registration(
             db,
-            tournament_id,
-            user.id,
-            payment.id if payment else None,
-            RegistrationStatus.ACTIVE if is_free else RegistrationStatus.PENDING,
+            user_id=user.id,
+            tournament_id=tournament_id,
+            payment_id=payment.id if payment else None,
+            status=RegistrationStatus.ACTIVE if is_free else RegistrationStatus.PENDING,
         )
 
     return registration
@@ -81,14 +82,14 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
 
 @router.delete("/{tournament_id}", response_model=RegistrationResponse)
 async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep):
-    registration = registration_crud.get_registration_by_user_and_tournament(
+    registration = registration_repository.get_user_tournament_registration(
         db, user.id, tournament_id
     )
     if not registration:
         raise HTTPException(status_code=404, detail="Registration not found")
     if registration.status != RegistrationStatus.ACTIVE:
         raise HTTPException(status_code=400, detail="Registration is not active")
-    registration_crud.update_registration_status(
+    registration_repository.update_registration_status(
         db, registration.id, RegistrationStatus.CANCELED_BY_USER
     )
     await notify_waitlist(bot, db, tournament_id)

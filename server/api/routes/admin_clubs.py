@@ -4,9 +4,9 @@ from uuid import UUID
 from api.deps import SessionDep
 from api.schemas.club import Club, ClubCreate, ClubUpdate
 from api.utils.admin_middleware import admin_required
-from db.crud import club as club_crud
 from fastapi import APIRouter, HTTPException, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from repositories import club_repository
 
 router = APIRouter()
 security = HTTPBearer()
@@ -22,7 +22,7 @@ async def get_clubs(
     limit: int = 100,
 ):
     """Получить список всех клубов"""
-    clubs = club_crud.get_clubs(db, skip=skip, limit=limit)
+    clubs = club_repository.get_all(db, skip=skip, limit=limit)
     return clubs
 
 
@@ -35,7 +35,11 @@ async def create_club(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Создать новый клуб"""
-    return club_crud.create_club(db, name=club.name, address=club.address)
+    return club_repository.create_club(
+        db,
+        name=club.name,
+        address=club.address,
+    )
 
 
 @router.get("/{club_id}", response_model=Club)
@@ -47,7 +51,7 @@ async def get_club(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Получить клуб по ID"""
-    club = club_crud.get_club_by_id(db, club_id)
+    club = club_repository.get(db, club_id)
     if club is None:
         raise HTTPException(status_code=404, detail="Club not found")
     return club
@@ -63,12 +67,18 @@ async def update_club(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Обновить клуб"""
-    club = club_crud.update_club(
-        db, club_id, name=club_update.name, address=club_update.address
-    )
-    if club is None:
+    club = club_repository.get(db, club_id)
+    if not club:
         raise HTTPException(status_code=404, detail="Club not found")
-    return club
+
+    update_data = {}
+    if club_update.name is not None:
+        update_data["name"] = club_update.name
+    if club_update.address is not None:
+        update_data["address"] = club_update.address
+
+    updated_club = club_repository.update_club(db, club, update_data)
+    return updated_club
 
 
 @router.delete("/{club_id}")
@@ -80,7 +90,7 @@ async def delete_club(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Удалить клуб"""
-    success = club_crud.delete_club(db, club_id)
+    success = club_repository.delete_club(db, club_id)
     if not success:
         raise HTTPException(status_code=404, detail="Club not found")
     return {"message": "Club deleted successfully"}

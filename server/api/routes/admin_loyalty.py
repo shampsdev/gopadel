@@ -3,15 +3,9 @@ from typing import List
 from api.deps import SessionDep
 from api.schemas.admin_loyalty import AdminLoyaltyResponse, LoyaltyCreate, LoyaltyUpdate
 from api.utils.admin_middleware import admin_required
-from db.crud.loyalty import (
-    create_loyalty,
-    delete_loyalty,
-    get_loyalties,
-    get_loyalty_by_id,
-    update_loyalty,
-)
 from fastapi import APIRouter, HTTPException, Request, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from repositories import loyalty_repository
 
 router = APIRouter()
 security = HTTPBearer()
@@ -30,7 +24,7 @@ async def get_all_loyalties(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Get all loyalty levels"""
-    loyalties = get_loyalties(db)
+    loyalties = loyalty_repository.get_all_loyalty_levels(db)
     for loyalty in loyalties:
         setattr(loyalty, "users_count", len(loyalty.users))
     return loyalties
@@ -53,7 +47,7 @@ async def get_loyalty_admin(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Get a loyalty level by ID"""
-    loyalty = get_loyalty_by_id(db, loyalty_id)
+    loyalty = loyalty_repository.get(db, loyalty_id)
     if not loyalty:
         raise HTTPException(status_code=404, detail="Loyalty level not found")
 
@@ -76,7 +70,7 @@ async def create_loyalty_admin(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Create a new loyalty level"""
-    loyalty = create_loyalty(
+    loyalty = loyalty_repository.create_loyalty_level(
         db=db,
         name=loyalty_data.name,
         discount=loyalty_data.discount,
@@ -105,13 +99,20 @@ async def update_loyalty_admin(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Update a loyalty level"""
-    loyalty = update_loyalty(
+    update_data = {}
+    if loyalty_data.name is not None:
+        update_data["name"] = loyalty_data.name
+    if loyalty_data.discount is not None:
+        update_data["discount"] = loyalty_data.discount
+    if loyalty_data.description is not None:
+        update_data["description"] = loyalty_data.description
+    if loyalty_data.requirements is not None:
+        update_data["requirements"] = loyalty_data.requirements
+
+    loyalty = loyalty_repository.update_loyalty_level(
         db=db,
         loyalty_id=loyalty_id,
-        name=loyalty_data.name,
-        discount=loyalty_data.discount,
-        description=loyalty_data.description,
-        requirements=loyalty_data.requirements,
+        update_data=update_data,
     )
     if not loyalty:
         raise HTTPException(status_code=404, detail="Loyalty level not found")
@@ -137,6 +138,6 @@ async def delete_loyalty_admin(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Delete a loyalty level"""
-    success = delete_loyalty(db, loyalty_id)
+    success = loyalty_repository.delete_loyalty_level(db, loyalty_id)
     if not success:
         raise HTTPException(status_code=404, detail="Loyalty level not found")

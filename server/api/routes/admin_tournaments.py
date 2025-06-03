@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from api.deps import SessionDep
@@ -10,18 +10,14 @@ from api.schemas.admin_tournament import (
 from api.schemas.registration import RegistrationResponse
 from api.schemas.waitlist import WaitlistResponse
 from api.utils.admin_middleware import admin_required
-from db.crud.registration import get_registrations_by_tournament
-from db.crud.tournament import (
-    create_tournament,
-    delete_tournament,
-    get_tournament_by_id,
-    get_tournaments,
-    update_tournament,
-)
-from db.crud.user import get_all_users
-from db.crud.waitlist import get_waitlist_entries_by_tournament
 from fastapi import APIRouter, HTTPException, Request, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from repositories import (
+    registration_repository,
+    tournament_repository,
+    user_repository,
+    waitlist_repository,
+)
 
 router = APIRouter()
 security = HTTPBearer()
@@ -40,7 +36,7 @@ async def get_all_tournaments(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Get all tournaments"""
-    return get_tournaments(db)
+    return tournament_repository.get_all(db)
 
 
 @router.get(
@@ -60,7 +56,7 @@ async def get_tournament_admin(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Get a tournament by ID"""
-    tournament = get_tournament_by_id(db, tournament_id)
+    tournament = tournament_repository.get(db, tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
     return tournament
@@ -81,10 +77,10 @@ async def create_tournament_admin(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Create a new tournament"""
-    # If organizator_id is not provided, get the first user from the database
+    # Get organizator_id - use first user if not provided
     organizator_id = tournament_data.organizator_id
     if not organizator_id:
-        users = get_all_users(db, limit=1)
+        users = user_repository.get_all(db, limit=1)
         if not users:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -92,13 +88,13 @@ async def create_tournament_admin(
             )
         organizator_id = users[0].id
 
-    tournament = create_tournament(
+    tournament = tournament_repository.create_tournament(
         db=db,
         name=tournament_data.name,
         start_time=tournament_data.start_time,
         end_time=tournament_data.end_time,
-        price=tournament_data.price,
         club_id=tournament_data.club_id,
+        price=tournament_data.price,
         tournament_type=tournament_data.tournament_type,
         rank_min=tournament_data.rank_min,
         rank_max=tournament_data.rank_max,
@@ -127,24 +123,38 @@ async def update_tournament_admin(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Update a tournament"""
-    tournament = update_tournament(
-        db=db,
-        tournament_id=tournament_id,
-        name=tournament_data.name,
-        start_time=tournament_data.start_time,
-        end_time=tournament_data.end_time,
-        price=tournament_data.price,
-        club_id=tournament_data.club_id,
-        tournament_type=tournament_data.tournament_type,
-        rank_min=tournament_data.rank_min,
-        rank_max=tournament_data.rank_max,
-        max_users=tournament_data.max_users,
-        description=tournament_data.description,
-        organizator_id=tournament_data.organizator_id,
-    )
+    tournament = tournament_repository.get(db, tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
-    return tournament
+
+    update_data = {}
+    if tournament_data.name is not None:
+        update_data["name"] = tournament_data.name
+    if tournament_data.start_time is not None:
+        update_data["start_time"] = tournament_data.start_time
+    if tournament_data.end_time is not None:
+        update_data["end_time"] = tournament_data.end_time
+    if tournament_data.club_id is not None:
+        update_data["club_id"] = tournament_data.club_id
+    if tournament_data.price is not None:
+        update_data["price"] = tournament_data.price
+    if tournament_data.tournament_type is not None:
+        update_data["tournament_type"] = tournament_data.tournament_type
+    if tournament_data.rank_min is not None:
+        update_data["rank_min"] = tournament_data.rank_min
+    if tournament_data.rank_max is not None:
+        update_data["rank_max"] = tournament_data.rank_max
+    if tournament_data.max_users is not None:
+        update_data["max_users"] = tournament_data.max_users
+    if tournament_data.description is not None:
+        update_data["description"] = tournament_data.description
+    if tournament_data.organizator_id is not None:
+        update_data["organizator_id"] = tournament_data.organizator_id
+
+    updated_tournament = tournament_repository.update_tournament(
+        db, tournament, update_data
+    )
+    return updated_tournament
 
 
 @router.delete(
@@ -164,7 +174,7 @@ async def delete_tournament_admin(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Delete a tournament"""
-    success = delete_tournament(db, tournament_id)
+    success = tournament_repository.delete_tournament(db, tournament_id)
     if not success:
         raise HTTPException(status_code=404, detail="Tournament not found")
     return None
@@ -187,11 +197,13 @@ async def get_tournament_participants(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Get all participants for a tournament"""
-    tournament = get_tournament_by_id(db, tournament_id)
+    tournament = tournament_repository.get(db, tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
 
-    registrations = get_registrations_by_tournament(db, tournament_id)
+    registrations = registration_repository.get_tournament_registrations(
+        db, tournament_id
+    )
     return registrations
 
 
@@ -212,9 +224,9 @@ async def get_tournament_waitlist(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Get waitlist for a tournament"""
-    tournament = get_tournament_by_id(db, tournament_id)
+    tournament = tournament_repository.get(db, tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
 
-    waitlist = get_waitlist_entries_by_tournament(db, tournament_id)
+    waitlist = waitlist_repository.get_tournament_waitlist(db, tournament_id)
     return waitlist

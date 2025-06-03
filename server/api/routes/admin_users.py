@@ -1,12 +1,13 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from api.deps import SessionDep
 from api.schemas.admin_user_operations import UserResponse, UserUpdateByAdmin
+from api.schemas.user import UserBase
 from api.utils.admin_middleware import admin_required
-from db.crud.user import get_all_users, get_user_by_id, update_user_by_admin
-from fastapi import APIRouter, HTTPException, Request, Security
+from fastapi import APIRouter, HTTPException, Query, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from repositories import user_repository
 
 router = APIRouter()
 security = HTTPBearer()
@@ -27,7 +28,7 @@ async def get_users(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Get all users with pagination"""
-    users = get_all_users(db, skip=skip, limit=limit)
+    users = user_repository.get_all(db, skip=skip, limit=limit)
     return users
 
 
@@ -48,7 +49,7 @@ async def get_user(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Get a specific user by ID"""
-    user = get_user_by_id(db, user_id)
+    user = user_repository.get(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -72,9 +73,9 @@ async def update_user(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Update user details by admin"""
-    user = get_user_by_id(db, user_id)
+    user = user_repository.get(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    updated_user = update_user_by_admin(db, user, update_data)
+    updated_user = user_repository.update_user_by_admin(db, user, update_data)
     return updated_user

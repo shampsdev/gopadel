@@ -1,12 +1,14 @@
 from typing import Optional
+from uuid import UUID
 
 from api.deps import SessionDep
 from api.schemas.admin_payment import PaymentResponse, PaymentWithRegistration
 from api.utils.admin_middleware import admin_required
-from db.models.payment import Payment
+from db.models.payment import Payment, PaymentStatus
 from db.models.registration import Registration
 from fastapi import APIRouter, HTTPException, Query, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from repositories import payment_repository
 from sqlalchemy import desc
 from sqlalchemy.orm import joinedload
 
@@ -30,31 +32,31 @@ async def get_payments(
     Get all payments with pagination.
     Optionally filter by user_id, tournament_id, or status.
     """
-    query = (
-        db.query(Payment)
-        .join(Registration, Registration.payment_id == Payment.id, isouter=True)
-        .options(
-            joinedload(Payment.registration).joinedload(Registration.user),
-            joinedload(Payment.registration).joinedload(Registration.tournament),
-        )
-        .order_by(desc(Payment.date))
+    # Convert status string to enum if provided
+    payment_status = None
+    if status:
+        try:
+            payment_status = PaymentStatus(status)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid payment status")
+
+    # Use repository to get filtered payments
+    payments = payment_repository.get_filtered_payments(
+        db=db,
+        skip=skip,
+        limit=limit,
+        status=payment_status,
+        tournament_id=UUID(tournament_id) if tournament_id else None,
+        user_id=UUID(user_id) if user_id else None,
     )
 
-    # Apply filters if provided
-    if user_id:
-        query = query.filter(Registration.user_id == user_id)
-
-    if tournament_id:
-        query = query.filter(Registration.tournament_id == tournament_id)
-
-    if status:
-        query = query.filter(Payment.status == status)
-
     # Count total matching records
-    total = query.count()
-
-    # Apply pagination
-    payments = query.offset(skip).limit(limit).all()
+    total = payment_repository.count_filtered_payments(
+        db=db,
+        status=payment_status,
+        tournament_id=UUID(tournament_id) if tournament_id else None,
+        user_id=UUID(user_id) if user_id else None,
+    )
 
     # Convert to schema
     payment_list = []

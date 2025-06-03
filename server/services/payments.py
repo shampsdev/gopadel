@@ -1,13 +1,14 @@
-from yookassa import Configuration
-from yookassa import Payment as YooKassaPayment
-from uuid import uuid4
 from datetime import datetime
+from uuid import uuid4
 from zoneinfo import ZoneInfo
-from sqlalchemy.orm import Session
 
 from config import settings
 from db.models.payment import Payment
 from db.models.tournament import Tournament
+from repositories import payment_repository
+from sqlalchemy.orm import Session
+from yookassa import Configuration
+from yookassa import Payment as YooKassaPayment
 
 
 def configure_yookassa():
@@ -74,19 +75,14 @@ def create_invoice(
     if yoo_payment.confirmation is None:
         raise ValueError("Payment confirmation URL is missing")
 
-    # Create payment record in database
-    payment = Payment(
-        id=uuid4(),
+    # Create payment record using repository
+    payment = payment_repository.create_payment(
+        db=db,
         payment_id=yoo_payment.id,
-        date=datetime.now(ZoneInfo("Europe/Moscow")),
         amount=final_price,
         payment_link=yoo_payment.confirmation.confirmation_url,
         status=yoo_payment.status,
     )
-
-    db.add(payment)
-    db.commit()
-    db.refresh(payment)
 
     return payment
 
@@ -141,21 +137,18 @@ def create_widget_payment(
     # Create payment in YooKassa
     yoo_payment = YooKassaPayment.create(payment_data, uuid4())
 
-    # Create payment record in database
-    payment = Payment(
-        id=uuid4(),
+    # Create payment record using repository
+    payment = payment_repository.create_payment(
+        db=db,
         payment_id=yoo_payment.id,
-        date=datetime.now(ZoneInfo("Europe/Moscow")),
         amount=final_price,
         payment_link="",  # Widget doesn't use payment_link
-        confirmation_token=yoo_payment.confirmation.confirmation_token
-        if yoo_payment.confirmation
-        else "",
         status=yoo_payment.status,
+        confirmation_token=(
+            yoo_payment.confirmation.confirmation_token
+            if yoo_payment.confirmation
+            else ""
+        ),
     )
-
-    db.add(payment)
-    db.commit()
-    db.refresh(payment)
 
     return payment

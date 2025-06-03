@@ -3,9 +3,8 @@ from typing import List
 from api.deps import SessionDep, UserDep
 from api.schemas.loyalty import LoyaltyResponse
 from api.schemas.user import UserBase
-from db.crud.loyalty import get_loyalties
-from db.crud.user import get_all_users
 from fastapi import APIRouter
+from repositories import loyalty_repository, user_repository
 
 router = APIRouter()
 
@@ -24,9 +23,8 @@ async def get_users(
 ):
     """Get all registered users with pagination"""
     # Only return registered users
-    users = [
-        user for user in get_all_users(db, skip=skip, limit=limit) if user.is_registered
-    ]
+    all_users = user_repository.get_all(db, skip=skip, limit=limit)
+    users = [user for user in all_users if user.is_registered]
     return users
 
 
@@ -41,4 +39,4 @@ async def get_loyalty_levels(
     db: SessionDep,
 ):
     """Get all loyalty levels available to users"""
-    return get_loyalties(db)
+    return loyalty_repository.get_all_loyalty_levels(db)

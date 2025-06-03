@@ -7,9 +7,9 @@ from typing import Optional
 from aiohttp import ClientError, ClientSession, ClientTimeout
 from api.deps import SessionDep, UserDep
 from api.schemas.user import UserBase, UserRegister, UserUpdate
-from db.crud import user
 from db.models.user import PlayingPosition
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
+from repositories import user_repository
 from services.storage import Storage
 
 router = APIRouter()
@@ -87,7 +87,9 @@ async def register(
                 telegram_photo_url, f"profile/{current_user.id}"
             )
 
-        updated_user = user.register_user(db, current_user, register_data, avatar_url)
+        updated_user = user_repository.register_user(
+            db, current_user, register_data, avatar_url
+        )
         return updated_user
 
     except json.JSONDecodeError:
@@ -157,7 +159,9 @@ async def update_me(
                 telegram_photo_url, f"profile/{current_user.id}"
             )
 
-        updated_user = user.update_user(db, current_user, update_data, avatar_url)
+        updated_user = user_repository.update_user(
+            db, current_user, update_data, avatar_url
+        )
         return updated_user
 
     except json.JSONDecodeError as e:

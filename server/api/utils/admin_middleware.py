@@ -2,15 +2,17 @@ from functools import wraps
 from typing import Callable
 
 import jwt
-from api.deps import SessionDep
 from api.utils.jwt import ALGORITHM, SECRET_KEY
-from db.crud.admin_user import get_admin_by_username
+from config import settings
+from db import SessionLocal
 from fastapi import HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials
+from repositories import admin_user_repository
 
 
 def superuser_required(func: Callable) -> Callable:
     @wraps(func)
-    async def wrapper(request: Request, db: SessionDep, *args, **kwargs):
+    async def wrapper(request: Request, *args, **kwargs):
         authorization = request.headers.get("Authorization")
         if not authorization or not authorization.startswith("Bearer "):
             raise HTTPException(status_code=401, detail="Not authenticated")
@@ -25,7 +27,14 @@ def superuser_required(func: Callable) -> Callable:
             if not username:
                 raise HTTPException(status_code=401, detail="Invalid token")
 
-            admin = get_admin_by_username(db, username)
+            # Get db from kwargs
+            db = kwargs.get("db")
+            if not db:
+                raise HTTPException(
+                    status_code=500, detail="Database session not found"
+                )
+
+            admin = admin_user_repository.get_by_username(db, username)
             if not admin:
                 raise HTTPException(status_code=401, detail="Admin not found")
 
@@ -39,14 +48,14 @@ def superuser_required(func: Callable) -> Callable:
         except jwt.PyJWTError:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-        return await func(request=request, db=db, *args, **kwargs)
+        return await func(request=request, *args, **kwargs)
 
     return wrapper
 
 
 def admin_required(func: Callable) -> Callable:
     @wraps(func)
-    async def wrapper(request: Request, db: SessionDep, *args, **kwargs):
+    async def wrapper(request: Request, *args, **kwargs):
         authorization = request.headers.get("Authorization")
         if not authorization or not authorization.startswith("Bearer "):
             raise HTTPException(status_code=401, detail="Not authenticated")
@@ -60,7 +69,14 @@ def admin_required(func: Callable) -> Callable:
             if not username:
                 raise HTTPException(status_code=401, detail="Invalid token")
 
-            admin = get_admin_by_username(db, username)
+            # Get db from kwargs
+            db = kwargs.get("db")
+            if not db:
+                raise HTTPException(
+                    status_code=500, detail="Database session not found"
+                )
+
+            admin = admin_user_repository.get_by_username(db, username)
             if not admin:
                 raise HTTPException(status_code=401, detail="Admin not found")
 
@@ -69,6 +85,6 @@ def admin_required(func: Callable) -> Callable:
         except jwt.PyJWTError:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-        return await func(request=request, db=db, *args, **kwargs)
+        return await func(request=request, *args, **kwargs)
 
     return wrapper

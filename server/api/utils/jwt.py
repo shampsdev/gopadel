@@ -5,6 +5,7 @@ from config import settings
 from db.models.admin import AdminUser
 from fastapi import Depends, HTTPException
 from passlib.context import CryptContext
+from repositories import admin_user_repository
 from sqlalchemy.orm import Session
 
 SECRET_KEY = settings.JWT_SECRET_KEY
@@ -41,7 +42,7 @@ def get_current_admin(db: Session, token: str = Depends()) -> AdminUser:
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-        admin = db.query(AdminUser).filter(AdminUser.username == username).first()
+        admin = admin_user_repository.get_by_username(db, username)
         if admin is None:
             raise credentials_exception
     except jwt.PyJWTError:

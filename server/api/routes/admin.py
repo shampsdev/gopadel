@@ -5,16 +5,10 @@ from api.deps import SessionDep
 from api.schemas.admin_user import AdminUserCreate, AdminUserResponse
 from api.utils.admin_middleware import admin_required, superuser_required
 from api.utils.jwt import get_password_hash
-from db.crud.admin_user import (
-    create_admin_user,
-    delete_admin_user,
-    get_admin_by_id,
-    update_admin_user,
-)
-from db.crud.user import get_user_by_id
 from db.models.admin import AdminUser
 from fastapi import APIRouter, Body, HTTPException, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from repositories import admin_user_repository, user_repository
 
 router = APIRouter()
 security = HTTPBearer()
@@ -37,6 +31,18 @@ async def get_admins(
     return admins
 
 
+@router.get("/admins")
+@admin_required
+async def get_all_admins(
+    request: Request,
+    db: SessionDep,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+):
+    """Get all admin users."""
+    admins = admin_user_repository.get_all_admins(db)
+    return admins
+
+
 @router.post(
     "/create",
     response_model=AdminUserResponse,
@@ -53,30 +59,25 @@ async def create_admin(
     request: Request,
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
-    existing_admin = (
-        db.query(AdminUser).filter(AdminUser.username == admin_data.username).first()
-    )
+    """Create a new admin user."""
+    # Check if username already exists
+    existing_admin = admin_user_repository.get_by_username(db, admin_data.username)
     if existing_admin:
-        raise HTTPException(status_code=400, detail="Username already taken")
+        raise HTTPException(
+            status_code=400, detail="Admin with this username already exists"
+        )
 
-    # Verify that the user exists if user_id is provided
-    if admin_data.user_id:
-        user = get_user_by_id(db, admin_data.user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-    hashed_password = get_password_hash(admin_data.password)
-
-    admin = create_admin_user(
+    # Create new admin using repository
+    admin = admin_user_repository.create_admin(
         db=db,
         username=admin_data.username,
-        password_hash=hashed_password,
+        password=admin_data.password,
         first_name=admin_data.first_name,
         last_name=admin_data.last_name,
+        is_active=admin_data.is_active if admin_data.is_active is not None else True,
         is_superuser=(
             admin_data.is_superuser if admin_data.is_superuser is not None else False
         ),
-        is_active=admin_data.is_active if admin_data.is_active is not None else True,
         user_id=admin_data.user_id,
     )
 
@@ -100,7 +101,7 @@ async def delete_admin(
     request: Request,
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
-    success = delete_admin_user(db, admin_id)
+    success = admin_user_repository.delete_admin(db, admin_id)
     if not success:
         raise HTTPException(status_code=404, detail="Admin not found")
 
@@ -123,15 +124,15 @@ async def update_admin_user_association(
     request: Request = None,
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
-    admin = get_admin_by_id(db, admin_id)
+    admin = admin_user_repository.get(db, admin_id)
     if not admin:
         raise HTTPException(status_code=404, detail="Admin not found")
 
     # Verify that the user exists
-    user = get_user_by_id(db, user_id)
+    user = user_repository.get(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
     # Update the admin user with the new user_id
-    updated_admin = update_admin_user(db, admin_id, user_id=user_id)
+    updated_admin = admin_user_repository.update_admin(db, admin, {"user_id": user_id})
     return updated_admin

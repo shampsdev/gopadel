@@ -1,15 +1,16 @@
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException
+from uuid import UUID
 
 from api.deps import SessionDep, UserDep
 from api.schemas.registration import RegistrationResponse
 from api.schemas.tournament import (
+    ParticipantResponse,
     RegistrationWithTournamentResponse,
     TournamentResponse,
-    ParticipantResponse,
 )
-from db.crud import tournament as tournament_crud, registration as registration_crud
-from uuid import UUID
+from db.models.registration import RegistrationStatus
+from fastapi import APIRouter, HTTPException
+from repositories import registration_repository, tournament_repository
 
 router = APIRouter()
 
@@ -18,27 +19,24 @@ router = APIRouter()
 async def get_tournaments(
     db: SessionDep, user: UserDep, available: Optional[bool] = None
 ):
-    tournaments = tournament_crud.get_tournaments_with_participants(
-        db, user.rank, available
-    )
+    if available:
+        tournaments = tournament_repository.get_available_tournaments(db, user)
+    else:
+        tournaments = tournament_repository.get_tournaments(db)
     return tournaments
 
 
-@router.get(
-    "/{tournament_id}/my", response_model=List[RegistrationWithTournamentResponse]
-)
-async def get_user_tournamets(db: SessionDep, tournament_id: UUID, user: UserDep):
-    tournaments = tournament_crud.get_registrations_with_tournaments_by_user(
+@router.get("/my", response_model=List[RegistrationWithTournamentResponse])
+async def get_user_tournament_history(db: SessionDep, user: UserDep):
+    registrations = registration_repository.get_user_registrations_with_relations(
         db, user.id
     )
-    return tournaments
+    return registrations
 
 
 @router.get("/{tournament_id}", response_model=TournamentResponse)
 async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
-    tournament = tournament_crud.get_tournament_with_participants_by_id(
-        db, tournament_id
-    )
+    tournament = tournament_repository.get(db, tournament_id)
 
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
@@ -52,17 +50,21 @@ async def get_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
 async def get_tournament_registration(
     db: SessionDep, tournament_id: UUID, user: UserDep
 ):
-    registration = registration_crud.get_registration(db, tournament_id, user.id)
+    registration = registration_repository.get_user_tournament_registration(
+        db, user.id, tournament_id
+    )
     return registration
 
 
 @router.get("/{tournament_id}/participants", response_model=List[ParticipantResponse])
 async def get_tournament_participants(db: SessionDep, tournament_id: UUID):
-    tournament = tournament_crud.get_tournament_with_participants_by_id(
+    registrations = registration_repository.get_tournament_registrations(
         db, tournament_id
     )
 
-    if not tournament:
-        raise HTTPException(status_code=404, detail="Tournament not found")
+    # Filter only active registrations
+    active_registrations = [
+        r for r in registrations if r.status == RegistrationStatus.ACTIVE
+    ]
 
-    return tournament.registrations
+    return active_registrations

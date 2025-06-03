@@ -1,12 +1,11 @@
+import enum
 from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
-import enum
-
-from sqlalchemy import String, Integer, DateTime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db import Base
+from sqlalchemy import DateTime, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from db.models.registration import Registration

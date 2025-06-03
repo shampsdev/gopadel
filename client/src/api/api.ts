@@ -117,17 +117,15 @@ export const getTournamentRegistration = async (
   }
 }
 
-export const getUserTournaments = async (
-  tournamentId: string
-): Promise<RegistrationWithTournament[]> => {
+export const getUserTournamentHistory = async (): Promise<RegistrationWithTournament[]> => {
   try {
     const response = await api.get<RegistrationWithTournament[]>(
-      `/tournaments/${tournamentId}/my`
+      `/tournaments/my`
     )
     return response.data
   } catch (error) {
     console.error(
-      `Error fetching user tournaments for tournament ${tournamentId}:`,
+      `Error fetching user tournament history:`,
       error
     )
     return []

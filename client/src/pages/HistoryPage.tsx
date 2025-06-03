@@ -1,4 +1,4 @@
-import { getUserTournaments } from "@/api/api"
+import { getUserTournamentHistory } from "@/api/api"
 import HistoryCard from "@/components/HistoryCard"
 import Header from "@/components/Header"
 import { Spinner } from "@/components/ui/Spinner"
@@ -17,7 +17,7 @@ export default function HistoryPage() {
   useEffect(() => {
     if (userData) {
       setLoading(true)
-      getUserTournaments(userData.id)
+      getUserTournamentHistory()
         .then((registrations) => {
           setRegistrations(registrations || [])
         })
