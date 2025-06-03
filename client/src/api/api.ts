@@ -5,6 +5,7 @@ import { Tournament } from "@/types/tournament"
 import { Registration, RegistrationWithTournament } from "@/types/registration"
 import { initDataRaw } from "@telegram-apps/sdk-react"
 import { LoyaltyDetails, LoyaltyResponse } from "@/types/loyalty"
+import { Waitlist } from "@/types/waitlist"
 
 export const api = axios.create({
   baseURL: `${API_URL}/api/v1`,
@@ -188,5 +189,52 @@ export const getLoyaltyLevels = async (): Promise<LoyaltyDetails[]> => {
   } catch (error) {
     console.error("Error fetching loyalty levels:", error)
     return []
+  }
+}
+
+// Waitlist API methods
+export const addToWaitlist = async (
+  tournamentId: string
+): Promise<Waitlist | null> => {
+  try {
+    const response = await api.post<Waitlist>(`/waitlist/${tournamentId}`)
+    return response.data
+  } catch (error) {
+    console.error(`Error adding to waitlist for tournament ${tournamentId}:`, error)
+    return null
+  }
+}
+
+export const removeFromWaitlist = async (
+  tournamentId: string
+): Promise<boolean> => {
+  try {
+    await api.delete(`/waitlist/${tournamentId}`)
+    return true
+  } catch (error) {
+    console.error(`Error removing from waitlist for tournament ${tournamentId}:`, error)
+    return false
+  }
+}
+
+export const getUserWaitlists = async (): Promise<Waitlist[]> => {
+  try {
+    const response = await api.get<Waitlist[]>("/waitlist/my")
+    return response.data
+  } catch (error) {
+    console.error("Error fetching user waitlists:", error)
+    return []
+  }
+}
+
+export const getTournamentWaitlistStatus = async (
+  tournamentId: string
+): Promise<Waitlist | null> => {
+  try {
+    const waitlists = await getUserWaitlists()
+    return waitlists.find(w => w.tournament_id === tournamentId) || null
+  } catch (error) {
+    console.error(`Error checking waitlist status for tournament ${tournamentId}:`, error)
+    return null
   }
 }

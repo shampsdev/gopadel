@@ -12,7 +12,7 @@ from repositories import (
     waitlist_repository,
 )
 from services.payments import create_widget_payment
-from services.waitlist import notify_waitlist
+from services.waitlist_notifications import notify_waitlist_users
 
 router = APIRouter()
 
@@ -123,6 +123,6 @@ async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep
     registration_repository.update_registration_status(
         db, registration.id, RegistrationStatus.CANCELED_BY_USER
     )
-    # ВРЕМЕННО ОТКЛЮЧЕНО: автоматическая регистрация людей из waitlist
-    await notify_waitlist(bot, db, tournament_id)
+    # Уведомляем всех пользователей из waitlist о том, что освободилось место
+    await notify_waitlist_users(bot, db, tournament_id)
     return registration

@@ -10,6 +10,7 @@ from api.schemas.admin_tournament import (
 from api.schemas.registration import RegistrationResponse
 from api.schemas.waitlist import WaitlistResponse
 from api.utils.admin_middleware import admin_required
+from bot.init_bot import bot
 from fastapi import APIRouter, HTTPException, Request, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from repositories import (
@@ -17,6 +18,10 @@ from repositories import (
     tournament_repository,
     user_repository,
     waitlist_repository,
+)
+from services.waitlist_notifications import (
+    notify_tournament_cancelled,
+    notify_waitlist_users,
 )
 
 router = APIRouter()
@@ -127,6 +132,9 @@ async def update_tournament_admin(
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
 
+    # Запоминаем старое значение max_users для проверки
+    old_max_users = tournament.max_users
+
     update_data = {}
     if tournament_data.name is not None:
         update_data["name"] = tournament_data.name
@@ -154,6 +162,14 @@ async def update_tournament_admin(
     updated_tournament = tournament_repository.update_tournament(
         db, tournament, update_data
     )
+
+    # Если увеличилось количество мест, уведомляем пользователей из waitlist
+    if (
+        tournament_data.max_users is not None
+        and tournament_data.max_users > old_max_users
+    ):
+        await notify_waitlist_users(bot, db, tournament_id)
+
     return updated_tournament
 
 
@@ -174,6 +190,9 @@ async def delete_tournament_admin(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Delete a tournament"""
+    # Уведомляем пользователей из waitlist об отмене турнира
+    await notify_tournament_cancelled(bot, db, tournament_id)
+
     success = tournament_repository.delete_tournament(db, tournament_id)
     if not success:
         raise HTTPException(status_code=404, detail="Tournament not found")
