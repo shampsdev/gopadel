@@ -13,7 +13,7 @@ export default function BottomNavbar() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-16 shadow-lg pb-safe">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center shadow-lg navbar-container">
       <Link 
         to="/" 
         className={`flex flex-col items-center justify-center w-1/4 py-1 transition-colors ${isActive('/') ? 'text-green-600' : 'text-gray-600'}`}

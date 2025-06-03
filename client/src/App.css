@@ -4,3 +4,8 @@
 .pressable:active {
   transform: scale(0.95);
 }
+
+.navbar-container {
+  padding-bottom: calc(env(safe-area-inset-bottom)*.6);
+  height: calc(var(--spacing)*16 + env(safe-area-inset-bottom)*.6);
+}
