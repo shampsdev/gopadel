@@ -96,12 +96,13 @@ export default function ParticipateButton({
   if (currentRegistration?.status === RegistrationStatus.PENDING) {
     return (
       <div className="w-full space-y-2">
-        {currentRegistration?.payment ? (
+        {currentRegistration?.payment && 
+         currentRegistration.payment.status !== "canceled" ? (
           <GreenButton onClick={handlePayClick} className="w-full rounded-full">
             Оплатить
           </GreenButton>
         ) : (
-          // No payment yet, create payment first
+          // No payment yet or payment is canceled, create new payment
           <GreenButton onClick={handleCreatePayment} isLoading={loading} className="w-full rounded-full">
             Оплатить
           </GreenButton>

@@ -9,6 +9,7 @@ from config import settings
 from db.models.registration import RegistrationStatus
 from fastapi import APIRouter, HTTPException
 from repositories import (
+    payment_repository,
     registration_repository,
     tournament_repository,
     waitlist_repository,
@@ -230,11 +231,19 @@ async def create_payment_for_tournament(
             status_code=400, detail="Can only create payment for pending registrations"
         )
 
-    # Check if payment already exists
+    # Check if payment already exists and is successful or pending
     if registration.payment_id:
-        raise HTTPException(
-            status_code=400, detail="Payment already exists for this registration"
-        )
+        existing_payment = payment_repository.get(db, registration.payment_id)
+        if existing_payment and existing_payment.status in (
+            "succeeded",
+            "pending",
+            "waiting_for_capture",
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="Active payment already exists for this registration",
+            )
+        # If payment exists but is canceled, we'll create a new one (continue execution)
 
     discount = user.loyalty.discount if user.loyalty else 0
     price = round(tournament.price * (1 - discount / 100))
@@ -254,7 +263,7 @@ async def create_payment_for_tournament(
         return_url=f"https://t.me/{settings.TG_BOT_USERNAME}/app?startapp=t-{tournament_id}",
     )
 
-    # Update registration with payment
+    # Update registration with new payment
     registration_repository.update_registration_payment(db, registration.id, payment.id)
 
     # Refresh registration to get updated data

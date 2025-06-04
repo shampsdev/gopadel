@@ -1,17 +1,16 @@
+import enum
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
-import enum
-
-from sqlalchemy import DateTime, ForeignKey, Enum
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db import Base
+from sqlalchemy import DateTime, Enum, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
-    from db.models.user import User
-    from db.models.tournament import Tournament
     from db.models.payment import Payment
+    from db.models.tournament import Tournament
+    from db.models.user import User
 
 
 class RegistrationStatus(str, enum.Enum):
