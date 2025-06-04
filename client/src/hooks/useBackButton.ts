@@ -1,4 +1,4 @@
-import { backButton } from "@telegram-apps/sdk-react"
+import { backButton, closeMiniApp } from "@telegram-apps/sdk-react"
 import { useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 
@@ -17,6 +17,11 @@ export default function useBackButton() {
     backButton.show()
 
     const handleBackClick = () => {
+      if (currentPath === "/register") {
+        closeMiniApp()
+        return
+      }
+
       let targetPath = "/"
 
       if (currentPath === "/profile/edit") {
@@ -35,6 +40,9 @@ export default function useBackButton() {
       
       if (currentPath.startsWith("/tournament/")) {
         if (currentPath.includes("/participants")) {
+          const tournamentId = currentPath.split("/")[2]
+          targetPath = `/tournament/${tournamentId}`
+        } else if (currentPath.includes("/waitlist")) {
           const tournamentId = currentPath.split("/")[2]
           targetPath = `/tournament/${tournamentId}`
         }

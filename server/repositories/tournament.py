@@ -82,7 +82,9 @@ class TournamentRepository(BaseRepository[Tournament]):
         club_id: Optional[UUID] = None,
     ) -> List[Tournament]:
         """Get tournaments with filters"""
-        query = db.query(Tournament).options(joinedload(Tournament.club))
+        query = db.query(Tournament).options(
+            joinedload(Tournament.club), joinedload(Tournament.organizator)
+        )
 
         if filter_old:
             # Filter out finished tournaments
@@ -104,35 +106,32 @@ class TournamentRepository(BaseRepository[Tournament]):
         self, db: Session, user: User, skip: int = 0, limit: int = 10
     ) -> List[Tournament]:
         """Get tournaments available for user registration"""
-        # First get all future tournaments (not finished)
         now = datetime.now()
-        all_tournaments = (
+
+        # Build query with all filters at database level
+        query = (
             db.query(Tournament)
-            .options(joinedload(Tournament.club))
+            .options(joinedload(Tournament.club), joinedload(Tournament.organizator))
             .filter(
+                # Filter out finished tournaments
                 or_(
                     and_(Tournament.end_time.is_not(None), Tournament.end_time >= now),
                     and_(Tournament.end_time.is_(None), Tournament.start_time >= now),
                 )
             )
-            .order_by(Tournament.start_time)
-            .all()
         )
 
-        # Then filter by rank restriction only
-        available_tournaments = []
-        for tournament in all_tournaments:
-            if (
-                user.rank is not None
-                and tournament.rank_min <= user.rank <= tournament.rank_max
-            ):
-                available_tournaments.append(tournament)
-            elif user.rank is None and tournament.rank_min == 0:
-                # Allow users without rank to join tournaments with min rank 0
-                available_tournaments.append(tournament)
+        # Add rank filtering at database level
+        if user.rank is not None:
+            query = query.filter(
+                and_(Tournament.rank_min <= user.rank, Tournament.rank_max >= user.rank)
+            )
+        else:
+            # Allow users without rank to join tournaments with min rank 0
+            query = query.filter(Tournament.rank_min == 0)
 
-        # Apply pagination
-        return available_tournaments[skip : skip + limit]
+        # Order by start time and apply pagination
+        return query.order_by(Tournament.start_time).offset(skip).limit(limit).all()
 
     def get_user_tournaments(
         self, db: Session, user_id: UUID, skip: int = 0, limit: int = 10
