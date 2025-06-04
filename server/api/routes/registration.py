@@ -30,6 +30,21 @@ async def register_for_tournament(db: SessionDep, tournament_id: UUID, user: Use
             status_code=400, detail="Cannot register for a finished tournament"
         )
 
+    # Check if user's rank is within tournament requirements
+    if user.rank is not None:
+        if not (user.rank >= tournament.rank_min and user.rank <= tournament.rank_max):
+            raise HTTPException(
+                status_code=400,
+                detail=f"User rank {user.rank} is not within tournament requirements ({tournament.rank_min} - {tournament.rank_max})",
+            )
+    else:
+        # Allow users without rank to join tournaments with min rank 0
+        if tournament.rank_min > 0:
+            raise HTTPException(
+                status_code=400,
+                detail="User must have a rank to register for this tournament",
+            )
+
     registration = registration_repository.get_user_tournament_registration(
         db, user.id, tournament_id
     )

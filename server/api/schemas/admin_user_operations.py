@@ -24,7 +24,7 @@ class UserResponse(BaseModel):
     username: Optional[str] = None
     first_name: str
     second_name: str
-    avatar: str
+    avatar: Optional[str] = None
     rank: float
     city: str
     birth_date: Optional[date] = None

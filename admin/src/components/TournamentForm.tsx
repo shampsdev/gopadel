@@ -437,6 +437,7 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
             value={formData.rank_min}
             onChange={handleChange}
             error={errors.rank_min}
+            type="min"
           />
 
           <RatingSelector
@@ -445,6 +446,7 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
             value={formData.rank_max}
             onChange={handleChange}
             error={errors.rank_max}
+            type="max"
           />
         </div>
 

@@ -4,17 +4,17 @@
  * @returns String representation of the rating with original value in parentheses
  */
 export function getRatingWord(rating: number): string {
-  if (rating >= 0 && rating < 1.7) {
+  if (rating >= 0 && rating < 1.0) {
     return `Beginner (${rating})`;
-  } else if (rating >= 1.7 && rating < 2.7) {
+  } else if (rating >= 1.0 && rating < 1.7) {
     return `Upper Beginner (${rating})`;
-  } else if (rating >= 2.7 && rating < 3.5) {
+  } else if (rating >= 1.7 && rating < 2.5) {
     return `Intermediate (${rating})`;
-  } else if (rating >= 3.5 && rating < 4.5) {
+  } else if (rating >= 2.5 && rating < 3.5) {
     return `Upper Intermediate (${rating})`;
-  } else if (rating >= 4.5 && rating < 6.0) {
+  } else if (rating >= 3.5 && rating < 5.0) {
     return `Advanced (${rating})`;
-  } else if (rating >= 6.0) {
+  } else if (rating >= 5.0) {
     return `Pro (${rating})`;
   } else {
     return `${rating}`;
@@ -27,17 +27,17 @@ export function getRatingWord(rating: number): string {
  * @returns String representation of the rating level only
  */
 export function getRatingLevelName(rating: number): string {
-  if (rating >= 0 && rating < 1.7) {
+  if (rating >= 0 && rating < 1.0) {
     return "Beginner";
-  } else if (rating >= 1.7 && rating < 2.7) {
+  } else if (rating >= 1.0 && rating < 1.7) {
     return "Upper Beginner";
-  } else if (rating >= 2.7 && rating < 3.5) {
+  } else if (rating >= 1.7 && rating < 2.5) {
     return "Intermediate";
-  } else if (rating >= 3.5 && rating < 4.5) {
+  } else if (rating >= 2.5 && rating < 3.5) {
     return "Upper Intermediate";
-  } else if (rating >= 4.5 && rating < 6.0) {
+  } else if (rating >= 3.5 && rating < 5.0) {
     return "Advanced";
-  } else if (rating >= 6.0) {
+  } else if (rating >= 5.0) {
     return "Pro";
   } else {
     return `${rating}`;
@@ -62,15 +62,15 @@ export function getRatingRangeDescription(minRating: number, maxRating: number):
 }
 
 /**
- * Rating level definitions with min values
+ * Rating level definitions with min and max values
  */
 export const ratingLevels = [
-  { label: "Beginner", value: 1.0, min: 0 },
-  { label: "Upper Beginner", value: 2.0, min: 1.7 },
-  { label: "Intermediate", value: 3.0, min: 2.7 },
-  { label: "Upper Intermediate", value: 4.0, min: 3.5 },
-  { label: "Advanced", value: 5.5, min: 4.5 },
-  { label: "Pro", value: 6.5, min: 6.0 }
+  { label: "Beginner", value: 0.5, min: 0, max: 0.9 },
+  { label: "Upper Beginner", value: 1.3, min: 1.0, max: 1.6 },
+  { label: "Intermediate", value: 2.1, min: 1.7, max: 2.4 },
+  { label: "Upper Intermediate", value: 3.0, min: 2.5, max: 3.4 },
+  { label: "Advanced", value: 4.2, min: 3.5, max: 4.9 },
+  { label: "Pro", value: 6.0, min: 5.0, max: 7.0 }
 ];
 
 /**
