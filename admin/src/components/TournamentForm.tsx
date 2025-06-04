@@ -14,7 +14,7 @@ interface TournamentFormProps {
 
 const defaultTournament: Tournament = {
   name: '',
-  start_time: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString().slice(0, 16),
+  start_time: new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16),
   end_time: '',
   price: 0,
   club_id: '',
@@ -48,15 +48,12 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
 
   useEffect(() => {
     if (tournament) {
-      // Convert ISO string to local datetime-local format with Moscow timezone adjustment
-      const moscowOffset = 3 * 60 * 60 * 1000; // +3 hours in milliseconds
-      const startDate = new Date(tournament.start_time);
-      const endDate = tournament.end_time ? new Date(tournament.end_time) : null;
-      
+      // Since the server now handles Moscow timezone correctly,
+      // we can display the time as is for datetime-local input
       const formattedTournament = {
         ...tournament,
-        start_time: new Date(startDate.getTime() + moscowOffset).toISOString().slice(0, 16),
-        end_time: endDate ? new Date(endDate.getTime() + moscowOffset).toISOString().slice(0, 16) : ''
+        start_time: tournament.start_time.slice(0, 16), // Remove timezone info for datetime-local
+        end_time: tournament.end_time ? tournament.end_time.slice(0, 16) : ''
       };
       setFormData(formattedTournament);
       
@@ -240,8 +237,8 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
     e.preventDefault();
     
     if (validate()) {
-      // Format datetime to ISO string for API with Moscow timezone adjustment
-      const moscowOffset = 3 * 60 * 60 * 1000; // +3 hours in milliseconds
+      // Since the server now handles Moscow timezone correctly,
+      // we can send the datetime-local value as is
       
       // Ensure all number fields have valid values (default to 0 if undefined)
       const tournamentToSave = {
@@ -250,8 +247,8 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
         rank_min: formData.rank_min ?? 0,
         rank_max: formData.rank_max ?? 0,
         max_users: formData.max_users ?? 0,
-        start_time: new Date(new Date(formData.start_time).getTime() - moscowOffset).toISOString(),
-        end_time: formData.end_time ? new Date(new Date(formData.end_time).getTime() - moscowOffset).toISOString() : undefined,
+        start_time: formData.start_time, // Send as is - server will handle Moscow timezone
+        end_time: formData.end_time || undefined,
         description: formData.description || undefined
       };
       onSave(tournamentToSave);

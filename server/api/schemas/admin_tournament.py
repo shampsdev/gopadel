@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class TournamentCreate(BaseModel):
@@ -18,6 +18,22 @@ class TournamentCreate(BaseModel):
     description: Optional[str] = None
     organizator_id: Optional[UUID] = None
 
+    @field_validator("start_time", "end_time", mode="before")
+    @classmethod
+    def parse_datetime(cls, v):
+        """Parse datetime as naive datetime (Moscow time)"""
+        if v is None:
+            return v
+        if isinstance(v, datetime):
+            return v.replace(tzinfo=None) if v.tzinfo else v
+        if isinstance(v, str):
+            dt_str = v.replace("Z", "").replace("+00:00", "")
+            try:
+                return datetime.fromisoformat(dt_str)
+            except ValueError:
+                return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S")
+        return v
+
 
 class TournamentUpdate(BaseModel):
     name: Optional[str] = None
@@ -31,6 +47,22 @@ class TournamentUpdate(BaseModel):
     max_users: Optional[int] = None
     description: Optional[str] = None
     organizator_id: Optional[UUID] = None
+
+    @field_validator("start_time", "end_time", mode="before")
+    @classmethod
+    def parse_datetime(cls, v):
+        """Parse datetime as naive datetime (Moscow time)"""
+        if v is None:
+            return v
+        if isinstance(v, datetime):
+            return v.replace(tzinfo=None) if v.tzinfo else v
+        if isinstance(v, str):
+            dt_str = v.replace("Z", "").replace("+00:00", "")
+            try:
+                return datetime.fromisoformat(dt_str)
+            except ValueError:
+                return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S")
+        return v
 
 
 class AdminTournamentResponse(BaseModel):

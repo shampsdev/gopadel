@@ -22,17 +22,16 @@ export default function TournamentWaitlistPage() {
   }
 
   const formatMoscowTime = (dateString: string) => {
+    // Since time is already stored in Moscow timezone, no conversion needed
     const date = new Date(dateString)
-    // Add 3 hours for Moscow timezone
-    const moscowDate = new Date(date.getTime() + (3 * 60 * 60 * 1000))
     
-    const dateFormatted = moscowDate.toLocaleDateString('ru-RU', {
+    const dateFormatted = date.toLocaleDateString('ru-RU', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
     })
     
-    const timeFormatted = moscowDate.toLocaleTimeString('ru-RU', {
+    const timeFormatted = date.toLocaleTimeString('ru-RU', {
       hour: '2-digit',
       minute: '2-digit'
     })
