@@ -59,4 +59,16 @@ export function getRatingRangeDescription(minRating: number, maxRating: number):
   }
   
   return `${minLevel} - ${maxLevel}`;
-} 
+}
+
+/**
+ * Rating level definitions with min and max values
+ */
+export const ratingLevels = [
+  { label: "Beginner", value: 0.85, min: 0, max: 1.69 },
+  { label: "Upper Beginner", value: 2.2, min: 1.7, max: 2.69 },
+  { label: "Intermediate", value: 3.1, min: 2.7, max: 3.49 },
+  { label: "Upper Intermediate", value: 4.0, min: 3.5, max: 4.49 },
+  { label: "Advanced", value: 5.25, min: 4.5, max: 5.99 },
+  { label: "Pro", value: 6.5, min: 6.0, max: 7.0 }
+]; 

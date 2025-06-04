@@ -5,7 +5,7 @@ import { clubService } from '../services/club';
 import { useUser } from '../context/UserContext';
 import { adminService } from '../services/admin';
 import { getRatingRangeDescription } from '../utils/ratingUtils';
-import RatingSelector from './RatingSelector';
+import RatingLevelSelector from './RatingLevelSelector';
 
 interface TournamentFormProps {
   tournament?: Tournament;
@@ -20,7 +20,7 @@ const defaultTournament: Tournament = {
   club_id: '',
   tournament_type: '',
   rank_min: 0,
-  rank_max: 5,
+  rank_max: 7,
   max_users: 0,
   description: '',
   organizator_id: ''
@@ -153,22 +153,6 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       newErrors.max_users = 'Максимальное количество участников должно быть больше 0';
     }
 
-    if (formData.rank_min < 0) {
-      newErrors.rank_min = 'Минимальный рейтинг не может быть отрицательным';
-    }
-
-    if (formData.rank_max < formData.rank_min) {
-      newErrors.rank_max = 'Максимальный рейтинг должен быть не меньше минимального';
-    }
-
-    if (formData.rank_min > 7) {
-      newErrors.rank_min = 'Минимальный рейтинг не может быть больше 7';
-    }
-
-    if (formData.rank_max > 7) {
-      newErrors.rank_max = 'Максимальный рейтинг не может быть больше 7';
-    }
-
     if (formData.price < 0) {
       newErrors.price = 'Цена не может быть отрицательной';
     }
@@ -188,26 +172,6 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    
-    // Special handling for rank fields to enforce limits
-    if ((name === 'rank_min' || name === 'rank_max') && type === 'number' && value !== '') {
-      const numValue = Number(value);
-      if (numValue > 7) {
-        e.target.value = '7';
-        setFormData({
-          ...formData,
-          [name]: 7
-        });
-        return;
-      } else if (numValue < 0) {
-        e.target.value = '0';
-        setFormData({
-          ...formData,
-          [name]: 0
-        });
-        return;
-      }
-    }
     
     // Special handling for tournament type
     if (name === 'tournament_type') {
@@ -272,6 +236,14 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
     setFormData({
       ...formData,
       tournament_type: ''
+    });
+  };
+
+  const handleRatingChange = (minRating: number, maxRating: number) => {
+    setFormData({
+      ...formData,
+      rank_min: minRating,
+      rank_max: maxRating
     });
   };
 
@@ -427,29 +399,18 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <RatingSelector
-            name="rank_min"
-            label="Минимальный рейтинг"
-            value={formData.rank_min}
-            onChange={handleChange}
-            error={errors.rank_min}
-            type="min"
-          />
-
-          <RatingSelector
-            name="rank_max"
-            label="Максимальный рейтинг"
-            value={formData.rank_max}
-            onChange={handleChange}
-            error={errors.rank_max}
-            type="max"
+        <div className="grid grid-cols-1 gap-4">
+          <RatingLevelSelector
+            minRating={formData.rank_min ?? 0}
+            maxRating={formData.rank_max ?? 7}
+            onChange={handleRatingChange}
+            error={errors.rank_min || errors.rank_max}
           />
         </div>
 
         <div>
           <p className="text-sm text-gray-600 mb-2">
-            Диапазон рейтинга: {getRatingRangeDescription(formData.rank_min ?? 0, formData.rank_max ?? 0)}
+            Диапазон рейтинга: {getRatingRangeDescription(formData.rank_min ?? 0, formData.rank_max ?? 7)}
           </p>
         </div>
 
