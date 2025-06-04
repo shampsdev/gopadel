@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from api.schemas.payment import PaymentBase
 from api.schemas.user import UserBase
 from db.models.registration import RegistrationStatus
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 
 class RegistrationBase(BaseModel):
@@ -17,4 +17,19 @@ class RegistrationBase(BaseModel):
 
 
 class RegistrationResponse(RegistrationBase):
-    payment: Optional[PaymentBase]
+    payments: List[PaymentBase] = []
+
+    @computed_field
+    @property
+    def payment(self) -> Optional[PaymentBase]:
+        """Backward compatibility: return the latest active payment"""
+        if not self.payments:
+            return None
+
+        # Find the latest non-canceled payment
+        active_payments = [p for p in self.payments if p.status != "canceled"]
+        if active_payments:
+            return max(active_payments, key=lambda x: x.id)
+
+        # If no active payments, return the latest one
+        return max(self.payments, key=lambda x: x.id) if self.payments else None

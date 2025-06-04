@@ -115,21 +115,12 @@ async def register_for_tournament(db: SessionDep, tournament_id: UUID, user: Use
 
     # Don't create payment during registration, only set status
     if registration:
-        # Clear any existing payment only if switching to pending from other statuses (not from CANCELED_BY_USER)
-        if (
-            not is_free
-            and registration.status != RegistrationStatus.PENDING
-            and registration.status != RegistrationStatus.CANCELED_BY_USER
-        ):
-            registration_repository.update_registration_payment(
-                db, registration.id, None
-            )
+        pass  # Payments are now created separately, no need to clear anything
     else:
         registration = registration_repository.create_registration(
             db,
             user_id=user.id,
             tournament_id=tournament_id,
-            payment_id=None,  # No payment created yet
             status=RegistrationStatus.ACTIVE if is_free else RegistrationStatus.PENDING,
         )
 
@@ -206,7 +197,10 @@ async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep
 
 
 @router.post("/{tournament_id}/create-payment", response_model=RegistrationResponse)
-def create_payment_for_tournament(db: SessionDep, tournament_id: UUID, user: UserDep):
+async def create_payment_for_tournament(
+    db: SessionDep, tournament_id: UUID, user: UserDep
+):
+    """Create payment for existing pending registration"""
     tournament = tournament_repository.get(db, tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
@@ -235,21 +229,19 @@ def create_payment_for_tournament(db: SessionDep, tournament_id: UUID, user: Use
             status_code=400, detail="Can only create payment for pending registrations"
         )
 
-    # Проверяем, есть ли у PENDING-регистрации прежний платёж
-    existing_payment = None
-    if registration.payment_id:
-        existing_payment = payment_repository.get(db, registration.payment_id)
+    # Если регистрация CANCELED, восстанавливаем в PENDING
+    if registration.status == RegistrationStatus.CANCELED:
+        registration_repository.update_registration_status(
+            db, registration.id, RegistrationStatus.PENDING
+        )
 
-        if existing_payment:
-            if existing_payment.status in (
-                "pending",
-                "waiting_for_capture",
-                "succeeded",
-            ):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Active or already succeeded payment exists for this registration",
-                )
+    # Проверяем, есть ли активный платёж для этой регистрации
+    active_payment = payment_repository.get_latest_active_payment(db, registration.id)
+    if active_payment:
+        raise HTTPException(
+            status_code=400,
+            detail="Active payment already exists for this registration",
+        )
 
     # Считаем итоговую стоимость с учётом скидки
     discount = user.loyalty.discount if user.loyalty else 0
@@ -262,17 +254,18 @@ def create_payment_for_tournament(db: SessionDep, tournament_id: UUID, user: Use
         )
         return registration
 
-    # Создаём новый инвойс/платёж (независимо от того, был ли старый "canceled")
+    # Создаём новый платёж
     payment = create_invoice(
         db,
         tournament,
         discount,
         return_url=f"https://t.me/{settings.TG_BOT_USERNAME}/app?startapp=t-{tournament_id}",
+        registration_id=registration.id,
     )
 
-    registration_repository.update_registration_payment(db, registration.id, payment.id)
-
+    # Обновляем данные регистрации со всеми платежами
     updated_registration = registration_repository.get_user_tournament_registration(
         db, user.id, tournament_id
     )
+
     return updated_registration

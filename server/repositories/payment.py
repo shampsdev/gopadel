@@ -28,6 +28,7 @@ class PaymentRepository(BaseRepository[Payment]):
         payment_link: str,
         status: str,
         confirmation_token: str = "",
+        registration_id: Optional[UUID] = None,
     ) -> Payment:
         """Create a new payment record"""
         payment = Payment(
@@ -38,6 +39,7 @@ class PaymentRepository(BaseRepository[Payment]):
             payment_link=payment_link,
             status=status,
             confirmation_token=confirmation_token,
+            registration_id=registration_id,
         )
         db.add(payment)
         db.commit()
@@ -138,3 +140,27 @@ class PaymentRepository(BaseRepository[Payment]):
             query = query.filter(Payment.date <= date_to)
 
         return query.count()
+
+    def get_registration_payments(
+        self, db: Session, registration_id: UUID
+    ) -> List[Payment]:
+        """Get all payments for a registration"""
+        return (
+            db.query(Payment)
+            .filter(Payment.registration_id == registration_id)
+            .order_by(Payment.date.desc())
+            .all()
+        )
+
+    def get_latest_active_payment(
+        self, db: Session, registration_id: UUID
+    ) -> Optional[Payment]:
+        """Get the latest non-canceled payment for a registration"""
+        return (
+            db.query(Payment)
+            .filter(
+                Payment.registration_id == registration_id, Payment.status != "canceled"
+            )
+            .order_by(Payment.date.desc())
+            .first()
+        )

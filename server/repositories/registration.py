@@ -64,14 +64,12 @@ class RegistrationRepository(BaseRepository[Registration]):
         db: Session,
         user_id: UUID,
         tournament_id: UUID,
-        payment_id: Optional[UUID] = None,
         status: RegistrationStatus = RegistrationStatus.PENDING,
     ) -> Registration:
         """Create new registration"""
         registration = Registration(
             user_id=user_id,
             tournament_id=tournament_id,
-            payment_id=payment_id,
             status=status,
             date=datetime.now(ZoneInfo("Europe/Moscow")),
         )
@@ -89,19 +87,6 @@ class RegistrationRepository(BaseRepository[Registration]):
         )
         if registration:
             registration.status = status
-            db.commit()
-            db.refresh(registration)
-        return registration
-
-    def update_registration_payment(
-        self, db: Session, registration_id: int, payment_id: UUID
-    ) -> Optional[Registration]:
-        """Update registration payment"""
-        registration = (
-            db.query(Registration).filter(Registration.id == registration_id).first()
-        )
-        if registration:
-            registration.payment_id = payment_id
             db.commit()
             db.refresh(registration)
         return registration
@@ -129,7 +114,7 @@ class RegistrationRepository(BaseRepository[Registration]):
         query = db.query(Registration).options(
             joinedload(Registration.user),
             joinedload(Registration.tournament),
-            joinedload(Registration.payment),
+            joinedload(Registration.payments),
         )
 
         if tournament_id:
@@ -169,7 +154,7 @@ class RegistrationRepository(BaseRepository[Registration]):
             .options(
                 joinedload(Registration.tournament).joinedload(Tournament.club),
                 joinedload(Registration.tournament).joinedload(Tournament.organizator),
-                joinedload(Registration.payment),
+                joinedload(Registration.payments),
             )
             .filter(Registration.user_id == user_id)
             .order_by(Registration.date.desc())

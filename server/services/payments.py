@@ -1,5 +1,5 @@
 from datetime import datetime
-from uuid import uuid4
+from uuid import UUID, uuid4
 from zoneinfo import ZoneInfo
 
 from config import settings
@@ -21,6 +21,7 @@ def create_invoice(
     tournament: Tournament,
     discount: int,
     return_url: str,
+    registration_id: UUID,
 ) -> Payment:
 
     final_price = round(tournament.price * (1 - discount / 100))
@@ -86,6 +87,7 @@ def create_invoice(
         amount=final_price,
         payment_link=yoo_payment.confirmation.confirmation_url,
         status=yoo_payment.status,
+        registration_id=registration_id,
     )
 
     return payment
@@ -95,6 +97,7 @@ def create_widget_payment(
     db: Session,
     tournament: Tournament,
     discount: int,
+    registration_id: UUID,
 ) -> Payment:
 
     final_price = round(tournament.price * (1 - discount / 100))
@@ -156,6 +159,7 @@ def create_widget_payment(
             if yoo_payment.confirmation
             else ""
         ),
+        registration_id=registration_id,
     )
 
     return payment

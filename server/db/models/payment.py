@@ -1,10 +1,10 @@
 import enum
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
 from db import Base
-from sqlalchemy import DateTime, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
@@ -28,7 +28,10 @@ class Payment(Base):
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
     payment_link: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[str] = mapped_column(String(255), nullable=False)
+    registration_id: Mapped[Optional[UUID]] = mapped_column(
+        ForeignKey("registrations.id"), nullable=True
+    )
 
-    registration: Mapped["Registration"] = relationship(
-        "Registration", back_populates="payment"
+    registration: Mapped[Optional["Registration"]] = relationship(
+        "Registration", back_populates="payments"
     )

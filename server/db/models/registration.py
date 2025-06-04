@@ -1,6 +1,6 @@
 import enum
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List
 from uuid import UUID, uuid4
 
 from db import Base
@@ -32,12 +32,11 @@ class Registration(Base):
     status: Mapped[RegistrationStatus] = mapped_column(
         Enum(RegistrationStatus), nullable=False, default=RegistrationStatus.PENDING
     )
-    payment_id: Mapped[Optional[UUID]] = mapped_column(
-        ForeignKey("payments.id"), nullable=True
-    )
 
     user: Mapped["User"] = relationship("User", back_populates="registrations")
     tournament: Mapped["Tournament"] = relationship(
         "Tournament", back_populates="registrations"
     )
-    payment: Mapped["Payment"] = relationship("Payment", back_populates="registration")
+    payments: Mapped[List["Payment"]] = relationship(
+        "Payment", back_populates="registration"
+    )

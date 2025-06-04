@@ -15,9 +15,9 @@ export interface Registration {
   tournament_id: string // UUID
   date: string // ISO date string
   status: RegistrationStatus
-  payment_id: string // UUID
-  payment: Payment
   user: User
+  payments: Payment[] // New: array of payments
+  payment?: Payment // For backward compatibility: latest active payment
 }
 
 export interface RegistrationWithTournament extends Registration {
