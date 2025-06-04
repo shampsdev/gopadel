@@ -17,6 +17,9 @@ const startParamHandlers: StartParamHandler[] = [
       }
       
       const tournamentId = param.substring(2)
+      // Сохраняем информацию о том, что пользователь пришел по ссылке на турнир
+      sessionStorage.setItem('fromTournamentLink', 'true')
+      sessionStorage.setItem('sourceTournamentId', tournamentId)
       navigate(`/tournament/${tournamentId}`)
     }
   },
@@ -61,6 +64,14 @@ export function handlePendingStartParam(navigate: NavigateFunction): void {
   const pendingStartParam = sessionStorage.getItem('pendingStartParam')
   if (pendingStartParam) {
     sessionStorage.removeItem('pendingStartParam')
+    
+    // Если это ссылка на турнир, устанавливаем соответствующие флаги
+    if (pendingStartParam.startsWith('t-')) {
+      const tournamentId = pendingStartParam.substring(2)
+      sessionStorage.setItem('fromTournamentLink', 'true')
+      sessionStorage.setItem('sourceTournamentId', tournamentId)
+    }
+    
     handleStartParam(pendingStartParam, navigate, true)
   }
 } 

@@ -2,6 +2,7 @@ from typing import List
 from uuid import UUID
 
 from aiogram import Bot
+from config import settings
 from db.models.tournament import Tournament
 from db.models.waitlist import Waitlist
 from repositories import waitlist_repository
@@ -37,16 +38,24 @@ async def notify_waitlist_users(bot: Bot, db: Session, tournament_id: UUID):
             f"Notifying {len(waitlist_users)} users about free spot in tournament {tournament.name}"
         )
 
+        # Создаем ссылку на турнир
+        tournament_link = (
+            f"https://t.me/{settings.TG_BOT_USERNAME}/app?startapp=t-{tournament_id}"
+        )
+
         # Уведомляем всех пользователей из waitlist
         for waitlist_entry in waitlist_users:
             try:
                 message = (
                     f"🎾 Освободилось место в турнире '{tournament.name}'!\n\n"
-                    f"Теперь вы можете зарегистрироваться на турнир.\n"
-                    f"Откройте приложение и нажмите кнопку 'Зарегистрироваться'."
+                    f"Поспеши зарегистрироваться, места ограничены!\n"
+                    f"Откройте приложение и нажмите кнопку 'Зарегистрироваться'.\n\n"
+                    f"Ссылка на турнир: {tournament_link}"
                 )
 
-                await bot.send_message(waitlist_entry.user.telegram_id, message)
+                await bot.send_message(
+                    waitlist_entry.user.telegram_id, message, parse_mode=None
+                )
                 print(
                     f"Notification sent to user {waitlist_entry.user.first_name} {waitlist_entry.user.second_name}"
                 )
@@ -90,7 +99,9 @@ async def notify_tournament_cancelled(bot: Bot, db: Session, tournament_id: UUID
                     f"Вы были удалены из списка ожидания."
                 )
 
-                await bot.send_message(waitlist_entry.user.telegram_id, message)
+                await bot.send_message(
+                    waitlist_entry.user.telegram_id, message, parse_mode=None
+                )
 
             except Exception as e:
                 print(

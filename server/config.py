@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str
     TG_API_TOKEN: str
     TRUSTED_API_TOKENS: list[str]
+    TG_BOT_USERNAME: str
     SHOP_ID: str
     SHOP_SECRET: str
     FRONTEND_URL: str
