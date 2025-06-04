@@ -176,6 +176,15 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       newErrors.price = 'Цена не может быть отрицательной';
     }
 
+    // Check if start time is in the past (only for new tournaments)
+    if (!tournament && formData.start_time) {
+      const selectedDate = new Date(formData.start_time);
+      const now = new Date();
+      if (selectedDate < now) {
+        newErrors.start_time = 'Предупреждение: Выбрана дата из прошлого';
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -292,9 +301,10 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
               name="start_time"
               value={formData.start_time}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded"
+              className={`w-full px-3 py-2 border rounded ${errors.start_time ? 'border-orange-500' : 'border-gray-300'}`}
             />
             <p className="text-xs text-gray-500 mt-1">Время указывается по Москве (UTC+3)</p>
+            {errors.start_time && <p className="text-orange-600 text-sm mt-1">{errors.start_time}</p>}
           </div>
 
           <div>

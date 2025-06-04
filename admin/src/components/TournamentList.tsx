@@ -39,19 +39,21 @@ const TournamentList = ({ tournaments, selectedId, onSelect, onDelete }: Tournam
 
   return (
     <div className="max-h-[500px] overflow-y-auto">
-      <ul className="divide-y divide-gray-200">
+      <div className="space-y-2 p-2">
         {sortedTournaments.map((tournament) => {
           const isPast = isPastTournament(tournament.start_time);
+          const isSelected = tournament.id === selectedId;
           
           return (
-            <li 
+            <div
               key={tournament.id}
-              className={`relative p-3 hover:bg-gray-50 cursor-pointer 
-                ${tournament.id === selectedId ? 'bg-green-50' : ''} 
-                ${isPast ? 'bg-gray-100 opacity-70' : ''}`}
+              className={`p-3 border rounded cursor-pointer hover:bg-gray-50 ${
+                isSelected ? 'border-green-500 bg-green-50' : 'border-gray-200'
+              } ${isPast ? 'bg-gray-100 opacity-70' : ''}`}
+              onClick={() => onSelect(tournament)}
             >
-              <div className="flex flex-col sm:flex-row justify-between items-start" onClick={() => onSelect(tournament)}>
-                <div className="flex-1 mb-2 sm:mb-0">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
                   <h3 className={`text-sm font-medium truncate ${isPast ? 'text-gray-500' : 'text-gray-900'}`}>
                     {tournament.name}
                     {isPast && <span className="ml-2 text-xs text-gray-500 font-normal">(прошедший)</span>}
@@ -75,17 +77,15 @@ const TournamentList = ({ tournaments, selectedId, onSelect, onDelete }: Tournam
                     e.stopPropagation();
                     onDelete(tournament.id as number);
                   }}
-                  className="sm:ml-2 p-1 text-gray-400 hover:text-red-500 self-end sm:self-start"
+                  className="ml-2 text-red-600 hover:text-red-800"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
+                  ✕
                 </button>
               </div>
-            </li>
+            </div>
           );
         })}
-      </ul>
+      </div>
     </div>
   );
 };
