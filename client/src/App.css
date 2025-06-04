@@ -9,3 +9,7 @@
   padding-bottom: calc(env(safe-area-inset-bottom)*.6);
   height: calc(var(--spacing)*16 + env(safe-area-inset-bottom)*.6);
 }
+
+.page-container {
+  padding-bottom: calc(env(safe-area-inset-bottom)*.6 + var(--spacing)*20);
+}

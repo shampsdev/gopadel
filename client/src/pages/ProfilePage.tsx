@@ -22,7 +22,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="p-4 bg-white min-h-screen flex flex-col pb-20">
+    <div className="p-4 bg-white min-h-screen flex flex-col page-container">
       <div>
         <div className="flex items-center justify-between">
           <img src={blackLogo} className="h-5" alt="" />
@@ -43,9 +43,9 @@ export default function ProfilePage() {
       <div className="flex flex-col items-center mb-6 mt-4 relative">
         <div className="relative">
           {userData.avatar ? (
-            <img 
-              src={userData.avatar} 
-              alt={`${userData.first_name} ${userData.second_name}`} 
+            <img
+              src={userData.avatar}
+              alt={`${userData.first_name} ${userData.second_name}`}
               className="w-24 h-24 rounded-full object-cover mb-3"
             />
           ) : (
@@ -54,17 +54,18 @@ export default function ProfilePage() {
               {userData.second_name.charAt(0)}
             </div>
           )}
-          
+
           {/* Loyalty badge positioned at the bottom right of avatar */}
           <div className="absolute -bottom-1 -right-1">
-            <LoyaltyBadge 
-              loyaltyId={userData.loyalty_id} 
-              size="md"
-            />
+            <LoyaltyBadge loyaltyId={userData.loyalty_id} size="md" />
           </div>
         </div>
-        <h2 className="text-2xl font-bold">{userData.first_name} {userData.second_name}</h2>
-        {userData.username && <p className="text-gray-500">@{userData.username}</p>}
+        <h2 className="text-2xl font-bold">
+          {userData.first_name} {userData.second_name}
+        </h2>
+        {userData.username && (
+          <p className="text-gray-500">@{userData.username}</p>
+        )}
       </div>
 
       {/* User information card */}
@@ -74,7 +75,7 @@ export default function ProfilePage() {
           <span className="font-medium">{userData.city}</span>
         </div>
         <Divider />
-        
+
         <div className="flex justify-between py-2">
           <span className="text-gray-500">Рейтинг</span>
           <span className="font-medium">{getRatingWord(userData.rank)}</span>
@@ -83,7 +84,9 @@ export default function ProfilePage() {
 
         <div className="flex justify-between py-2">
           <span className="text-gray-500">Квадрат игры</span>
-          <span className="font-medium">{getPlayingPositionText(userData.playing_position)}</span>
+          <span className="font-medium">
+            {getPlayingPositionText(userData.playing_position)}
+          </span>
         </div>
         <Divider />
 
@@ -96,25 +99,22 @@ export default function ProfilePage() {
             <Divider />
           </>
         )}
-        
+
         {/* Loyalty level section with enhanced styling */}
-        <div 
+        <div
           className="flex items-center py-3 cursor-pointer"
           onClick={() => navigate("/loyalty")}
         >
           <div className="flex-1">
             <span className="text-gray-500">Уровень лояльности</span>
             <div className="flex items-center mt-1">
-              <LoyaltyBadge 
-                loyaltyId={userData.loyalty_id} 
-                size="sm" 
-              />
+              <LoyaltyBadge loyaltyId={userData.loyalty_id} size="sm" />
               <span className="font-medium ml-2">{userData.loyalty.name}</span>
             </div>
           </div>
           <ChevronRight className="text-gray-400 h-5 w-5" />
         </div>
-        
+
         {userData.birth_date_ru && (
           <>
             <Divider />

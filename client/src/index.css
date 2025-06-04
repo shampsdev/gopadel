@@ -130,6 +130,27 @@ html,
 body {
   overflow: hidden;
   height: 100%;
+  touch-action: manipulation;
+}
+
+/* Disable pinch to zoom */
+* {
+  touch-action: manipulation;
+}
+
+/* Additional iOS zoom prevention */
+input,
+textarea,
+select {
+  font-size: 16px;
+  touch-action: manipulation;
+}
+
+/* Prevent double-tap zoom */
+a,
+button,
+[role="button"] {
+  touch-action: manipulation;
 }
 
 @font-face {
