@@ -105,10 +105,10 @@ class TournamentRepository(BaseRepository[Tournament]):
     def get_available_tournaments(
         self, db: Session, user: User, skip: int = 0, limit: int = 10
     ) -> List[Tournament]:
-        """Get tournaments available for user registration"""
+        """Get tournaments available for user registration (all non-expired tournaments regardless of user rank)"""
         now = datetime.now()
 
-        # Build query with all filters at database level
+        # Build query with only time-based filtering - remove rank filtering
         query = (
             db.query(Tournament)
             .options(joinedload(Tournament.club), joinedload(Tournament.organizator))
@@ -121,14 +121,7 @@ class TournamentRepository(BaseRepository[Tournament]):
             )
         )
 
-        # Add rank filtering at database level
-        if user.rank is not None:
-            query = query.filter(
-                and_(Tournament.rank_min <= user.rank, Tournament.rank_max >= user.rank)
-            )
-        else:
-            # Allow users without rank to join tournaments with min rank 0
-            query = query.filter(Tournament.rank_min == 0)
+        # No rank filtering anymore - show all tournaments regardless of user rank
 
         # Order by start time and apply pagination
         return query.order_by(Tournament.start_time).offset(skip).limit(limit).all()
