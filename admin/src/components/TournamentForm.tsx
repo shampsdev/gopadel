@@ -108,7 +108,7 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
     const fetchUsers = async () => {
       setLoadingUsers(true);
       try {
-        const { users } = await userService.getAll(0, 1000);
+        const users = await userService.getAllUsers();
         setUsers(users);
       } catch {
         setUsers([]);

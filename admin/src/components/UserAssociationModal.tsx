@@ -23,7 +23,7 @@ const UserAssociationModal = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const LIMIT = 10;
+  const LIMIT = 50;
 
   useEffect(() => {
     fetchUsers();

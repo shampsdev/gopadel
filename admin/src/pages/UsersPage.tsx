@@ -24,7 +24,7 @@ const UsersPage = () => {
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
-  const [usersPerPage] = useState(10);
+  const [usersPerPage] = useState(50);
   
   // Search and filter states
   const [nameFilter, setNameFilter] = useState('');

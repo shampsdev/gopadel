@@ -57,8 +57,8 @@ const PaymentsPage = () => {
   const fetchUsers = async () => {
     try {
       setLoadingUsers(true);
-      const { users: fetchedUsers } = await userService.getAll(0, 1000); // Get all users
-      setUsers(fetchedUsers);
+      const users = await userService.getAllUsers(); // Get all users
+      setUsers(users);
     } catch (err) {
       console.error('Error fetching users:', err);
     } finally {

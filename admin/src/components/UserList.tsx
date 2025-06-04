@@ -1,5 +1,5 @@
 import type { User } from '../shared/types';
-import { getRatingWord, getPlayingPositionText } from '../utils/ratingUtils';
+import { getRatingWord } from '../utils/ratingUtils';
 
 interface UserListProps {
   users: User[];
@@ -11,17 +11,6 @@ interface UserListProps {
 }
 
 const UserList = ({ users, selectedId, onSelect, currentPage, totalPages, onPageChange }: UserListProps) => {
-  // Format date for display
-  const formatDate = (dateString?: string): string => {
-    if (!dateString) return 'Не указана';
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('ru', { 
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }).format(date);
-  };
-
   if (users.length === 0) {
     return (
       <div className="py-4 text-center text-gray-500">
@@ -32,55 +21,38 @@ const UserList = ({ users, selectedId, onSelect, currentPage, totalPages, onPage
 
   return (
     <div>
-      <div className="max-h-[450px] overflow-y-auto">
+      <div className="max-h-[700px] overflow-y-auto">
         <ul className="divide-y divide-gray-200">
           {users.map((user) => (
             <li 
               key={user.id}
-              className={`relative p-3 hover:bg-gray-50 cursor-pointer 
+              className={`relative p-2 hover:bg-gray-50 cursor-pointer 
                 ${user.id === selectedId ? 'bg-green-50' : ''}`}
               onClick={() => onSelect(user)}
             >
               <div className="flex items-start">
-                <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200 mr-3 flex-shrink-0">
+                <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200 mr-3 flex-shrink-0">
                   {user.avatar && (
                     <img src={user.avatar} alt={user.first_name} className="h-full w-full object-cover" />
                   )}
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-medium text-gray-900 flex items-center">
+                  <h3 className="text-sm font-medium text-gray-900">
                     {user.first_name} {user.second_name}
-                    {user.username && <span className="text-xs text-gray-500 ml-2">@{user.username}</span>}
                   </h3>
-                  <div className="mt-1 flex flex-col text-xs text-gray-500">
-                    <span>ID: {user.telegram_id}</span>
-                    <span>Город: {user.city || 'Не указан'}</span>
-                    <span>Рейтинг: {getRatingWord(user.rank)}</span>
-                    {user.playing_position && (
+                  <div className="mt-1 flex flex-col text-xs text-gray-500 space-y-0.5">
+                    <div className="flex items-center justify-between">
                       <span>
-                        Позиция: {getPlayingPositionText(user.playing_position)}
+                        {user.username ? `@${user.username}` : `ID: ${user.telegram_id}`}
                       </span>
-                    )}
-                    {user.padel_profiles && (
-                      <span className="truncate" title={user.padel_profiles}>
-                        Профили: {user.padel_profiles}
+                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ${user.is_registered ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        {user.is_registered ? 'Рег.' : 'Не рег.'}
                       </span>
-                    )}
-                    <span>
-                      Лояльность: {user.loyalty ? (
-                        <span className="px-1 py-0.5 bg-yellow-50 text-yellow-800 rounded-sm">
-                          {user.loyalty.name} ({user.loyalty.discount}%)
-                        </span>
-                      ) : (
-                        `ID: ${user.loyalty_id}`
-                      )}
-                    </span>
-                    <span>Дата рождения: {user.birth_date_ru || formatDate(user.birth_date)}</span>
-                    <span className="mt-1 flex items-center">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${user.is_registered ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                        {user.is_registered ? 'Зарегистрирован' : 'Не зарегистрирован'}
-                      </span>
-                    </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>{user.city}</span>
+                      <span>Рейтинг: {getRatingWord(user.rank)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -172,4 +144,4 @@ const UserList = ({ users, selectedId, onSelect, currentPage, totalPages, onPage
   );
 };
 
-export default UserList; 
+export default UserList;
