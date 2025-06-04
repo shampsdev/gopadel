@@ -63,14 +63,9 @@ async def webhook(request: Request, event: WebhookEvent, db: SessionDep):
                     status_code=500, detail="Failed to update registration status"
                 )
     elif payment_status == "canceled" and payment.registration:
-        # Only update registration status if it wasn't already canceled by user
-        if payment.registration.status != RegistrationStatus.CANCELED_BY_USER:
-            registration = registration_repository.update_registration_status(
-                db, payment.registration.id, RegistrationStatus.CANCELED
-            )
-            if not registration:
-                raise HTTPException(
-                    status_code=500, detail="Failed to update registration status"
-                )
+        # При отмененном платеже регистрация остается в статусе PENDING,
+        # чтобы пользователь мог создать новый платеж.
+        # Регистрация переходит в CANCELED только при отмене пользователем
+        pass
 
     return {"status": "success"}
