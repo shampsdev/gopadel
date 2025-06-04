@@ -22,6 +22,7 @@ def create_invoice(
     discount: int,
     return_url: str,
 ) -> Payment:
+
     final_price = round(tournament.price * (1 - discount / 100))
 
     """
@@ -41,12 +42,13 @@ def create_invoice(
     # Create payment data
     payment_data = {
         "amount": {"value": f"{final_price}.00", "currency": "RUB"},
+        "payment_method_data": {"type": "sbp"},
         "confirmation": {
             "type": "redirect",
             "return_url": return_url,
         },
         "capture": True,
-        "description": f"GoPadel Tournament {tournament.name}",
+        "description": f"Оплата турнира `{tournament.name}`",
     }
 
     # Add receipt if items provided
@@ -92,6 +94,7 @@ def create_widget_payment(
     tournament: Tournament,
     discount: int,
 ) -> Payment:
+
     final_price = round(tournament.price * (1 - discount / 100))
 
     """
@@ -105,23 +108,22 @@ def create_widget_payment(
     Returns:
         Payment object from database with payment details
     """
-    # Create payment data for widget
+    # Create payment data for widget with SBP
     payment_data = {
         "amount": {"value": f"{final_price}.00", "currency": "RUB"},
         "capture": True,
         "description": f"GoPadel Tournament {tournament.name}",
-        "confirmation": {
-            "type": "embedded",
-        },
+        "confirmation": {"type": "embedded"},  # For widget integration
+        "payment_method_types": ["sbp"],  # Allow only SBP payments
     }
 
     # Add receipt
     payment_data["receipt"] = {
-        "customer": {"email": "TODO@aa.aa"},
+        "customer": {"email": "client@gopadel.ru"},  # TODO: use real user email
         "items": [
             {
-                "description": "GoPadel Tournament",
-                "payment_subject": "commodity",
+                "description": f"Участие в турнире {tournament.name}",
+                "payment_subject": "service",  # Changed to service for tournament participation
                 "amount": {
                     "value": f"{final_price}.00",
                     "currency": "RUB",
@@ -142,7 +144,7 @@ def create_widget_payment(
         db=db,
         payment_id=yoo_payment.id,
         amount=final_price,
-        payment_link="",  # Widget doesn't use payment_link
+        payment_link="",
         status=yoo_payment.status,
         confirmation_token=(
             yoo_payment.confirmation.confirmation_token
