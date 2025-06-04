@@ -83,6 +83,23 @@ export const getTournamentParticipants = async (
   }
 }
 
+export const getTournamentWaitlist = async (
+  tournamentId: string
+): Promise<Waitlist[]> => {
+  try {
+    const response = await api.get<Waitlist[]>(
+      `/tournaments/${tournamentId}/waitlist`
+    )
+    return response.data
+  } catch (error) {
+    console.error(
+      `Error fetching waitlist for tournament ${tournamentId}:`,
+      error
+    )
+    return []
+  }
+}
+
 export const registerForTournament = async (
   tournamentId: string
 ): Promise<Registration | null> => {

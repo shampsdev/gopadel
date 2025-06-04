@@ -5,6 +5,7 @@ import {
   getTournament,
   getTournamentRegistration,
   getTournamentWaitlistStatus,
+  getTournamentWaitlist,
 } from "@/api/api"
 import { Tournament } from "@/types/tournament"
 import { Waitlist } from "@/types/waitlist"
@@ -19,6 +20,7 @@ import {
   FaShare,
 } from "react-icons/fa"
 import TournamentParticipants from "@/components/TournamentParticipants"
+import TournamentWaitlist from "@/components/TournamentWaitlist"
 import ParticipateButton from "@/components/ParticipateButton"
 import WaitlistButton from "@/components/WaitlistButton"
 import Divider from "@/components/ui/Divider"
@@ -39,6 +41,7 @@ export default function TournamentPage() {
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [registration, setRegistration] = useState<Registration | null>(null)
   const [waitlistEntry, setWaitlistEntry] = useState<Waitlist | null>(null)
+  const [waitlistData, setWaitlistData] = useState<Waitlist[]>([])
   const [loading, setLoading] = useState(true)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
@@ -48,10 +51,15 @@ export default function TournamentPage() {
     if (!id) return
     setLoading(true)
     try {
-      const data = await getTournament(id)
-      if (!data) return
+      const [tournamentData, waitlistDataResponse] = await Promise.all([
+        getTournament(id),
+        getTournamentWaitlist(id),
+      ])
+      
+      if (!tournamentData) return
 
-      setTournament(data)
+      setTournament(tournamentData)
+      setWaitlistData(waitlistDataResponse)
 
       if (userData?.id) {
         const registrationData = await getTournamentRegistration(id)
@@ -59,8 +67,8 @@ export default function TournamentPage() {
         
         // Check waitlist status only if not registered
         if (!registrationData || registrationData.status === RegistrationStatus.CANCELED_BY_USER || registrationData.status === RegistrationStatus.CANCELED) {
-          const waitlistData = await getTournamentWaitlistStatus(id)
-          setWaitlistEntry(waitlistData)
+          const waitlistStatusData = await getTournamentWaitlistStatus(id)
+          setWaitlistEntry(waitlistStatusData)
         } else {
           setWaitlistEntry(null)
         }
@@ -223,7 +231,8 @@ export default function TournamentPage() {
           </>
         )}
 
-        {tournament.organizator.username && (
+        <div className="p-3 space-y-2">
+          {tournament.organizator.username && (
             <button
               className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-blue-200"
               onClick={() => openTelegramLink(`https://t.me/${tournament.organizator.username}`)}
@@ -232,17 +241,19 @@ export default function TournamentPage() {
               <span className="text-sm font-medium">Написать организатору</span>
             </button>
           )}
-        <button
-          className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-700 rounded-lg transition-colors duration-200 border border-green-200 mt-2"
-          onClick={() =>
-            shareURL(
-              createBotLink(`t-${tournament.id}`)
-            )
-          }
-        >
-          <FaShare size={16} />
-          <span className="text-sm font-medium">Поделиться турниром</span>
-        </button>
+          <button
+            className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-700 rounded-lg transition-colors duration-200 border border-green-200"
+            onClick={() =>
+              shareURL(
+                createBotLink(`t-${tournament.id}`)
+              )
+            }
+          >
+            <FaShare size={16} />
+            <span className="text-sm font-medium">Поделиться турниром</span>
+          </button>
+        </div>
+        
         <div className="my-4">
           <Divider />
         </div>
@@ -251,6 +262,13 @@ export default function TournamentPage() {
           tournamentId={tournament.id}
           registrations={tournament.registrations || []}
         />
+
+        <div className="mb-4">
+          <TournamentWaitlist
+            tournamentId={tournament.id}
+            waitlistCount={waitlistData.length}
+          />
+        </div>
 
         <div className="mt-auto">
           {isFinished ? (

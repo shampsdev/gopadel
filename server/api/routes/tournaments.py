@@ -8,9 +8,14 @@ from api.schemas.tournament import (
     RegistrationWithTournamentResponse,
     TournamentResponse,
 )
+from api.schemas.waitlist import WaitlistResponse
 from db.models.registration import RegistrationStatus
 from fastapi import APIRouter, HTTPException
-from repositories import registration_repository, tournament_repository
+from repositories import (
+    registration_repository,
+    tournament_repository,
+    waitlist_repository,
+)
 
 router = APIRouter()
 
@@ -71,3 +76,14 @@ async def get_tournament_participants(db: SessionDep, tournament_id: UUID):
     ]
 
     return active_registrations
+
+
+@router.get("/{tournament_id}/waitlist", response_model=List[WaitlistResponse])
+async def get_tournament_waitlist(db: SessionDep, tournament_id: UUID):
+    """Get waitlist for a tournament (public endpoint)"""
+    tournament = tournament_repository.get(db, tournament_id)
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Tournament not found")
+
+    waitlist = waitlist_repository.get_tournament_waitlist(db, tournament_id)
+    return waitlist

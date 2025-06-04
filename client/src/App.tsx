@@ -10,6 +10,7 @@ import useBackButton from "@/hooks/useBackButton"
 import useAuth from "@/hooks/useAuth"
 import TournamentPage from "./pages/TournamentPage"
 import TournamentParticipantsPage from "./pages/TournamentParticipantsPage"
+import TournamentWaitlistPage from "./pages/TournamentWaitlistPage"
 import EditProfilePage from "./pages/EditProfilePage"
 import HistoryPage from "./pages/HistoryPage"
 import BottomNavbar from "./components/BottomNavbar"
@@ -84,6 +85,10 @@ function App() {
                 <Route
                   path="participants"
                   element={<TournamentParticipantsPage />}
+                />
+                <Route
+                  path="waitlist"
+                  element={<TournamentWaitlistPage />}
                 />
               </Route>
             </Route>
