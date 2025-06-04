@@ -39,10 +39,12 @@ def create_invoice(
     Returns:
         Payment object from database with payment details
     """
+    # Configure YooKassa before creating payment
+    configure_yookassa()
+
     # Create payment data
     payment_data = {
         "amount": {"value": f"{final_price}.00", "currency": "RUB"},
-        "payment_method_data": {"type": "sbp"},
         "confirmation": {
             "type": "redirect",
             "return_url": return_url,
@@ -108,6 +110,9 @@ def create_widget_payment(
     Returns:
         Payment object from database with payment details
     """
+    # Configure YooKassa before creating payment
+    configure_yookassa()
+
     # Create payment data for widget with SBP
     payment_data = {
         "amount": {"value": f"{final_price}.00", "currency": "RUB"},

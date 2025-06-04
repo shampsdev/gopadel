@@ -1,7 +1,6 @@
 import React, { useState } from "react"
 import GreenButton from "@/components/ui/GreenButton"
-import PaymentWidget from "@/components/PaymentWidget"
-import { registerForTournament, cancelRegistrationBeforePayment } from "@/api/api"
+import { registerForTournament, cancelRegistrationBeforePayment, createPaymentForTournament } from "@/api/api"
 import { backButton } from "@telegram-apps/sdk-react"
 import { Registration, RegistrationStatus } from "@/types/registration"
 
@@ -20,7 +19,6 @@ export default function ParticipateButton({
   isReturning = false,
 }: ParticipateButtonProps) {
   const [loading, setLoading] = useState(false)
-  const [showPayment, setShowPayment] = useState(false)
   const [currentRegistration, setCurrentRegistration] =
     useState<Registration | null>(registration)
 
@@ -42,35 +40,32 @@ export default function ParticipateButton({
     }
   }
   
-  const handlePay = async () => {
+  const handleCreatePayment = async () => {
     setLoading(true)
     backButton.hide()
     try {
-      const newRegistration = await registerForTournament(tournamentId)
-      if (newRegistration) {
-        setCurrentRegistration(newRegistration)
-        if (
-          newRegistration.payment &&
-          newRegistration.status === RegistrationStatus.PENDING
-        ) {
-          setShowPayment(true)
-        } else {
-          // Free tournament or already active
-          callback?.()
+      const updatedRegistration = await createPaymentForTournament(tournamentId)
+      if (updatedRegistration) {
+        setCurrentRegistration(updatedRegistration)
+        // Open payment link if available
+        if (updatedRegistration.payment?.payment_link) {
+          window.open(updatedRegistration.payment.payment_link, '_blank')
         }
+        callback?.()
       } else {
-        console.error("Failed to register for tournament")
+        console.error("Failed to create payment for tournament")
       }
     } catch (error) {
-      console.error("Error participating in tournament:", error)
+      console.error("Error creating payment:", error)
     } finally {
       setLoading(false)
     }
   }
 
   const handlePayClick = () => {
-    if (currentRegistration?.payment) {
-      setShowPayment(true)
+    if (currentRegistration?.payment?.payment_link) {
+      // Open payment link in new tab
+      window.open(currentRegistration.payment.payment_link, '_blank')
     }
   }
 
@@ -91,33 +86,26 @@ export default function ParticipateButton({
     }
   }
 
-  const handlePaymentSuccess = () => {
-    setShowPayment(false)
-    callback?.()
-  }
-
-  const handlePaymentError = (error: unknown) => {
-    console.error("Payment failed:", error)
-    setShowPayment(false)
-  }
-
   const buttonText = () => {
-    if (currentRegistration?.status === RegistrationStatus.PENDING)
-      return "Оплатить"
+    if (currentRegistration?.status === RegistrationStatus.PENDING) {
+      return currentRegistration?.payment ? "Оплатить" : "Оплатить"
+    }
     return isReturning ? "Вернуться" : "Зарегистрироваться"
   }
 
-  // If we have a pending registration with payment, show payment and cancel options
-  if (
-    currentRegistration?.status === RegistrationStatus.PENDING &&
-    currentRegistration?.payment &&
-    !showPayment
-  ) {
+  if (currentRegistration?.status === RegistrationStatus.PENDING) {
     return (
       <div className="w-full space-y-2">
-        <GreenButton onClick={handlePayClick} className="w-full rounded-full">
-          Оплатить
-        </GreenButton>
+        {currentRegistration?.payment ? (
+          <GreenButton onClick={handlePayClick} className="w-full rounded-full">
+            Оплатить
+          </GreenButton>
+        ) : (
+          // No payment yet, create payment first
+          <GreenButton onClick={handleCreatePayment} isLoading={loading} className="w-full rounded-full">
+            Оплатить
+          </GreenButton>
+        )}
         <GreenButton 
           onClick={handleCancelBeforePayment} 
           isLoading={loading}
@@ -126,30 +114,16 @@ export default function ParticipateButton({
         >
           Отменить регистрацию
         </GreenButton>
-      </div>
-    )
-  }
-
-  if (showPayment && currentRegistration?.payment) {
-    return (
-      <div className="w-full space-y-4">
-        <PaymentWidget
-          confirmationToken={currentRegistration.payment.confirmation_token}
-          onSuccess={handlePaymentSuccess}
-          onError={handlePaymentError}
-          onClose={() => setShowPayment(false)}
-        />
+        <p className="text-xs text-gray-500 text-center mt-2">
+          При нажатии откроется страница оплаты в новой вкладке
+        </p>
       </div>
     )
   }
 
   return (
     <GreenButton
-      onClick={
-        currentRegistration?.status === RegistrationStatus.PENDING
-          ? handlePay
-          : handleRegister
-      }
+      onClick={handleRegister}
       isLoading={loading}
       className="w-full rounded-full"
     >

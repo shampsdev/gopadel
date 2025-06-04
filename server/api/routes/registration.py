@@ -5,6 +5,7 @@ from api.schemas.registration import RegistrationResponse
 from api.schemas.waitlist import WaitlistResponse
 from api.utils.tournament import is_tournament_finished
 from bot.init_bot import bot
+from config import settings
 from db.models.registration import RegistrationStatus
 from fastapi import APIRouter, HTTPException
 from repositories import (
@@ -12,7 +13,7 @@ from repositories import (
     tournament_repository,
     waitlist_repository,
 )
-from services.payments import create_widget_payment
+from services.payments import create_invoice
 from services.waitlist_notifications import notify_waitlist_users
 
 router = APIRouter()
@@ -100,33 +101,34 @@ async def register_for_tournament(db: SessionDep, tournament_id: UUID, user: Use
                 status_code=400, detail="User already registered for this tournament"
             )
         elif registration.status in (RegistrationStatus.CANCELED_BY_USER,):
+            # User already paid before, so return to ACTIVE status directly
             registration_repository.update_registration_status(
                 db, registration.id, RegistrationStatus.ACTIVE
             )
         else:
             registration_repository.update_registration_status(
-                db, registration.id, RegistrationStatus.PENDING
+                db,
+                registration.id,
+                RegistrationStatus.ACTIVE if is_free else RegistrationStatus.PENDING,
             )
-    payment = (
-        create_widget_payment(
-            db,
-            tournament,
-            discount,
-        )
-        if not is_free
-        else None
-    )
-    if registration:
-        registration_repository.update_registration_payment(
-            db, registration.id, payment.id if payment else None
-        )
 
+    # Don't create payment during registration, only set status
+    if registration:
+        # Clear any existing payment only if switching to pending from other statuses (not from CANCELED_BY_USER)
+        if (
+            not is_free
+            and registration.status != RegistrationStatus.PENDING
+            and registration.status != RegistrationStatus.CANCELED_BY_USER
+        ):
+            registration_repository.update_registration_payment(
+                db, registration.id, None
+            )
     else:
         registration = registration_repository.create_registration(
             db,
             user_id=user.id,
             tournament_id=tournament_id,
-            payment_id=payment.id if payment else None,
+            payment_id=None,  # No payment created yet
             status=RegistrationStatus.ACTIVE if is_free else RegistrationStatus.PENDING,
         )
 
@@ -139,7 +141,7 @@ async def register_for_tournament(db: SessionDep, tournament_id: UUID, user: Use
 async def cancel_registration_before_payment(
     db: SessionDep, tournament_id: UUID, user: UserDep
 ):
-    """Cancel registration before payment with CANCELED status (not CANCELED_BY_USER)"""
+    """Cancel registration before payment with CANCELLED status"""
     tournament = tournament_repository.get(db, tournament_id)
     if not tournament:
         raise HTTPException(status_code=404, detail="Tournament not found")
@@ -164,7 +166,7 @@ async def cancel_registration_before_payment(
             detail="Can only cancel pending registrations before payment",
         )
 
-    # Set status to CANCELED (not CANCELED_BY_USER)
+    # Set status to CANCELLED for pending registrations (before payment)
     registration_repository.update_registration_status(
         db, registration.id, RegistrationStatus.CANCELED
     )
@@ -200,3 +202,64 @@ async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep
     # Уведомляем всех пользователей из waitlist о том, что освободилось место
     await notify_waitlist_users(bot, db, tournament_id)
     return registration
+
+
+@router.post("/{tournament_id}/create-payment", response_model=RegistrationResponse)
+async def create_payment_for_tournament(
+    db: SessionDep, tournament_id: UUID, user: UserDep
+):
+    """Create payment for existing pending registration"""
+    tournament = tournament_repository.get(db, tournament_id)
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Tournament not found")
+
+    # Check if tournament is finished
+    if is_tournament_finished(tournament):
+        raise HTTPException(
+            status_code=400, detail="Cannot create payment for a finished tournament"
+        )
+
+    registration = registration_repository.get_user_tournament_registration(
+        db, user.id, tournament_id
+    )
+    if not registration:
+        raise HTTPException(status_code=404, detail="Registration not found")
+
+    if registration.status != RegistrationStatus.PENDING:
+        raise HTTPException(
+            status_code=400, detail="Can only create payment for pending registrations"
+        )
+
+    # Check if payment already exists
+    if registration.payment_id:
+        raise HTTPException(
+            status_code=400, detail="Payment already exists for this registration"
+        )
+
+    discount = user.loyalty.discount if user.loyalty else 0
+    price = round(tournament.price * (1 - discount / 100))
+
+    if price == 0:
+        # Free tournament, just activate registration
+        registration_repository.update_registration_status(
+            db, registration.id, RegistrationStatus.ACTIVE
+        )
+        return registration
+
+    # Create payment
+    payment = create_invoice(
+        db,
+        tournament,
+        discount,
+        return_url=f"https://t.me/{settings.TG_BOT_USERNAME}/app?startapp=t-{tournament_id}",
+    )
+
+    # Update registration with payment
+    registration_repository.update_registration_payment(db, registration.id, payment.id)
+
+    # Refresh registration to get updated data
+    updated_registration = registration_repository.get_user_tournament_registration(
+        db, user.id, tournament_id
+    )
+
+    return updated_registration

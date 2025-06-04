@@ -83,9 +83,25 @@ export default function TournamentPage() {
       setLoading(false)
     }
   }
+
   useEffect(() => {
     fetchTournament()
   }, [id, userData?.id])
+
+  // Auto-refresh when user returns from payment (page becomes visible)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && registration?.status === RegistrationStatus.PENDING) {
+        // Refresh tournament data when user returns and has pending payment
+        fetchTournament()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [registration?.status])
 
   const handleCancelClick = () => {
     setShowCancelDialog(true)
@@ -277,6 +293,26 @@ export default function TournamentPage() {
               {registration?.status === RegistrationStatus.ACTIVE && (
                 <p className="text-sm text-gray-500">Вы участвовали в этом турнире</p>
               )}
+            </div>
+          ) : registration?.status === RegistrationStatus.PENDING ? (
+            <div className="mt-4 text-center">
+              <div className="space-y-2">
+                <ParticipateButton
+                  tournamentId={tournament.id}
+                  registration={registration}
+                  callback={() => {
+                    fetchTournament()
+                  }}
+                />
+                
+                <button
+                  onClick={fetchTournament}
+                  disabled={loading}
+                  className="w-full py-2 px-4 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors duration-200 border border-gray-200"
+                >
+                  {loading ? 'Обновление...' : 'Обновить статус'}
+                </button>
+              </div>
             </div>
           ) : registration?.status === RegistrationStatus.CANCELED_BY_USER ? (
             <div className="mt-4 text-center">

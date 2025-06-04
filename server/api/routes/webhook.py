@@ -2,7 +2,6 @@ import json
 
 from api.deps import SessionDep
 from bot.init_bot import bot
-from db.models.payment import PaymentStatus
 from db.models.registration import RegistrationStatus
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
@@ -53,7 +52,7 @@ async def webhook(request: Request, event: WebhookEvent, db: SessionDep):
             )
 
     # If payment status is successful and payment has registration, update registration status
-    if payment_status == PaymentStatus.SUCCEEDED and payment.registration:
+    if payment_status == "succeeded" and payment.registration:
         # Update registration status if it was pending
         if payment.registration.status == RegistrationStatus.PENDING:
             registration = registration_repository.update_registration_status(
@@ -63,13 +62,15 @@ async def webhook(request: Request, event: WebhookEvent, db: SessionDep):
                 raise HTTPException(
                     status_code=500, detail="Failed to update registration status"
                 )
-    elif payment_status == PaymentStatus.CANCELED and payment.registration:
-        registration = registration_repository.update_registration_status(
-            db, payment.registration.id, RegistrationStatus.CANCELED
-        )
-        if not registration:
-            raise HTTPException(
-                status_code=500, detail="Failed to update registration status"
+    elif payment_status == "canceled" and payment.registration:
+        # Only update registration status if it wasn't already canceled by user
+        if payment.registration.status != RegistrationStatus.CANCELED_BY_USER:
+            registration = registration_repository.update_registration_status(
+                db, payment.registration.id, RegistrationStatus.CANCELED
             )
+            if not registration:
+                raise HTTPException(
+                    status_code=500, detail="Failed to update registration status"
+                )
 
     return {"status": "success"}

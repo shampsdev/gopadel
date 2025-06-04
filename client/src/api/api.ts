@@ -184,6 +184,23 @@ export const cancelRegistrationBeforePayment = async (
   }
 }
 
+export const createPaymentForTournament = async (
+  tournamentId: string
+): Promise<Registration | null> => {
+  try {
+    const response = await api.post<Registration>(
+      `/registration/${tournamentId}/create-payment`
+    )
+    return response.data
+  } catch (error) {
+    console.error(
+      `Error creating payment for tournament ${tournamentId}:`,
+      error
+    )
+    return null
+  }
+}
+
 export const getUsers = async () => {
   try {
     const response = await api.get("/users")
