@@ -166,14 +166,15 @@ async def get_all_registrations(
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid status")
 
-    # Get registrations with relations
+    # Get registrations with relations using proper filtering
     registrations = registration_repository.get_registrations_with_relations(
-        db=db, tournament_id=tournament_id, status=status_filter, skip=skip, limit=limit
+        db=db,
+        tournament_id=tournament_id,
+        user_id=user_id,  # Pass user_id directly to repository
+        status=status_filter,
+        skip=skip,
+        limit=limit,
     )
-
-    # Apply user filter if provided (since we can't filter by user in the query easily)
-    if user_id:
-        registrations = [r for r in registrations if r.user_id == user_id]
 
     # Count total registrations with same filters
     total_count = registration_repository.count_registrations_with_filters(
@@ -183,7 +184,12 @@ async def get_all_registrations(
     # Convert to admin response format
     admin_registrations = []
     for reg in registrations:
-        admin_registrations.append(AdminRegistrationResponse.model_validate(reg))
+        try:
+            admin_registrations.append(AdminRegistrationResponse.model_validate(reg))
+        except Exception as e:
+            print(f"Error converting registration {reg.id}: {e}")
+            # Skip problematic registrations but continue processing
+            continue
 
     return {"registrations": admin_registrations, "total": total_count}
 

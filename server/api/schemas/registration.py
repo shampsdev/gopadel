@@ -61,8 +61,8 @@ class AdminRegistrationResponse(BaseModel):
     tournament_id: UUID
     status: RegistrationStatus
     date: datetime
-    user: AdminUserInfo
-    tournament: AdminTournamentInfo
+    user: Optional[AdminUserInfo] = None
+    tournament: Optional[AdminTournamentInfo] = None
     payments: List[PaymentBase] = []
 
     class Config:

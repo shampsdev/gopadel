@@ -106,6 +106,7 @@ class RegistrationRepository(BaseRepository[Registration]):
         self,
         db: Session,
         tournament_id: Optional[UUID] = None,
+        user_id: Optional[UUID] = None,
         status: Optional[RegistrationStatus] = None,
         skip: int = 0,
         limit: int = 100,
@@ -119,6 +120,9 @@ class RegistrationRepository(BaseRepository[Registration]):
 
         if tournament_id:
             query = query.filter(Registration.tournament_id == tournament_id)
+
+        if user_id:
+            query = query.filter(Registration.user_id == user_id)
 
         if status:
             query = query.filter(Registration.status == status)
