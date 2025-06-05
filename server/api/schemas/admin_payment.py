@@ -9,7 +9,7 @@ class UserInfo(BaseModel):
     id: str
     first_name: str
     second_name: str
-    city: str
+    city: Optional[str] = None
 
 
 class TournamentInfo(BaseModel):

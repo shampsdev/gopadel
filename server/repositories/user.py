@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from api.schemas.user import UserRegister, UserUpdate
@@ -131,3 +131,7 @@ class UserRepository(BaseRepository[User]):
         db.commit()
         db.refresh(user)
         return user
+
+    def get_users_by_ids(self, db: Session, user_ids: List[UUID]) -> List[User]:
+        """Get users by list of IDs"""
+        return db.query(User).filter(User.id.in_(user_ids)).all()

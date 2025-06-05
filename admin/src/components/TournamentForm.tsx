@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Tournament, User, Club } from '../shared/types';
-import { userService } from '../services/user';
+
 import { clubService } from '../services/club';
 import { useUser } from '../context/UserContext';
 import { adminService } from '../services/admin';
@@ -108,7 +108,7 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
     const fetchUsers = async () => {
       setLoadingUsers(true);
       try {
-        const users = await userService.getAllUsers();
+        const users = await adminService.getLinkedUsers();
         setUsers(users);
       } catch {
         setUsers([]);

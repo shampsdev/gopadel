@@ -26,7 +26,7 @@ class UserResponse(BaseModel):
     second_name: str
     avatar: Optional[str] = None
     rank: float
-    city: str
+    city: Optional[str] = None
     birth_date: Optional[date] = None
     birth_date_ru: Optional[str] = None
     playing_position: Optional[str] = None

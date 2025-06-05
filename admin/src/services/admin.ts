@@ -1,4 +1,5 @@
 import { api } from "../api/api";
+import type { User } from "../shared/types";
 
 export interface AdminUser {
   id: string;
@@ -51,6 +52,11 @@ export const adminService = {
   
   updateUserAssociation: async (adminId: string, userId: string): Promise<AdminUser> => {
     const response = await api.patch(`/admin/${adminId}/user`, { user_id: userId });
+    return response.data;
+  },
+
+  getLinkedUsers: async (): Promise<User[]> => {
+    const response = await api.get('/admin/linked-users/');
     return response.data;
   }
 }; 

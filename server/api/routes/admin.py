@@ -4,6 +4,7 @@ from uuid import UUID
 from api.deps import SessionDep
 from api.schemas.admin_user import AdminUserCreate, AdminUserResponse
 from api.schemas.registration import AdminRegistrationResponse, RegistrationStatus
+from api.schemas.user import UserBase
 from api.utils.admin_middleware import admin_required, superuser_required
 from db.models.admin import AdminUser
 from fastapi import APIRouter, Body, HTTPException, Query, Request, Security
@@ -136,6 +137,33 @@ async def update_admin_user_association(
     # Update the admin user with the new user_id
     updated_admin = admin_user_repository.update_admin(db, admin, {"user_id": user_id})
     return updated_admin
+
+
+@router.get(
+    "/linked-users/",
+    response_model=List[UserBase],
+    description="Get all users linked to admins. Requires admin privileges.",
+    responses={401: {"description": "Not authenticated or invalid token"}},
+)
+@admin_required
+async def get_linked_users(
+    request: Request,
+    db: SessionDep,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+):
+    """Get all users that are linked to admin accounts"""
+    # Get all admins with user_id set
+    admins_with_users = db.query(AdminUser).filter(AdminUser.user_id.isnot(None)).all()
+
+    # Extract user_ids
+    user_ids = [admin.user_id for admin in admins_with_users if admin.user_id]
+
+    if not user_ids:
+        return []
+
+    # Get the actual users
+    users = user_repository.get_users_by_ids(db, user_ids)
+    return users
 
 
 @router.get(

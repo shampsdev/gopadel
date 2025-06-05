@@ -40,7 +40,7 @@ class AdminUserInfo(BaseModel):
     id: UUID
     first_name: str
     second_name: str
-    city: str
+    city: Optional[str] = None
     username: Optional[str] = None
 
     class Config:
