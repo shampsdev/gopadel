@@ -46,7 +46,7 @@ function App() {
       const startParam = initData.startParam() || null
       handleStartParam(startParam, navigate, isAuthenticated)
     }
-  }, [])
+  }, [isAuthenticated])
 
   return (
     <div className="bg-main w-[100vw] h-[100vh] overflow-y-auto">
