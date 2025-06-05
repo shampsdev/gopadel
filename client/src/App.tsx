@@ -46,7 +46,7 @@ function App() {
       const startParam = initData.startParam() || null
       handleStartParam(startParam, navigate, isAuthenticated)
     }
-  }, [navigate, isAuthenticated, isLoading])
+  }, [])
 
   return (
     <div className="bg-main w-[100vw] h-[100vh] overflow-y-auto">
@@ -86,10 +86,7 @@ function App() {
                   path="participants"
                   element={<TournamentParticipantsPage />}
                 />
-                <Route
-                  path="waitlist"
-                  element={<TournamentWaitlistPage />}
-                />
+                <Route path="waitlist" element={<TournamentWaitlistPage />} />
               </Route>
             </Route>
 
