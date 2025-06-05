@@ -9,7 +9,6 @@ export default function useBackButton() {
   useEffect(() => {
     const currentPath = location.pathname
 
-    // Очищаем флаги если пользователь покинул турнир или перешел на главную
     if (currentPath === "/" || currentPath === "/people" || currentPath === "/league" || currentPath === "/profile") {
       sessionStorage.removeItem('fromTournamentLink')
       sessionStorage.removeItem('sourceTournamentId')
@@ -28,15 +27,13 @@ export default function useBackButton() {
         return
       }
 
-      // Проверяем, пришел ли пользователь по ссылке на турнир
       const fromTournamentLink = sessionStorage.getItem('fromTournamentLink') === 'true'
       const sourceTournamentId = sessionStorage.getItem('sourceTournamentId')
       
-      // Если пользователь на странице турнира и пришел по ссылке на этот турнир, закрываем приложение
       if (currentPath.startsWith("/tournament/") && fromTournamentLink && !currentPath.includes("/participants") && !currentPath.includes("/waitlist")) {
         const currentTournamentId = currentPath.split("/")[2]
         if (currentTournamentId === sourceTournamentId) {
-          closeMiniApp()
+          navigate("/")
           return
         }
       }
