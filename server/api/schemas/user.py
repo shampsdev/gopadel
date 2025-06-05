@@ -20,7 +20,7 @@ class UserBase(BaseModel):
     bio: str = ""
     avatar: Optional[str] = None
     rank: float
-    city: str
+    city: Optional[str] = None
     birth_date: date | None
     birth_date_ru: str | None
     playing_position: Optional[PlayingPosition] = None
@@ -36,7 +36,7 @@ class UserRegister(BaseModel):
     second_name: str
     bio: str = ""
     rank: float
-    city: str
+    city: Optional[str] = None
     birth_date: Optional[date] = None
     playing_position: Optional[PlayingPosition] = None
     padel_profiles: Optional[str] = None

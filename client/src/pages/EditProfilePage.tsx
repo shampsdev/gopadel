@@ -65,14 +65,12 @@ export default function EditProfilePage() {
     name: !name.trim(),
     secondName: !secondName.trim(),
     rank: !validateRank(rank),
-    city: !city,
   }
 
   const formIsValid =
     !hasErrors.name &&
     !hasErrors.secondName &&
     !hasErrors.rank &&
-    !hasErrors.city &&
     (birthDate === "" || isValidDateFormat(birthDate))
 
   const handleRankChange = (value: string) => {
@@ -100,7 +98,7 @@ export default function EditProfilePage() {
         second_name: secondName,
         bio: bio,
         rank: parseFloat(rank),
-        city: city,
+        city: city || null,
         birth_date: birthDate ? formatDateForBackend(birthDate) : null,
         playing_position: playingPosition ? playingPosition.toLowerCase() : null,
         padel_profiles: padelProfiles || null,
@@ -176,7 +174,7 @@ export default function EditProfilePage() {
           value={rank}
         />
 
-        <SimpleCitySelector value={city} onChange={setCity} title="Город" />
+        <SimpleCitySelector value={city} onChange={setCity} title="Город" optional={true} />
 
         <PlayingPositionSelector
           value={playingPosition}
@@ -199,7 +197,7 @@ export default function EditProfilePage() {
 
         <InputField
           onChangeFunction={setBirthDate}
-          title="Дата рождения (опционально)"
+          title="Дата рождения"
           value={birthDate}
           maxLength={10}
           type="date"

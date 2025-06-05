@@ -5,12 +5,14 @@ interface SimpleCitySelectorProps {
   value: string
   onChange: (value: string) => void
   title: string
+  optional?: boolean
 }
 
 const SimpleCitySelector: React.FC<SimpleCitySelectorProps> = ({
   value,
   onChange,
   title,
+  optional = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
@@ -61,7 +63,7 @@ const SimpleCitySelector: React.FC<SimpleCitySelectorProps> = ({
       <fieldset
         className={`border-2 rounded-xl px-3 relative transition-all duration-100 
           ${
-            !value
+            !value && !optional
               ? "border-[#E53935] text-[#E53935]"
               : "border-gray-300 text-gray-400 focus-within:border-[#20C86E] focus-within:text-[#20C86E]"
           } 

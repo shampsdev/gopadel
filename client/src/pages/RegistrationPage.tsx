@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { initData, showPopup } from "@telegram-apps/sdk-react"
 import InputField from "@/components/InputField"
-import SimpleCitySelector from "@/components/SimpleCitySelector"
-import { isValidDateFormat, formatDateForBackend } from "@/utils/date"
+
+
 import { api } from "@/api/api"
 import { useNavigate } from "react-router-dom"
 import useAuth from "@/hooks/useAuth"
@@ -10,8 +10,7 @@ import useUserStore from "@/stores/userStore"
 import GreenButton from "@/components/ui/GreenButton"
 import HeaderEditAvatar from "@/components/HeaderEditAvatar"
 import RatingSelector from "@/components/RatingSelector"
-import PlayingPositionSelector from "@/components/PlayingPositionSelector"
-import { PlayingPosition } from "@/types/user"
+
 import { handleAvatarFileChange } from "@/utils/avatarUpload"
 import { handlePendingStartParam } from "@/utils/startParamHandler"
 
@@ -20,11 +19,8 @@ export default function RegistrationPage() {
   const [secondName, setSecondName] = useState(initData.user()?.last_name ?? "")
   const [bio, setBio] = useState("")
   const [rank, setRank] = useState("1.0")
-  const [city, setCity] = useState("")
-  const [birthDate, setBirthDate] = useState("")
-  const [playingPosition, setPlayingPosition] =
-    useState<PlayingPosition | null>(null)
-  const [padelProfiles, setPadelProfiles] = useState("")
+
+
   const [profilePicture, setProfilePicture] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -45,15 +41,12 @@ export default function RegistrationPage() {
     name: !name.trim(),
     secondName: !secondName.trim(),
     rank: !validateRank(rank),
-    city: !city,
   }
 
   const formIsValid =
     !hasErrors.name &&
     !hasErrors.secondName &&
-    !hasErrors.rank &&
-    !hasErrors.city &&
-    (birthDate === "" || isValidDateFormat(birthDate))
+    !hasErrors.rank
 
   useEffect(() => {
     if (initData.user()?.username) {
@@ -113,12 +106,10 @@ export default function RegistrationPage() {
         second_name: secondName,
         bio: bio,
         rank: parseFloat(rank),
-        city: city,
-        birth_date: birthDate ? formatDateForBackend(birthDate) : null,
-        playing_position: playingPosition
-          ? playingPosition.toLowerCase()
-          : null,
-        padel_profiles: padelProfiles || null,
+        city: null,
+        birth_date: null,
+        playing_position: null,
+        padel_profiles: null,
       }
 
       console.log("Sending registration data:", userData)
@@ -192,36 +183,7 @@ export default function RegistrationPage() {
           value={rank}
         />
 
-        <SimpleCitySelector value={city} onChange={setCity} title="Город" />
 
-        <PlayingPositionSelector
-          value={playingPosition}
-          onChange={setPlayingPosition}
-          title="В каком квадрате играете?"
-          optional={true}
-        />
-
-        <InputField
-          onChangeFunction={setPadelProfiles}
-          title="Профили по падел"
-          value={padelProfiles}
-          maxLength={500}
-          placeholder="Ссылки на профили из других рейтинговых платформ
-По одной на строку"
-          optional={true}
-          multiline={true}
-          rows={3}
-        />
-
-        <InputField
-          onChangeFunction={setBirthDate}
-          title="Дата рождения (опционально)"
-          value={birthDate}
-          maxLength={10}
-          type="date"
-          placeholder="дд.мм.гггг"
-          optional={true}
-        />
 
         <GreenButton
           onClick={handleSubmit}

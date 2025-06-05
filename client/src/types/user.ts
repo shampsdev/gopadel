@@ -24,7 +24,7 @@ export interface User {
   second_name: string
   bio: string
   rank: number
-  city: string
+  city: string | null
   birth_date: string | null
   birth_date_ru: string | null
   avatar: string | null

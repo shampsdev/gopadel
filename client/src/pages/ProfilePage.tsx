@@ -90,6 +90,16 @@ export default function ProfilePage() {
         </div>
         <Divider />
 
+        {userData.bio && (
+          <>
+            <div className="py-2">
+              <span className="text-gray-500 block mb-2">О себе</span>
+              <div className="font-medium break-words whitespace-pre-wrap">{userData.bio}</div>
+            </div>
+            <Divider />
+          </>
+        )}
+
         {userData.padel_profiles && (
           <>
             <div className="py-2">

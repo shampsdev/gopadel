@@ -114,10 +114,12 @@ export default function UserProfilePage() {
         </div>
         <Divider />
 
-        <div className="flex justify-between py-2 gap-4">
-          <span className="text-gray-500 text-nowrap">О себе</span>
-          <span className="font-medium">{user.bio}</span>
-        </div>
+        {user.bio && (
+          <div className="py-2">
+            <span className="text-gray-500 block mb-2">О себе</span>
+            <div className="font-medium break-words whitespace-pre-wrap">{user.bio}</div>
+          </div>
+        )}
         <Divider />
 
         {user.padel_profiles && (

@@ -44,7 +44,7 @@ class User(Base):
     bio: Mapped[str] = mapped_column(Text, nullable=False, default="")
     avatar: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     rank: Mapped[float] = mapped_column(Float, nullable=False)
-    city: Mapped[str] = mapped_column(String(255), nullable=False)
+    city: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     playing_position: Mapped[Optional[PlayingPosition]] = mapped_column(
         Enum(PlayingPosition), nullable=True
