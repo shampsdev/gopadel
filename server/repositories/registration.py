@@ -160,3 +160,24 @@ class RegistrationRepository(BaseRepository[Registration]):
             .order_by(Registration.date.desc())
             .all()
         )
+
+    def count_registrations_with_filters(
+        self,
+        db: Session,
+        tournament_id: Optional[UUID] = None,
+        user_id: Optional[UUID] = None,
+        status: Optional[RegistrationStatus] = None,
+    ) -> int:
+        """Count registrations with filters"""
+        query = db.query(Registration)
+
+        if tournament_id:
+            query = query.filter(Registration.tournament_id == tournament_id)
+
+        if user_id:
+            query = query.filter(Registration.user_id == user_id)
+
+        if status:
+            query = query.filter(Registration.status == status)
+
+        return query.count()

@@ -51,8 +51,8 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
             <button onClick={() => navigate('/clubs')} className="hover:text-gray-600 transition">
               Клубы
             </button>
-            <button onClick={() => navigate('/payments')} className="hover:text-gray-600 transition">
-              Платежи
+            <button onClick={() => navigate('/registrations')} className="hover:text-gray-600 transition">
+              Регистрации
             </button>
             <button onClick={() => navigate('/loyalty')} className="hover:text-gray-600 transition">
               Лояльность
@@ -120,12 +120,12 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
             </button>
             <button 
               onClick={() => {
-                navigate('/payments');
+                navigate('/registrations');
                 setIsMenuOpen(false);
               }} 
               className="py-2 px-1 hover:bg-green-200 rounded transition"
             >
-              Платежи
+              Регистрации
             </button>
             <button 
               onClick={() => {

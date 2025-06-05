@@ -5,7 +5,7 @@ import UsersPage from './pages/UsersPage';
 import LoyaltyPage from './pages/LoyaltyPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminsPage from './pages/AdminsPage';
-import PaymentsPage from './pages/PaymentsPage';
+import RegistrationsPage from './pages/RegistrationsPage';
 import ClubsPage from './pages/ClubsPage';
 import { authService } from './services/auth';
 import { UserProvider, useUser } from './context/UserContext';
@@ -65,10 +65,10 @@ function App() {
               </Layout>
             </ProtectedRoute>
           } />
-          <Route path="/payments" element={
+          <Route path="/registrations" element={
             <ProtectedRoute>
               <Layout>
-                <PaymentsPage />
+                <RegistrationsPage />
               </Layout>
             </ProtectedRoute>
           } />

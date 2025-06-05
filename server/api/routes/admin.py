@@ -1,14 +1,14 @@
-from typing import List
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from api.deps import SessionDep
 from api.schemas.admin_user import AdminUserCreate, AdminUserResponse
+from api.schemas.registration import AdminRegistrationResponse, RegistrationStatus
 from api.utils.admin_middleware import admin_required, superuser_required
-from api.utils.jwt import get_password_hash
 from db.models.admin import AdminUser
-from fastapi import APIRouter, Body, HTTPException, Request, Security
+from fastapi import APIRouter, Body, HTTPException, Query, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from repositories import admin_user_repository, user_repository
+from repositories import admin_user_repository, registration_repository, user_repository
 
 router = APIRouter()
 security = HTTPBearer()
@@ -136,3 +136,99 @@ async def update_admin_user_association(
     # Update the admin user with the new user_id
     updated_admin = admin_user_repository.update_admin(db, admin, {"user_id": user_id})
     return updated_admin
+
+
+@router.get(
+    "/registrations/",
+    response_model=Dict[str, Any],
+    tags=["admin", "registrations"],
+    description="Get all registrations with filters. Requires admin privileges.",
+    responses={401: {"description": "Not authenticated or invalid token"}},
+)
+@admin_required
+async def get_all_registrations(
+    request: Request,
+    db: SessionDep,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    user_id: Optional[UUID] = Query(None),
+    tournament_id: Optional[UUID] = Query(None),
+    status: Optional[str] = Query(None),
+    credentials: HTTPAuthorizationCredentials = Security(security),
+):
+    """Get all registrations with filters for admin"""
+
+    # Convert string status to enum if provided
+    status_filter = None
+    if status and status != "all":
+        try:
+            status_filter = RegistrationStatus(status)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid status")
+
+    # Get registrations with relations
+    registrations = registration_repository.get_registrations_with_relations(
+        db=db, tournament_id=tournament_id, status=status_filter, skip=skip, limit=limit
+    )
+
+    # Apply user filter if provided (since we can't filter by user in the query easily)
+    if user_id:
+        registrations = [r for r in registrations if r.user_id == user_id]
+
+    # Count total registrations with same filters
+    total_count = registration_repository.count_registrations_with_filters(
+        db=db, tournament_id=tournament_id, user_id=user_id, status=status_filter
+    )
+
+    # Convert to admin response format
+    admin_registrations = []
+    for reg in registrations:
+        admin_registrations.append(AdminRegistrationResponse.model_validate(reg))
+
+    return {"registrations": admin_registrations, "total": total_count}
+
+
+@router.patch(
+    "/registrations/{registration_id}/status",
+    tags=["admin", "registrations"],
+    description="Update registration status. Requires admin privileges.",
+    responses={
+        401: {"description": "Not authenticated or invalid token"},
+        404: {"description": "Registration not found"},
+    },
+)
+@admin_required
+async def update_registration_status_admin(
+    registration_id: UUID,
+    status_data: Dict[str, str],
+    request: Request,
+    db: SessionDep,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+):
+    """Update registration status (admin only)"""
+
+    new_status = status_data.get("status")
+    if not new_status:
+        raise HTTPException(status_code=400, detail="Status is required")
+
+    try:
+        status_enum = RegistrationStatus(new_status)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid status")
+
+    # Get registration
+    registration = registration_repository.get(db, registration_id)
+    if not registration:
+        raise HTTPException(status_code=404, detail="Registration not found")
+
+    # Update status
+    updated_registration = registration_repository.update_registration_status(
+        db, registration_id, status_enum
+    )
+
+    if not updated_registration:
+        raise HTTPException(
+            status_code=500, detail="Failed to update registration status"
+        )
+
+    return {"message": "Registration status updated successfully", "status": new_status}
