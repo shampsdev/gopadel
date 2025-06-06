@@ -83,126 +83,134 @@ const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-700 mb-1">Имя</label>
+          <label className="block text-gray-700 mb-1 text-sm">Имя</label>
           <input
             type="text"
             name="first_name"
             value={formData.first_name || ''}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded ${errors.first_name ? 'border-red-500' : 'border-gray-300'}`}
+            className={`w-full px-3 py-2 border rounded text-sm ${errors.first_name ? 'border-red-500' : 'border-gray-300'}`}
           />
-          {errors.first_name && <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>}
+          {errors.first_name && <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-1">Фамилия</label>
+          <label className="block text-gray-700 mb-1 text-sm">Фамилия</label>
           <input
             type="text"
             name="second_name"
             value={formData.second_name || ''}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded ${errors.second_name ? 'border-red-500' : 'border-gray-300'}`}
+            className={`w-full px-3 py-2 border rounded text-sm ${errors.second_name ? 'border-red-500' : 'border-gray-300'}`}
           />
-          {errors.second_name && <p className="text-red-500 text-sm mt-1">{errors.second_name}</p>}
+          {errors.second_name && <p className="text-red-500 text-xs mt-1">{errors.second_name}</p>}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-gray-700 mb-1 text-sm">Город</label>
+          <input
+            type="text"
+            name="city"
+            value={formData.city || ''}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-700 mb-1 text-sm">Дата рождения</label>
+          <input
+            type="date"
+            name="birth_date"
+            value={formData.birth_date || ''}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <RatingSelector
+            name="rank"
+            label="Рейтинг"
+            value={formData.rank}
+            onChange={handleChange}
+            error={errors.rank}
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-700 mb-1 text-sm">Позиция игры</label>
+          <select
+            name="playing_position"
+            value={formData.playing_position || ''}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+          >
+            <option value="">Не указано</option>
+            <option value="right">В правом</option>
+            <option value="left">В левом</option>
+            <option value="both">В обоих</option>
+          </select>
         </div>
       </div>
 
       <div>
-        <label className="block text-gray-700 mb-1">Город</label>
-        <input
-          type="text"
-          name="city"
-          value={formData.city || ''}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      <div>
-        <label className="block text-gray-700 mb-1">Дата рождения</label>
-        <input
-          type="date"
-          name="birth_date"
-          value={formData.birth_date || ''}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      <div>
-        <RatingSelector
-          name="rank"
-          label="Рейтинг"
-          value={formData.rank}
-          onChange={handleChange}
-          error={errors.rank}
-        />
-      </div>
-
-      <div>
-        <label className="block text-gray-700 mb-1">Позиция игры</label>
-        <select
-          name="playing_position"
-          value={formData.playing_position || ''}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded"
-        >
-          <option value="">Не указано</option>
-          <option value="right">В правом</option>
-          <option value="left">В левом</option>
-          <option value="both">В обоих</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-gray-700 mb-1">Профили по падел</label>
+        <label className="block text-gray-700 mb-1 text-sm">Профили по падел</label>
         <textarea
           name="padel_profiles"
           value={formData.padel_profiles || ''}
           onChange={handleChange}
-          rows={3}
+          rows={2}
           placeholder="Ссылки на профили (по одной на строку)"
-          className="w-full px-3 py-2 border border-gray-300 rounded resize-vertical"
+          className="w-full px-3 py-2 border border-gray-300 rounded resize-vertical text-sm"
         />
       </div>
 
-      <div>
-        <label className="block text-gray-700 mb-1">Уровень лояльности</label>
-        <select
-          name="loyalty_id"
-          value={formData.loyalty_id}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded"
-        >
-          {loyalties.map(loyalty => (
-            <option key={loyalty.id} value={loyalty.id}>
-              {loyalty.name} ({loyalty.discount}%)
-            </option>
-          ))}
-        </select>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-gray-700 mb-1 text-sm">Уровень лояльности</label>
+          <select
+            name="loyalty_id"
+            value={formData.loyalty_id}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+          >
+            {loyalties.map(loyalty => (
+              <option key={loyalty.id} value={loyalty.id}>
+                {loyalty.name} ({loyalty.discount}%)
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-end">
+          <div className="flex items-center">
+            <input
+              id="is_registered"
+              type="checkbox"
+              name="is_registered"
+              checked={formData.is_registered || false}
+              onChange={handleChange}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            />
+            <label htmlFor="is_registered" className="ml-2 block text-sm text-gray-700">
+              Зарегистрирован
+            </label>
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-center">
-        <input
-          id="is_registered"
-          type="checkbox"
-          name="is_registered"
-          checked={formData.is_registered || false}
-          onChange={handleChange}
-          className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-        />
-        <label htmlFor="is_registered" className="ml-2 block text-sm text-gray-700">
-          Зарегистрирован
-        </label>
-      </div>
-
-      <div className="flex justify-end">
+      <div className="flex justify-end pt-2">
         <button
           type="submit"
-          className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
         >
           Сохранить
         </button>

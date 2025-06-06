@@ -20,8 +20,8 @@ const UserList = ({ users, selectedId, onSelect, currentPage, totalPages, onPage
   }
 
   return (
-    <div>
-      <div className="max-h-[700px] overflow-y-auto">
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto">
         <ul className="divide-y divide-gray-200">
           {users.map((user) => (
             <li 
@@ -63,7 +63,7 @@ const UserList = ({ users, selectedId, onSelect, currentPage, totalPages, onPage
       
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="border-t border-gray-200 px-4 py-3 flex items-center justify-between">
+        <div className="border-t border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
           <div className="flex-1 flex justify-between sm:hidden">
             <button
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}

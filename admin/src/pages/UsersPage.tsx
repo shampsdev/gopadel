@@ -21,22 +21,12 @@ const UsersPage = () => {
   const [loyalties, setLoyalties] = useState<Loyalty[]>([]);
   const [loadingLoyalty, setLoadingLoyalty] = useState(true);
   
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [usersPerPage] = useState(50);
-  
   // Search and filter states
-  const [nameFilter, setNameFilter] = useState('');
-  const [cityFilter, setCityFilter] = useState('');
+  const [searchFilter, setSearchFilter] = useState('');
   const [isRegisteredFilter, setIsRegisteredFilter] = useState<string>('all');
-  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   
   // Flag to track if we're loading a user from query params
   const [isLoadingFromQueryParams, setIsLoadingFromQueryParams] = useState(false);
-
-  // Calculate total pages
-  const totalPages = Math.ceil(totalUsers / usersPerPage);
 
   // Parse URL query parameters to get userId
   useEffect(() => {
@@ -92,11 +82,10 @@ const UsersPage = () => {
     }
   };
 
-  const fetchUsers = async (page: number = 1) => {
+  const fetchAllUsers = async () => {
     try {
       setLoading(true);
-      const skip = (page - 1) * usersPerPage;
-      const { users: fetchedUsers, total } = await userService.getAll(skip, usersPerPage);
+      const fetchedUsers = await userService.getAllUsers();
       
       // Attach loyalty objects to users
       const usersWithLoyalty = fetchedUsers.map(user => {
@@ -108,7 +97,6 @@ const UsersPage = () => {
       });
       
       setUsers(usersWithLoyalty);
-      setTotalUsers(total);
       setError(null);
     } catch (err) {
       setError('Ошибка при загрузке пользователей');
@@ -125,7 +113,7 @@ const UsersPage = () => {
       
       // If we're not loading a specific user from query params, load the user list
       if (!isLoadingFromQueryParams) {
-        await fetchUsers(currentPage);
+        await fetchAllUsers();
       }
       
       // If we have a userId in the URL, load that specific user
@@ -140,13 +128,6 @@ const UsersPage = () => {
     initData();
   }, []); // Empty dependency array - only run once
 
-  useEffect(() => {
-    // Re-fetch users when page changes, but only if we're not loading a specific user
-    if (!loadingLoyalty && loyalties.length > 0 && !isLoadingFromQueryParams) {
-      fetchUsers(currentPage);
-    }
-  }, [currentPage, loadingLoyalty]);
-
   const handleSelectUser = (user: User) => {
     // Make sure selected user has the loyalty object
     const loyaltyObj = loyalties.find(l => l.id === user.loyalty_id);
@@ -159,9 +140,7 @@ const UsersPage = () => {
     navigate(`/users?userId=${user.id}`, { replace: true });
   };
 
-  const handleChangePage = (page: number) => {
-    setCurrentPage(page);
-  };
+  // Removed pagination functionality
 
   const handleSave = async (updatedUserData: Partial<User>) => {
     if (!selectedUser) return;
@@ -174,7 +153,7 @@ const UsersPage = () => {
       });
       
       // Refresh the users list
-      await fetchUsers(currentPage);
+      await fetchAllUsers();
       
       // Update the selected user with returned data and loyalty info
       const loyaltyObj = loyalties.find(l => l.id === updatedUser.loyalty_id);
@@ -196,15 +175,14 @@ const UsersPage = () => {
   // Note: In a production app with many users, these filters should be moved to the server-side API
   const filteredUsers = users.filter(user => {
     const fullName = `${user.first_name} ${user.second_name}`.toLowerCase();
+    const username = user.username ? user.username.toLowerCase() : '';
     
-    // Filter by name
-    if (nameFilter && !fullName.includes(nameFilter.toLowerCase())) {
-      return false;
-    }
-    
-    // Filter by city
-    if (cityFilter && !user.city.toLowerCase().includes(cityFilter.toLowerCase())) {
-      return false;
+    // Filter by name, surname or username
+    if (searchFilter) {
+      const searchTerm = searchFilter.toLowerCase();
+      if (!fullName.includes(searchTerm) && !username.includes(searchTerm)) {
+        return false;
+      }
     }
     
     // Filter by registration status
@@ -218,11 +196,7 @@ const UsersPage = () => {
     return true;
   });
 
-  const clearFilters = () => {
-    setNameFilter('');
-    setCityFilter('');
-    setIsRegisteredFilter('all');
-  };
+
 
   const isLoading = loading || (loadingLoyalty && loyalties.length === 0);
 
@@ -238,72 +212,62 @@ const UsersPage = () => {
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Left side - User list */}
-        <div className="w-full lg:w-1/3 bg-white rounded-lg shadow">
-          <div className="p-4 border-b">
-            <h2 className="text-lg font-medium">Список пользователей</h2>
+        <div className="w-full lg:w-1/3 bg-white rounded-lg shadow max-h-[600px] flex flex-col">
+          <div className="p-4 border-b flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-medium">Список пользователей</h2>
+                <p className="text-xs text-gray-500">
+                  Всего: {users.length}
+                  {(searchFilter || isRegisteredFilter !== 'all') && 
+                    ` | Отфильтровано: ${filteredUsers.length}`}
+                </p>
+              </div>
+            </div>
           </div>
           
-          {/* Filters section */}
-          <div className="p-3 border-b">
-            <div className="flex items-center justify-between mb-2">
-              <button 
-                onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-                className="flex items-center text-sm text-green-700"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          {/* Search section */}
+          <div className="p-3 border-b flex-shrink-0">
+            <div className="relative mb-3">
+              <input
+                type="text"
+                placeholder="Поиск по имени, фамилии или никнейму..."
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+              />
+              <span className="absolute left-3 top-2.5 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                {isFilterExpanded ? 'Скрыть фильтры' : 'Показать фильтры'}
-              </button>
-              {isFilterExpanded && (
-                <button 
-                  onClick={clearFilters} 
-                  className="text-xs text-gray-500 hover:text-gray-700"
+              </span>
+              {searchFilter && (
+                <button
+                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                  onClick={() => setSearchFilter('')}
                 >
-                  Сбросить
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               )}
             </div>
             
-            <div className={`space-y-2 ${isFilterExpanded ? 'block' : 'hidden'}`}>
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Поиск по имени</label>
-                <input
-                  type="text"
-                  value={nameFilter}
-                  onChange={(e) => setNameFilter(e.target.value)}
-                  placeholder="Введите имя или фамилию"
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Город</label>
-                <input
-                  type="text"
-                  value={cityFilter}
-                  onChange={(e) => setCityFilter(e.target.value)}
-                  placeholder="Введите город"
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Статус регистрации</label>
-                <select
-                  value={isRegisteredFilter}
-                  onChange={(e) => setIsRegisteredFilter(e.target.value)}
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                >
-                  <option value="all">Все</option>
-                  <option value="registered">Зарегистрированные</option>
-                  <option value="unregistered">Не зарегистрированные</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Статус регистрации</label>
+              <select
+                value={isRegisteredFilter}
+                onChange={(e) => setIsRegisteredFilter(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+              >
+                <option value="all">Все</option>
+                <option value="registered">Зарегистрированные</option>
+                <option value="unregistered">Не зарегистрированные</option>
+              </select>
             </div>
           </div>
           
-          <div className="p-2">
+          <div className="p-2 flex-1 min-h-0">
             {isLoading && !isLoadingFromQueryParams ? (
               <p className="text-center py-4">Загрузка...</p>
             ) : filteredUsers.length > 0 ? (
@@ -311,13 +275,13 @@ const UsersPage = () => {
                 users={filteredUsers}
                 onSelect={handleSelectUser}
                 selectedId={selectedUser?.id}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handleChangePage}
+                currentPage={1}
+                totalPages={1}
+                onPageChange={() => {}}
               />
             ) : (
               <p className="text-center py-4 text-gray-500">
-                {nameFilter || cityFilter || isRegisteredFilter !== 'all' 
+                {searchFilter || isRegisteredFilter !== 'all' 
                   ? 'Нет пользователей, соответствующих фильтрам' 
                   : 'Нет доступных пользователей'}
               </p>
@@ -326,7 +290,7 @@ const UsersPage = () => {
         </div>
         
         {/* Right side - User form */}
-        <div className="w-full lg:w-2/3 bg-white rounded-lg shadow p-6 mt-4 lg:mt-0">
+        <div className="w-full lg:w-2/3 bg-white rounded-lg shadow p-6 mt-4 lg:mt-0 max-h-[600px] overflow-y-auto">
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <p className="text-gray-500">Загрузка...</p>
