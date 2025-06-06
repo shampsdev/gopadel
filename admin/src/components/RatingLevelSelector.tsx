@@ -13,6 +13,12 @@ const RatingLevelSelector = ({ minRating, maxRating, onChange, error }: RatingLe
 
   // Initialize selected levels based on min/max rating
   useEffect(() => {
+    // If invalid range (-1, -1), don't select anything
+    if (minRating === -1 && maxRating === -1) {
+      setSelectedLevels(new Array(ratingLevels.length).fill(false));
+      return;
+    }
+    
     const newSelectedLevels = ratingLevels.map(level => {
       // A level is selected if it overlaps with the min-max range
       return level.max >= minRating && level.min <= maxRating;
@@ -31,8 +37,8 @@ const RatingLevelSelector = ({ minRating, maxRating, onChange, error }: RatingLe
       .filter(idx => idx !== -1);
 
     if (selectedIndices.length === 0) {
-      // If nothing selected, default to Beginner
-      onChange(0, 1.69);
+      // If nothing selected, set invalid range
+      onChange(-1, -1);
       return;
     }
 
@@ -85,7 +91,7 @@ const RatingLevelSelector = ({ minRating, maxRating, onChange, error }: RatingLe
           Выбранный диапазон: <span className="font-medium">{getSelectedLevelsDescription()}</span>
         </p>
         <p className="text-xs text-gray-500">
-          Числовой диапазон: {minRating} - {maxRating}
+          Числовой диапазон: {minRating === -1 && maxRating === -1 ? 'Не выбрано' : `${minRating} - ${maxRating}`}
         </p>
       </div>
       

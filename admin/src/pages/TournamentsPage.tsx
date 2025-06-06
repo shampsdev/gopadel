@@ -20,7 +20,6 @@ const TournamentsPage = () => {
   const [nameFilter, setNameFilter] = useState('');
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
-  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'edit' | 'participants' | 'waitlist'>('edit');
 
@@ -50,9 +49,13 @@ const TournamentsPage = () => {
     const tournamentId = params.get('tournamentId');
     if (tournamentId && tournaments.length > 0) {
       const found = tournaments.find(t => String(t.id) === String(tournamentId));
-      if (found) setSelectedTournament(found);
+      if (found) {
+        setSelectedTournament(found);
+      }
     }
   }, [location.search, tournaments]);
+
+
 
   const handleSelectTournament = (tournament: Tournament) => {
     setSelectedTournament(tournament);
@@ -200,18 +203,21 @@ const TournamentsPage = () => {
           </div>
 
           {activeTab === 'edit' && (
-            <>
-              <h2 className="text-lg font-medium mb-4">Редактирование турнира</h2>
+            <div className="p-4">
               <TournamentForm tournament={selectedTournament} onSave={handleSave} />
-            </>
+            </div>
           )}
 
           {activeTab === 'participants' && (
-            <TournamentParticipants tournamentId={selectedTournament.id} />
+            <div className="p-4">
+              <TournamentParticipants tournamentId={selectedTournament.id} />
+            </div>
           )}
 
           {activeTab === 'waitlist' && (
-            <TournamentWaitlist tournamentId={selectedTournament.id} />
+            <div className="p-4">
+              <TournamentWaitlist tournamentId={selectedTournament.id} />
+            </div>
           )}
         </>
       );
@@ -256,26 +262,16 @@ const TournamentsPage = () => {
           {/* Filters section */}
           <div className="p-3 border-b">
             <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700">Фильтры</h3>
               <button 
-                onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-                className="flex items-center text-sm text-green-700"
+                onClick={clearFilters} 
+                className="text-xs text-gray-500 hover:text-gray-700"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                {isFilterExpanded ? 'Скрыть фильтры' : 'Показать фильтры'}
+                Сбросить
               </button>
-              {isFilterExpanded && (
-                <button 
-                  onClick={clearFilters} 
-                  className="text-xs text-gray-500 hover:text-gray-700"
-                >
-                  Сбросить
-                </button>
-              )}
             </div>
             
-            <div className={`space-y-2 ${isFilterExpanded ? 'block' : 'hidden'}`}>
+            <div className="space-y-2">
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Поиск по названию</label>
                 <input

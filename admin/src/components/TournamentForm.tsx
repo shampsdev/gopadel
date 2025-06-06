@@ -19,8 +19,8 @@ const defaultTournament: Tournament = {
   price: 0,
   club_id: '',
   tournament_type: '',
-  rank_min: 0,
-  rank_max: 7,
+  rank_min: -1,
+  rank_max: -1,
   max_users: 0,
   description: '',
   organizator_id: ''
@@ -157,6 +157,10 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       newErrors.price = 'Цена не может быть отрицательной';
     }
 
+    if (formData.rank_min === -1 || formData.rank_max === -1) {
+      newErrors.rank_min = 'Необходимо выбрать допустимые уровни игроков';
+    }
+
     // Check if start time is in the past (only for new tournaments)
     if (!tournament && formData.start_time) {
       const selectedDate = new Date(formData.start_time);
@@ -208,8 +212,8 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
       const tournamentToSave = {
         ...formData,
         price: formData.price ?? 0,
-        rank_min: formData.rank_min ?? 0,
-        rank_max: formData.rank_max ?? 0,
+        rank_min: formData.rank_min!,
+        rank_max: formData.rank_max!,
         max_users: formData.max_users ?? 0,
         start_time: formData.start_time, // Send as is - server will handle Moscow timezone
         end_time: formData.end_time || undefined,
@@ -401,8 +405,8 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
 
         <div className="grid grid-cols-1 gap-4">
           <RatingLevelSelector
-            minRating={formData.rank_min ?? 0}
-            maxRating={formData.rank_max ?? 7}
+            minRating={formData.rank_min ?? -1}
+            maxRating={formData.rank_max ?? -1}
             onChange={handleRatingChange}
             error={errors.rank_min || errors.rank_max}
           />
@@ -410,7 +414,7 @@ const TournamentForm = ({ tournament, onSave }: TournamentFormProps) => {
 
         <div>
           <p className="text-sm text-gray-600 mb-2">
-            Диапазон рейтинга: {getRatingRangeDescription(formData.rank_min ?? 0, formData.rank_max ?? 7)}
+            Диапазон рейтинга: {formData.rank_min === -1 || formData.rank_max === -1 ? 'Не выбрано' : getRatingRangeDescription(formData.rank_min, formData.rank_max)}
           </p>
         </div>
 
