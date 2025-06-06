@@ -30,6 +30,24 @@ async def get_users(
 
 
 @router.get(
+    "/all",
+    response_model=List[UserBase],
+    description="Get all users without pagination. Requires authentication.",
+    responses={401: {"description": "Not authenticated"}},
+)
+async def get_all_users(
+    current_user: UserDep,
+    db: SessionDep,
+):
+    """Get all registered users without pagination"""
+    # Get all users without pagination
+    all_users = user_repository.get_all(db, skip=0, limit=10000)
+    # Only return registered users
+    users = [user for user in all_users if user.is_registered]
+    return users
+
+
+@router.get(
     "/{user_id}",
     response_model=UserBase,
     description="Get a specific user by ID. Requires authentication.",

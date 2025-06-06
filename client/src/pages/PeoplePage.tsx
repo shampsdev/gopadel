@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import Header from "@/components/Header"
 import UserCard from "@/components/UserCard"
-import { getUsers } from "@/api/api"
+import { getAllUsers } from "@/api/api"
 import { User } from "@/types/user"
 import { Spinner } from "@/components/ui/Spinner"
 import { useNavigate } from "react-router-dom"
@@ -18,7 +18,7 @@ export default function PeoplePage() {
     const fetchUsers = async () => {
       setLoading(true)
       try {
-        const usersData = await getUsers()
+        const usersData = await getAllUsers()
         setUsers(usersData)
         setFilteredUsers(usersData)
       } catch (error) {

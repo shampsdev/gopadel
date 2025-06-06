@@ -239,6 +239,27 @@ export const getUserById = async (userId: string): Promise<User | null> => {
   }
 }
 
+export const getAllUsers = async (): Promise<User[]> => {
+  try {
+    const response = await api.get<User[]>("/users/all")
+    const users = response.data
+    
+    // Normalize playing_position for all users
+    if (Array.isArray(users)) {
+      users.forEach((user: User) => {
+        if (user.playing_position) {
+          user.playing_position = user.playing_position.toLowerCase() as PlayingPosition
+        }
+      })
+    }
+    
+    return users
+  } catch (error) {
+    console.error("Error fetching all users:", error)
+    return []
+  }
+}
+
 export const getLoyaltyLevels = async (): Promise<LoyaltyDetails[]> => {
   try {
     const response = await api.get<LoyaltyResponse[]>("/users/loyalty-levels")
