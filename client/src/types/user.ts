@@ -1,6 +1,5 @@
 import { Loyalty } from "@/types/loyalty"
 import { Registration } from "@/types/registration"
-import { Waitlist } from "@/types/waitlist"
 
 export type PlayingPosition = "right" | "left" | "both"
 
@@ -36,5 +35,5 @@ export interface User {
   // Relations
   loyalty: Loyalty
   registrations?: Registration[]
-  waitlist_entries?: Waitlist[]
+  // waitlist_entries removed to avoid circular dependency
 }

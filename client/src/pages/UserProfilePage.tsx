@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom"
 import Header from "@/components/Header"
 import { User } from "@/types/user"
 import { Spinner } from "@/components/ui/Spinner"
-import { getUsers } from "@/api/api"
+import { getUserById } from "@/api/api"
 import Divider from "@/components/ui/Divider"
 import { MessageCircle } from "lucide-react"
 import { openTelegramLink } from "@telegram-apps/sdk-react"
@@ -20,10 +20,11 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     const fetchUser = async () => {
+      if (!userId) return
+      
       setLoading(true)
       try {
-        const users = await getUsers()
-        const foundUser = users.find((u: User) => u.id === userId)
+        const foundUser = await getUserById(userId)
         if (foundUser) {
           setUser(foundUser)
         }

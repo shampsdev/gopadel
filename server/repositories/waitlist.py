@@ -2,10 +2,11 @@ from typing import List, Optional
 from uuid import UUID
 
 from db.models.tournament import Tournament
+from db.models.user import User
 from db.models.waitlist import Waitlist
 from repositories.base import BaseRepository
 from sqlalchemy import and_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 
 class WaitlistRepository(BaseRepository[Waitlist]):
@@ -77,17 +78,23 @@ class WaitlistRepository(BaseRepository[Waitlist]):
     def get_tournament_waitlist(
         self, db: Session, tournament_id: UUID
     ) -> List[Waitlist]:
-        """Get all users in waitlist for a tournament"""
+        """Get all users in waitlist for a tournament with simplified user data"""
         return (
             db.query(Waitlist)
+            .options(selectinload(Waitlist.user))
             .filter(Waitlist.tournament_id == tournament_id)
             .order_by(Waitlist.date)
             .all()
         )
 
     def get_user_waitlists(self, db: Session, user_id: UUID) -> List[Waitlist]:
-        """Get all waitlists for a user"""
-        return db.query(Waitlist).filter(Waitlist.user_id == user_id).all()
+        """Get all waitlists for a user with simplified user data"""
+        return (
+            db.query(Waitlist)
+            .options(selectinload(Waitlist.user))
+            .filter(Waitlist.user_id == user_id)
+            .all()
+        )
 
     def get_waitlist_position(
         self, db: Session, user_id: UUID, tournament_id: UUID

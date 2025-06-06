@@ -1,9 +1,10 @@
 from typing import List
+from uuid import UUID
 
 from api.deps import SessionDep, UserDep
 from api.schemas.loyalty import LoyaltyResponse
 from api.schemas.user import UserBase
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from repositories import loyalty_repository, user_repository
 
 router = APIRouter()
@@ -26,6 +27,32 @@ async def get_users(
     all_users = user_repository.get_all(db, skip=skip, limit=limit)
     users = [user for user in all_users if user.is_registered]
     return users
+
+
+@router.get(
+    "/{user_id}",
+    response_model=UserBase,
+    description="Get a specific user by ID. Requires authentication.",
+    responses={
+        401: {"description": "Not authenticated"},
+        404: {"description": "User not found"},
+    },
+)
+async def get_user_by_id(
+    user_id: UUID,
+    current_user: UserDep,
+    db: SessionDep,
+):
+    """Get a specific user by ID"""
+    user = user_repository.get(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Only return registered users
+    if not user.is_registered:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user
 
 
 @router.get(

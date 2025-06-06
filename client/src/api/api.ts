@@ -222,6 +222,23 @@ export const getUsers = async () => {
   }
 }
 
+export const getUserById = async (userId: string): Promise<User | null> => {
+  try {
+    const response = await api.get<User>(`/users/${userId}`)
+    const user = response.data
+    
+    // Normalize playing_position
+    if (user.playing_position) {
+      user.playing_position = user.playing_position.toLowerCase() as PlayingPosition
+    }
+    
+    return user
+  } catch (error) {
+    console.error(`Error fetching user with id ${userId}:`, error)
+    return null
+  }
+}
+
 export const getLoyaltyLevels = async (): Promise<LoyaltyDetails[]> => {
   try {
     const response = await api.get<LoyaltyResponse[]>("/users/loyalty-levels")

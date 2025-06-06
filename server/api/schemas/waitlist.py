@@ -1,8 +1,21 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
-from api.schemas.user import UserBase
 from pydantic import BaseModel
+
+
+class WaitlistUser(BaseModel):
+    """Упрощенная модель пользователя для waitlist"""
+
+    id: UUID
+    first_name: str
+    second_name: str
+    rank: float
+    avatar: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 
 class WaitlistResponse(BaseModel):
@@ -10,7 +23,7 @@ class WaitlistResponse(BaseModel):
     user_id: UUID
     tournament_id: UUID
     date: datetime
-    user: UserBase
+    user: WaitlistUser
 
     class Config:
         from_attributes = True
