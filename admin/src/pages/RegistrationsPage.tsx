@@ -3,7 +3,7 @@ import type { Registration } from '../services/registration';
 import { registrationService } from '../services/registration';
 import { userService } from '../services/user';
 import { tournamentService } from '../services/tournament';
-import type { User, Tournament } from '../shared/types';
+import type { UserListItem, Tournament } from '../shared/types';
 import RegistrationList from '../components/RegistrationList';
 import RegistrationDetail from '../components/RegistrationDetail';
 
@@ -26,7 +26,7 @@ const RegistrationsPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   
   // Dropdown data
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserListItem[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingTournaments, setLoadingTournaments] = useState(false);
