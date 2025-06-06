@@ -32,6 +32,7 @@ export interface User {
   birth_date_ru?: string
   playing_position?: 'right' | 'left' | 'both'
   padel_profiles?: string
+  bio: string
   loyalty_id: number
   loyalty?: Loyalty
   is_registered: boolean
@@ -69,4 +70,17 @@ export interface WaitlistEntry {
   tournament_id: string
   date: string
   user: User
+}
+
+// Упрощенная модель пользователя для списка
+export interface UserListItem {
+  id: string
+  telegram_id: number
+  username?: string
+  first_name: string
+  second_name: string
+  avatar?: string
+  city: string
+  rank: number
+  is_registered: boolean
 }

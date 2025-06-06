@@ -6,9 +6,10 @@ interface UserFormProps {
   user: User;
   loyalties: Loyalty[];
   onSave: (user: Partial<User>) => void;
+  loading?: boolean;
 }
 
-const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
+const UserForm = ({ user, loyalties, onSave, loading = false }: UserFormProps) => {
   const [formData, setFormData] = useState<Partial<User>>({});
   const [errors, setErrors] = useState<Partial<Record<keyof User, string>>>({});
 
@@ -21,6 +22,7 @@ const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
       rank: user.rank,
       playing_position: user.playing_position,
       padel_profiles: user.padel_profiles,
+      bio: user.bio,
       loyalty_id: user.loyalty_id,
       is_registered: user.is_registered
     });
@@ -173,7 +175,19 @@ const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div>
+        <label className="block text-gray-700 mb-1 text-sm">Описание</label>
+        <textarea
+          name="bio"
+          value={formData.bio || ''}
+          onChange={handleChange}
+          rows={3}
+          placeholder="Описание пользователя"
+          className="w-full px-3 py-2 border border-gray-300 rounded resize-vertical text-sm"
+        />
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <label className="block text-gray-700 mb-1 text-sm">Уровень лояльности</label>
           <select
@@ -205,15 +219,20 @@ const UserForm = ({ user, loyalties, onSave }: UserFormProps) => {
             </label>
           </div>
         </div>
-      </div>
 
-      <div className="flex justify-end pt-2">
-        <button
-          type="submit"
-          className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-        >
-          Сохранить
-        </button>
+        <div className="flex items-end justify-end">
+          <button
+            type="submit"
+            disabled={loading}
+            className={`px-6 py-2 text-white rounded text-sm ${
+              loading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-green-600 hover:bg-green-700'
+            }`}
+          >
+            {loading ? 'Сохранение...' : 'Сохранить'}
+          </button>
+        </div>
       </div>
     </form>
   );

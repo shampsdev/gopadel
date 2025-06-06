@@ -2,7 +2,11 @@ from typing import List, Optional
 from uuid import UUID
 
 from api.deps import SessionDep
-from api.schemas.admin_user_operations import UserResponse, UserUpdateByAdmin
+from api.schemas.admin_user_operations import (
+    UserListResponse,
+    UserResponse,
+    UserUpdateByAdmin,
+)
 from api.schemas.user import UserBase
 from api.utils.admin_middleware import admin_required
 from fastapi import APIRouter, HTTPException, Query, Request, Security
@@ -29,6 +33,23 @@ async def get_users(
 ):
     """Get all users with pagination"""
     users = user_repository.get_all(db, skip=skip, limit=limit)
+    return users
+
+
+@router.get(
+    "/all",
+    response_model=List[UserListResponse],
+    description="Get all users in simplified format without pagination. Requires admin privileges.",
+    responses={401: {"description": "Not authenticated or invalid token"}},
+)
+@admin_required
+async def get_all_users_simple(
+    request: Request,
+    db: SessionDep,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+):
+    """Get all users in simplified format without pagination"""
+    users = user_repository.get_all(db, skip=0, limit=10000)
     return users
 
 

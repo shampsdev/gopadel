@@ -1,10 +1,10 @@
-import type { User } from '../shared/types';
+import type { UserListItem } from '../shared/types';
 import { getRatingWord } from '../utils/ratingUtils';
 
 interface UserListProps {
-  users: User[];
+  users: UserListItem[];
   selectedId?: string;
-  onSelect: (user: User) => void;
+  onSelect: (user: UserListItem) => void;
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;

@@ -123,6 +123,8 @@ class UserRepository(BaseRepository[User]):
                 user.playing_position = update_data.playing_position
         if update_data.padel_profiles is not None:
             user.padel_profiles = update_data.padel_profiles
+        if update_data.bio is not None:
+            user.bio = update_data.bio
         if update_data.is_registered is not None:
             user.is_registered = update_data.is_registered
         if update_data.loyalty_id is not None:

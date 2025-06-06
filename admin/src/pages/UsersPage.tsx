@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
-import type { User, Loyalty } from '../shared/types';
+import type { User, UserListItem, Loyalty } from '../shared/types';
 import { userService } from '../services/user';
 import { loyaltyService } from '../services/loyalty';
 import UserForm from '../components/UserForm';
 import UserList from '../components/UserList';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const UsersPage = () => {
   // For query parameters handling
   const location = useLocation();
-  const navigate = useNavigate();
   
   // User states
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [loadingUser, setLoadingUser] = useState(false);
 
   // Loyalty states
   const [loyalties, setLoyalties] = useState<Loyalty[]>([]);
@@ -42,7 +42,7 @@ const UsersPage = () => {
   // Load a specific user by ID
   const loadUserById = async (userId: string) => {
     try {
-      setLoading(true);
+      setLoadingUser(true);
       const user = await userService.getById(userId);
       
       // Make sure loyalties are loaded before setting selected user
@@ -63,7 +63,7 @@ const UsersPage = () => {
       setError('Ошибка при загрузке пользователя');
       console.error(err);
     } finally {
-      setLoading(false);
+      setLoadingUser(false);
       setIsLoadingFromQueryParams(false);
     }
   };
@@ -82,21 +82,12 @@ const UsersPage = () => {
     }
   };
 
-  const fetchAllUsers = async () => {
+  const fetchUsers = async () => {
     try {
       setLoading(true);
       const fetchedUsers = await userService.getAllUsers();
       
-      // Attach loyalty objects to users
-      const usersWithLoyalty = fetchedUsers.map(user => {
-        const loyaltyObj = loyalties.find(l => l.id === user.loyalty_id);
-        return {
-          ...user,
-          loyalty: loyaltyObj
-        };
-      });
-      
-      setUsers(usersWithLoyalty);
+      setUsers(fetchedUsers);
       setError(null);
     } catch (err) {
       setError('Ошибка при загрузке пользователей');
@@ -113,7 +104,7 @@ const UsersPage = () => {
       
       // If we're not loading a specific user from query params, load the user list
       if (!isLoadingFromQueryParams) {
-        await fetchAllUsers();
+        await fetchUsers();
       }
       
       // If we have a userId in the URL, load that specific user
@@ -128,16 +119,9 @@ const UsersPage = () => {
     initData();
   }, []); // Empty dependency array - only run once
 
-  const handleSelectUser = (user: User) => {
-    // Make sure selected user has the loyalty object
-    const loyaltyObj = loyalties.find(l => l.id === user.loyalty_id);
-    setSelectedUser({
-      ...user,
-      loyalty: loyaltyObj
-    });
-    
-    // Update URL with the selected user ID
-    navigate(`/users?userId=${user.id}`, { replace: true });
+  const handleSelectUser = (user: UserListItem) => {
+    // Load full user information when selecting from list
+    loadUserById(user.id);
   };
 
   // Removed pagination functionality
@@ -146,14 +130,28 @@ const UsersPage = () => {
     if (!selectedUser) return;
 
     try {
-      setLoading(true);
+      setLoadingUser(true);
       const updatedUser = await userService.update({
         id: selectedUser.id,
         ...updatedUserData
       });
       
-      // Refresh the users list
-      await fetchAllUsers();
+      // Update the specific user in the list without reloading everything
+      setUsers(prevUsers => prevUsers.map(user => 
+        user.id === updatedUser.id 
+          ? {
+              id: user.id,
+              telegram_id: user.telegram_id,
+              username: updatedUser.username,
+              first_name: updatedUser.first_name,
+              second_name: updatedUser.second_name,
+              avatar: updatedUser.avatar,
+              city: updatedUser.city,
+              rank: updatedUser.rank,
+              is_registered: updatedUser.is_registered
+            }
+          : user
+      ));
       
       // Update the selected user with returned data and loyalty info
       const loyaltyObj = loyalties.find(l => l.id === updatedUser.loyalty_id);
@@ -167,7 +165,7 @@ const UsersPage = () => {
       setError('Ошибка при сохранении данных пользователя');
       console.error(err);
     } finally {
-      setLoading(false);
+      setLoadingUser(false);
     }
   };
 
@@ -198,7 +196,7 @@ const UsersPage = () => {
 
 
 
-  const isLoading = loading || (loadingLoyalty && loyalties.length === 0);
+
 
   return (
     <div className="p-4 md:p-6">
@@ -268,7 +266,7 @@ const UsersPage = () => {
           </div>
           
           <div className="p-2 flex-1 min-h-0">
-            {isLoading && !isLoadingFromQueryParams ? (
+            {loading && users.length === 0 ? (
               <p className="text-center py-4">Загрузка...</p>
             ) : filteredUsers.length > 0 ? (
               <UserList
@@ -291,11 +289,11 @@ const UsersPage = () => {
         
         {/* Right side - User form */}
         <div className="w-full lg:w-2/3 bg-white rounded-lg shadow p-6 mt-4 lg:mt-0 max-h-[600px] overflow-y-auto">
-          {isLoading ? (
+          {loadingUser ? (
             <div className="flex justify-center items-center h-64">
-              <p className="text-gray-500">Загрузка...</p>
+              <p className="text-gray-500">Загрузка пользователя...</p>
             </div>
-          ) : selectedUser && loyalties.length > 0 ? (
+          ) : selectedUser && loyalties.length > 0 && !loadingLoyalty ? (
             <>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-medium">Редактирование пользователя</h2>
@@ -313,7 +311,7 @@ const UsersPage = () => {
                   </div>
                 </div>
               </div>
-              <UserForm user={selectedUser} loyalties={loyalties} onSave={handleSave} />
+              <UserForm user={selectedUser} loyalties={loyalties} onSave={handleSave} loading={loadingUser} />
             </>
           ) : (
             <div className="flex items-center justify-center h-64 text-gray-500">
