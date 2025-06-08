@@ -22,9 +22,12 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - gopadel-db:/var/lib/postgresql/data
 
   adminer:
     image: adminer
     ports:
       - "8080:8080"
+
+volumes:
+  gopadel-db:
