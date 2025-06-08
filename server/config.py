@@ -23,7 +23,6 @@ class Settings(BaseSettings):
     TG_BOT_USERNAME: str
     SHOP_ID: str
     SHOP_SECRET: str
-    FRONTEND_URL: str
     DEBUG: bool = False
     ADMINS_IDS: list[int]
     WEBAPP_URL: str

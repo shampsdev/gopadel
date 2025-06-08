@@ -48,6 +48,21 @@ async def get_all_users(
 
 
 @router.get(
+    "/loyalty-levels",
+    response_model=List[LoyaltyResponse],
+    description="Get all loyalty levels. Requires authentication.",
+    responses={401: {"description": "Not authenticated"}},
+)
+async def get_loyalty_levels(
+    current_user: UserDep,
+    db: SessionDep,
+):
+    """Get all loyalty levels for users"""
+    loyalties = loyalty_repository.get_all_loyalty_levels(db)
+    return loyalties
+
+
+@router.get(
     "/{user_id}",
     response_model=UserBase,
     description="Get a specific user by ID. Requires authentication.",
@@ -56,6 +71,7 @@ async def get_all_users(
         404: {"description": "User not found"},
     },
 )
+
 async def get_user_by_id(
     user_id: UUID,
     current_user: UserDep,
@@ -71,17 +87,3 @@ async def get_user_by_id(
         raise HTTPException(status_code=404, detail="User not found")
 
     return user
-
-
-@router.get(
-    "/loyalty-levels",
-    response_model=List[LoyaltyResponse],
-    description="Get all loyalty levels. Requires authentication.",
-    responses={401: {"description": "Not authenticated"}},
-)
-async def get_loyalty_levels(
-    current_user: UserDep,
-    db: SessionDep,
-):
-    """Get all loyalty levels available to users"""
-    return loyalty_repository.get_all_loyalty_levels(db)

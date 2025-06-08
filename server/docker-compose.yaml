@@ -14,6 +14,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile.bot
+    env_file:
+      - .env
   
   db:
     image: postgres:16
@@ -25,7 +27,7 @@ services:
       - gopadel-db:/var/lib/postgresql/data
 
   adminer:
-    image: adminer
+    image: adminer:5
     ports:
       - "8080:8080"
 
