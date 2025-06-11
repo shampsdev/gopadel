@@ -1,5 +1,6 @@
 import { api } from "../api/api";
 import type { Tournament, Participant, WaitlistEntry } from "../shared/types";
+import { RegistrationStatus } from "../shared/types";
 
 export const tournamentService = {
   async getAll(): Promise<Tournament[]> {
@@ -34,5 +35,9 @@ export const tournamentService = {
   async getWaitlist(tournamentId: number): Promise<WaitlistEntry[]> {
     const response = await api.get(`/admin/tournaments/${tournamentId}/waitlist`);
     return response.data;
+  },
+
+  async updateRegistrationStatus(registrationId: string, status: RegistrationStatus): Promise<void> {
+    await api.patch(`/admin/registrations/${registrationId}/status`, { status });
   }
 }; 

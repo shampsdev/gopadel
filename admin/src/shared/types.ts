@@ -54,6 +54,13 @@ export interface Payment {
   created_at: string
 }
 
+export enum RegistrationStatus {
+  ACTIVE = 'active',
+  PENDING = 'pending',
+  CANCELED = 'canceled',
+  CANCELED_BY_USER = 'canceled_by_user'
+}
+
 export interface Participant {
   id: string
   user_id: string
