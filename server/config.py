@@ -36,6 +36,10 @@ class Settings(BaseSettings):
     # JWT
     JWT_SECRET_KEY: str
     JWT_ACCESS_TOKEN_EXPIRE_HOURS: int
+    # NATS
+    NATS_URL: str
+    NATS_PORT: int = 4222
+    NATS_TOKEN: str = ""
 
     @property
     def SQLALCHEMY_DATABASE_URI(self):
