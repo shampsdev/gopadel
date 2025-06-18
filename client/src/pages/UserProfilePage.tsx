@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import Header from "@/components/Header"
 import { User } from "@/types/user"
 import { Spinner } from "@/components/ui/Spinner"
 import { getUserById } from "@/api/api"
 import Divider from "@/components/ui/Divider"
 import { MessageCircle } from "lucide-react"
-import { openTelegramLink } from "@telegram-apps/sdk-react"
+import { openTelegramLink, backButton } from "@telegram-apps/sdk-react"
 import GreenButton from "@/components/ui/GreenButton"
 import LoyaltyBadge from "@/components/LoyaltyBadge"
 import { getRatingWord } from "@/utils/ratingUtils"
@@ -17,6 +17,31 @@ export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    // Custom back button handler for this page
+    const handleBackClick = () => {
+      const history = JSON.parse(sessionStorage.getItem('navigationHistory') || '[]')
+      // Check if we came from a tournament participants or waitlist page
+      const previousPath = history.length >= 2 ? history[history.length - 2] : null
+      
+      if (previousPath && (previousPath.includes('/participants') || previousPath.includes('/waitlist'))) {
+        navigate(previousPath)
+      } else {
+        navigate('/people')
+      }
+    }
+
+    // Show back button and set custom handler
+    backButton.show()
+    backButton.onClick(handleBackClick)
+
+    return () => {
+      // Clean up the custom handler when component unmounts
+      backButton.offClick(handleBackClick)
+    }
+  }, [navigate])
 
   useEffect(() => {
     const fetchUser = async () => {

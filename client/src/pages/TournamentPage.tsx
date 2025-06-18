@@ -17,7 +17,7 @@ import {
   FaUsers,
   FaTelegramPlane,
   FaInfoCircle,
-  FaShare,
+  FaCopy,
 } from "react-icons/fa"
 import TournamentParticipants from "@/components/TournamentParticipants"
 import TournamentWaitlist from "@/components/TournamentWaitlist"
@@ -32,7 +32,7 @@ import { Registration } from "@/types/registration"
 import { RegistrationStatus } from "@/types/registration"
 import GreenButton from "@/components/ui/GreenButton"
 import PriceWithDiscount from "@/components/PriceWithDiscount"
-import { openTelegramLink, shareURL } from "@telegram-apps/sdk-react"
+import { openTelegramLink } from "@telegram-apps/sdk-react"
 import { getRatingRangeDescription } from "@/utils/ratingUtils"
 import { createBotLink } from "@/utils/botUtils"
 
@@ -45,6 +45,7 @@ export default function TournamentPage() {
   const [loading, setLoading] = useState(true)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
+  const [copySuccess, setCopySuccess] = useState(false)
   const { userData } = useUserStore()
 
   const fetchTournament = async () => {
@@ -65,7 +66,6 @@ export default function TournamentPage() {
         const registrationData = await getTournamentRegistration(id)
         setRegistration(registrationData)
         
-        // Check waitlist status only if not registered
         if (!registrationData || registrationData.status === RegistrationStatus.CANCELED_BY_USER || registrationData.status === RegistrationStatus.CANCELED) {
           const waitlistStatusData = await getTournamentWaitlistStatus(id)
           setWaitlistEntry(waitlistStatusData)
@@ -73,7 +73,6 @@ export default function TournamentPage() {
           setWaitlistEntry(null)
         }
       } else {
-        // If no user data, reset registration and waitlist state
         setRegistration(null)
         setWaitlistEntry(null)
       }
@@ -88,11 +87,9 @@ export default function TournamentPage() {
     fetchTournament()
   }, [id, userData?.id])
 
-  // Auto-refresh when user returns from payment (page becomes visible)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && registration?.status === RegistrationStatus.PENDING) {
-        // Refresh tournament data when user returns and has pending payment
         fetchTournament()
       }
     }
@@ -127,6 +124,18 @@ export default function TournamentPage() {
     if (!cancelLoading) {
       setShowCancelDialog(false)
     }
+  }
+
+  const handleCopyLink = () => {
+    const link = createBotLink(`t-${tournament?.id}`)
+    navigator.clipboard.writeText(link)
+      .then(() => {
+        setCopySuccess(true)
+        setTimeout(() => setCopySuccess(false), 2000)
+      })
+      .catch(err => {
+        console.error('Failed to copy: ', err)
+      })
   }
 
   if (loading) {
@@ -259,14 +268,12 @@ export default function TournamentPage() {
           )}
           <button
             className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-700 rounded-lg transition-colors duration-200 border border-green-200"
-            onClick={() =>
-              shareURL(
-                createBotLink(`t-${tournament.id}`)
-              )
-            }
+            onClick={handleCopyLink}
           >
-            <FaShare size={16} />
-            <span className="text-sm font-medium">Поделиться турниром</span>
+            <FaCopy size={16} />
+            <span className="text-sm font-medium">
+              {copySuccess ? "Ссылка скопирована!" : "Поделиться турниром"}
+            </span>
           </button>
         </div>
         

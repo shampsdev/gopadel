@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 
 import { Tournament } from "@/types/tournament"
 import { Registration, RegistrationStatus } from "@/types/registration"
@@ -16,9 +16,20 @@ export default function TournamentParticipantsPage() {
   const [registrations, setRegistrations] = useState<Registration[]>([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const location = useLocation()
 
   // Function to navigate to user profile
   const goToUserProfile = (userId: string) => {
+    // Store the current path in sessionStorage
+    const currentPath = location.pathname
+    const history = JSON.parse(sessionStorage.getItem('navigationHistory') || '[]')
+    
+    // Ensure current path is in history
+    if (history.length === 0 || history[history.length - 1] !== currentPath) {
+      history.push(currentPath)
+      sessionStorage.setItem('navigationHistory', JSON.stringify(history))
+    }
+    
     navigate(`/people/${userId}`)
   }
 
