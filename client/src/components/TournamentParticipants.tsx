@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import { IoIosArrowForward } from "react-icons/io"
 import { Registration, RegistrationStatus } from "@/types/registration"
 import "./TournamentParticipants.css"
@@ -22,6 +22,7 @@ export default function TournamentParticipants({
   const [showRightShadow, setShowRightShadow] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+  const location = useLocation()
 
   // Filter out participants with CANCELED status
   const activeRegistrations = registrations.filter(
@@ -36,6 +37,21 @@ export default function TournamentParticipants({
   // Function to navigate to user profile
   const goToUserProfile = (userId: string, event: React.MouseEvent) => {
     event.stopPropagation()
+    
+    // Store the current path in sessionStorage before navigating
+    const currentPath = location.pathname
+    const history = JSON.parse(sessionStorage.getItem('navigationHistory') || '[]')
+    
+    // Ensure current path is in history
+    if (history.length === 0 || history[history.length - 1] !== currentPath) {
+      // Keep only the last 10 entries to avoid excessive storage
+      if (history.length >= 10) {
+        history.shift()
+      }
+      history.push(currentPath)
+      sessionStorage.setItem('navigationHistory', JSON.stringify(history))
+    }
+    
     navigate(`/people/${userId}`)
   }
 

@@ -1,37 +1,69 @@
 import { useEffect, useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import Header from "@/components/Header"
 import { User } from "@/types/user"
 import { Spinner } from "@/components/ui/Spinner"
 import { getUserById } from "@/api/api"
 import Divider from "@/components/ui/Divider"
-import { MessageCircle } from "lucide-react"
+import { MessageCircle, User as UserIcon } from "lucide-react"
 import { openTelegramLink, backButton } from "@telegram-apps/sdk-react"
 import GreenButton from "@/components/ui/GreenButton"
 import LoyaltyBadge from "@/components/LoyaltyBadge"
 import { getRatingWord } from "@/utils/ratingUtils"
 import { getPlayingPositionText } from "@/utils/playingPosition"
 import PadelProfilesList from "@/components/PadelProfilesList"
+import { FaTelegramPlane } from "react-icons/fa"
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     // Custom back button handler for this page
     const handleBackClick = () => {
       const history = JSON.parse(sessionStorage.getItem('navigationHistory') || '[]')
-      // Check if we came from a tournament participants or waitlist page
+      
+      // Check if we came from a tournament page (directly or from participants/waitlist)
       const previousPath = history.length >= 2 ? history[history.length - 2] : null
       
-      if (previousPath && (previousPath.includes('/participants') || previousPath.includes('/waitlist'))) {
-        navigate(previousPath)
-      } else {
-        navigate('/people')
+      if (previousPath) {
+        // If came from tournament participants or waitlist page
+        if (previousPath.includes('/participants') || previousPath.includes('/waitlist')) {
+          navigate(previousPath)
+          return
+        }
+        
+        // If came directly from a tournament page
+        if (previousPath.includes('/tournament/') && !previousPath.includes('/participants') && !previousPath.includes('/waitlist')) {
+          navigate(previousPath)
+          return
+        }
+      }
+      
+      // Default fallback
+      navigate('/people')
+    }
+
+    // Store the current path in navigation history
+    const updateNavigationHistory = () => {
+      const history = JSON.parse(sessionStorage.getItem('navigationHistory') || '[]')
+      const currentPath = location.pathname
+      
+      // Don't add duplicate entries
+      if (history.length === 0 || history[history.length - 1] !== currentPath) {
+        // Keep only the last 10 entries to avoid excessive storage
+        if (history.length >= 10) {
+          history.shift()
+        }
+        history.push(currentPath)
+        sessionStorage.setItem('navigationHistory', JSON.stringify(history))
       }
     }
+    
+    updateNavigationHistory()
 
     // Show back button and set custom handler
     backButton.show()
@@ -41,7 +73,7 @@ export default function UserProfilePage() {
       // Clean up the custom handler when component unmounts
       backButton.offClick(handleBackClick)
     }
-  }, [navigate])
+  }, [navigate, location.pathname])
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -64,6 +96,12 @@ export default function UserProfilePage() {
   }, [userId])
 
   const handleMessage = () => {
+    if (user?.username) {
+      openTelegramLink(`https://t.me/${user.username}`)
+    }
+  }
+
+  const openTelegramProfile = () => {
     if (user?.username) {
       openTelegramLink(`https://t.me/${user.username}`)
     }
@@ -118,7 +156,15 @@ export default function UserProfilePage() {
         <h2 className="text-2xl font-bold">
           {user.first_name} {user.second_name}
         </h2>
-        {user.username && <p className="text-gray-500">@{user.username}</p>}
+        {user.username && (
+          <div 
+            className="flex items-center gap-1 text-blue-500 cursor-pointer"
+            onClick={openTelegramProfile}
+          >
+            <FaTelegramPlane size={14} />
+            <p>@{user.username}</p>
+          </div>
+        )}
       </div>
 
       <div className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -183,12 +229,22 @@ export default function UserProfilePage() {
       </div>
 
       {user.username && (
-        <GreenButton onClick={handleMessage} className="w-full">
-          <div className="flex items-center justify-center gap-2">
-            <MessageCircle size={20} />
-            Написать сообщение
-          </div>
-        </GreenButton>
+        <div className="space-y-3">
+          <GreenButton onClick={handleMessage} className="w-full">
+            <div className="flex items-center justify-center gap-2">
+              <MessageCircle size={20} />
+              Написать сообщение
+            </div>
+          </GreenButton>
+          
+          <button
+            onClick={openTelegramProfile}
+            className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-blue-200"
+          >
+            <FaTelegramPlane size={18} />
+            <span className="text-sm font-medium">Открыть профиль Telegram</span>
+          </button>
+        </div>
       )}
     </div>
   )

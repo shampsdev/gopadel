@@ -58,20 +58,34 @@ export default function useBackButton() {
       // Get navigation history
       const history = JSON.parse(sessionStorage.getItem('navigationHistory') || '[]')
       
-      // Tournament participant navigation logic
+      // User profile navigation logic
       if (currentPath.match(/^\/people\/[^/]+$/)) {
-        // If we're on a user profile page, check if we came from tournament participants
+        // If we're on a user profile page, check where we came from
         const previousPath = history.length >= 2 ? history[history.length - 2] : null
         
-        if (previousPath && previousPath.includes('/tournament/') && previousPath.includes('/participants')) {
-          // Go back to the tournament participants page
-          navigate(previousPath)
-          return
-        } else {
-          // Otherwise go to the people list
-          navigate('/people')
-          return
+        if (previousPath) {
+          // If came from tournament participants or waitlist page
+          if (previousPath.includes('/participants') || previousPath.includes('/waitlist')) {
+            navigate(previousPath)
+            return
+          }
+          
+          // If came directly from a tournament page
+          if (previousPath.includes('/tournament/') && !previousPath.includes('/participants') && !previousPath.includes('/waitlist')) {
+            navigate(previousPath)
+            return
+          }
+          
+          // If came from people list
+          if (previousPath === '/people') {
+            navigate('/people')
+            return
+          }
         }
+        
+        // Default fallback for user profile
+        navigate('/people')
+        return
       }
       
       // Tournament participants page navigation
