@@ -7,6 +7,9 @@ import (
 	"os"
 	"time"
 
+	"gopadel/scheduler/pkg/utils/slogx"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/lmittmann/tint"
@@ -15,10 +18,20 @@ import (
 
 type Config struct {
 	Debug  bool `default:"false" envconfig:"DEBUG"`
+	DB struct {
+		User     string `envconfig:"POSTGRES_USER"`
+		Password string `envconfig:"POSTGRES_PASSWORD"`
+		Host     string `envconfig:"POSTGRES_HOST"`
+		Port     uint16 `envconfig:"POSTGRES_PORT"`
+		Database string `envconfig:"POSTGRES_DB"`
+	}
 	NATS struct {
 		URL   string `envconfig:"NATS_URL"`
 		Port     uint16 `envconfig:"NATS_PORT" default:"4222"`
 		Token string `envconfig:"NATS_TOKEN" default:""`
+	}
+	TG struct {
+		BotToken   string `envconfig:"TG_BOT_TOKEN"`
 	}
 	Log struct {
 		Handler string `envconfig:"LOG_HANDLER" default:"tint"`
@@ -49,6 +62,26 @@ func (c *Config) Print() {
 	} else {
 		slog.Info("Launched in production mode")
 	}
+}
+
+func (c *Config) DBUrl() string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		c.DB.User,
+		c.DB.Password,
+		c.DB.Host,
+		c.DB.Port,
+		c.DB.Database,
+	)
+}
+
+func (c *Config) PGXConfig() *pgxpool.Config {
+	pgxConfig, err := pgxpool.ParseConfig(c.DBUrl())
+	if err != nil {
+		slogx.WithErr(slog.Default(), err).Error("can't parse pgx config")
+		panic(err)
+	}
+	return pgxConfig
 }
 
 func (c *Config) Logger() *slog.Logger {
