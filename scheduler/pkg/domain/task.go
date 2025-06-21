@@ -1,10 +1,19 @@
 package domain
 
 import (
+	"fmt"
 	"time"
 
 	"encoding/json"
+	"strings"
 )
+
+type NATSTaskMessage struct {
+	TaskName  string          `json:"task_name"`
+	ExecuteAt string          `json:"execute_at"`
+	Data      json.RawMessage `json:"data"`
+	CreatedAt string          `json:"created_at"`
+}
 
 type TaskStatus string
 type TaskType string
@@ -61,4 +70,39 @@ type PatchTask struct {
 	MaxRetries    *int             `json:"max_retries,omitempty"`       // optional
 	ExecuteAt     *time.Time       `json:"execute_at,omitempty"`        // optional
 	Data          *json.RawMessage `json:"data,omitempty"`              // optional
+}
+
+// НАВАЙБКОЖЕНО!!! ВЫВОД ДЛЯ ЛОГОВ
+func (t Task) String() string {
+	var parts []string
+	
+	parts = append(parts, fmt.Sprintf("ID:%s", t.ID))
+	parts = append(parts, fmt.Sprintf("TaskType:%s", t.TaskType))
+	parts = append(parts, fmt.Sprintf("Status:%s", t.Status))
+	parts = append(parts, fmt.Sprintf("ExecuteAt:%s", t.ExecuteAt.Format("2006-01-02 15:04:05 -0700 MST")))
+	parts = append(parts, fmt.Sprintf("CreatedAt:%s", t.CreatedAt.Format("2006-01-02 15:04:05 -0700 MST")))
+	parts = append(parts, fmt.Sprintf("UpdatedAt:%s", t.UpdatedAt.Format("2006-01-02 15:04:05 -0700 MST")))
+	
+	if len(t.Data) > 0 {
+		parts = append(parts, fmt.Sprintf("Data:%s", string(t.Data)))
+	} else {
+		parts = append(parts, "Data:{}")
+	}
+	
+	if len(t.Result) > 0 {
+		parts = append(parts, fmt.Sprintf("Result:%s", string(t.Result)))
+	} else {
+		parts = append(parts, "Result:[]")
+	}
+	
+	if t.ErrorMessage != nil {
+		parts = append(parts, fmt.Sprintf("ErrorMessage:%s", *t.ErrorMessage))
+	} else {
+		parts = append(parts, "ErrorMessage:<nil>")
+	}
+	
+	parts = append(parts, fmt.Sprintf("RetryCount:%d", t.RetryCount))
+	parts = append(parts, fmt.Sprintf("MaxRetries:%d", t.MaxRetries))
+	
+	return fmt.Sprintf("&{%s}", strings.Join(parts, " "))
 }

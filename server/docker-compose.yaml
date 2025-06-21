@@ -25,6 +25,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - gopadel-db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
   adminer:
     image: adminer:5

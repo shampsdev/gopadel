@@ -23,9 +23,9 @@ CREATE TABLE tasks (
     task_type task_type NOT NULL,
     status task_status NOT NULL DEFAULT 'pending',
 
-    execute_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    execute_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     data JSONB NOT NULL DEFAULT '{}',
     result JSONB,
@@ -43,7 +43,7 @@ CREATE INDEX idx_tasks_ready ON tasks (execute_at) WHERE status = 'pending';
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = NOW();
+    NEW.updated_at = CURRENT_TIMESTAMP;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

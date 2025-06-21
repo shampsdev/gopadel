@@ -42,9 +42,9 @@ class TournamentTaskService:
         try:
             message = {
                 "task_name": task_name,
-                "execute_at": execute_at.isoformat(),
+                "execute_at": execute_at.strftime("%Y-%m-%dT%H:%M:%S"),
                 "data": data,
-                "created_at": datetime.now().isoformat()
+                "created_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
             }
             
             success = await nats_client.publish(

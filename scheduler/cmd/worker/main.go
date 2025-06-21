@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
 
 	"gopadel/scheduler/cmd/config"
+	"gopadel/scheduler/pkg/handler"
+	"gopadel/scheduler/pkg/repo/pg"
 	"gopadel/scheduler/pkg/utils/slogx"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -45,8 +46,15 @@ func main() {
 	defer nc.Close()
 	slog.Info("Connected to NATS server", "url", natsURL)
 
+	taskRepo := pg.NewTaskRepo(pool)
+	taskHandler := handler.NewTaskHandler(taskRepo)
 	nc.Subscribe("tasks.active", func(m *nats.Msg) {
-		fmt.Printf("Received a message: %s\n", string(m.Data))
+		task, err := taskHandler.HandleTaskMessage(ctx, m)
+		if err != nil {
+			log.Error("Error handling task message", slogx.Err(err))
+			return
+		}
+		log.Info("Task message handled", "task", task)
 	})
 
 	slog.Info("NATS client is running.")
