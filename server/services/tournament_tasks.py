@@ -16,6 +16,7 @@ class TournamentTaskNames:
     PAYMENT_SUCCESS = "tournament.payment.success"
     LOYALTY_LEVEL_CHANGED = "tournament.loyalty.changed"
     REGISTRATION_CANCELED = "tournament.registration.canceled"
+    AUTO_DELETE_UNPAID = "tournament.registration.auto_delete_unpaid"
 
 
 class TournamentTaskService:
@@ -210,6 +211,31 @@ class TournamentTaskService:
                 "tournament_name": tournament_name,
                 "user_telegram_id": user_telegram_id,
                 "reason": reason,
+            }
+        )
+    
+    async def send_auto_delete_unpaid_task(
+        self, 
+        user_id: UUID, 
+        tournament_id: UUID,
+        registration_id: UUID,
+        tournament_name: str,
+        user_telegram_id: int,
+        registration_time: datetime
+    ):
+        """
+        Отправляет задачу автоматического удаления неоплаченной регистрации через 24 часа
+        """
+        delete_time = registration_time + timedelta(hours=24)
+        await self._send_task(
+            task_name=TournamentTaskNames.AUTO_DELETE_UNPAID,
+            execute_at=delete_time,
+            data={
+                "user_id": str(user_id),
+                "tournament_id": str(tournament_id),
+                "registration_id": str(registration_id),
+                "tournament_name": tournament_name,
+                "user_telegram_id": user_telegram_id,
             }
         )
     

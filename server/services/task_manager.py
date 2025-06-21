@@ -96,7 +96,7 @@ class NatsClient:
                 await self.connect()
                 
             if not isinstance(message, str):
-                message = json.dumps(message)
+                message = json.dumps(message, ensure_ascii=False)
                 
             # Добавляем таймаут для публикации
             await asyncio.wait_for(
@@ -143,7 +143,7 @@ class NatsClient:
                 await self.connect()
                 
             if not isinstance(message, str):
-                message = json.dumps(message)
+                message = json.dumps(message, ensure_ascii=False)
                 
             response = await self.broker.request(
                 subject=subject,

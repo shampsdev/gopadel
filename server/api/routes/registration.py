@@ -145,6 +145,16 @@ async def register_for_tournament(db: SessionDep, tournament_id: UUID, user: Use
             user_telegram_id=user.telegram_id,
             registration_time=registration.date
         )
+        
+        # Задача автоматического удаления через 24 часа
+        await tournament_task_service.send_auto_delete_unpaid_task(
+            user_id=user.id,
+            tournament_id=tournament_id,
+            registration_id=registration.id,
+            tournament_name=tournament.name,
+            user_telegram_id=user.telegram_id,
+            registration_time=registration.date
+        )
     elif registration and registration.status == RegistrationStatus.ACTIVE and is_free:
         # Для бесплатных турниров отправляем задачу об успешной регистрации
         await tournament_task_service.send_payment_success_task(
@@ -202,7 +212,6 @@ async def cancel_registration_before_payment(
         registration_id=registration.id,
         tournament_name=tournament.name,
         user_telegram_id=user.telegram_id,
-        reason="Регистрация отменена пользователем до оплаты"
     )
     
     # Отменяем все отложенные задачи для этой регистрации
@@ -248,7 +257,6 @@ async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep
         registration_id=registration.id,
         tournament_name=tournament.name,
         user_telegram_id=user.telegram_id,
-        reason="Регистрация отменена пользователем"
     )
     
     # Отменяем все отложенные задачи для этой регистрации
