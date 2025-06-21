@@ -5,8 +5,9 @@ from bot.init_bot import bot
 from db.models.registration import RegistrationStatus
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
-from repositories import payment_repository, registration_repository
+from repositories import payment_repository, registration_repository, tournament_repository
 from services.payments import configure_yookassa
+from services.tournament_tasks import tournament_task_service
 from yookassa import Payment as YooKassaPayment
 from yookassa.domain.notification import WebhookNotification
 
@@ -62,6 +63,27 @@ async def webhook(request: Request, event: WebhookEvent, db: SessionDep):
                 raise HTTPException(
                     status_code=500, detail="Failed to update registration status"
                 )
+            
+            # Получаем данные турнира для отправки задачи
+            tournament = tournament_repository.get(db, registration.tournament_id)
+            if tournament:
+                # Отправляем задачу об успешной оплате
+                await tournament_task_service.send_payment_success_task(
+                    user_id=registration.user_id,
+                    tournament_id=registration.tournament_id,
+                    registration_id=registration.id,
+                    tournament_name=tournament.name,
+                    user_telegram_id=registration.user.telegram_id,
+                    payment_amount=float(payment.amount)
+                )
+                
+                # Отменяем все отложенные задачи напоминания об оплате
+                await tournament_task_service.cancel_pending_tasks(
+                    user_id=registration.user_id,
+                    tournament_id=registration.tournament_id,
+                    registration_id=registration.id
+                )
+                
     elif payment_status == "canceled" and payment.registration:
         # При отмененном платеже регистрация остается в статусе PENDING,
         # чтобы пользователь мог создать новый платеж.

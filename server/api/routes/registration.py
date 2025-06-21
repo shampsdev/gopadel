@@ -16,6 +16,7 @@ from repositories import (
 )
 from services.payments import create_invoice
 from services.waitlist_notifications import notify_waitlist_users
+from services.tournament_tasks import tournament_task_service
 
 router = APIRouter()
 
@@ -124,6 +125,37 @@ async def register_for_tournament(db: SessionDep, tournament_id: UUID, user: Use
             status=RegistrationStatus.ACTIVE if is_free else RegistrationStatus.PENDING,
         )
 
+    # Отправляем задачи в NATS для новой регистрации
+    if registration and registration.status == RegistrationStatus.PENDING:
+        # Задача об успешной регистрации (место занято)
+        await tournament_task_service.send_registration_success_task(
+            user_id=user.id,
+            tournament_id=tournament_id,
+            registration_id=registration.id,
+            tournament_name=tournament.name,
+            user_telegram_id=user.telegram_id
+        )
+        
+        # Задачи напоминания об оплате
+        await tournament_task_service.send_payment_reminder_tasks(
+            user_id=user.id,
+            tournament_id=tournament_id,
+            registration_id=registration.id,
+            tournament_name=tournament.name,
+            user_telegram_id=user.telegram_id,
+            registration_time=registration.date
+        )
+    elif registration and registration.status == RegistrationStatus.ACTIVE and is_free:
+        # Для бесплатных турниров отправляем задачу об успешной регистрации
+        await tournament_task_service.send_payment_success_task(
+            user_id=user.id,
+            tournament_id=tournament_id,
+            registration_id=registration.id,
+            tournament_name=tournament.name,
+            user_telegram_id=user.telegram_id,
+            payment_amount=0.0
+        )
+
     return registration
 
 
@@ -163,6 +195,23 @@ async def cancel_registration_before_payment(
         db, registration.id, RegistrationStatus.CANCELED
     )
 
+    # Отправляем задачу об отмене регистрации
+    await tournament_task_service.send_registration_canceled_task(
+        user_id=user.id,
+        tournament_id=tournament_id,
+        registration_id=registration.id,
+        tournament_name=tournament.name,
+        user_telegram_id=user.telegram_id,
+        reason="Регистрация отменена пользователем до оплаты"
+    )
+    
+    # Отменяем все отложенные задачи для этой регистрации
+    await tournament_task_service.cancel_pending_tasks(
+        user_id=user.id,
+        tournament_id=tournament_id,
+        registration_id=registration.id
+    )
+
     # Уведомляем всех пользователей из waitlist о том, что освободилось место
     await notify_waitlist_users(bot, db, tournament_id)
     return registration
@@ -191,6 +240,24 @@ async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep
     registration_repository.update_registration_status(
         db, registration.id, RegistrationStatus.CANCELED_BY_USER
     )
+    
+    # Отправляем задачу об отмене регистрации
+    await tournament_task_service.send_registration_canceled_task(
+        user_id=user.id,
+        tournament_id=tournament_id,
+        registration_id=registration.id,
+        tournament_name=tournament.name,
+        user_telegram_id=user.telegram_id,
+        reason="Регистрация отменена пользователем"
+    )
+    
+    # Отменяем все отложенные задачи для этой регистрации
+    await tournament_task_service.cancel_pending_tasks(
+        user_id=user.id,
+        tournament_id=tournament_id,
+        registration_id=registration.id
+    )
+    
     # Уведомляем всех пользователей из waitlist о том, что освободилось место
     await notify_waitlist_users(bot, db, tournament_id)
     return registration
