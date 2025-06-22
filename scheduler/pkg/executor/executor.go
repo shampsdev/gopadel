@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"time"
 
 	"gopadel/scheduler/cmd/config"
 	"gopadel/scheduler/pkg/domain"
@@ -13,18 +12,29 @@ import (
 	"gopadel/scheduler/pkg/telegram"
 )
 
-type TaskExecutor struct {
-	repo           repo.Task
-	telegramClient *telegram.TelegramClient
-	config         *config.Config
+type TaskSchedulerInterface interface {
+	CancelTask(taskID string) error
 }
 
-func NewTaskExecutor(repo repo.Task, telegramClient *telegram.TelegramClient, config *config.Config) *TaskExecutor {
+type TaskExecutor struct {
+	repo              repo.Task
+	registrationRepo  repo.Registration
+	telegramClient    *telegram.TelegramClient
+	config            *config.Config
+	scheduler         TaskSchedulerInterface
+}
+
+func NewTaskExecutor(repo repo.Task, registrationRepo repo.Registration, telegramClient *telegram.TelegramClient, config *config.Config) *TaskExecutor {
 	return &TaskExecutor{
-		repo:           repo,
-		telegramClient: telegramClient,
-		config:         config,
+		repo:             repo,
+		registrationRepo: registrationRepo,
+		telegramClient:   telegramClient,
+		config:           config,
 	}
+}
+
+func (e *TaskExecutor) SetScheduler(scheduler TaskSchedulerInterface) {
+	e.scheduler = scheduler
 }
 
 func (e *TaskExecutor) ExecuteTask(ctx context.Context, task *domain.Task) error {
@@ -38,6 +48,8 @@ func (e *TaskExecutor) ExecuteTask(ctx context.Context, task *domain.Task) error
 	switch task.TaskType {
 	case domain.TaskTypeTournamentTasksCancel:
 		return e.executeTournamentTasksCancel(ctx, taskData)
+	case domain.TaskTypeTournamentRegistrationAutoDeleteUnpaid:
+		return e.executeTournamentRegistrationAutoDeleteUnpaid(ctx, taskData)
 	default:
 		chatIDFloat, ok := taskData["user_telegram_id"].(float64)
 		if !ok {
@@ -98,11 +110,18 @@ func (e *TaskExecutor) executeTournamentTasksCancel(ctx context.Context, data ma
 
 		if shouldCancel {
 			if err := e.repo.CancelTask(ctx, task.ID); err != nil {
-				slog.Error("failed to cancel task", "task_id", task.ID, "task_type", task.TaskType, "error", err)
-			} else {
-				slog.Info("task canceled successfully", "task_id", task.ID, "task_type", task.TaskType)
-				canceledCount++
+				slog.Error("failed to cancel task in database", "task_id", task.ID, "task_type", task.TaskType, "error", err)
+				continue
 			}
+
+			if e.scheduler != nil {
+				if err := e.scheduler.CancelTask(task.ID); err != nil {
+					slog.Error("failed to cancel task in scheduler", "task_id", task.ID, "task_type", task.TaskType, "error", err)
+				}
+			}
+
+			slog.Info("task canceled successfully", "task_id", task.ID, "task_type", task.TaskType)
+			canceledCount++
 		}
 	}
 
@@ -115,58 +134,25 @@ func (e *TaskExecutor) executeTournamentTasksCancel(ctx context.Context, data ma
 	return nil
 }
 
-func (e *TaskExecutor) ProcessReadyTasks(ctx context.Context) error {
-	tasks, err := e.repo.GetReadyTasks(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to get ready tasks: %w", err)
+func (e *TaskExecutor) executeTournamentRegistrationAutoDeleteUnpaid(ctx context.Context, data map[string]interface{}) error {
+	registrationID, ok := data["registration_id"].(string)
+	if !ok {
+		return fmt.Errorf("registration_id not found or invalid in task data")
 	}
 
-	slog.Info("processing ready tasks", "count", len(tasks))
-
-	for _, task := range tasks {
-		if err := e.processTask(ctx, task); err != nil {
-			slog.Error("failed to process task", "task_id", task.ID, "error", err)
-		}
+	if err := e.registrationRepo.SetCanceledStatus(ctx, registrationID); err != nil {
+		return fmt.Errorf("failed to set registration status to canceled: %w", err)
 	}
 
-	return nil
-}
+	slog.Info("registration automatically canceled due to unpaid status", 
+		"registration_id", registrationID)
 
-func (e *TaskExecutor) processTask(ctx context.Context, task *domain.Task) error {
-	patchTask := &domain.PatchTask{
-		ID:     task.ID,
-		Status: &[]domain.TaskStatus{domain.TaskStatusProcessing}[0],
+	chatIDFloat, ok := data["user_telegram_id"].(float64)
+	if !ok {
+		slog.Warn("user_telegram_id not found, skipping notification", "registration_id", registrationID)
+		return nil
 	}
-	
-	if err := e.repo.Patch(ctx, patchTask); err != nil {
-		return fmt.Errorf("failed to update task status to processing: %w", err)
-	}
+	chatID := int64(chatIDFloat)
 
-	if err := e.ExecuteTask(ctx, task); err != nil {
-		task.RetryCount++
-		
-		if task.RetryCount >= task.MaxRetries {
-			if failErr := e.repo.FailTask(ctx, task.ID); failErr != nil {
-				slog.Error("failed to mark task as failed", "task_id", task.ID, "error", failErr)
-			}
-		} else {
-			retryDelay := time.Duration(task.RetryCount) * time.Minute
-			retryPatch := &domain.PatchTask{
-				ID:         task.ID,
-				Status:     &[]domain.TaskStatus{domain.TaskStatusPending}[0],
-				RetryCount: &task.RetryCount,
-				ExecuteAt:  &[]time.Time{time.Now().Add(retryDelay)}[0],
-			}
-			if patchErr := e.repo.Patch(ctx, retryPatch); patchErr != nil {
-				slog.Error("failed to reschedule task", "task_id", task.ID, "error", patchErr)
-			}
-		}
-		return err
-	}
-
-	if err := e.repo.CompleteTask(ctx, task.ID); err != nil {
-		return fmt.Errorf("failed to mark task as completed: %w", err)
-	}
-
-	return nil
+	return e.sendTelegramMessage(ctx, domain.TaskTypeTournamentRegistrationAutoDeleteUnpaid, chatID, data)
 }

@@ -12,23 +12,41 @@ import (
 	"gopadel/scheduler/pkg/domain"
 	"gopadel/scheduler/pkg/executor"
 	"gopadel/scheduler/pkg/repo"
+	"gopadel/scheduler/pkg/scheduler"
 	"gopadel/scheduler/pkg/telegram"
 
 	"github.com/nats-io/nats.go"
 )
 
 type TaskHandler struct {
-	repo     repo.Task
-	executor *executor.TaskExecutor
+	repo      repo.Task
+	executor  *executor.TaskExecutor
+	scheduler *scheduler.TaskScheduler
 }
 
-func NewTaskHandler(repo repo.Task, telegramClient *telegram.TelegramClient, config *config.Config) *TaskHandler {
-	taskExecutor := executor.NewTaskExecutor(repo, telegramClient, config)
+func NewTaskHandler(repo repo.Task, registrationRepo repo.Registration, telegramClient *telegram.TelegramClient, config *config.Config) (*TaskHandler, error) {
+	taskExecutor := executor.NewTaskExecutor(repo, registrationRepo, telegramClient, config)
+	
+	taskScheduler, err := scheduler.NewTaskScheduler(taskExecutor, repo)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create task scheduler: %w", err)
+	}
+	
+	taskExecutor.SetScheduler(taskScheduler)
 	
 	return &TaskHandler{
-		repo:     repo,
-		executor: taskExecutor,
-	}
+		repo:      repo,
+		executor:  taskExecutor,
+		scheduler: taskScheduler,
+	}, nil
+}
+
+func (h *TaskHandler) Start(ctx context.Context) error {
+	return h.scheduler.Start(ctx)
+}
+
+func (h *TaskHandler) Stop() error {
+	return h.scheduler.Stop()
 }
 
 func (h *TaskHandler) HandleTaskMessage(ctx context.Context, msg *nats.Msg) (*domain.Task, error) {
@@ -70,15 +88,20 @@ func (h *TaskHandler) HandleTaskMessage(ctx context.Context, msg *nats.Msg) (*do
 		"task_type", task.TaskType,
 		"execute_at", task.ExecuteAt.Format("2006-01-02 15:04:05"))
 	
+	if err := h.scheduler.ScheduleTask(ctx, task); err != nil {
+		slog.Error("failed to schedule task", "task_id", task.ID, "error", err)
+		return task, err
+	}
+	
 	return task, nil
-}
-
-func (h *TaskHandler) ProcessReadyTasks(ctx context.Context) error {
-	return h.executor.ProcessReadyTasks(ctx)
 }
 
 func (h *TaskHandler) ExecuteTask(ctx context.Context, task *domain.Task) error {
 	return h.executor.ExecuteTask(ctx, task)
+}
+
+func (h *TaskHandler) CancelScheduledTask(taskID string) error {
+	return h.scheduler.CancelTask(taskID)
 }
 
 func parseTimeString(timeStr string) (time.Time, error) {

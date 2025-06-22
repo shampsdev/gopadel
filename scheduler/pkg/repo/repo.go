@@ -11,8 +11,14 @@ type Task interface {
 	Patch(ctx context.Context, task *domain.PatchTask) error
 	Delete(ctx context.Context, id string) error
 	GetReadyTasks(ctx context.Context) ([]*domain.Task, error)
+	GetPendingTasksNow(ctx context.Context) ([]*domain.Task, error)
+	GetPendingTasksFuture(ctx context.Context) ([]*domain.Task, error)
 	FindTasksByUserAndTournament(ctx context.Context, userTelegramID int64, tournamentID string, statuses []domain.TaskStatus) ([]*domain.Task, error)
 	CompleteTask(ctx context.Context, id string) error
 	FailTask(ctx context.Context, id string) error
 	CancelTask(ctx context.Context, id string) error
+}
+
+type Registration interface {
+	SetCanceledStatus(ctx context.Context, id string) error
 }

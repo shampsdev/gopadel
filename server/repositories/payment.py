@@ -155,11 +155,13 @@ class PaymentRepository(BaseRepository[Payment]):
     def get_latest_active_payment(
         self, db: Session, registration_id: UUID
     ) -> Optional[Payment]:
-        """Get the latest non-canceled payment for a registration"""
+        """Get the latest active payment for a registration (pending, waiting_for_capture, or succeeded)"""
+        active_statuses = ["pending", "waiting_for_capture", "succeeded"]
         return (
             db.query(Payment)
             .filter(
-                Payment.registration_id == registration_id, Payment.status != "canceled"
+                Payment.registration_id == registration_id, 
+                Payment.status.in_(active_statuses)
             )
             .order_by(Payment.date.desc())
             .first()

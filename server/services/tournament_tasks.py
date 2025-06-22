@@ -25,13 +25,17 @@ class TournamentTaskService:
     def __init__(self):
         self.queue_subject = "tasks.active"
     
+    def _get_utc_time(self) -> datetime:
+        """Получить текущее время в UTC"""
+        return datetime.utcnow()
+    
     async def _send_task(self, task_name: str, execute_at: datetime, data: Dict[str, Any]):
         """
         Отправляет задачу в очередь NATS
         
         Args:
             task_name: Название задачи для воркера
-            execute_at: Время выполнения задачи
+            execute_at: Время выполнения задачи в UTC
             data: Дополнительные данные для задачи
         """
         # Быстрая проверка доступности без попытки подключения
@@ -40,11 +44,15 @@ class TournamentTaskService:
             return
             
         try:
+            # Убираем информацию о часовом поясе для единообразия
+            if execute_at.tzinfo:
+                execute_at = execute_at.replace(tzinfo=None)
+            
             message = {
                 "task_name": task_name,
                 "execute_at": execute_at.strftime("%Y-%m-%dT%H:%M:%S"),
                 "data": data,
-                "created_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                "created_at": self._get_utc_time().strftime("%Y-%m-%dT%H:%M:%S")
             }
             
             success = await nats_client.publish(
@@ -53,9 +61,9 @@ class TournamentTaskService:
             )
             
             if success:
-                logger.info(f"Task {task_name} successfully scheduled for {execute_at}")
+                logger.info(f"Task {task_name} successfully scheduled for {execute_at} UTC")
             else:
-                logger.warning(f"Failed to schedule task {task_name} for {execute_at}")
+                logger.warning(f"Failed to schedule task {task_name} for {execute_at} UTC")
             
         except Exception as e:
             logger.error(f"Exception while sending task {task_name}: {str(e)}")
@@ -74,7 +82,7 @@ class TournamentTaskService:
         """
         await self._send_task(
             task_name=TournamentTaskNames.REGISTRATION_SUCCESS,
-            execute_at=datetime.now(),
+            execute_at=self._get_utc_time(),
             data={
                 "user_id": str(user_id),
                 "tournament_id": str(tournament_id),
@@ -91,13 +99,16 @@ class TournamentTaskService:
         registration_id: UUID,
         tournament_name: str,
         user_telegram_id: int,
-        registration_time: datetime
+        registration_time: datetime = None  # Параметр остается для совместимости, но не используется
     ):
         """
         Отправляет все задачи напоминания об оплате
+        Планирует задачи относительно ТЕКУЩЕГО времени UTC
         """
-        # Напоминание через 12 часов
-        reminder_1_time = registration_time + timedelta(hours=12)
+        now = self._get_utc_time()
+        
+        # Напоминание через 12 часов от текущего момента
+        reminder_1_time = now + timedelta(hours=12)
         await self._send_task(
             task_name=TournamentTaskNames.PAYMENT_REMINDER_1,
             execute_at=reminder_1_time,
@@ -110,8 +121,8 @@ class TournamentTaskService:
             }
         )
         
-        # Напоминание через 21 час
-        reminder_2_time = registration_time + timedelta(hours=21)
+        # Напоминание через 21 час от текущего момента
+        reminder_2_time = now + timedelta(hours=21)
         await self._send_task(
             task_name=TournamentTaskNames.PAYMENT_REMINDER_2,
             execute_at=reminder_2_time,
@@ -124,8 +135,8 @@ class TournamentTaskService:
             }
         )
         
-        # Напоминание через 23 часа
-        reminder_3_time = registration_time + timedelta(hours=23)
+        # Напоминание через 23 часа от текущего момента
+        reminder_3_time = now + timedelta(hours=23)
         await self._send_task(
             task_name=TournamentTaskNames.PAYMENT_REMINDER_3,
             execute_at=reminder_3_time,
@@ -153,7 +164,7 @@ class TournamentTaskService:
         """
         await self._send_task(
             task_name=TournamentTaskNames.PAYMENT_SUCCESS,
-            execute_at=datetime.now(),
+            execute_at=self._get_utc_time(),
             data={
                 "user_id": str(user_id),
                 "tournament_id": str(tournament_id),
@@ -178,7 +189,7 @@ class TournamentTaskService:
         """
         await self._send_task(
             task_name=TournamentTaskNames.LOYALTY_LEVEL_CHANGED,
-            execute_at=datetime.now(),
+            execute_at=self._get_utc_time(),
             data={
                 "user_id": str(user_id),
                 "user_telegram_id": user_telegram_id,
@@ -203,7 +214,7 @@ class TournamentTaskService:
         """
         await self._send_task(
             task_name=TournamentTaskNames.REGISTRATION_CANCELED,
-            execute_at=datetime.now(),
+            execute_at=self._get_utc_time(),
             data={
                 "user_id": str(user_id),
                 "tournament_id": str(tournament_id),
@@ -221,12 +232,15 @@ class TournamentTaskService:
         registration_id: UUID,
         tournament_name: str,
         user_telegram_id: int,
-        registration_time: datetime
+        registration_time: datetime = None  # Параметр остается для совместимости, но не используется
     ):
         """
         Отправляет задачу автоматического удаления неоплаченной регистрации через 24 часа
+        Планирует задачу относительно ТЕКУЩЕГО времени UTC
         """
-        delete_time = registration_time + timedelta(hours=24)
+        now = self._get_utc_time()
+        delete_time = now + timedelta(hours=24)
+        
         await self._send_task(
             task_name=TournamentTaskNames.AUTO_DELETE_UNPAID,
             execute_at=delete_time,
@@ -252,7 +266,7 @@ class TournamentTaskService:
         """
         await self._send_task(
             task_name="tournament.tasks.cancel",
-            execute_at=datetime.now(),
+            execute_at=self._get_utc_time(),
             data={
                 "user_id": str(user_id),
                 "tournament_id": str(tournament_id),

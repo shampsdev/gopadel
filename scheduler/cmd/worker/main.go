@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"time"
 
 	"gopadel/scheduler/cmd/config"
 	"gopadel/scheduler/pkg/handler"
@@ -56,7 +55,22 @@ func main() {
 	}
 
 	taskRepo := pg.NewTaskRepo(pool)
-	taskHandler := handler.NewTaskHandler(taskRepo, telegramClient, cfg)
+	registrationRepo := pg.NewRegistrationRepo(pool)
+	taskHandler, err := handler.NewTaskHandler(taskRepo, registrationRepo, telegramClient, cfg)
+	if err != nil {
+		slog.Error("Error creating task handler", "error", err)
+		os.Exit(1)
+	}
+
+	if err := taskHandler.Start(ctx); err != nil {
+		slog.Error("Error starting task scheduler", "error", err)
+		os.Exit(1)
+	}
+	defer func() {
+		if err := taskHandler.Stop(); err != nil {
+			slog.Error("Error stopping task scheduler", "error", err)
+		}
+	}()
 
 	nc.Subscribe("tasks.active", func(m *nats.Msg) {
 		task, err := taskHandler.HandleTaskMessage(ctx, m)
@@ -67,27 +81,8 @@ func main() {
 		log.Info("Task message handled", "task", task)
 	})
 
-	go func() {
-		ticker := time.NewTicker(30 * time.Second)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ctx.Done():
-				slog.Info("Task scheduler stopped")
-				return
-			case <-ticker.C:
-				if err := taskHandler.ProcessReadyTasks(ctx); err != nil {
-					slog.Error("Error processing ready tasks", "error", err)
-				}
-			}
-		}
-	}()
-
 	slog.Info("Worker is running. NATS consumer and task scheduler are active.")
 	
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	<-c
+	<-ctx.Done()
 	slog.Info("Shutting down...")
 }

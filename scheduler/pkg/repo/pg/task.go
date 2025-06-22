@@ -38,11 +38,55 @@ func (r *TaskRepo) Create(ctx context.Context, task *domain.CreateTask) (string,
 func (r *TaskRepo) GetReadyTasks(ctx context.Context) ([]*domain.Task, error) {
 	rows, err := r.db.Query(
 		ctx,
-		`SELECT id, task_type, status, execute_at, created_at, updated_at, data, retry_count, max_retries FROM tasks WHERE status = 'pending' AND execute_at <= NOW()`,
+		`SELECT id, task_type, status, execute_at, created_at, updated_at, data, retry_count, max_retries FROM tasks WHERE status = 'pending' AND execute_at <= NOW() AT TIME ZONE 'UTC'`,
 	)	
 	if err != nil {
 		return nil, err
 	}
+
+	var tasks []*domain.Task
+	for rows.Next() {
+		var task domain.Task
+		err := rows.Scan(&task.ID, &task.TaskType, &task.Status, &task.ExecuteAt, &task.CreatedAt, &task.UpdatedAt, &task.Data, &task.RetryCount, &task.MaxRetries)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, &task)
+	}
+	return tasks, nil
+}
+
+func (r *TaskRepo) GetPendingTasksNow(ctx context.Context) ([]*domain.Task, error) {
+	rows, err := r.db.Query(
+		ctx,
+		`SELECT id, task_type, status, execute_at, created_at, updated_at, data, retry_count, max_retries FROM tasks WHERE status = 'pending' AND execute_at <= NOW() AT TIME ZONE 'UTC'`,
+	)	
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tasks []*domain.Task
+	for rows.Next() {
+		var task domain.Task
+		err := rows.Scan(&task.ID, &task.TaskType, &task.Status, &task.ExecuteAt, &task.CreatedAt, &task.UpdatedAt, &task.Data, &task.RetryCount, &task.MaxRetries)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, &task)
+	}
+	return tasks, nil
+}
+
+func (r *TaskRepo) GetPendingTasksFuture(ctx context.Context) ([]*domain.Task, error) {
+	rows, err := r.db.Query(
+		ctx,
+		`SELECT id, task_type, status, execute_at, created_at, updated_at, data, retry_count, max_retries FROM tasks WHERE status = 'pending' AND execute_at > NOW() AT TIME ZONE 'UTC' ORDER BY execute_at ASC`,
+	)	
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
 	var tasks []*domain.Task
 	for rows.Next() {
