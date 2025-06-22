@@ -38,7 +38,7 @@ func (r *TaskRepo) Create(ctx context.Context, task *domain.CreateTask) (string,
 func (r *TaskRepo) GetReadyTasks(ctx context.Context) ([]*domain.Task, error) {
 	rows, err := r.db.Query(
 		ctx,
-		`SELECT * FROM tasks WHERE status = 'pending' AND execute_at <= NOW()`,
+		`SELECT id, task_type, status, execute_at, created_at, updated_at, data, retry_count, max_retries FROM tasks WHERE status = 'pending' AND execute_at <= NOW()`,
 	)	
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (r *TaskRepo) GetReadyTasks(ctx context.Context) ([]*domain.Task, error) {
 	var tasks []*domain.Task
 	for rows.Next() {
 		var task domain.Task
-		err := rows.Scan(&task.ID, &task.TaskType, &task.Status, &task.ExecuteAt, &task.CreatedAt, &task.UpdatedAt, &task.Data, &task.Result, &task.ErrorMessage, &task.RetryCount, &task.MaxRetries)
+		err := rows.Scan(&task.ID, &task.TaskType, &task.Status, &task.ExecuteAt, &task.CreatedAt, &task.UpdatedAt, &task.Data, &task.RetryCount, &task.MaxRetries)
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +87,7 @@ func (r *TaskRepo) FindTasksByUserAndTournament(ctx context.Context, userTelegra
 	}
 	
 	query := `
-		SELECT id, task_type, status, execute_at, created_at, updated_at, data, result, error_message, retry_count, max_retries
+		SELECT id, task_type, status, execute_at, created_at, updated_at, data, retry_count, max_retries
 		FROM tasks 
 		WHERE data->>'user_telegram_id' = $1 
 		AND data->>'tournament_id' = $2 
@@ -106,8 +106,8 @@ func (r *TaskRepo) FindTasksByUserAndTournament(ctx context.Context, userTelegra
 		var task domain.Task
 		err := rows.Scan(
 			&task.ID, &task.TaskType, &task.Status, &task.ExecuteAt, 
-			&task.CreatedAt, &task.UpdatedAt, &task.Data, &task.Result, 
-			&task.ErrorMessage, &task.RetryCount, &task.MaxRetries,
+			&task.CreatedAt, &task.UpdatedAt, &task.Data, 
+			&task.RetryCount, &task.MaxRetries,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan task: %w", err)
@@ -124,14 +124,6 @@ func (r *TaskRepo) Patch(ctx context.Context, task *domain.PatchTask) error {
 
 	if task.Status != nil {
 		s = s.Set("status", *task.Status)
-	}
-
-	if task.Result != nil {
-		s = s.Set("result", *task.Result)
-	}
-
-	if task.ErrorMessage != nil {
-		s = s.Set("error_message", *task.ErrorMessage)
 	}
 
 	if task.RetryCount != nil {

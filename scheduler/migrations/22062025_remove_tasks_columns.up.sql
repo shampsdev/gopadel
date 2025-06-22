@@ -1,0 +1,2 @@
+ALTER TABLE tasks DROP COLUMN IF EXISTS result;
+ALTER TABLE tasks DROP COLUMN IF EXISTS error_message;

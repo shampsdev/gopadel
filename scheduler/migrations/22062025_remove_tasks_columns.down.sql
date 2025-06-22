@@ -1,0 +1,2 @@
+ALTER TABLE tasks ADD COLUMN result JSONB;
+ALTER TABLE tasks ADD COLUMN error_message TEXT;
