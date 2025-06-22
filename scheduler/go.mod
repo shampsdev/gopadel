@@ -46,6 +46,7 @@ require (
 	github.com/aws/aws-sdk-go v1.37.16 // indirect
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-stack/stack v1.8.0 // indirect
+	github.com/go-telegram/bot v1.15.0
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.1 // indirect

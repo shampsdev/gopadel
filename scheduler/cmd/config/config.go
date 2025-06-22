@@ -32,6 +32,8 @@ type Config struct {
 	}
 	TG struct {
 		BotToken   string `envconfig:"TG_BOT_TOKEN"`
+		WebAppName string `envconfig:"TG_WEBAPP_NAME"`
+		TgBotUsername string `envconfig:"TG_BOT_USERNAME"`
 	}
 	Log struct {
 		Handler string `envconfig:"LOG_HANDLER" default:"tint"`
@@ -62,6 +64,10 @@ func (c *Config) Print() {
 	} else {
 		slog.Info("Launched in production mode")
 	}
+}
+
+func (c *Config) TelegramWebAppURL() string {
+	return fmt.Sprintf("https://t.me/%s/%s", c.TG.TgBotUsername, c.TG.WebAppName)
 }
 
 func (c *Config) DBUrl() string {
