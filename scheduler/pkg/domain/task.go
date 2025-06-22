@@ -23,6 +23,7 @@ const (
 	TaskStatusProcessing TaskStatus = "processing"
 	TaskStatusCompleted  TaskStatus = "completed"
 	TaskStatusFailed     TaskStatus = "failed"
+	TaskStatusCancelled  TaskStatus = "cancelled"
 )
 
 const (

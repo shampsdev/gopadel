@@ -66,6 +66,10 @@ func (c *Config) Print() {
 	}
 }
 
+func (c *Config) TelegramToken() string {
+	return c.TG.BotToken
+}
+
 func (c *Config) TelegramWebAppURL() string {
 	return fmt.Sprintf("https://t.me/%s/%s", c.TG.TgBotUsername, c.TG.WebAppName)
 }

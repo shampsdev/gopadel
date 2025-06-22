@@ -81,7 +81,8 @@ async def webhook(request: Request, event: WebhookEvent, db: SessionDep):
                 await tournament_task_service.cancel_pending_tasks(
                     user_id=registration.user_id,
                     tournament_id=registration.tournament_id,
-                    registration_id=registration.id
+                    registration_id=registration.id,
+                    user_telegram_id=registration.user.telegram_id,
                 )
                 
     elif payment_status == "canceled" and payment.registration:

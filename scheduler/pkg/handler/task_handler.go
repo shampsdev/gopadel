@@ -4,25 +4,34 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
+	"gopadel/scheduler/cmd/config"
 	"gopadel/scheduler/pkg/domain"
+	"gopadel/scheduler/pkg/executor"
 	"gopadel/scheduler/pkg/repo"
+	"gopadel/scheduler/pkg/telegram"
 
 	"github.com/nats-io/nats.go"
 )
 
 type TaskHandler struct {
-	repo repo.Task
+	repo     repo.Task
+	executor *executor.TaskExecutor
 }
 
-func NewTaskHandler(repo repo.Task) TaskHandler {
-	return TaskHandler{repo: repo}
+func NewTaskHandler(repo repo.Task, telegramClient *telegram.TelegramClient, config *config.Config) *TaskHandler {
+	taskExecutor := executor.NewTaskExecutor(repo, telegramClient, config)
+	
+	return &TaskHandler{
+		repo:     repo,
+		executor: taskExecutor,
+	}
 }
 
-
-func (h TaskHandler) HandleTaskMessage(ctx context.Context, msg *nats.Msg) (*domain.Task, error) {
+func (h *TaskHandler) HandleTaskMessage(ctx context.Context, msg *nats.Msg) (*domain.Task, error) {
 	var natsMsg domain.NATSTaskMessage
 	if err := json.Unmarshal(msg.Data, &natsMsg); err != nil {
 		return nil, fmt.Errorf("failed to parse NATS message: %w", err)
@@ -56,7 +65,20 @@ func (h TaskHandler) HandleTaskMessage(ctx context.Context, msg *nats.Msg) (*dom
 		UpdatedAt:  time.Now(),
 	}
 	
+	slog.Info("task created from NATS message", 
+		"task_id", task.ID, 
+		"task_type", task.TaskType,
+		"execute_at", task.ExecuteAt.Format("2006-01-02 15:04:05"))
+	
 	return task, nil
+}
+
+func (h *TaskHandler) ProcessReadyTasks(ctx context.Context) error {
+	return h.executor.ProcessReadyTasks(ctx)
+}
+
+func (h *TaskHandler) ExecuteTask(ctx context.Context, task *domain.Task) error {
+	return h.executor.ExecuteTask(ctx, task)
 }
 
 func parseTimeString(timeStr string) (time.Time, error) {

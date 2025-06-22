@@ -243,7 +243,8 @@ class TournamentTaskService:
         self, 
         user_id: UUID, 
         tournament_id: UUID,
-        registration_id: UUID
+        registration_id: UUID,
+        user_telegram_id: int
     ):
         """
         Отменяет все отложенные задачи для конкретной регистрации
@@ -256,7 +257,8 @@ class TournamentTaskService:
                 "user_id": str(user_id),
                 "tournament_id": str(tournament_id),
                 "registration_id": str(registration_id),
-                "action": "cancel_pending_tasks"
+                "action": "cancel_pending_tasks",
+                "user_telegram_id": user_telegram_id,
             }
         )
 

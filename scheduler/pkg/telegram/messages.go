@@ -81,6 +81,15 @@ func GetMessageForTaskType(taskType domain.TaskType, data map[string]interface{}
 			),
 		}
 	
+	case domain.TaskTypeTournamentRegistrationAutoDeleteUnpaid:
+		return &domain.MessageText{
+			Text: fmt.Sprintf(
+				"⏰ Ваша регистрация на турнир '%s' была автоматически отменена из-за неоплаты в установленный срок.\n\nВы можете зарегистрироваться повторно, если есть свободные места.\n\n%s",
+				data["tournament_name"],
+				tournamentURL,
+			),
+		}
+	
 	default:
 		return &domain.MessageText{
 			Text: "Уведомление от GoPadel",
