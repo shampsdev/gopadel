@@ -17,7 +17,7 @@ type TaskScheduler struct {
 	scheduler gocron.Scheduler
 	executor  *executor.TaskExecutor
 	repo      repo.Task
-	jobs      map[string]gocron.Job // map[taskID]job для отслеживания задач
+	jobs      map[string]gocron.Job 
 }
 
 func NewTaskScheduler(executor *executor.TaskExecutor, repo repo.Task) (*TaskScheduler, error) {
@@ -37,7 +37,6 @@ func NewTaskScheduler(executor *executor.TaskExecutor, repo repo.Task) (*TaskSch
 func (s *TaskScheduler) Start(ctx context.Context) error {
 	slog.Info("Starting task scheduler")
 	
-	// Загружаем задачи из БД при старте
 	if err := s.loadExistingTasks(ctx); err != nil {
 		return fmt.Errorf("failed to load existing tasks: %w", err)
 	}
@@ -53,7 +52,6 @@ func (s *TaskScheduler) Stop() error {
 }
 
 func (s *TaskScheduler) loadExistingTasks(ctx context.Context) error {
-	// Загружаем задачи со статусом pending и execute_at <= now() - выполняем сразу
 	nowTasks, err := s.repo.GetPendingTasksNow(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get pending tasks for now: %w", err)
@@ -68,7 +66,6 @@ func (s *TaskScheduler) loadExistingTasks(ctx context.Context) error {
 		}(task)
 	}
 
-	// Загружаем задачи со статусом pending и execute_at > now() - регистрируем в планировщике
 	futureTasks, err := s.repo.GetPendingTasksFuture(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get pending tasks for future: %w", err)

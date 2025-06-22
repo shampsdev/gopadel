@@ -1,0 +1,26 @@
+name: deploy-worker
+
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        description: Deploy to PROD/DEV
+        type: choice
+        options: [PROD, DEV]
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy.yaml
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    secrets: inherit
+    with:
+      dockerfile_path: 'worker/Dockerfile.worker'
+      context_path: 'worker'
+      image_name: 'gopadel-worker'
+      environment: ${{ github.event.inputs.environment }}
+      secret-service-hash: ${{ github.event.inputs.environment == 'PROD' && 'WORKER_SERVICE_HASH' || 'WORKER_SERVICE_HASH_DEV' }}
