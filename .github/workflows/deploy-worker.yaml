@@ -8,6 +8,7 @@ on:
         description: Deploy to PROD/DEV
         type: choice
         options: [PROD, DEV]
+        default: DEV
 
 jobs:
   deploy:
