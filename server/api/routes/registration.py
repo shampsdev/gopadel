@@ -264,7 +264,8 @@ async def delete_registration(db: SessionDep, tournament_id: UUID, user: UserDep
     await tournament_task_service.cancel_pending_tasks(
         user_id=user.id,
         tournament_id=tournament_id,
-        registration_id=registration.id
+        registration_id=registration.id,
+        user_telegram_id=user.telegram_id
     )
     
     # Уведомляем всех пользователей из waitlist о том, что освободилось место

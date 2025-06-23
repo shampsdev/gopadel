@@ -185,3 +185,14 @@ class RegistrationRepository(BaseRepository[Registration]):
             query = query.filter(Registration.status == status)
 
         return query.count()
+
+    def set_canceled_status(self, db: Session, registration_id: UUID) -> Optional[Registration]:
+        """Set registration status to CANCELED (for auto-delete unpaid)"""
+        registration = (
+            db.query(Registration).filter(Registration.id == registration_id).first()
+        )
+        if registration:
+            registration.status = RegistrationStatus.CANCELED
+            db.commit()
+            db.refresh(registration)
+        return registration
