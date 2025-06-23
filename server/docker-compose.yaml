@@ -29,7 +29,7 @@ services:
       - "5432:5432"
 
   adminer:
-    image: adminer:5
+    image: adminer:4.8.1
     ports:
       - "8080:8080"
 
