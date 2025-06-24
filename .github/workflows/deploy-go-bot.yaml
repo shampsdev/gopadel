@@ -1,0 +1,27 @@
+name: deploy-go-bot
+
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        description: Deploy to PROD/DEV
+        type: choice
+        options: [PROD, DEV]
+        default: DEV
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy.yaml
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    secrets: inherit
+    with:
+      dockerfile_path: 'server-go/Dockerfile.bot'
+      context_path: 'server-go'
+      image_name: 'gopadel-bot'
+      environment: ${{ github.event.inputs.environment }}
+      secret-service-hash: ${{ github.event.inputs.environment == 'PROD' && 'BOT_SERVICE_HASH' || 'BOT_SERVICE_HASH_DEV' }}

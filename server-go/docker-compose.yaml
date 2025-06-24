@@ -1,0 +1,24 @@
+services:
+  database:
+    restart: unless-stopped
+    image: postgres:16.7
+    container_name: database
+    volumes:
+      - gopadel-server:/var/lib/postgresql/data
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "1000:8080"
+    depends_on:
+      - database
+
+volumes:
+  gopadel-server:

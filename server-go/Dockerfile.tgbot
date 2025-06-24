@@ -1,0 +1,21 @@
+# Build stage
+FROM golang:1.24-alpine AS builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY pkg pkg
+COPY cmd cmd
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o tgbot ./cmd/tgbot/main.go
+
+# Run stage
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /app/tgbot .
+
+CMD ["./tgbot"]
