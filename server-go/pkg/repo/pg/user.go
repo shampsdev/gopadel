@@ -24,7 +24,7 @@ func NewUserRepo(db *pgxpool.Pool) *UserRepo {
 }
 
 func (r *UserRepo) Create(ctx context.Context, user *domain.CreateUser) (string, error) {
-	s := r.psql.Insert(`"user"`).
+	s := r.psql.Insert(`"users"`).
 		Columns("telegram_id", "telegram_username", "first_name", "last_name", "avatar").
 		Values(user.TelegramID, user.TelegramUsername, user.FirstName, user.LastName, user.Avatar).
 		Suffix("RETURNING id")
@@ -41,7 +41,7 @@ func (r *UserRepo) Create(ctx context.Context, user *domain.CreateUser) (string,
 
 func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*domain.User, error) {
 	s := r.psql.Select("id", "telegram_id", "telegram_username", "first_name", "last_name", "avatar").
-		From(`"user"`)
+		From(`"users"`)
 
 	if filter.ID != nil {
 		s = s.Where(sq.Eq{"id": *filter.ID})
@@ -86,7 +86,7 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 }
 
 func (r *UserRepo) Patch(ctx context.Context, id string, user *domain.PatchUser) error {
-	s := r.psql.Update(`"user"`)
+	s := r.psql.Update(`"users"`)
 	if user.TelegramUsername != nil {
 		s = s.Set("telegram_username", *user.TelegramUsername)
 	}
@@ -108,7 +108,7 @@ func (r *UserRepo) Patch(ctx context.Context, id string, user *domain.PatchUser)
 }
 
 func (r *UserRepo) Delete(ctx context.Context, id string) error {
-	s := r.psql.Delete(`"user"`).
+	s := r.psql.Delete(`"users"`).
 		Where(sq.Eq{"id": id})
 	sql, args, err := s.ToSql()
 	if err != nil {

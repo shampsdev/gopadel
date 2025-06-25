@@ -1,5 +1,13 @@
 package domain
 
+type PlayingPosition string
+
+const (
+	PlayingPositionRight PlayingPosition = "right"
+	PlayingPositionLeft  PlayingPosition = "left"
+	PlayingPositionBoth  PlayingPosition = "both"
+)
+
 type User struct {
 	ID string `json:"id"`
 	UserTGData
@@ -15,6 +23,7 @@ type UserTGData struct {
 
 type CreateUser struct {
 	UserTGData
+	Rank float64 `json:"rank"`
 }
 
 type PatchUser struct {
