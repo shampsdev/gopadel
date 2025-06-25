@@ -1,27 +1,4 @@
 definitions:
-  domain.Cat:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      owner:
-        $ref: '#/definitions/domain.User'
-    type: object
-  domain.CreateCat:
-    properties:
-      name:
-        type: string
-      ownerId:
-        type: string
-    type: object
-  domain.PatchCat:
-    properties:
-      name:
-        type: string
-      ownerId:
-        type: string
-    type: object
   domain.User:
     properties:
       avatar:
@@ -40,107 +17,9 @@ definitions:
 info:
   contact: {}
   description: Manage chats, users
-  title: TGLinked server
+  title: GoPadel server
   version: "1.0"
 paths:
-  /cats:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of cats
-          schema:
-            items:
-              $ref: '#/definitions/domain.Cat'
-            type: array
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      summary: Get all cats
-      tags:
-      - cats
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Cat data
-        in: body
-        name: cat
-        required: true
-        schema:
-          $ref: '#/definitions/domain.CreateCat'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created cat
-          schema:
-            $ref: '#/definitions/domain.Cat'
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Create cat
-      tags:
-      - cats
-  /cats/id/{id}:
-    patch:
-      consumes:
-      - application/json
-      parameters:
-      - description: Cat ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Cat data to update
-        in: body
-        name: cat
-        required: true
-        schema:
-          $ref: '#/definitions/domain.PatchCat'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Cat updated successfully
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Update cat
-      tags:
-      - cats
-  /cats/me:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of user's cats
-          schema:
-            items:
-              $ref: '#/definitions/domain.Cat'
-            type: array
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      security:
-      - ApiKeyAuth: []
-      summary: Get my cats
-      tags:
-      - cats
   /users/me:
     get:
       consumes:

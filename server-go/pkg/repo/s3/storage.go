@@ -46,11 +46,6 @@ func NewStorage(cfg config.S3Config) (*Storage, error) {
 }
 
 func (s *Storage) SaveImageByURL(ctx context.Context, imageURL, key string) (string, error) {
-	if imageURL == "" {
-		slogx.Info(ctx, "Empty image URL provided, skipping image upload")
-		return "", nil
-	}
-
 	imageData, err := downloadFromURL(imageURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to download image: %w", err)

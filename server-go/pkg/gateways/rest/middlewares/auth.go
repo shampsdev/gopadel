@@ -9,6 +9,7 @@ import (
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/ginerr"
 	"github.com/shampsdev/go-telegram-template/pkg/usecase"
+	"github.com/shampsdev/go-telegram-template/pkg/utils/slogx"
 
 	initdata "github.com/telegram-mini-apps/init-data-golang"
 )
@@ -28,6 +29,7 @@ func ExtractUserTGData() gin.HandlerFunc {
 		if ginerr.AbortIfErr(c, err, http.StatusUnauthorized, "failed to parse initdata") {
 			return
 		}
+		slogx.Info(c, "Parsed initdata", "parsed", parsed)
 		c.Set("user_tg_data", &domain.UserTGData{
 			TelegramID:       parsed.User.ID,
 			FirstName:        parsed.User.FirstName,

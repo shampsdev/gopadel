@@ -86,7 +86,7 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 }
 
 func (r *UserRepo) Patch(ctx context.Context, id string, user *domain.PatchUser) error {
-	s := r.psql.Update(`"users"`)
+	s := r.psql.Update(`"users"`).Where(sq.Eq{"id": id})
 	if user.TelegramUsername != nil {
 		s = s.Set("telegram_username", *user.TelegramUsername)
 	}

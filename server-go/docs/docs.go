@@ -15,163 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/cats": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cats"
-                ],
-                "summary": "Get all cats",
-                "responses": {
-                    "200": {
-                        "description": "List of cats",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Cat"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cats"
-                ],
-                "summary": "Create cat",
-                "parameters": [
-                    {
-                        "description": "Cat data",
-                        "name": "cat",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.CreateCat"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created cat",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Cat"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/cats/id/{id}": {
-            "patch": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cats"
-                ],
-                "summary": "Update cat",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Cat ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Cat data to update",
-                        "name": "cat",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.PatchCat"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Cat updated successfully"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/cats/me": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cats"
-                ],
-                "summary": "Get my cats",
-                "responses": {
-                    "200": {
-                        "description": "List of user's cats",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Cat"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
         "/users/me": {
             "get": {
                 "security": [
@@ -238,42 +81,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "domain.Cat": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owner": {
-                    "$ref": "#/definitions/domain.User"
-                }
-            }
-        },
-        "domain.CreateCat": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "ownerId": {
-                    "type": "string"
-                }
-            }
-        },
-        "domain.PatchCat": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "ownerId": {
-                    "type": "string"
-                }
-            }
-        },
         "domain.User": {
             "type": "object",
             "properties": {
@@ -313,7 +120,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "TGLinked server",
+	Title:            "GoPadel server",
 	Description:      "Manage chats, users",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

@@ -15,7 +15,7 @@ import (
 	"github.com/shampsdev/go-telegram-template/pkg/utils/slogx"
 )
 
-// @title           TGLinked server
+// @title           GoPadel server
 // @version         1.0
 // @description     Manage chats, users
 // @securityDefinitions.apikey ApiKeyAuth
@@ -27,7 +27,7 @@ func main() {
 
 	log := cfg.Logger()
 	slog.SetDefault(log)
-	log.Info("Hello from tglinked server!")
+	log.Info("Hello from GoPadel server!")
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()

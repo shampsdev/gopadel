@@ -18,7 +18,7 @@ func main() {
 
 	log := cfg.Logger()
 	slog.SetDefault(log)
-	log.Info("Hello from tglinked tgbot!")
+	log.Info("Hello from GoPadel tgbot!")
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()

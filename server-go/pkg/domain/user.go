@@ -23,7 +23,6 @@ type UserTGData struct {
 
 type CreateUser struct {
 	UserTGData
-	Rank float64 `json:"rank"`
 }
 
 type PatchUser struct {
