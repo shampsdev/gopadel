@@ -81,10 +81,52 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "domain.Loyalty": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "discount": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.PlayingPosition": {
+            "type": "string",
+            "enum": [
+                "right",
+                "left",
+                "both"
+            ],
+            "x-enum-varnames": [
+                "PlayingPositionRight",
+                "PlayingPositionLeft",
+                "PlayingPositionBoth"
+            ]
+        },
         "domain.User": {
             "type": "object",
             "properties": {
                 "avatar": {
+                    "type": "string"
+                },
+                "bio": {
+                    "type": "string"
+                },
+                "birth_date": {
+                    "type": "string"
+                },
+                "city": {
                     "type": "string"
                 },
                 "firstName": {
@@ -93,8 +135,23 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_registered": {
+                    "type": "boolean"
+                },
                 "lastName": {
                     "type": "string"
+                },
+                "loyalty": {
+                    "$ref": "#/definitions/domain.Loyalty"
+                },
+                "padel_profiles": {
+                    "type": "string"
+                },
+                "playing_position": {
+                    "$ref": "#/definitions/domain.PlayingPosition"
+                },
+                "rank": {
+                    "type": "number"
                 },
                 "telegramId": {
                     "type": "integer"
