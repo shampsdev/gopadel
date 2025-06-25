@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/shampsdev/go-telegram-template/docs"
-	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/cats"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/middlewares"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/user"
 	"github.com/shampsdev/go-telegram-template/pkg/usecase"
@@ -23,5 +22,4 @@ func setupRouter(ctx context.Context, r *gin.Engine, useCases usecase.Cases) {
 	v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	user.Setup(v1, useCases)
-	cats.Setup(v1, useCases)
 }

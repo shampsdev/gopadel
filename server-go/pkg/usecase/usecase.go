@@ -10,13 +10,11 @@ import (
 )
 
 type Cases struct {
-	Cat  *Cat
 	User *User
 }
 
 func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	userRepo := pg.NewUserRepo(db)
-	catRepo := pg.NewCatRepo(db)
 
 	storage, err := s3.NewStorage(cfg.S3)
 	if err != nil {
@@ -24,10 +22,8 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	}
 
 	userCase := NewUser(ctx, userRepo, storage)
-	catCase := NewCat(catRepo)
 
 	return Cases{
-		Cat:  catCase,
 		User: userCase,
 	}
 }

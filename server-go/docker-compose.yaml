@@ -2,7 +2,7 @@ services:
   database:
     restart: unless-stopped
     image: postgres:16.7
-    container_name: database
+    container_name: database-go
     volumes:
       - gopadel-server:/var/lib/postgresql/data
     env_file:

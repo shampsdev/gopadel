@@ -59,8 +59,6 @@ func (b *Bot) Run(ctx context.Context) {
 	}
 
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, b.handleCommandStart)
-	b.RegisterHandler(bot.HandlerTypeMessageText, "/cats", bot.MatchTypeExact, b.handleCommandCats)
-
 	b.Start(ctx)
 }
 
@@ -76,44 +74,3 @@ func (b *Bot) handleCommandStart(ctx context.Context, _ *bot.Bot, update *models
 	}
 }
 
-func (b *Bot) handleCommandCats(ctx context.Context, _ *bot.Bot, update *models.Update) {
-	user, err := b.cases.User.GetByTelegramID(ctx, update.Message.From.ID)
-	if err != nil {
-		slogx.FromCtxWithErr(ctx, err).Error("error getting user")
-		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Произошла ошибка при получении информации о вас. Попробуйте позже.",
-		})
-		if err != nil {
-			slogx.FromCtxWithErr(ctx, err).Error("error sending message")
-		}
-		return
-	}
-
-	cats, err := b.cases.Cat.ListOwnedCats(ctx, user.ID)
-	if err != nil {
-		slogx.FromCtxWithErr(ctx, err).Error("error getting cats")
-		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Произошла ошибка при получении информации о ваших котах. Попробуйте позже.",
-		})
-		if err != nil {
-			slogx.FromCtxWithErr(ctx, err).Error("error sending message")
-		}
-		return
-	}
-
-	catsText := ""
-	for _, cat := range cats {
-		catsText += fmt.Sprintf("*%s*\n", cat.Name)
-	}
-
-	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID:    update.Message.Chat.ID,
-		Text:      catsText,
-		ParseMode: models.ParseModeMarkdown,
-	})
-	if err != nil {
-		slogx.FromCtxWithErr(ctx, err).Error("error sending message")
-	}
-}
