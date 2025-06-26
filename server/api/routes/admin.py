@@ -7,9 +7,17 @@ from api.schemas.registration import AdminRegistrationResponse, RegistrationStat
 from api.schemas.user import UserBase
 from api.utils.admin_middleware import admin_required, superuser_required
 from db.models.admin import AdminUser
+from db.models.registration import Registration
 from fastapi import APIRouter, Body, HTTPException, Query, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from repositories import admin_user_repository, registration_repository, user_repository
+from repositories import (
+    admin_user_repository,
+    registration_repository,
+    tournament_repository,
+    user_repository,
+)
+from services.tournament_tasks import tournament_task_service
+from sqlalchemy.orm import joinedload
 
 router = APIRouter()
 security = HTTPBearer()
@@ -250,10 +258,22 @@ async def update_registration_status_admin(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid status")
 
-    # Get registration
-    registration = registration_repository.get(db, registration_id)
+    # Get registration with relations
+    registration = (
+        db.query(Registration)
+        .options(
+            joinedload(Registration.user),
+            joinedload(Registration.tournament),
+        )
+        .filter(Registration.id == registration_id)
+        .first()
+    )
+
     if not registration:
         raise HTTPException(status_code=404, detail="Registration not found")
+
+    # Store old status to check if it changed
+    old_status = registration.status
 
     # Update status
     updated_registration = registration_repository.update_registration_status(
@@ -264,5 +284,29 @@ async def update_registration_status_admin(
         raise HTTPException(
             status_code=500, detail="Failed to update registration status"
         )
+
+    # Send tasks if status changed from non-active to active (SUCCESS)
+    if (
+        old_status != RegistrationStatus.ACTIVE
+        and status_enum == RegistrationStatus.ACTIVE
+    ):
+        if registration.user and registration.tournament:
+            # Send payment success task
+            await tournament_task_service.send_payment_success_task(
+                user_id=registration.user_id,
+                tournament_id=registration.tournament_id,
+                registration_id=registration.id,
+                tournament_name=registration.tournament.name,
+                user_telegram_id=registration.user.telegram_id,
+                payment_amount=0.0,  # Admin activation doesn't have payment amount
+            )
+
+            # Cancel pending tasks (payment reminders, auto-delete, etc.)
+            await tournament_task_service.cancel_pending_tasks(
+                user_id=registration.user_id,
+                tournament_id=registration.tournament_id,
+                registration_id=registration.id,
+                user_telegram_id=registration.user.telegram_id,
+            )
 
     return {"message": "Registration status updated successfully", "status": new_status}
