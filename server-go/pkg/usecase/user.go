@@ -3,7 +3,9 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -150,4 +152,58 @@ func (u *User) cacheCleaner(ctx context.Context) {
 			log.Info("userTGData cache cleaned", "deleted", deleted.Load())
 		}
 	}
+}
+
+func (u *User) GetUserBio(ctx context.Context, telegram_username string) (string, error) {
+	max_retries := 3
+	retry_delay := 1 * time.Second
+	userBioUrl := fmt.Sprintf("https://t.me/%s", telegram_username)
+
+	re, err := regexp.Compile(`<div class="tgme_page_description.*?">(.*?)</div>`)
+	if err != nil {
+		return "", fmt.Errorf("failed to compile regex: %w", err)
+	}
+
+	for attempt := 0; attempt < max_retries; attempt++ {
+		resp, err := http.Get(userBioUrl)
+		if err != nil {
+			if attempt == max_retries-1 {
+				return "", fmt.Errorf("request failed after %d attempts: %w", max_retries, err)
+			}
+			time.Sleep(retry_delay)
+			continue
+		}
+		
+		if resp.StatusCode != http.StatusOK {
+			resp.Body.Close()
+			if attempt == max_retries-1 {
+				return "", fmt.Errorf("request failed with status code: %d", resp.StatusCode)
+			}
+			time.Sleep(retry_delay)
+			continue
+		}
+
+		bodyBytes, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			if attempt == max_retries-1 {
+				return "", fmt.Errorf("error reading response body: %w", err)
+			}
+			time.Sleep(retry_delay)
+			continue
+		}
+
+		bodyString := string(bodyBytes)
+		
+		matches := re.FindStringSubmatch(bodyString)
+		if len(matches) > 1 {
+			return strings.TrimSpace(matches[1]), nil
+		}
+		
+		if attempt < max_retries-1 {
+			time.Sleep(retry_delay)
+		}
+	}
+	
+	return "", fmt.Errorf("bio not found for user %s after %d attempts", telegram_username, max_retries)
 }

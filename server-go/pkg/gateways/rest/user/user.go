@@ -15,4 +15,5 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases) {
 	gAuth.Use(middlewares.AuthUser(cases.User))
 	gAuth.Group("/me").
 		GET("", GetMe(cases.User))
+	gAuth.Group("/me").GET("/bio", GetUserBio(cases.User))
 }
