@@ -12,6 +12,31 @@ definitions:
       name:
         type: string
     type: object
+  domain.PatchUser:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      birth_date:
+        type: string
+      city:
+        type: string
+      firstName:
+        type: string
+      is_registered:
+        type: boolean
+      lastName:
+        type: string
+      padel_profiles:
+        type: string
+      playing_position:
+        $ref: '#/definitions/domain.PlayingPosition'
+      rank:
+        type: number
+      telegramUsername:
+        type: string
+    type: object
   domain.PlayingPosition:
     enum:
     - right
@@ -77,6 +102,32 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get me
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: User update data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PatchUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated user data
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Update current user data
       tags:
       - users
     post:

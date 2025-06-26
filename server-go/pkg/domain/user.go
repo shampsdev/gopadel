@@ -44,6 +44,7 @@ type PatchUser struct {
 	BirthDate        *string          `json:"birth_date"`
 	PlayingPosition  *PlayingPosition `json:"playing_position"`
 	PadelProfiles    *string          `json:"padel_profiles"`
+	IsRegistered     *bool            `json:"is_registered"`
 }
 
 type FilterUser struct {

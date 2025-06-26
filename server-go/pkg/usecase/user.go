@@ -64,6 +64,15 @@ func (u *User) GetMe(ctx Context) (*domain.User, error) {
 	return ctx.User, nil
 }
 
+func (u *User) PatchMe(ctx Context, patch *domain.PatchUser) (*domain.User, error) {
+	err := u.userRepo.Patch(ctx, ctx.User.ID, patch)
+	if err != nil {
+		return nil, fmt.Errorf("failed to patch user: %w", err)
+	}
+	
+	return repo.First(u.userRepo.Filter)(ctx, &domain.FilterUser{ID: &ctx.User.ID})
+}
+
 func (u *User) GetByTGData(ctx context.Context, tgData *domain.UserTGData) (*domain.User, error) {
 	if u, ok := u.tgDataCache.Load(tgData.TelegramID); ok {
 		//nolint:errcheck// because sure
@@ -173,7 +182,7 @@ func (u *User) GetUserBio(ctx context.Context, telegram_username string) (string
 			time.Sleep(retry_delay)
 			continue
 		}
-		
+
 		if resp.StatusCode != http.StatusOK {
 			resp.Body.Close()
 			if attempt == max_retries-1 {
@@ -194,16 +203,16 @@ func (u *User) GetUserBio(ctx context.Context, telegram_username string) (string
 		}
 
 		bodyString := string(bodyBytes)
-		
+
 		matches := re.FindStringSubmatch(bodyString)
 		if len(matches) > 1 {
 			return strings.TrimSpace(matches[1]), nil
 		}
-		
+
 		if attempt < max_retries-1 {
 			time.Sleep(retry_delay)
 		}
 	}
-	
+
 	return "", fmt.Errorf("bio not found for user %s after %d attempts", telegram_username, max_retries)
 }

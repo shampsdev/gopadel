@@ -7,6 +7,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 )
@@ -40,8 +41,10 @@ func (r *UserRepo) Create(ctx context.Context, user *domain.CreateUser) (string,
 }
 
 func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*domain.User, error) {
-	s := r.psql.Select("id", "telegram_id", "telegram_username", "first_name", "last_name", "avatar").
-		From(`"users"`)
+	s := r.psql.Select(
+		"id", "telegram_id", "telegram_username", "first_name", "last_name", "avatar",
+		"bio", "rank", "city", "birth_date", "playing_position", "padel_profiles", "is_registered",
+	).From(`"users"`)
 
 	if filter.ID != nil {
 		s = s.Where(sq.Eq{"id": *filter.ID})
@@ -68,6 +71,11 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 	users := []*domain.User{}
 	for rows.Next() {
 		var user domain.User
+		var bio, city, birthDate, padelProfiles pgtype.Text
+		var playingPosition pgtype.Text
+		var rank pgtype.Float8
+		var isRegistered pgtype.Bool
+
 		err := rows.Scan(
 			&user.ID,
 			&user.TelegramID,
@@ -75,10 +83,40 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 			&user.FirstName,
 			&user.LastName,
 			&user.Avatar,
+			&bio,
+			&rank,
+			&city,
+			&birthDate,
+			&playingPosition,
+			&padelProfiles,
+			&isRegistered,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
+
+		if bio.Valid {
+			user.Bio = bio.String
+		}
+		if rank.Valid {
+			user.Rank = rank.Float64
+		}
+		if city.Valid {
+			user.City = city.String
+		}
+		if birthDate.Valid {
+			user.BirthDate = birthDate.String
+		}
+		if playingPosition.Valid {
+			user.PlayingPosition = domain.PlayingPosition(playingPosition.String)
+		}
+		if padelProfiles.Valid {
+			user.PadelProfiles = padelProfiles.String
+		}
+		if isRegistered.Valid {
+			user.IsRegistered = isRegistered.Bool
+		}
+
 		users = append(users, &user)
 	}
 
@@ -98,6 +136,27 @@ func (r *UserRepo) Patch(ctx context.Context, id string, user *domain.PatchUser)
 	}
 	if user.Avatar != nil {
 		s = s.Set("avatar", *user.Avatar)
+	}
+	if user.Bio != nil {
+		s = s.Set("bio", *user.Bio)
+	}
+	if user.Rank != nil {
+		s = s.Set("rank", *user.Rank)
+	}
+	if user.City != nil {
+		s = s.Set("city", *user.City)
+	}
+	if user.BirthDate != nil {
+		s = s.Set("birth_date", *user.BirthDate)
+	}
+	if user.PlayingPosition != nil {
+		s = s.Set("playing_position", *user.PlayingPosition)
+	}
+	if user.PadelProfiles != nil {
+		s = s.Set("padel_profiles", *user.PadelProfiles)
+	}
+	if user.IsRegistered != nil {
+		s = s.Set("is_registered", true)
 	}
 	sql, args, err := s.ToSql()
 	if err != nil {
