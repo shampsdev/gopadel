@@ -87,6 +87,47 @@ func (s *Storage) SaveImageByBytes(ctx context.Context, imageData []byte, uid st
 	return fileURL, nil
 }
 
+func (s *Storage) SaveImageByReader(ctx context.Context, imageData io.Reader, destDir string) (string, error) {
+	data, err := io.ReadAll(imageData)
+	if err != nil {
+		return "", fmt.Errorf("failed to read image data: %w", err)
+	}
+
+	return s.SaveImageByBytes(ctx, data, destDir)
+}
+
+func (s *Storage) SaveImageByReaderWithPath(ctx context.Context, imageData io.Reader, destDir string) (string, error) {
+	data, err := io.ReadAll(imageData)
+	if err != nil {
+		return "", fmt.Errorf("failed to read image data: %w", err)
+	}
+
+	fileUUID := uuid.New().String()
+	
+	mimeType := http.DetectContentType(data)
+	fileExtension, _ := mime.ExtensionsByType(mimeType)
+	if len(fileExtension) == 0 {
+		fileExtension = []string{".jpeg"}
+	}
+
+	key := fmt.Sprintf("%s/%s/%s%s", s.rootDir, destDir, fileUUID, fileExtension[0])
+
+	_, err = s.s3Client.PutObject(&s3.PutObjectInput{
+		Bucket:      &s.cfg.Bucket,
+		Key:         aws.String(key),
+		Body:        bytes.NewReader(data),
+		ContentType: aws.String(mimeType),
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to upload image to S3: %w", err)
+	}
+
+	fileURL := fmt.Sprintf("%s/%s/%s", s.cfg.EndpointUrl, s.cfg.Bucket, key)
+	slogx.Info(ctx, "Successfully upload image", slog.String("file_url", fileURL))
+
+	return fileURL, nil
+}
+
 func downloadFromURL(imageURL string) ([]byte, error) {
 	resp, err := http.Get(imageURL)
 	if err != nil {

@@ -15,6 +15,51 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/images/upload/avatar": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "images"
+                ],
+                "summary": "Upload file to s3",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Image data",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A url to the stored image",
+                        "schema": {
+                            "$ref": "#/definitions/image.UploadResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Parsing error"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/users/me": {
             "get": {
                 "security": [
@@ -277,6 +322,15 @@ const docTemplate = `{
                 },
                 "telegramUsername": {
                     "type": "string"
+                }
+            }
+        },
+        "image.UploadResponse": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "example": "https://example.com/image.jpg"
                 }
             }
         }

@@ -10,7 +10,8 @@ import (
 )
 
 type Cases struct {
-	User *User
+	User  *User
+	Image *Image
 }
 
 func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
@@ -22,8 +23,10 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	}
 
 	userCase := NewUser(ctx, userRepo, storage)
+	imageCase := NewImage(ctx, storage)
 
 	return Cases{
-		User: userCase,
+		User:  userCase,
+		Image: imageCase,
 	}
 }

@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"errors"
+	"io"
 
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 )
@@ -21,4 +22,6 @@ type User interface {
 type ImageStorage interface {
 	SaveImageByURL(ctx context.Context, url, key string) (string, error)
 	SaveImageByBytes(ctx context.Context, bytes []byte, key string) (string, error)
+	SaveImageByReader(ctx context.Context, imageData io.Reader, destDir string) (string, error)
+	SaveImageByReaderWithPath(ctx context.Context, imageData io.Reader, destDir string) (string, error)
 }
