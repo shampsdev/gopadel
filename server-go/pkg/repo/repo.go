@@ -19,6 +19,22 @@ type User interface {
 	Delete(ctx context.Context, id string) error
 }
 
+type Club interface {
+	Create(ctx context.Context, club *domain.CreateClub) (string, error)
+	Patch(ctx context.Context, id string, club *domain.PatchClub) error
+	Filter(ctx context.Context, filter *domain.FilterClub) ([]*domain.Club, error)
+	Delete(ctx context.Context, id string) error
+}
+
+type Loyalty interface {
+	Create(ctx context.Context, loyalty *domain.CreateLoyalty) (string, error)
+	Filter(ctx context.Context, filter *domain.FilterLoyalty) ([]*domain.Loyalty, error)
+}
+
+type Tournament interface {
+	Filter(ctx context.Context, filter *domain.Tournament) ([]*domain.Tournament, error)
+}
+
 type ImageStorage interface {
 	SaveImageByURL(ctx context.Context, url, key string) (string, error)
 	SaveImageByBytes(ctx context.Context, bytes []byte, key string) (string, error)

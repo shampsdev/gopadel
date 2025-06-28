@@ -4,5 +4,8 @@ import "github.com/shampsdev/go-telegram-template/pkg/repo"
 
 // to ensure pg implement the repo interfaces
 var (
-	_ repo.User = &UserRepo{}
+	_ repo.User       = &UserRepo{}
+	_ repo.Club       = &ClubRepo{}
+	_ repo.Tournament = &TournamentRepo{}
+	_ repo.Loyalty    = &LoyaltyRepo{}
 )
