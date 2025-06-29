@@ -1,8 +1,25 @@
 definitions:
+  domain.Club:
+    properties:
+      address:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  domain.FilterTournament:
+    properties:
+      id:
+        type: string
+      is_avalible:
+        description: true if tournament is not started and not full
+        type: boolean
+      name:
+        type: string
+    type: object
   domain.Loyalty:
     properties:
-      data:
-        type: string
       description:
         type: string
       discount:
@@ -10,6 +27,8 @@ definitions:
       id:
         type: integer
       name:
+        type: string
+      requirements:
         type: string
     type: object
   domain.PatchUser:
@@ -47,6 +66,33 @@ definitions:
     - PlayingPositionRight
     - PlayingPositionLeft
     - PlayingPositionBoth
+  domain.Tournament:
+    properties:
+      club:
+        $ref: '#/definitions/domain.Club'
+      description:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: string
+      max_users:
+        type: integer
+      name:
+        type: string
+      organizator:
+        $ref: '#/definitions/domain.User'
+      price:
+        type: integer
+      rank_max:
+        type: number
+      rank_min:
+        type: number
+      start_time:
+        type: string
+      tournament_type:
+        type: string
+    type: object
   domain.User:
     properties:
       avatar:
@@ -118,6 +164,37 @@ paths:
       summary: Upload file to s3
       tags:
       - images
+  /tournaments/filter:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Tournament filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/domain.FilterTournament'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of tournaments
+          schema:
+            items:
+              $ref: '#/definitions/domain.Tournament'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Filter tournaments
+      tags:
+      - tournaments
   /users/me:
     get:
       consumes:

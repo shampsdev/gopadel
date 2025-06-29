@@ -60,6 +60,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/tournaments/filter": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tournaments"
+                ],
+                "summary": "Filter tournaments",
+                "parameters": [
+                    {
+                        "description": "Tournament filter",
+                        "name": "filter",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.FilterTournament"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of tournaments",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Tournament"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/users/me": {
             "get": {
                 "security": [
@@ -207,12 +257,38 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "domain.Club": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.FilterTournament": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "is_avalible": {
+                    "description": "true if tournament is not started and not full",
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.Loyalty": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
                 },
@@ -223,6 +299,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "requirements": {
                     "type": "string"
                 }
             }
@@ -277,6 +356,47 @@ const docTemplate = `{
                 "PlayingPositionLeft",
                 "PlayingPositionBoth"
             ]
+        },
+        "domain.Tournament": {
+            "type": "object",
+            "properties": {
+                "club": {
+                    "$ref": "#/definitions/domain.Club"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "max_users": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "organizator": {
+                    "$ref": "#/definitions/domain.User"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rank_max": {
+                    "type": "number"
+                },
+                "rank_min": {
+                    "type": "number"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "tournament_type": {
+                    "type": "string"
+                }
+            }
         },
         "domain.User": {
             "type": "object",

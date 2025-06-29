@@ -18,4 +18,7 @@ type Tournament struct {
 }
 
 type FilterTournament struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	IsAvalible bool   `json:"is_avalible"` // true if tournament is not started and not full
 }

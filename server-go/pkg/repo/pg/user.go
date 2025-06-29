@@ -42,16 +42,17 @@ func (r *UserRepo) Create(ctx context.Context, user *domain.CreateUser) (string,
 
 func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*domain.User, error) {
 	s := r.psql.Select(
-		"id", "telegram_id", "telegram_username", "first_name", "last_name", "avatar",
-		"bio", "rank", "city", "birth_date", "playing_position", "padel_profiles", "is_registered",
-	).From(`"users"`)
+		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
+		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`,
+		`"u"."is_registered"`, `"l"."id"`, `"l"."name"`, `"l"."discount"`, `"l"."description"`, `"l"."requirements"`,
+	).Join(`"loyalties" AS l ON "u"."loyalty_id" = "l"."id"`).From(`"users" AS u`)
 
 	if filter.ID != nil {
-		s = s.Where(sq.Eq{"id": *filter.ID})
+		s = s.Where(sq.Eq{`"u"."id"`: *filter.ID})
 	}
 
 	if filter.TelegramID != nil {
-		s = s.Where(sq.Eq{"telegram_id": *filter.TelegramID})
+		s = s.Where(sq.Eq{`"u"."telegram_id"`: *filter.TelegramID})
 	}
 
 	sql, args, err := s.ToSql()
@@ -75,6 +76,11 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 		var playingPosition pgtype.Text
 		var rank pgtype.Float8
 		var isRegistered pgtype.Bool
+		var loyaltyID pgtype.Int4
+		var loyaltyName pgtype.Text
+		var loyaltyDiscount pgtype.Int4
+		var loyaltyDescription pgtype.Text
+		var loyaltyRequirements pgtype.Text
 
 		err := rows.Scan(
 			&user.ID,
@@ -90,6 +96,11 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 			&playingPosition,
 			&padelProfiles,
 			&isRegistered,
+			&loyaltyID,
+			&loyaltyName,
+			&loyaltyDiscount,
+			&loyaltyDescription,
+			&loyaltyRequirements,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
@@ -115,6 +126,16 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 		}
 		if isRegistered.Valid {
 			user.IsRegistered = isRegistered.Bool
+		}
+
+		if loyaltyName.Valid {
+			user.Loyalty = &domain.Loyalty{
+				ID:           int(loyaltyID.Int32),
+				Name:         loyaltyName.String,
+				Discount:     int(loyaltyDiscount.Int32),
+				Description:  loyaltyDescription.String,
+				Requirements: loyaltyRequirements.String,
+			}
 		}
 
 		users = append(users, &user)

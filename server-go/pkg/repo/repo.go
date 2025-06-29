@@ -32,7 +32,7 @@ type Loyalty interface {
 }
 
 type Tournament interface {
-	Filter(ctx context.Context, filter *domain.Tournament) ([]*domain.Tournament, error)
+	Filter(ctx context.Context, filter *domain.FilterTournament) ([]*domain.Tournament, error)
 }
 
 type ImageStorage interface {
