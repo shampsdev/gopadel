@@ -1,6 +1,6 @@
 import type { RouteObject } from "react-router";
 import { ProtectedRoute } from "../../components/helpers/protected-route";
-import { About } from "../../pages/about";
+import { About } from "../../pages/about/about";
 import { AnimatedOutlet } from "../../components/helpers/animated-outlet";
 
 const authRoutes: RouteObject[] = [
@@ -15,7 +15,7 @@ const authRoutes: RouteObject[] = [
       {
         path: "policy",
         children: [
-          { path: "first", element: <About.Policy.First /> },
+          { path: "", element: <About.Policy.First /> },
           { path: "decline", element: <About.Policy.Decline /> },
           { path: "read", element: <About.Policy.Read /> },
         ],

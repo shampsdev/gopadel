@@ -12,9 +12,6 @@ export const useTelegramBackButton = ({
   const navigate = useNavigate();
   useEffect(() => {
     if (showOnMount && !backButton.isVisible()) {
-      backButton.onClick(() => {
-        navigate(-1);
-      });
       backButton.show();
     } else if (!showOnMount && backButton.isVisible()) {
       backButton.hide();

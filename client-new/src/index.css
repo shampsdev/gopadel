@@ -90,6 +90,18 @@ body {
   font-style: normal;
 }
 
+.bg-main-color {
+  background-color: #afff3f;
+}
+
+.bg-back-color {
+  background-color: #f8f8fa;
+}
+
+.bg-green-back-color {
+  background-color: #e7ffc6;
+}
+
 * {
   font-family: "SF";
 }

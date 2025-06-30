@@ -10,7 +10,6 @@ const router = createBrowserRouter(routes);
 function App() {
   const { setToken } = useAuthStore();
   const initData = useRawInitData();
-
   useEffect(() => {
     if (initData) setToken(initData);
   }, [initData]);
