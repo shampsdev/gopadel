@@ -7,6 +7,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 )
@@ -60,5 +61,36 @@ func (r *LoyaltyRepo) Filter(ctx context.Context, filter *domain.FilterLoyalty) 
 	}
 	defer rows.Close()
 
-	return nil, nil
+	loyalties := []*domain.Loyalty{}
+	for rows.Next() {
+		var loyalty domain.Loyalty
+		var description pgtype.Text
+		var requirements pgtype.Text
+
+		err := rows.Scan(
+			&loyalty.ID,
+			&loyalty.Name,
+			&loyalty.Discount,
+			&description,
+			&requirements,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		if description.Valid {
+			loyalty.Description = description.String
+		}
+		if requirements.Valid {
+			loyalty.Requirements = requirements.String
+		}
+
+		loyalties = append(loyalties, &loyalty)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return loyalties, nil
 }

@@ -14,12 +14,14 @@ type Cases struct {
 	Image      *Image
 	Club       *Club
 	Tournament *Tournament
+	Loyalty    *Loyalty
 }
 
 func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	userRepo := pg.NewUserRepo(db)
 	clubRepo := pg.NewClubRepo(db)
 	tournamentRepo := pg.NewTournamentRepo(db)
+	loyaltyRepo := pg.NewLoyaltyRepo(db)
 
 	storage, err := s3.NewStorage(cfg.S3)
 	if err != nil {
@@ -30,11 +32,13 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	imageCase := NewImage(ctx, storage)
 	clubCase := NewClub(ctx, clubRepo)
 	tournamentCase := NewTournament(ctx, tournamentRepo)
+	loyaltyCase := NewLoyalty(ctx, loyaltyRepo)
 
 	return Cases{
 		User:       userCase,
 		Image:      imageCase,
 		Club:       clubCase,
 		Tournament: tournamentCase,
+		Loyalty:    loyaltyCase,
 	}
 }

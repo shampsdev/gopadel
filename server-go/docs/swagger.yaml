@@ -164,6 +164,28 @@ paths:
       summary: Upload file to s3
       tags:
       - images
+  /loyalties:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of loyalty programs
+          schema:
+            items:
+              $ref: '#/definitions/domain.Loyalty'
+            type: array
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get all loyalty programs
+      tags:
+      - loyalties
   /tournaments/filter:
     post:
       consumes:

@@ -52,6 +52,42 @@
                 }
             }
         },
+        "/loyalties": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "loyalties"
+                ],
+                "summary": "Get all loyalty programs",
+                "responses": {
+                    "200": {
+                        "description": "List of loyalty programs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Loyalty"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/tournaments/filter": {
             "post": {
                 "security": [
