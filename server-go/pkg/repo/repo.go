@@ -36,6 +36,20 @@ type Tournament interface {
 	GetTournamentsByUserID(ctx context.Context, userID string) ([]*domain.Tournament, error)
 }
 
+type Registration interface {
+	Create(ctx context.Context, registration *domain.CreateRegistration) (string, error)
+	Patch(ctx context.Context, id string, registration *domain.PatchRegistration) error
+	Filter(ctx context.Context, filter *domain.FilterRegistration) ([]*domain.Registration, error)
+	Delete(ctx context.Context, id string) error
+}
+
+type Payment interface {
+	Create(ctx context.Context, payment *domain.CreatePayment) (string, error)
+	Patch(ctx context.Context, id string, payment *domain.PatchPayment) error
+	Filter(ctx context.Context, filter *domain.FilterPayment) ([]*domain.Payment, error)
+	Delete(ctx context.Context, id string) error
+}
+
 type ImageStorage interface {
 	SaveImageByURL(ctx context.Context, url, key string) (string, error)
 	SaveImageByBytes(ctx context.Context, bytes []byte, key string) (string, error)
