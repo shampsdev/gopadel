@@ -22,3 +22,7 @@ func NewTournament(ctx context.Context, TournamentRepo repo.Tournament) *Tournam
 func (t *Tournament) Filter(ctx context.Context, filter *domain.FilterTournament) ([]*domain.Tournament, error) {
 	return t.TournamentRepo.Filter(ctx, filter)
 }
+
+func (t *Tournament) GetTournamentsByUserID(ctx Context, userID string) ([]*domain.Tournament, error) {
+	return t.TournamentRepo.GetTournamentsByUserID(ctx.Context, userID)
+}

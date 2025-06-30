@@ -1,0 +1,7 @@
+-- Add sample users
+INSERT INTO "users" ("id", "telegram_id", "telegram_username", "first_name", "last_name", "avatar", "rank", "city", "birth_date", "loyalty_id", "is_registered", "bio", "playing_position", "padel_profiles") VALUES
+('f22f076c-135c-407b-a7d1-3d9f0aefc5fd', 6621741465, 'psNMeZOOjT', 'Alice', 'A', 'https://storage.yandexcloud.net/gopadel/gopadel-prod/profile/f22f076c-135c-407b-a7d1-3d9f0aefc5fd.jpg', 1, NULL, NULL, 1, true, 'copywriter, intern frontend dev', NULL, NULL),
+('b8d8c61f-999b-462c-a0d9-7d2837b565e4', 179708903, 'chunghoa', 'Никита', 'Столяров', 'https://storage.yandexcloud.net/gopadel/gopadel-prod/profile/b8d8c61f-999b-462c-a0d9-7d2837b565e4.jpg', 4, 'Москва', '1988-03-07', 1, true, '', 'both', NULL),
+('dfa0e28a-73ca-4820-8a2b-cf82ba74ac12', 208352446, 'sdrv_m', 'Mary', 'Sidorova', 'https://storage.yandexcloud.net/gopadel/gopadel-prod/profile/dfa0e28a-73ca-4820-8a2b-cf82ba74ac12.jpg', 2, 'Москва', NULL, 2, true, '', 'both', 'https://app.lundapadel.ru/profile/7270?locale=ru'),
+('e1ce7266-c8f8-4921-ac8a-7a2b897b7a25', 266576442, 'odulepova', 'Ольга', 'Дулепова-Менейлюк', 'https://storage.yandexcloud.net/gopadel/gopadel-prod/profile/e1ce7266-c8f8-4921-ac8a-7a2b897b7a25.svg', 1, NULL, NULL, 3, true, '', NULL, NULL),
+('273b556a-3d7d-4528-ab78-58a7a5befa2c', 46313680, 'AlexSoFly', '', '', NULL, 0, '', NULL, 1, false, '', NULL, NULL); 

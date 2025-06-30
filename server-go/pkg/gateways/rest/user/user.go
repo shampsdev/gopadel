@@ -13,6 +13,7 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases) {
 
 	gAuth := g.Group("")
 	gAuth.Use(middlewares.AuthUser(cases.User))
+	gAuth.GET("/:user_id/tournaments", GetUserTournaments(cases.Tournament))
 	gAuth.Group("/me").
 		GET("", GetMe(cases.User)).PATCH("", PatchMe(cases.User))
 	gAuth.Group("/me").GET("/bio", GetUserBio(cases.User))
