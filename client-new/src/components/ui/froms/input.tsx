@@ -11,17 +11,11 @@ export interface InputProps {
 }
 
 export const Input = (props: InputProps) => {
-  const isEmpty = props.value.trim() === "";
-
   return (
     <section>
       <fieldset
-        className={`border-2 rounded-xl px-3 relative transition-all duration-100 
-          ${
-            isEmpty && !props.fillNotRequired
-              ? "border-[#E53935] text-[#E53935]"
-              : "border-gray-300 text-gray-400 focus-within:border-[#20C86E] focus-within:text-[#20C86E]"
-          } 
+        className={`border-2 rounded-[14px] px-3 relative transition-all 
+          ${"border-gray-300 text-gray-400 focus-within:border-[#000] focus-within:text-[#000]"} 
           `}
       >
         <legend className="px-2 text-[15px] font-semibold transition-all duration-100">
@@ -36,7 +30,7 @@ export const Input = (props: InputProps) => {
           type="text"
           value={props.value}
           maxLength={props.maxLength}
-          className="w-full text-main outline-none pb-[12px] py-[3px] px-[16px] bg-transparent"
+          className="w-full text-black outline-none pb-[12px] py-[3px] px-[16px] bg-transparent"
         />
       </fieldset>
     </section>

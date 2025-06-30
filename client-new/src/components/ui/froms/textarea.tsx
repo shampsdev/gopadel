@@ -10,7 +10,6 @@ export interface TextareaProps {
 }
 export const Textarea = (props: TextareaProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const isEmpty = props.value.trim() === "";
 
   const autoResize = () => {
     const textarea = textareaRef.current;
@@ -37,12 +36,10 @@ export const Textarea = (props: TextareaProps) => {
     <section>
       <fieldset
         className={
-          isEmpty && !props.fillNotRequired
-            ? "border-2 rounded-xl p-3 relative border-[#E53935] text-[#E53935]"
-            : "border-2 rounded-xl p-3 relative border-gray-300 focus-within:border-[#20C86E] focus-within:text-[#20C86E] text-[#A2ACB0]"
+          "border-2 rounded-xl p-3 relative border-gray-300 focus-within:border-[#000] focus-within:text-[#000] text-[#A2ACB0]"
         }
       >
-        <legend className="px-2 text-[15px] font-semibold transition-all duration-100">
+        <legend className="px-2 text-[15px] font-semibold transition-all ">
           {props.title}
         </legend>
         <textarea
@@ -60,7 +57,7 @@ export const Textarea = (props: TextareaProps) => {
             whiteSpace: "pre-wrap",
             overflow: "hidden",
           }}
-          className="resize-none w-full text-main outline-none pb-[6px] py-[3px] px-[16px] bg-transparent"
+          className="resize-none w-full  outline-none pb-[6px] py-[3px] px-[16px] bg-transparent"
         />
       </fieldset>
     </section>

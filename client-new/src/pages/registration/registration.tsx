@@ -2,6 +2,8 @@ import { useState } from "react";
 import Logo from "../../assets/logo.png";
 import useTgUserStore from "../../shared/stores/tg-user.store";
 import { Input } from "../../components/ui/froms/input";
+import { Textarea } from "../../components/ui/froms/textarea";
+import { Button } from "../../components/ui/button";
 
 export const Registration = () => {
   const { avatarUrl, username } = useTgUserStore();
@@ -10,10 +12,13 @@ export const Registration = () => {
   const [lastName, setLastName] = useState<string | null>(null);
   const [rank, setRank] = useState<number | null>(0);
   const [rankInput, setRankInput] = useState<string>("");
+
+  const [bio, setBio] = useState<string | null>(null);
+
   return (
-    <div className="flex flex-col gap-11 mt-3">
+    <div className="flex flex-col gap-11 mt-3 pb-[100px]">
       <div className="flex flex-row gap-7 items-center">
-        <div className="aspect-square max-h-20 rounded-full overflow-hidden">
+        <div className="aspect-square max-h-[160px] rounded-full overflow-hidden">
           <img src={avatarUrl} className="object-cover" />
         </div>
         <div className="flex flex-col w-full gap-2 ">
@@ -22,7 +27,7 @@ export const Registration = () => {
         </div>
       </div>
 
-      <div>
+      <div className="flex flex-col gap-2">
         <Input
           onChangeFunction={setFirstName}
           title={"Имя"}
@@ -65,7 +70,14 @@ export const Registration = () => {
             }
           }}
         />
+        <Textarea
+          onChangeFunction={setBio}
+          title={"О себе"}
+          value={bio ?? ""}
+          maxLength={255}
+        />
       </div>
+      <Button className="mx-auto">Готово</Button>
     </div>
   );
 };
