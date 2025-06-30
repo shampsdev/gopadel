@@ -12,7 +12,7 @@ definitions:
     properties:
       id:
         type: string
-      is_avalible:
+      isAvalible:
         description: true if tournament is not started and not full
         type: boolean
       name:
@@ -48,19 +48,19 @@ definitions:
         type: string
       bio:
         type: string
-      birth_date:
+      birthDate:
         type: string
       city:
         type: string
       firstName:
         type: string
-      is_registered:
+      isRegistered:
         type: boolean
       lastName:
         type: string
-      padel_profiles:
+      padelProfiles:
         type: string
-      playing_position:
+      playingPosition:
         $ref: '#/definitions/domain.PlayingPosition'
       rank:
         type: number
@@ -83,11 +83,11 @@ definitions:
         $ref: '#/definitions/domain.Club'
       description:
         type: string
-      end_time:
+      endTime:
         type: string
       id:
         type: string
-      max_users:
+      maxUsers:
         type: integer
       name:
         type: string
@@ -95,13 +95,13 @@ definitions:
         $ref: '#/definitions/domain.User'
       price:
         type: integer
-      rank_max:
+      rankMax:
         type: number
-      rank_min:
+      rankMin:
         type: number
-      start_time:
+      startTime:
         type: string
-      tournament_type:
+      tournamentType:
         type: string
     type: object
   domain.User:
@@ -110,7 +110,7 @@ definitions:
         type: string
       bio:
         type: string
-      birth_date:
+      birthDate:
         type: string
       city:
         type: string
@@ -118,15 +118,15 @@ definitions:
         type: string
       id:
         type: string
-      is_registered:
+      isRegistered:
         type: boolean
       lastName:
         type: string
       loyalty:
         $ref: '#/definitions/domain.Loyalty'
-      padel_profiles:
+      padelProfiles:
         type: string
-      playing_position:
+      playingPosition:
         $ref: '#/definitions/domain.PlayingPosition'
       rank:
         type: number

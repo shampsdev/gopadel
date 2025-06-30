@@ -14,11 +14,11 @@ type User struct {
 	Bio             string          `json:"bio"`
 	Rank            float64         `json:"rank"`
 	City            string          `json:"city"`
-	BirthDate       string          `json:"birth_date"`
-	PlayingPosition PlayingPosition `json:"playing_position"`
-	PadelProfiles   string          `json:"padel_profiles"`
+	BirthDate       string          `json:"birthDate"`
+	PlayingPosition PlayingPosition `json:"playingPosition"`
+	PadelProfiles   string          `json:"padelProfiles"`
 	Loyalty         *Loyalty        `json:"loyalty,omitempty"`
-	IsRegistered    bool            `json:"is_registered"`
+	IsRegistered    bool            `json:"isRegistered"`
 }
 
 type UserTGData struct {
@@ -41,10 +41,10 @@ type PatchUser struct {
 	Bio              *string          `json:"bio"`
 	Rank             *float64         `json:"rank"`
 	City             *string          `json:"city"`
-	BirthDate        *string          `json:"birth_date"`
-	PlayingPosition  *PlayingPosition `json:"playing_position"`
-	PadelProfiles    *string          `json:"padel_profiles"`
-	IsRegistered     *bool            `json:"is_registered"`
+	BirthDate        *string          `json:"birthDate"`
+	PlayingPosition  *PlayingPosition `json:"playingPosition"`
+	PadelProfiles    *string          `json:"padelProfiles"`
+	IsRegistered     *bool            `json:"isRegistered"`
 }
 
 type FilterUser struct {

@@ -411,7 +411,7 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "is_avalible": {
+                "isAvalible": {
                     "description": "true if tournament is not started and not full",
                     "type": "boolean"
                 },
@@ -466,7 +466,7 @@ const docTemplate = `{
                 "bio": {
                     "type": "string"
                 },
-                "birth_date": {
+                "birthDate": {
                     "type": "string"
                 },
                 "city": {
@@ -475,16 +475,16 @@ const docTemplate = `{
                 "firstName": {
                     "type": "string"
                 },
-                "is_registered": {
+                "isRegistered": {
                     "type": "boolean"
                 },
                 "lastName": {
                     "type": "string"
                 },
-                "padel_profiles": {
+                "padelProfiles": {
                     "type": "string"
                 },
-                "playing_position": {
+                "playingPosition": {
                     "$ref": "#/definitions/domain.PlayingPosition"
                 },
                 "rank": {
@@ -517,13 +517,13 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "max_users": {
+                "maxUsers": {
                     "type": "integer"
                 },
                 "name": {
@@ -535,16 +535,16 @@ const docTemplate = `{
                 "price": {
                     "type": "integer"
                 },
-                "rank_max": {
+                "rankMax": {
                     "type": "number"
                 },
-                "rank_min": {
+                "rankMin": {
                     "type": "number"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 },
-                "tournament_type": {
+                "tournamentType": {
                     "type": "string"
                 }
             }
@@ -558,7 +558,7 @@ const docTemplate = `{
                 "bio": {
                     "type": "string"
                 },
-                "birth_date": {
+                "birthDate": {
                     "type": "string"
                 },
                 "city": {
@@ -570,7 +570,7 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "is_registered": {
+                "isRegistered": {
                     "type": "boolean"
                 },
                 "lastName": {
@@ -579,10 +579,10 @@ const docTemplate = `{
                 "loyalty": {
                     "$ref": "#/definitions/domain.Loyalty"
                 },
-                "padel_profiles": {
+                "padelProfiles": {
                     "type": "string"
                 },
-                "playing_position": {
+                "playingPosition": {
                     "$ref": "#/definitions/domain.PlayingPosition"
                 },
                 "rank": {
