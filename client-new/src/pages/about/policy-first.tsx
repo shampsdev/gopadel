@@ -33,7 +33,7 @@ export function PolicyFirst() {
         </div>
       </div>
       <div className="mb-10 flex flex-row gap-4 justify-center">
-        <Button className="bg-[#F8F8FA]" onClick={() => navigate(-1)}>
+        <Button className="bg-[#F8F8FA]" onClick={() => navigate("./decline")}>
           Отмена
         </Button>
         <Button
