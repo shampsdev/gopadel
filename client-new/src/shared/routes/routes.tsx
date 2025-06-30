@@ -2,6 +2,7 @@ import type { RouteObject } from "react-router";
 import { ProtectedRoute } from "../../components/helpers/protected-route";
 import { About } from "../../pages/about/about";
 import { AnimatedOutlet } from "../../components/helpers/animated-outlet";
+import { Registration } from "../../pages/registration/registration";
 
 const authRoutes: RouteObject[] = [
   {
@@ -36,7 +37,7 @@ export const routes: RouteObject[] = [
     path: "/",
     element: <AnimatedOutlet />,
     children: [
-      { path: "registration" },
+      { path: "registration", element: <Registration /> },
       ...authRoutes,
       { path: "", element: <ProtectedRoute />, children: mainRoutes },
     ],

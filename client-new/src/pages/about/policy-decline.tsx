@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router";
 import AboutImage from "../../assets/about.png";
 import { Button } from "../../components/ui/button";
+import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 export function PolicyDecline() {
   const navigate = useNavigate();
   const register = () => {};
 
+  useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   return (
     <div className="flex flex-col h-full w-full justify-between">
       <div className="flex-1 flex flex-col text-center items-center justify-center gap-11">

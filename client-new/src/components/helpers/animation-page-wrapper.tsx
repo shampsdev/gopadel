@@ -15,7 +15,7 @@ export const PageWrapper = ({ children }: { children: React.ReactNode }) => {
       animate={{ opacity: 1, y: 0, transition: { duration: 0.15 } }}
       exit={{ opacity: 0, y: -20, transition: { duration: 0.15 } }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="max-w-[95%] mx-auto pt-[12px] h-screen overflow-y-scroll"
+      className="max-w-[90%] mx-auto pt-[12px] h-screen overflow-y-scroll"
     >
       {children}
     </motion.div>

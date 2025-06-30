@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router";
 import { Button } from "../../components/ui/button";
+import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 
 export function PolicyRead() {
   const navigate = useNavigate();
+  useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
   const register = () => {};
   return (
