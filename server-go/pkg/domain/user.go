@@ -50,4 +50,6 @@ type PatchUser struct {
 type FilterUser struct {
 	ID         *string `json:"id"`
 	TelegramID *int64  `json:"telegramId"`
+	FirstName  *string `json:"firstName"`
+	LastName   *string `json:"lastName"`
 }

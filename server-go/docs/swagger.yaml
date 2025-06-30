@@ -18,6 +18,17 @@ definitions:
       name:
         type: string
     type: object
+  domain.FilterUser:
+    properties:
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      telegramId:
+        type: integer
+    type: object
   domain.Loyalty:
     properties:
       description:
@@ -245,6 +256,37 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get tournaments by user ID
+      tags:
+      - users
+  /users/filter:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/domain.FilterUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of users
+          schema:
+            items:
+              $ref: '#/definitions/domain.User'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Filter users
       tags:
       - users
   /users/me:

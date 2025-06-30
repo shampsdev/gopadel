@@ -73,6 +73,10 @@ func (u *User) PatchMe(ctx Context, patch *domain.PatchUser) (*domain.User, erro
 	return repo.First(u.userRepo.Filter)(ctx, &domain.FilterUser{ID: &ctx.User.ID})
 }
 
+func (u *User) Filter(ctx Context, filter *domain.FilterUser) ([]*domain.User, error) {
+	return u.userRepo.Filter(ctx, filter)
+}
+
 func (u *User) GetByTGData(ctx context.Context, tgData *domain.UserTGData) (*domain.User, error) {
 	if u, ok := u.tgDataCache.Load(tgData.TelegramID); ok {
 		//nolint:errcheck// because sure
