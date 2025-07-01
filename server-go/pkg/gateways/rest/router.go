@@ -8,6 +8,7 @@ import (
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/image"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/loyalty"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/middlewares"
+	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/registration"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/tournament"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/user"
 	"github.com/shampsdev/go-telegram-template/pkg/usecase"
@@ -28,4 +29,5 @@ func setupRouter(ctx context.Context, r *gin.Engine, useCases usecase.Cases) {
 	image.Setup(v1, useCases)
 	tournament.Setup(v1, useCases)
 	loyalty.Setup(v1, useCases)
+	registration.Setup(v1, useCases)
 }

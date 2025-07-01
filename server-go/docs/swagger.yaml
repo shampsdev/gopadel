@@ -77,6 +77,35 @@ definitions:
     - PlayingPositionRight
     - PlayingPositionLeft
     - PlayingPositionBoth
+  domain.Registration:
+    properties:
+      date:
+        type: string
+      id:
+        type: string
+      status:
+        $ref: '#/definitions/domain.RegistrationStatus'
+      tournament:
+        $ref: '#/definitions/domain.Tournament'
+      tournamentId:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      userId:
+        type: string
+    type: object
+  domain.RegistrationStatus:
+    enum:
+    - PENDING
+    - ACTIVE
+    - CANCELED
+    - CANCELED_BY_USER
+    type: string
+    x-enum-varnames:
+    - RegistrationStatusPending
+    - RegistrationStatusActive
+    - RegistrationStatusCanceled
+    - RegistrationStatusCanceledByUser
   domain.Tournament:
     properties:
       club:
@@ -197,6 +226,238 @@ paths:
       summary: Get all loyalty programs
       tags:
       - loyalties
+  /registrations/{tournament_id}:
+    post:
+      consumes:
+      - application/json
+      description: Creates new registration or updates existing CANCELED status to
+        PENDING
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: tournament_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Registration created or updated
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Tournament not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict (already registered or tournament full)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Register for tournament
+      tags:
+      - registration
+  /registrations/{tournament_id}/cancel:
+    post:
+      consumes:
+      - application/json
+      description: Cancels registration with PENDING status (before payment)
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: tournament_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Registration canceled
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Registration not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Cancel registration before payment
+      tags:
+      - registration
+  /registrations/{tournament_id}/cancel-paid:
+    post:
+      consumes:
+      - application/json
+      description: Cancels registration with ACTIVE status (after payment)
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: tournament_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Registration canceled
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Registration not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Cancel registration after payment
+      tags:
+      - registration
+  /registrations/{tournament_id}/reactivate:
+    post:
+      consumes:
+      - application/json
+      description: Reactivates registration from CANCELED_BY_USER status to ACTIVE
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: tournament_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Registration reactivated
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Registration not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Tournament is full
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Reactivate canceled registration
+      tags:
+      - registration
+  /registrations/my:
+    get:
+      consumes:
+      - application/json
+      description: Returns all registrations for the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of registrations
+          schema:
+            items:
+              $ref: '#/definitions/domain.Registration'
+            type: array
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get my registrations
+      tags:
+      - registration
   /tournaments/filter:
     post:
       consumes:
