@@ -13,4 +13,6 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases) {
 	tournaments.POST("/filter", Filter(cases.Tournament))
 	tournaments.GET("/:tournament_id/participants", GetTournamentParticipants(cases.Tournament))
 	tournaments.GET("/:tournament_id/waitlist", GetTournamentWaitlist(cases.Waitlist))
+	tournaments.POST("/:tournament_id/waitlist", AddToTournamentWaitlist(cases.Waitlist))
+	tournaments.DELETE("/:tournament_id/waitlist", RemoveFromTournamentWaitlist(cases.Waitlist))
 }

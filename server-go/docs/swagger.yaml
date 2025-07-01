@@ -512,6 +512,54 @@ paths:
       tags:
       - tournaments
   /tournaments/{tournament_id}/waitlist:
+    delete:
+      consumes:
+      - application/json
+      description: Remove authenticated user from tournament waitlist
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: tournament_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User removed from waitlist
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid tournament ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Tournament not found or user not in waitlist
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Remove user from tournament waitlist
+      tags:
+      - tournaments
     get:
       consumes:
       - application/json
@@ -552,6 +600,59 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get tournament waitlist
+      tags:
+      - tournaments
+    post:
+      consumes:
+      - application/json
+      description: Add authenticated user to tournament waitlist. Checks that tournament
+        has not ended.
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: tournament_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User added to waitlist
+          schema:
+            $ref: '#/definitions/domain.Waitlist'
+        "400":
+          description: Invalid tournament ID or tournament has ended
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Tournament not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: User already in waitlist
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add user to tournament waitlist
       tags:
       - tournaments
   /tournaments/filter:

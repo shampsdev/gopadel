@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
@@ -36,6 +37,23 @@ func (t *Tournament) Filter(ctx context.Context, filter *domain.FilterTournament
 	}
 
 	return tournaments, nil
+}
+
+func (t *Tournament) GetTournamentByID(ctx context.Context, tournamentID string) (*domain.Tournament, error) {
+	filter := &domain.FilterTournament{
+		ID: tournamentID,
+	}
+	
+	tournaments, err := t.TournamentRepo.Filter(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	
+	if len(tournaments) == 0 {
+		return nil, fmt.Errorf("tournament not found")
+	}
+	
+	return tournaments[0], nil
 }
 
 func (t *Tournament) GetTournamentsByUserID(ctx Context, userID string) ([]*domain.Tournament, error) {
