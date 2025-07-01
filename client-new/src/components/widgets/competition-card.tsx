@@ -43,14 +43,32 @@ export const CompetitionCard = ({
         <div className="flex flex-row justify-between">
           <div className="flex flex-col gap-1 flex-1">
             <p className="text-[20px]">{rank.title}</p>
-            <p className="flex flex-row items-center gap-1 text-[#868D98]">
-              Организатор: <div className="text-[#5D6674]">{organizerName}</div>
-            </p>
+            <div className="flex flex-row items-center gap-1 text-[#868D98]">
+              Организатор: <p className="text-[#5D6674]">{organizerName}</p>
+            </div>
           </div>
 
-          <div>{category === "tournament" && Icons.Medal("#77BE14")}</div>
-          <div>{category === "game" && Icons.Padel("#77BE14")}</div>
-          <div>{category === "training" && Icons.Target("#77BE14")}</div>
+          {category === "tournament" && (
+            <div>
+              <div className="bg-[#E7FFC6] rounded-full p-[10px]">
+                {Icons.Medal("#77BE14")}
+              </div>
+            </div>
+          )}
+          {category === "game" && (
+            <div>
+              <div className="bg-[#E7FFC6] rounded-full p-[10px]">
+                {Icons.Padel("#77BE14")}
+              </div>
+            </div>
+          )}
+          {category === "training" && (
+            <div>
+              <div className="bg-[#E7FFC6] rounded-full p-[10px]">
+                {Icons.Target("#77BE14")}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-3 text-[#868D98]">
