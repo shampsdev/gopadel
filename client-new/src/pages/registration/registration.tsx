@@ -15,6 +15,12 @@ export const Registration = () => {
 
   const [bio, setBio] = useState<string | null>(null);
 
+  // const patchMeMutation = usePatchMe();
+
+  // const registration = async () => {
+
+  // }
+
   return (
     <div className="flex flex-col gap-11 mt-3 pb-[100px]">
       <div className="flex flex-row gap-7 items-center">

@@ -2,9 +2,14 @@ import { useNavigate } from "react-router";
 import AboutImage from "../../assets/about.png";
 import { Button } from "../../components/ui/button";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
+import useCreateMe from "../../shared/hooks/mutations/create-me";
 export function PolicyDecline() {
   const navigate = useNavigate();
-  const register = () => {};
+
+  const createMeMutation = useCreateMe();
+  const register = async () => {
+    await createMeMutation.mutateAsync();
+  };
 
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   return (
@@ -34,9 +39,14 @@ export function PolicyDecline() {
           Назад
         </Button>
         <Button
-          onClick={() => {
-            register();
-            navigate("/registration");
+          onClick={async () => {
+            try {
+              await register();
+              navigate("/registration");
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (error) {
+              alert("Упс, что-то пошло не так");
+            }
           }}
         >
           Принимаю

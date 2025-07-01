@@ -5,7 +5,9 @@ import { useAuthStore } from "./shared/stores/auth.store";
 import { initDataUser, useRawInitData } from "@telegram-apps/sdk-react";
 import { useEffect } from "react";
 import useTgUserStore from "./shared/stores/tg-user.store";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+const queryClient = new QueryClient();
 const router = createBrowserRouter(routes);
 
 function App() {
@@ -34,7 +36,11 @@ function App() {
     }
   }, [initUserData]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
 }
 
 export default App;

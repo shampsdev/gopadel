@@ -1,12 +1,16 @@
 import { useNavigate } from "react-router";
 import { Button } from "../../components/ui/button";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
+import useCreateMe from "../../shared/hooks/mutations/create-me";
 
 export function PolicyRead() {
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
-  const register = () => {};
+  const createMeMutation = useCreateMe();
+  const register = async () => {
+    await createMeMutation.mutateAsync();
+  };
   return (
     <div>
       <h1 className="py-6 font-semibold text-2xl px-3">
@@ -321,9 +325,14 @@ export function PolicyRead() {
           Отмена
         </Button>
         <Button
-          onClick={() => {
-            register();
-            navigate("/registration");
+          onClick={async () => {
+            try {
+              await register();
+              navigate("/registration");
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (error) {
+              alert("Упс, что-то пошло не так");
+            }
           }}
         >
           Принимаю

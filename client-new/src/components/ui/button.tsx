@@ -6,6 +6,11 @@ interface ButtonProps {
   children: React.ReactNode;
 }
 export const Button = ({ className, onClick, children }: ButtonProps) => {
+  // const variants = {
+  //   active: "",
+  //   disabled: "",
+  // };
+
   return (
     <div
       className={twMerge(

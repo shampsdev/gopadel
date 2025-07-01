@@ -2,14 +2,16 @@ import { useNavigate } from "react-router";
 import { Button } from "../../components/ui/button";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import AboutImage from "../../assets/about.png";
+import useCreateMe from "../../shared/hooks/mutations/create-me";
 
 export function PolicyFirst() {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
   const navigate = useNavigate();
 
-  const register = () => {
-    console.log("register");
+  const createMeMutation = useCreateMe();
+  const register = async () => {
+    await createMeMutation.mutateAsync();
   };
   return (
     <div className="flex flex-col h-full w-full justify-between">
@@ -37,9 +39,14 @@ export function PolicyFirst() {
           Отмена
         </Button>
         <Button
-          onClick={() => {
-            register();
-            navigate("/registration");
+          onClick={async () => {
+            try {
+              await register();
+              navigate("/registration");
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (error) {
+              alert("Упс, что-то пошло не так");
+            }
           }}
         >
           Принимаю
