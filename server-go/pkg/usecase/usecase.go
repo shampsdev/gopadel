@@ -35,7 +35,7 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	userCase := NewUser(ctx, userRepo, storage)
 	imageCase := NewImage(ctx, storage)
 	clubCase := NewClub(ctx, clubRepo)
-	tournamentCase := NewTournament(ctx, tournamentRepo)
+	tournamentCase := NewTournament(ctx, tournamentRepo, registrationRepo)
 	loyaltyCase := NewLoyalty(ctx, loyaltyRepo)
 	registrationCase := NewRegistration(ctx, registrationRepo, tournamentRepo)
 	paymentCase := NewPayment(ctx, paymentRepo)
