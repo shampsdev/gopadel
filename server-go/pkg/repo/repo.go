@@ -50,6 +50,12 @@ type Payment interface {
 	Delete(ctx context.Context, id string) error
 }
 
+type Waitlist interface {
+	Create(ctx context.Context, waitlist *domain.CreateWaitlist) (int, error)
+	Filter(ctx context.Context, filter *domain.FilterWaitlist) ([]*domain.Waitlist, error)
+	Delete(ctx context.Context, id int) error
+}
+
 type ImageStorage interface {
 	SaveImageByURL(ctx context.Context, url, key string) (string, error)
 	SaveImageByBytes(ctx context.Context, bytes []byte, key string) (string, error)

@@ -17,6 +17,7 @@ type Cases struct {
 	Loyalty      *Loyalty
 	Registration *Registration
 	Payment      *Payment
+	Waitlist     *Waitlist
 }
 
 func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
@@ -26,6 +27,7 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	loyaltyRepo := pg.NewLoyaltyRepo(db)
 	registrationRepo := pg.NewRegistrationRepo(db)
 	paymentRepo := pg.NewPaymentRepo(db)
+	waitlistRepo := pg.NewWaitlistRepo(db)
 
 	storage, err := s3.NewStorage(cfg.S3)
 	if err != nil {
@@ -39,6 +41,7 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	loyaltyCase := NewLoyalty(ctx, loyaltyRepo)
 	registrationCase := NewRegistration(ctx, registrationRepo, tournamentRepo)
 	paymentCase := NewPayment(ctx, paymentRepo)
+	waitlistCase := NewWaitlist(ctx, waitlistRepo)
 
 	return Cases{
 		User:         userCase,
@@ -48,5 +51,6 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 		Loyalty:      loyaltyCase,
 		Registration: registrationCase,
 		Payment:      paymentCase,
+		Waitlist:     waitlistCase,
 	}
 }

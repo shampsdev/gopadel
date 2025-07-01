@@ -168,6 +168,21 @@ definitions:
       telegramUsername:
         type: string
     type: object
+  domain.Waitlist:
+    properties:
+      date:
+        type: string
+      id:
+        type: integer
+      tournament:
+        $ref: '#/definitions/domain.Tournament'
+      tournamentId:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      userId:
+        type: string
+    type: object
   image.UploadResponse:
     properties:
       url:
@@ -494,6 +509,49 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get tournament participants
+      tags:
+      - tournaments
+  /tournaments/{tournament_id}/waitlist:
+    get:
+      consumes:
+      - application/json
+      description: Get list of users in tournament waitlist
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: tournament_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tournament waitlist
+          schema:
+            items:
+              $ref: '#/definitions/domain.Waitlist'
+            type: array
+        "400":
+          description: Invalid tournament ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Tournament not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get tournament waitlist
       tags:
       - tournaments
   /tournaments/filter:

@@ -10,4 +10,5 @@ var (
 	_ repo.Loyalty      = &LoyaltyRepo{}
 	_ repo.Registration = &RegistrationRepo{}
 	_ repo.Payment      = &PaymentRepo{}
+	_ repo.Waitlist     = &WaitlistRepo{}
 )
