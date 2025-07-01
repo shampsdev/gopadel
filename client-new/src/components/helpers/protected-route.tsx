@@ -1,17 +1,27 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
 import { useAuthStore } from "../../shared/stores/auth.store";
+import { useGetMe } from "../../shared/hooks/useGetMe";
 
 export const ProtectedRoute = () => {
-  const { auth } = useAuthStore();
+  const { token } = useAuthStore();
   const navigate = useNavigate();
+  const { data: me, isLoading, error } = useGetMe();
 
   useEffect(() => {
-    if (!auth) {
-      navigate("/about", { replace: true });
+    if (!token) {
+      return;
     }
-  }, [auth, navigate]);
 
-  if (!auth) return null;
+    if (error && !isLoading) {
+      navigate("/about", { replace: true });
+      return;
+    }
+  }, [token, error, isLoading, navigate]);
+
+  if (isLoading) return <div>Загрузка...</div>;
+
+  if (!token || !me) return null;
+
   return <Outlet />;
 };

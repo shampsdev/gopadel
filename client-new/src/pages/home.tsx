@@ -1,4 +1,7 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { CompetitionCard } from "../components/widgets/competition-card";
+import { HomeNavbar } from "../components/widgets/home-navbar";
 import { ranks } from "../shared/constants/ranking";
 import type { Rank } from "../types/rank.type";
 
@@ -80,26 +83,61 @@ const mockCompetitions = [
 ];
 
 export const Home = () => {
-  return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold mb-4">Соревнования</h1>
+  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
 
-      {mockCompetitions.map((competition) => (
-        <CompetitionCard
-          key={competition.id}
-          rank={competition.rank}
-          organizerName={competition.organizerName}
-          date={competition.date}
-          locationTitle={competition.locationTitle}
-          address={competition.address}
-          type={competition.type}
-          cost={competition.cost}
-          playersCapacity={competition.playersCapacity}
-          playersAmount={competition.playersAmount}
-          participating={competition.participating}
-          category={competition.category}
-        />
-      ))}
-    </div>
+  const toggleSwitch = () => {
+    setShowOnlyAvailable(!showOnlyAvailable);
+  };
+
+  // Фильтруем соревнования по наличию свободных мест
+  const filteredCompetitions = showOnlyAvailable
+    ? mockCompetitions.filter(
+        (comp) => comp.playersAmount < comp.playersCapacity
+      )
+    : mockCompetitions;
+
+  return (
+    <>
+      <HomeNavbar />
+
+      <div className="flex flex-row items-center py-6 px-5 border-[#EBEDF0] justify-between border-[1px] gap-6 rounded-[24px] bg-white">
+        <p className="flex-1 flex-grow text-[14px] text-[#5D6674]">
+          Только со свободными местами
+        </p>
+        <motion.div
+          className="h-[28px] w-[60px] rounded-[16px] flex items-center cursor-pointer relative"
+          onClick={toggleSwitch}
+          animate={{
+            backgroundColor: showOnlyAvailable ? "#AFFF3F" : "#F8F8FA",
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="h-[20px] w-[20px] rounded-full bg-white shadow-sm absolute left-1"
+            animate={{ x: showOnlyAvailable ? 32 : 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          />
+        </motion.div>
+      </div>
+
+      <div className="flex flex-col gap-4 mt-4">
+        {filteredCompetitions.map((competition) => (
+          <CompetitionCard
+            key={competition.id}
+            rank={competition.rank}
+            organizerName={competition.organizerName}
+            date={competition.date}
+            locationTitle={competition.locationTitle}
+            address={competition.address}
+            type={competition.type}
+            cost={competition.cost}
+            playersCapacity={competition.playersCapacity}
+            playersAmount={competition.playersAmount}
+            participating={competition.participating}
+            category={competition.category}
+          />
+        ))}
+      </div>
+    </>
   );
 };

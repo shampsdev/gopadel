@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Logo from "../../assets/logo.png";
 import useTgUserStore from "../../shared/stores/tg-user.store";
 import { Input } from "../../components/ui/froms/input";
 import { Textarea } from "../../components/ui/froms/textarea";
 import { Button } from "../../components/ui/button";
+import { usePatchMe } from "../../shared/hooks/mutations/patch-me";
+import { useNavigate } from "react-router";
 
 export const Registration = () => {
   const { avatarUrl, username } = useTgUserStore();
@@ -12,20 +14,63 @@ export const Registration = () => {
   const [lastName, setLastName] = useState<string | null>(null);
   const [rank, setRank] = useState<number | null>(0);
   const [rankInput, setRankInput] = useState<string>("");
-
   const [bio, setBio] = useState<string | null>(null);
 
-  // const patchMeMutation = usePatchMe();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // const registration = async () => {
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
 
-  // }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+
+      // Создаем URL для превью
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewUrl(objectUrl);
+    }
+  };
+
+  const displayAvatarUrl = previewUrl || avatarUrl;
+
+  const patchMeMutation = usePatchMe();
+
+  const navigate = useNavigate();
+
+  const registration = async () => {
+    try {
+      await patchMeMutation.mutateAsync({
+        avatar: displayAvatarUrl!,
+        bio: bio ?? "",
+        firstName: firstName ?? "",
+        lastName: lastName ?? "",
+        rank: rank ?? 0,
+      });
+      navigate("/");
+    } catch (error) {
+      alert("Уупс, что-то пошло не так");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-11 mt-3 pb-[100px]">
       <div className="flex flex-row gap-7 items-center">
-        <div className="aspect-square max-h-[160px] rounded-full overflow-hidden">
-          <img src={avatarUrl} className="object-cover" />
+        <div
+          className="aspect-square max-h-[160px] rounded-full overflow-hidden"
+          onClick={handleAvatarClick}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/png,image/jpeg,image/jpg"
+            style={{ display: "none" }}
+          />
+          <img src={displayAvatarUrl} className="object-cover w-full h-full" />
         </div>
         <div className="flex flex-col w-full gap-2 ">
           <img src={Logo} className="max-w-[140px]" />
@@ -83,7 +128,9 @@ export const Registration = () => {
           maxLength={255}
         />
       </div>
-      <Button className="mx-auto">Готово</Button>
+      <Button className="mx-auto" onClick={registration}>
+        Готово
+      </Button>
     </div>
   );
 };

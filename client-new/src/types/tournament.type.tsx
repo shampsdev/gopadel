@@ -1,7 +1,19 @@
+import type { Club } from "./club.type";
+import type { Registration } from "./registration.type";
+import type { User } from "./user.type";
+
 export interface Tournament {
+  club: Club;
   description: string;
-  discount: number;
-  id: number;
+  endTime: string;
+  id: string;
+  maxUsers: number;
   name: string;
-  requirements: string;
+  organizator: User;
+  participants: Registration[];
+  price: number;
+  rankMax: number;
+  rankMin: number;
+  startTime: string;
+  tournamentType: string;
 }
