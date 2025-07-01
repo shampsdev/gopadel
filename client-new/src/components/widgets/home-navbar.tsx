@@ -53,22 +53,22 @@ export const HomeNavbar = () => {
       title: "Турниры",
       icon: Icons.Medal(),
       activeIcon: Icons.Medal("#000"),
-      link: "tournaments",
+      link: "tournament",
     },
     {
       title: "Игры",
       icon: Icons.Padel(),
       activeIcon: Icons.Padel("#000"),
       onClick: () => {
-        navigate("games");
+        navigate("game");
       },
-      link: "games",
+      link: "game",
     },
     {
       title: "Тренировки",
       icon: Icons.Target(),
       activeIcon: Icons.Target("#000"),
-      link: "trainings",
+      link: "training",
     },
   ];
 

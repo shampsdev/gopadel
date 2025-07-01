@@ -3,6 +3,7 @@ import { ProtectedRoute } from "../../components/helpers/protected-route";
 import { About } from "../../pages/about/about";
 import { AnimatedOutlet } from "../../components/helpers/animated-outlet";
 import { Registration } from "../../pages/registration/registration";
+import { Home } from "../../pages/home";
 
 const authRoutes: RouteObject[] = [
   {
@@ -10,7 +11,8 @@ const authRoutes: RouteObject[] = [
     children: [
       {
         path: "",
-        element: <About.First />,
+        // element: <About.First />,
+        element: <Home />,
       },
       { path: "second", element: <About.Second /> },
       {
