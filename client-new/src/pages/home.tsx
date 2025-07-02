@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CompetitionCard } from "../components/widgets/competition-card";
 import { HomeNavbar } from "../components/widgets/home-navbar";
 import { ranks } from "../shared/constants/ranking";
 import type { Rank } from "../types/rank.type";
+import { useLocation, useNavigate } from "react-router";
 
 // Мок-данные для рангов
 const mockRanks: Rank[] = ranks;
@@ -83,18 +84,61 @@ const mockCompetitions = [
 ];
 
 export const Home = () => {
-  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const searchParams = new URLSearchParams(location.search);
+  const urlShowOnlyAvailable = searchParams.get("available") === "true";
+  const urlFilter = searchParams.get("filter") || "";
+
+  const [showOnlyAvailable, setShowOnlyAvailable] =
+    useState(urlShowOnlyAvailable);
+
+  useEffect(() => {
+    setShowOnlyAvailable(urlShowOnlyAvailable);
+  }, [urlShowOnlyAvailable]);
 
   const toggleSwitch = () => {
-    setShowOnlyAvailable(!showOnlyAvailable);
+    const newValue = !showOnlyAvailable;
+    setShowOnlyAvailable(newValue);
+
+    const newSearchParams = new URLSearchParams(location.search);
+    if (newValue) {
+      newSearchParams.set("available", "true");
+    } else {
+      newSearchParams.delete("available");
+    }
+    navigate(`${location.pathname}?${newSearchParams.toString()}`);
   };
 
-  // Фильтруем соревнования по наличию свободных мест
-  const filteredCompetitions = showOnlyAvailable
-    ? mockCompetitions.filter(
-        (comp) => comp.playersAmount < comp.playersCapacity
-      )
-    : mockCompetitions;
+  const filterByCategory = (competitions: typeof mockCompetitions) => {
+    if (!urlFilter) return competitions;
+
+    return competitions.filter((comp) => {
+      switch (urlFilter) {
+        case "tournament":
+          return comp.category === "tournament";
+        case "game":
+          return comp.category === "game";
+        case "training":
+          return comp.category === "training";
+        default:
+          return true;
+      }
+    });
+  };
+
+  const filterByAvailability = (competitions: typeof mockCompetitions) => {
+    if (!showOnlyAvailable) return competitions;
+
+    return competitions.filter(
+      (comp) => comp.playersAmount < comp.playersCapacity
+    );
+  };
+
+  const filteredCompetitions = filterByAvailability(
+    filterByCategory(mockCompetitions)
+  );
 
   return (
     <>
@@ -120,7 +164,7 @@ export const Home = () => {
         </motion.div>
       </div>
 
-      <div className="flex flex-col gap-4 mt-4">
+      <div className="flex flex-col gap-4 mt-4 pb-[100px]">
         {filteredCompetitions.map((competition) => (
           <CompetitionCard
             key={competition.id}

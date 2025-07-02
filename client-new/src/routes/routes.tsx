@@ -5,6 +5,7 @@ import { Registration } from "../pages/registration/registration";
 import { Home } from "../pages/home";
 import { MainLayout } from "../pages/main/layout";
 import { AnimatedOutlet } from "../components/helpers/animated-outlet";
+import { Players } from "../pages/players";
 
 const authRoutes: RouteObject[] = [
   {
@@ -57,7 +58,7 @@ export const routes: RouteObject[] = [
           },
           {
             path: "players",
-            element: <div>Players</div>,
+            element: <Players />,
           },
           { path: "league", element: <div>League</div> },
           { path: "profile", element: <div>Profile</div> },

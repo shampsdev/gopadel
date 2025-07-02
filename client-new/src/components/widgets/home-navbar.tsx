@@ -21,7 +21,7 @@ const NavbarItem = ({
 }: NavbarItemProps) => {
   const variants = {
     active: "bg-[#AFFF3F] text-black",
-    default: "bg-[#F8F8FA] text-[#868D98] text-[12px]",
+    default: "bg-[#F8F8FA] text-[#868D98]",
   };
 
   return (
@@ -42,35 +42,46 @@ const NavbarItem = ({
 export const HomeNavbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const searchParams = new URLSearchParams(location.search);
+  const currentFilter = searchParams.get("filter") || "";
+
   const categories = [
     {
       title: "Все",
       icon: Icons.Ball(),
       activeIcon: Icons.Ball("#000"),
-      link: "",
+      filter: "",
     },
     {
       title: "Турниры",
       icon: Icons.Medal(),
       activeIcon: Icons.Medal("#000"),
-      link: "tournament",
+      filter: "tournament",
     },
     {
       title: "Игры",
       icon: Icons.Padel(),
       activeIcon: Icons.Padel("#000"),
-      onClick: () => {
-        navigate("game");
-      },
-      link: "game",
+      filter: "game",
     },
     {
       title: "Тренировки",
       icon: Icons.Target(),
       activeIcon: Icons.Target("#000"),
-      link: "training",
+      filter: "training",
     },
   ];
+
+  const handleFilterChange = (filter: string) => {
+    const newSearchParams = new URLSearchParams(location.search);
+    if (filter) {
+      newSearchParams.set("filter", filter);
+    } else {
+      newSearchParams.delete("filter");
+    }
+    navigate(`${location.pathname}?${newSearchParams.toString()}`);
+  };
 
   return (
     <div className="flex flex-row py-[10px] w-full gap-2">
@@ -80,10 +91,8 @@ export const HomeNavbar = () => {
           title={item.title}
           icon={item.icon}
           activeIcon={item.activeIcon}
-          onClick={() => {
-            navigate(item.link);
-          }}
-          variant={location.pathname.endsWith(item.link) ? "active" : "default"}
+          onClick={() => handleFilterChange(item.filter)}
+          variant={currentFilter === item.filter ? "active" : "default"}
           className="flex-grow"
         />
       ))}
