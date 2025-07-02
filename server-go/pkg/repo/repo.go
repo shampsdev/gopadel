@@ -19,6 +19,10 @@ type User interface {
 	Delete(ctx context.Context, id string) error
 }
 
+type AdminUser interface {
+	Filter(ctx context.Context, filter *domain.FilterAdminUser) ([]*domain.AdminUser, error)
+}
+
 type Club interface {
 	Create(ctx context.Context, club *domain.CreateClub) (string, error)
 	Patch(ctx context.Context, id string, club *domain.PatchClub) error
@@ -32,8 +36,11 @@ type Loyalty interface {
 }
 
 type Tournament interface {
+	Create(ctx context.Context, tournament *domain.CreateTournament) (string, error)
+	Patch(ctx context.Context, id string, tournament *domain.PatchTournament) error
 	Filter(ctx context.Context, filter *domain.FilterTournament) ([]*domain.Tournament, error)
 	GetTournamentsByUserID(ctx context.Context, userID string) ([]*domain.Tournament, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type Registration interface {

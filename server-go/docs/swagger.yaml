@@ -8,6 +8,41 @@ definitions:
       name:
         type: string
     type: object
+  domain.CreateTournament:
+    properties:
+      clubId:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      maxUsers:
+        type: integer
+      name:
+        type: string
+      organizatorId:
+        type: string
+      price:
+        type: integer
+      rankMax:
+        type: number
+      rankMin:
+        type: number
+      startTime:
+        type: string
+      tournamentType:
+        type: string
+    required:
+    - clubId
+    - maxUsers
+    - name
+    - organizatorId
+    - price
+    - rankMax
+    - rankMin
+    - startTime
+    - tournamentType
+    type: object
   domain.FilterTournament:
     properties:
       id:
@@ -16,6 +51,8 @@ definitions:
         description: true if tournament is not started and not full
         type: boolean
       name:
+        type: string
+      organizatorId:
         type: string
     type: object
   domain.FilterUser:
@@ -40,6 +77,29 @@ definitions:
       name:
         type: string
       requirements:
+        type: string
+    type: object
+  domain.PatchTournament:
+    properties:
+      clubId:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      maxUsers:
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+      rankMax:
+        type: number
+      rankMin:
+        type: number
+      startTime:
+        type: string
+      tournamentType:
         type: string
     type: object
   domain.PatchUser:
@@ -520,6 +580,165 @@ paths:
       summary: Get my registrations
       tags:
       - registration
+  /tournaments:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new tournament. Requires telegram admin rights.
+      parameters:
+      - description: Tournament data
+        in: body
+        name: tournament
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateTournament'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created tournament
+          schema:
+            $ref: '#/definitions/domain.Tournament'
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Telegram admin rights required
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create tournament
+      tags:
+      - tournaments
+  /tournaments/{tournament_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a tournament. Only the tournament organizer can delete
+        their tournament.
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: tournament_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Tournament deleted successfully
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Not tournament organizer or admin rights required
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Tournament not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete tournament
+      tags:
+      - tournaments
+    patch:
+      consumes:
+      - application/json
+      description: Updates tournament data. Only the tournament organizer can update
+        their tournament.
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: tournament_id
+        required: true
+        type: string
+      - description: Tournament update data
+        in: body
+        name: tournament
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PatchTournament'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated tournament
+          schema:
+            $ref: '#/definitions/domain.Tournament'
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Not tournament organizer or admin rights required
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Tournament not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update tournament
+      tags:
+      - tournaments
   /tournaments/{tournament_id}/participants:
     get:
       consumes:

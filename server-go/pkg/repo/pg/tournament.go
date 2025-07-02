@@ -46,6 +46,10 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 		s = s.Where(sq.ILike{`"t"."name"`: "%" + filter.Name + "%"})
 	}
 
+	if filter.OrganizatorID != nil {
+		s = s.Where(sq.Eq{`"t"."organizator_id"`: *filter.OrganizatorID})
+	}
+
 	if filter.IsAvalible {
 		s = s.Having(`"t"."start_time" > NOW() AND COUNT(CASE WHEN "r"."status" IN ('PENDING', 'ACTIVE') THEN 1 END) < "t"."max_users"`)
 	}
@@ -228,4 +232,78 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 	}
 
 	return tournaments, nil
+}
+
+func (r *TournamentRepo) Create(ctx context.Context, tournament *domain.CreateTournament) (string, error) {
+	s := r.psql.Insert(`"tournaments"`).
+		Columns("name", "start_time", "end_time", "price", "rank_min", "rank_max", 
+				"max_users", "description", "club_id", "tournament_type", "organizator_id").
+		Values(tournament.Name, tournament.StartTime, tournament.EndTime, tournament.Price,
+			   tournament.RankMin, tournament.RankMax, tournament.MaxUsers, tournament.Description,
+			   tournament.ClubID, tournament.TournamentType, tournament.OrganizatorID).
+		Suffix("RETURNING id")
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return "", fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	var id string
+	err = r.db.QueryRow(ctx, sql, args...).Scan(&id)
+	return id, err
+}
+
+func (r *TournamentRepo) Patch(ctx context.Context, id string, tournament *domain.PatchTournament) error {
+	s := r.psql.Update(`"tournaments"`).Where(sq.Eq{"id": id})
+	
+	if tournament.Name != nil {
+		s = s.Set("name", *tournament.Name)
+	}
+	if tournament.StartTime != nil {
+		s = s.Set("start_time", *tournament.StartTime)
+	}
+	if tournament.EndTime != nil {
+		s = s.Set("end_time", *tournament.EndTime)
+	}
+	if tournament.Price != nil {
+		s = s.Set("price", *tournament.Price)
+	}
+	if tournament.RankMin != nil {
+		s = s.Set("rank_min", *tournament.RankMin)
+	}
+	if tournament.RankMax != nil {
+		s = s.Set("rank_max", *tournament.RankMax)
+	}
+	if tournament.MaxUsers != nil {
+		s = s.Set("max_users", *tournament.MaxUsers)
+	}
+	if tournament.Description != nil {
+		s = s.Set("description", *tournament.Description)
+	}
+	if tournament.ClubID != nil {
+		s = s.Set("club_id", *tournament.ClubID)
+	}
+	if tournament.TournamentType != nil {
+		s = s.Set("tournament_type", *tournament.TournamentType)
+	}
+	
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	_, err = r.db.Exec(ctx, sql, args...)
+	return err
+}
+
+func (r *TournamentRepo) Delete(ctx context.Context, id string) error {
+	s := r.psql.Delete(`"tournaments"`).Where(sq.Eq{"id": id})
+	
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	_, err = r.db.Exec(ctx, sql, args...)
+	return err
 }

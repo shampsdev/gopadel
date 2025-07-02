@@ -18,8 +18,36 @@ type Tournament struct {
 	Participants   []*Registration `json:"participants,omitempty"`
 }
 
+type CreateTournament struct {
+	Name           string    `json:"name" binding:"required"`
+	StartTime      time.Time `json:"startTime" binding:"required"`
+	EndTime        time.Time `json:"endTime"`
+	Price          int       `json:"price" binding:"required"`
+	RankMin        float64   `json:"rankMin" binding:"required"`
+	RankMax        float64   `json:"rankMax" binding:"required"`
+	MaxUsers       int       `json:"maxUsers" binding:"required"`
+	Description    string    `json:"description"`
+	ClubID         string    `json:"clubId" binding:"required"`
+	TournamentType string    `json:"tournamentType" binding:"required"`
+	OrganizatorID  string    `json:"organizatorId" binding:"required"`
+}
+
+type PatchTournament struct {
+	Name           *string    `json:"name,omitempty"`
+	StartTime      *time.Time `json:"startTime,omitempty"`
+	EndTime        *time.Time `json:"endTime,omitempty"`
+	Price          *int       `json:"price,omitempty"`
+	RankMin        *float64   `json:"rankMin,omitempty"`
+	RankMax        *float64   `json:"rankMax,omitempty"`
+	MaxUsers       *int       `json:"maxUsers,omitempty"`
+	Description    *string    `json:"description,omitempty"`
+	ClubID         *string    `json:"clubId,omitempty"`
+	TournamentType *string    `json:"tournamentType,omitempty"`
+}
+
 type FilterTournament struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	IsAvalible bool   `json:"isAvalible"` // true if tournament is not started and not full
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	IsAvalible   bool   `json:"isAvalible"` // true if tournament is not started and not full
+	OrganizatorID *string `json:"organizatorId,omitempty"`
 }
