@@ -14,7 +14,6 @@ interface CompetitionCardProps {
   playersCapacity: number;
   playersAmount: number;
   participating?: boolean;
-  category: "tournament" | "game" | "training";
 }
 
 export const CompetitionCard = ({
@@ -29,7 +28,6 @@ export const CompetitionCard = ({
   playersCapacity,
   playersAmount,
   participating,
-  category,
 }: CompetitionCardProps) => {
   return (
     <div
@@ -48,27 +46,11 @@ export const CompetitionCard = ({
             </div>
           </div>
 
-          {category === "tournament" && (
-            <div>
-              <div className="bg-[#E7FFC6] rounded-full p-[10px]">
-                {Icons.Medal("#77BE14")}
-              </div>
+          <div>
+            <div className="bg-[#E7FFC6] rounded-full p-[10px]">
+              {Icons.Medal("#77BE14")}
             </div>
-          )}
-          {category === "game" && (
-            <div>
-              <div className="bg-[#E7FFC6] rounded-full p-[10px]">
-                {Icons.Padel("#77BE14")}
-              </div>
-            </div>
-          )}
-          {category === "training" && (
-            <div>
-              <div className="bg-[#E7FFC6] rounded-full p-[10px]">
-                {Icons.Target("#77BE14")}
-              </div>
-            </div>
-          )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-3 text-[#868D98]">

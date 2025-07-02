@@ -4,8 +4,8 @@ import useTgUserStore from "../../shared/stores/tg-user.store";
 import { Input } from "../../components/ui/froms/input";
 import { Textarea } from "../../components/ui/froms/textarea";
 import { Button } from "../../components/ui/button";
-import { usePatchMe } from "../../shared/hooks/mutations/patch-me";
 import { useNavigate } from "react-router";
+import { usePatchMe } from "../../api/hooks/mutations/patch-me";
 
 export const Registration = () => {
   const { avatarUrl, username } = useTgUserStore();

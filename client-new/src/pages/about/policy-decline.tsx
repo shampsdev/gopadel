@@ -2,8 +2,8 @@ import { useNavigate } from "react-router";
 import AboutImage from "../../assets/about.png";
 import { Button } from "../../components/ui/button";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
-import useCreateMe from "../../shared/hooks/mutations/create-me";
 import { useAuthStore } from "../../shared/stores/auth.store";
+import useCreateMe from "../../api/hooks/mutations/create-me";
 export function PolicyDecline() {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();

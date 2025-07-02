@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getMe } from "../../api/user";
-import { useAuthStore } from "../stores/auth.store";
+import { useAuthStore } from "../../shared/stores/auth.store";
 
 export const useGetMe = () => {
   const { token } = useAuthStore();

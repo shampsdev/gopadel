@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import { useAuthStore } from "../../stores/auth.store";
 import { createMe } from "../../../api/user";
+import { useAuthStore } from "../../../shared/stores/auth.store";
 
 const useCreateMe = () => {
   const { token, setUser } = useAuthStore();

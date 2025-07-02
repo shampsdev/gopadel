@@ -1,6 +1,6 @@
-import { PlayerCard } from "../components/widgets/player-card";
-import type { Loyalty } from "../types/loyalty.type";
-import type { PlayingPosition } from "../types/playing-position.type";
+import { PlayerCard } from "../../components/widgets/player-card";
+import type { Loyalty } from "../../types/loyalty.type";
+import type { PlayingPosition } from "../../types/playing-position.type";
 
 // Мок-данные для игроков
 const mockPlayers = [

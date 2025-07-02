@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from "react-router";
 import { useAuthStore } from "../../shared/stores/auth.store";
-import { useGetMe } from "../../shared/hooks/useGetMe";
 import { useEffect } from "react";
+import { useGetMe } from "../../api/hooks/useGetMe";
 
 export const ProtectedRoute = () => {
   const { setAuth } = useAuthStore();

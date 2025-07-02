@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { patchMe } from "../../../api/user";
-import { useAuthStore } from "../../stores/auth.store";
 import type { PatchUser } from "../../../types/patch-user.type";
+import { useAuthStore } from "../../../shared/stores/auth.store";
 
 export const usePatchMe = () => {
   const { token, setUser, auth } = useAuthStore();

@@ -43,44 +43,35 @@ export const HomeNavbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const searchParams = new URLSearchParams(location.search);
-  const currentFilter = searchParams.get("filter") || "";
-
   const categories = [
     {
       title: "Все",
       icon: Icons.Ball(),
       activeIcon: Icons.Ball("#000"),
-      filter: "",
+      link: "",
     },
     {
       title: "Турниры",
       icon: Icons.Medal(),
       activeIcon: Icons.Medal("#000"),
-      filter: "tournament",
+      link: "tournaments",
     },
     {
       title: "Игры",
       icon: Icons.Padel(),
       activeIcon: Icons.Padel("#000"),
-      filter: "game",
+      link: "games",
     },
     {
       title: "Тренировки",
       icon: Icons.Target(),
       activeIcon: Icons.Target("#000"),
-      filter: "training",
+      link: "training",
     },
   ];
 
-  const handleFilterChange = (filter: string) => {
-    const newSearchParams = new URLSearchParams(location.search);
-    if (filter) {
-      newSearchParams.set("filter", filter);
-    } else {
-      newSearchParams.delete("filter");
-    }
-    navigate(`${location.pathname}?${newSearchParams.toString()}`);
+  const handleFilterChange = (link: string) => {
+    navigate(link);
   };
 
   return (
@@ -91,8 +82,13 @@ export const HomeNavbar = () => {
           title={item.title}
           icon={item.icon}
           activeIcon={item.activeIcon}
-          onClick={() => handleFilterChange(item.filter)}
-          variant={currentFilter === item.filter ? "active" : "default"}
+          onClick={() => handleFilterChange(item.link)}
+          variant={
+            (item.link === "" && location.pathname === "/") ||
+            (item.link !== "" && location.pathname.endsWith(item.link))
+              ? "active"
+              : "default"
+          }
           className="flex-grow"
         />
       ))}

@@ -2,10 +2,13 @@ import type { RouteObject } from "react-router";
 import { ProtectedRoute } from "../components/helpers/protected-route";
 import { About } from "../pages/about/about";
 import { Registration } from "../pages/registration/registration";
-import { Home } from "../pages/home";
+import { Home } from "../pages/home/home";
 import { MainLayout } from "../pages/main/layout";
 import { AnimatedOutlet } from "../components/helpers/animated-outlet";
-import { Players } from "../pages/players";
+import { Players } from "../pages/home/players";
+import { Tournaments } from "../pages/home/tournaments";
+import { Competitions } from "../pages/home/competitions";
+import { Tournament } from "../pages/tournament";
 
 const authRoutes: RouteObject[] = [
   {
@@ -55,6 +58,24 @@ export const routes: RouteObject[] = [
           {
             path: "",
             element: <Home />,
+            children: [
+              {
+                path: "",
+                element: <Competitions />,
+              },
+              {
+                path: "tournaments",
+                element: <Tournaments />,
+              },
+              {
+                path: "games",
+                element: <div>Games</div>,
+              },
+              {
+                path: "training",
+                element: <div>Training</div>,
+              },
+            ],
           },
           {
             path: "players",
@@ -62,6 +83,10 @@ export const routes: RouteObject[] = [
           },
           { path: "league", element: <div>League</div> },
           { path: "profile", element: <div>Profile</div> },
+          {
+            path: "tournament",
+            children: [{ path: ":id", element: <Tournament /> }],
+          },
         ],
       },
     ],
