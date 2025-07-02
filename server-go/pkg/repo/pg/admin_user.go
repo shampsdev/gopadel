@@ -26,7 +26,7 @@ func NewAdminUserRepo(db *pgxpool.Pool) *AdminUserRepo {
 
 func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUser) ([]*domain.AdminUser, error) {
 	s := r.psql.Select(
-		`"id"`, `"is_super_user"`, `"user_id"`, `"username"`,
+		`"id"`, `"is_superuser"`, `"user_id"`, `"username"`,
 	).From(`"admin_users"`)
 
 	if filter.ID != nil {
@@ -34,7 +34,7 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 	}
 
 	if filter.IsSuperUser != nil {
-		s = s.Where(sq.Eq{`"is_super_user"`: *filter.IsSuperUser})
+		s = s.Where(sq.Eq{`"is_superuser"`: *filter.IsSuperUser})
 	}
 
 	if filter.UserID != nil {
