@@ -5,6 +5,7 @@ interface AuthState {
   auth: boolean;
   token: string | null;
   user: User | null;
+  isInitialized: boolean;
 }
 
 interface AuthActions {
@@ -17,6 +18,7 @@ export const useAuthStore = create<AuthState & AuthActions>()((set) => ({
   auth: false,
   token: null,
   user: null,
+  isInitialized: false,
   setToken: (token: string) => {
     set({ token });
   },

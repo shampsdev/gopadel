@@ -4,10 +4,16 @@ import { About } from "../pages/about/about";
 import { Registration } from "../pages/registration/registration";
 import { Home } from "../pages/home";
 import { MainLayout } from "../pages/main/layout";
+import { AnimatedOutlet } from "../components/helpers/animated-outlet";
 
 const authRoutes: RouteObject[] = [
   {
     path: "about",
+    element: (
+      <div className="max-w-[90%] mx-auto">
+        <AnimatedOutlet />
+      </div>
+    ),
     children: [
       {
         path: "",
@@ -27,7 +33,15 @@ const authRoutes: RouteObject[] = [
 ];
 
 export const routes: RouteObject[] = [
-  { path: "registration", element: <Registration /> },
+  {
+    path: "registration",
+    element: (
+      <div className="max-w-[90%] mx-auto">
+        <AnimatedOutlet />
+      </div>
+    ),
+    children: [{ path: "", element: <Registration /> }],
+  },
   ...authRoutes,
   {
     path: "",

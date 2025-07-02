@@ -20,7 +20,7 @@ function App() {
     if (initData) {
       setToken(initData);
     }
-  }, [initData]);
+  }, [initData, setToken]);
 
   useEffect(() => {
     if (initUserData?.photo_url) {
@@ -34,11 +34,11 @@ function App() {
         setUsername(initUserData.username);
       }
     }
-  }, [initUserData]);
+  }, [initUserData, avatarUrl, username, setAvatarUrl, setUsername]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <RouterProvider router={router} />;
     </QueryClientProvider>
   );
 }

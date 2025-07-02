@@ -3,12 +3,15 @@ import AboutImage from "../../assets/about.png";
 import { Button } from "../../components/ui/button";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import useCreateMe from "../../shared/hooks/mutations/create-me";
+import { useAuthStore } from "../../shared/stores/auth.store";
 export function PolicyDecline() {
   const navigate = useNavigate();
+  const { setAuth } = useAuthStore();
 
   const createMeMutation = useCreateMe();
   const register = async () => {
     await createMeMutation.mutateAsync();
+    setAuth(true);
   };
 
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });

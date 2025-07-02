@@ -4,7 +4,7 @@ import { useAuthStore } from "../../stores/auth.store";
 import type { PatchUser } from "../../../types/patch-user.type";
 
 export const usePatchMe = () => {
-  const { token, setUser } = useAuthStore();
+  const { token, setUser, auth } = useAuthStore();
 
   return useMutation({
     mutationFn: (user: PatchUser) => patchMe(token ?? "", user),

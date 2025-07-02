@@ -3,8 +3,10 @@ import { Button } from "../../components/ui/button";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import AboutImage from "../../assets/about.png";
 import useCreateMe from "../../shared/hooks/mutations/create-me";
+import { useAuthStore } from "../../shared/stores/auth.store";
 
 export function PolicyFirst() {
+  const { setAuth } = useAuthStore();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
   const navigate = useNavigate();
@@ -12,6 +14,7 @@ export function PolicyFirst() {
   const createMeMutation = useCreateMe();
   const register = async () => {
     await createMeMutation.mutateAsync();
+    setAuth(true);
   };
   return (
     <div className="flex flex-col h-full w-full justify-between">

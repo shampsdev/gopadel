@@ -29,7 +29,6 @@ export const Registration = () => {
     if (file) {
       setSelectedFile(file);
 
-      // Создаем URL для превью
       const objectUrl = URL.createObjectURL(file);
       setPreviewUrl(objectUrl);
     }
@@ -49,6 +48,7 @@ export const Registration = () => {
         firstName: firstName ?? "",
         lastName: lastName ?? "",
         rank: rank ?? 0,
+        isRegistered: true,
       });
       navigate("/");
     } catch (error) {
@@ -128,9 +128,16 @@ export const Registration = () => {
           maxLength={255}
         />
       </div>
-      <Button className="mx-auto" onClick={registration}>
-        Готово
-      </Button>
+      {bio?.length &&
+      firstName?.length &&
+      lastName?.length &&
+      rankInput.length > 0 ? (
+        <Button className="mx-auto" onClick={registration}>
+          Готово
+        </Button>
+      ) : (
+        <Button className="mx-auto bg-[#F8F8FA] text-[#A4A9B4]">Готово</Button>
+      )}
     </div>
   );
 };

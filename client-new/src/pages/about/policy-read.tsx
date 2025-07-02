@@ -2,14 +2,17 @@ import { useNavigate } from "react-router";
 import { Button } from "../../components/ui/button";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import useCreateMe from "../../shared/hooks/mutations/create-me";
+import { useAuthStore } from "../../shared/stores/auth.store";
 
 export function PolicyRead() {
+  const { setAuth } = useAuthStore();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
   const createMeMutation = useCreateMe();
   const register = async () => {
     await createMeMutation.mutateAsync();
+    setAuth(true);
   };
   return (
     <div>

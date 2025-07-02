@@ -36,7 +36,7 @@ export const Textarea = (props: TextareaProps) => {
     <section>
       <fieldset
         className={
-          "border-2 rounded-xl p-3 relative border-gray-300 focus-within:border-[#000] focus-within:text-[#000] text-[#A2ACB0]"
+          "border-2 border-gray-300 rounded-xl p-3 relative text-gray-400 focus-within:border-[#000] focus-within:text-[#000]"
         }
       >
         <legend className="px-2 text-[15px] font-semibold transition-all ">
@@ -57,7 +57,7 @@ export const Textarea = (props: TextareaProps) => {
             whiteSpace: "pre-wrap",
             overflow: "hidden",
           }}
-          className="resize-none w-full  outline-none pb-[6px] py-[3px] px-[16px] bg-transparent"
+          className="resize-none w-full  outline-none pb-[6px] py-[3px] px-[16px] bg-transparent text-black"
         />
       </fieldset>
     </section>
