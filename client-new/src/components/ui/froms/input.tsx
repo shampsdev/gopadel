@@ -8,6 +8,7 @@ export interface InputProps {
   onFocus?: () => void;
   onBlur?: () => void;
   fillNotRequired?: boolean;
+  placeholder?: string;
 }
 
 export const Input = (props: InputProps) => {
@@ -15,7 +16,7 @@ export const Input = (props: InputProps) => {
     <section>
       <fieldset
         className={`border-2 rounded-[14px] px-3 relative transition-all 
-          ${"border-gray-300 text-gray-400 focus-within:border-[#000] focus-within:text-[#000]"} 
+          ${"border-[#EBEDF0] text-[#A4A9B4] focus-within:border-[#000] focus-within:text-[#000]"} 
           `}
       >
         <legend className="px-2 text-[15px] font-semibold transition-all duration-100">
@@ -24,6 +25,7 @@ export const Input = (props: InputProps) => {
         <input
           onBlur={props.onBlur}
           onFocus={props.onFocus}
+          placeholder={props.placeholder}
           onInput={(event: React.ChangeEvent<HTMLInputElement>) =>
             props.onChangeFunction(event.target.value)
           }

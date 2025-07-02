@@ -9,6 +9,11 @@ import { Players } from "../pages/home/players";
 import { Tournaments } from "../pages/home/tournaments";
 import { Competitions } from "../pages/home/competitions";
 import { Tournament } from "../pages/tournament";
+import { MyProfile } from "../pages/my-profile";
+import { TournamentPlayers } from "../pages/tournament-players";
+import { NewEvent } from "../pages/new-event/new-event";
+import { CreateTournament } from "../pages/new-event/create-tournament";
+import { CreateGame } from "../pages/new-event/create-game";
 
 const authRoutes: RouteObject[] = [
   {
@@ -82,10 +87,25 @@ export const routes: RouteObject[] = [
             element: <Players />,
           },
           { path: "league", element: <div>League</div> },
-          { path: "profile", element: <div>Profile</div> },
+          { path: "profile", element: <MyProfile /> },
           {
             path: "tournament",
-            children: [{ path: ":id", element: <Tournament /> }],
+            children: [
+              {
+                path: ":id",
+                element: <Tournament />,
+
+                children: [{ path: "players", element: <TournamentPlayers /> }],
+              },
+            ],
+          },
+          {
+            path: "new-event",
+            children: [
+              { path: "", element: <NewEvent /> },
+              { path: "tournament", element: <CreateTournament /> },
+              { path: "game", element: <CreateGame /> },
+            ],
           },
         ],
       },

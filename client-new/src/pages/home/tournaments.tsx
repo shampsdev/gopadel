@@ -124,7 +124,7 @@ export const Tournaments = () => {
         )}
 
         {transformedCompetitions.map((competition: any) => (
-          <Link to={`/tournaments/${competition.id}`}>
+          <Link key={competition.id} to={`/tournament/${competition.id}`}>
             <CompetitionCard
               key={competition.id}
               rank={competition.rank}

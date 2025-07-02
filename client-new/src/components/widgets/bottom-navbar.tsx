@@ -37,7 +37,7 @@ export default function BottomNavbar() {
           </p>
         </div>
       </Link>
-      <Link to="/competition/create">
+      <Link to="/new-event">
         <div className="flex flex-col bg-[#AFFF3F] rounded-full p-[14px] items-center justify-center">
           {Icons.Cross()}
         </div>

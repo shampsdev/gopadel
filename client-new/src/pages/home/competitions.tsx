@@ -1,11 +1,14 @@
-import { CompetitionCard } from "../../components/widgets/competition-card";
+import {
+  CompetitionCard,
+  type CompetitionCardProps,
+} from "../../components/widgets/competition-card";
 import { ranks } from "../../shared/constants/ranking";
 import type { Rank } from "../../types/rank.type";
 import { useGetTournaments } from "../../api/hooks/useGetTournaments";
 import type { Tournament } from "../../types/tournament.type";
 import type { FilterTournament } from "../../types/filter.type";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
 
@@ -13,63 +16,9 @@ import { HomeNavbar } from "../../components/widgets/home-navbar";
 const mockRanks: Rank[] = ranks;
 
 // Мок-данные для игр
-const mockGames = [
-  {
-    id: "game-1",
-    rank: mockRanks[1],
-    organizerName: "Спорт Лига",
-    date: "28 декабря, 14:00",
-    locationTitle: "Корт на Набережной",
-    address: "наб. Речная, 21",
-    type: "Дружеская игра",
-    cost: 800,
-    playersCapacity: 4,
-    playersAmount: 4,
-    participating: false,
-  },
-  {
-    id: "game-2",
-    rank: mockRanks[0],
-    organizerName: "Падель Клуб",
-    date: "29 декабря, 16:00",
-    locationTitle: "Центральный корт",
-    address: "ул. Спортивная, 10",
-    type: "Парная игра",
-    cost: 1200,
-    playersCapacity: 4,
-    playersAmount: 2,
-    participating: true,
-  },
-];
+const mockGames: CompetitionCardProps[] = [];
 
-const mockTrainings = [
-  {
-    id: "training-1",
-    rank: mockRanks[2],
-    organizerName: "Тренер Иван Петров",
-    date: "27 декабря, 16:00",
-    locationTitle: "Падель Клуб Премиум",
-    address: "ул. Чемпионов, 3",
-    type: "Индивидуальная тренировка",
-    cost: 1500,
-    playersCapacity: 4,
-    playersAmount: 2,
-    participating: false,
-  },
-  {
-    id: "training-2",
-    rank: mockRanks[1],
-    organizerName: "Анна Сидорова",
-    date: "30 декабря, 10:00",
-    locationTitle: "Спортивный комплекс",
-    address: "пр. Победы, 15",
-    type: "Групповая тренировка",
-    cost: 2000,
-    playersCapacity: 8,
-    playersAmount: 6,
-    participating: true,
-  },
-];
+const mockTrainings: CompetitionCardProps[] = [];
 
 export const Competitions = () => {
   const location = useLocation();
@@ -104,7 +53,9 @@ export const Competitions = () => {
 
   const { data: tournaments, isLoading, error } = useGetTournaments(filter);
 
-  const transformTournamentToCompetition = (tournament: Tournament) => {
+  const transformTournamentToCompetition = (
+    tournament: Tournament
+  ): CompetitionCardProps & { id: string; competitionType: string } => {
     const rank =
       mockRanks.find(
         (r) => r.from <= tournament.rankMin && r.to >= tournament.rankMin
@@ -133,6 +84,7 @@ export const Competitions = () => {
       playersCapacity: tournament.maxUsers,
       playersAmount: participantsCount,
       participating: false,
+      competitionType: "tournament",
     };
   };
 
@@ -141,7 +93,10 @@ export const Competitions = () => {
     : [];
 
   const allCompetitions = [
-    ...transformedTournaments,
+    ...transformedTournaments.map((tournament: any) => ({
+      ...tournament,
+      type: "tournament",
+    })),
     ...mockGames,
     ...mockTrainings,
   ];
@@ -153,7 +108,7 @@ export const Competitions = () => {
     : allCompetitions;
 
   return (
-    <>
+    <div className="pb-[100px]">
       <HomeNavbar />
       <div className="flex flex-row items-center py-6 px-5 border-[#EBEDF0] justify-between border-[1px] gap-6 rounded-[24px] bg-white">
         <p className="flex-1 flex-grow text-[14px] text-[#5D6674]">
@@ -194,22 +149,45 @@ export const Competitions = () => {
           </div>
         )}
 
-        {filteredCompetitions.map((competition: any) => (
-          <CompetitionCard
-            key={competition.id}
-            rank={competition.rank}
-            organizerName={competition.organizerName}
-            date={competition.date}
-            locationTitle={competition.locationTitle}
-            address={competition.address}
-            type={competition.type}
-            cost={competition.cost}
-            playersCapacity={competition.playersCapacity}
-            playersAmount={competition.playersAmount}
-            participating={competition.participating}
-          />
-        ))}
+        {filteredCompetitions.map(
+          (
+            competition: CompetitionCardProps & {
+              id: string;
+              competitionType: string;
+            }
+          ) =>
+            competition.competitionType === "tournament" ? (
+              <Link key={competition.id} to={`/tournament/${competition.id}`}>
+                <CompetitionCard
+                  rank={competition.rank}
+                  organizerName={competition.organizerName}
+                  date={competition.date}
+                  locationTitle={competition.locationTitle}
+                  address={competition.address}
+                  type={competition.type}
+                  cost={competition.cost}
+                  playersCapacity={competition.playersCapacity}
+                  playersAmount={competition.playersAmount}
+                  participating={competition.participating}
+                />
+              </Link>
+            ) : (
+              <CompetitionCard
+                key={competition.id}
+                rank={competition.rank}
+                organizerName={competition.organizerName}
+                date={competition.date}
+                locationTitle={competition.locationTitle}
+                address={competition.address}
+                type={competition.type}
+                cost={competition.cost}
+                playersCapacity={competition.playersCapacity}
+                playersAmount={competition.playersAmount}
+                participating={competition.participating}
+              />
+            )
+        )}
       </div>
-    </>
+    </div>
   );
 };

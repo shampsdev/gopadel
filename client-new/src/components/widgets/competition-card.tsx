@@ -2,7 +2,7 @@ import { twMerge } from "tailwind-merge";
 import { Icons } from "../../assets/icons";
 import type { Rank } from "../../types/rank.type";
 
-interface CompetitionCardProps {
+export interface CompetitionCardProps {
   className?: string;
   rank: Rank;
   organizerName: string;

@@ -3,12 +3,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { Tournament as TournamentType } from "../types/tournament.type";
 import { Icons } from "../assets/icons";
 import { getRankTitle } from "../utils/rank-title";
+import { useTelegramBackButton } from "../shared/hooks/useTelegramBackButton";
 
 export const Tournament = () => {
+  useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   const { id } = useParams();
   const queryClient = useQueryClient();
 
-  // TODO: грузить не из кеша, а с бэка
   const cachedTournaments = queryClient.getQueryData([
     "tournaments",
     {},
@@ -20,7 +21,6 @@ export const Tournament = () => {
 
   const waitlist = 1;
 
-  // Функция для правильного склонения слова "человек"
   const getPersonWord = (count: number) => {
     if (count === 1) return "человек";
     if (count >= 2 && count <= 4) return "человека";
@@ -28,7 +28,7 @@ export const Tournament = () => {
   };
 
   return (
-    <>
+    <div className="pb-[100px]">
       <div className="flex flex-col gap-8 pb-[100px]">
         <div className="flex flex-col gap-7">
           <h1>{tournament?.name}</h1>
@@ -74,7 +74,7 @@ export const Tournament = () => {
             <div className="flex flex-row gap-[7px]">
               <p>Участники</p>
               <p className="text-[14px] text-[#F34338]">
-                {tournament?.participants.length} / {tournament?.maxUsers}
+                {/* {tournament?.participants.length} / {tournament?.maxUsers} */}
               </p>
             </div>
 
@@ -111,7 +111,9 @@ export const Tournament = () => {
             <div>{Icons.Ball()}</div>
           </div>
         </div>
+
+        <div className="flex justify-center">статус оплаты/реги</div>
       </div>
-    </>
+    </div>
   );
 };
