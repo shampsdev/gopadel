@@ -5,6 +5,7 @@ import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButt
 import { useRef, useState, useEffect } from "react";
 import Logo from "../../../assets/logo.png";
 import { Textarea } from "../../../components/ui/froms/textarea";
+import { RankInput } from "../../../components/ui/froms/rank-input";
 import { Button } from "../../../components/ui/button";
 import { usePatchMe } from "../../../api/hooks/mutations/patch-me";
 import { uploadAvatar } from "../../../api/user";
@@ -17,6 +18,7 @@ import {
   validateBirthDate,
 } from "../../../utils/date-format";
 import type { PlayingPosition } from "../../../types/playing-position.type";
+import { ranks } from "../../../shared/constants/ranking";
 
 export const EditProfile = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -39,10 +41,17 @@ export const EditProfile = () => {
       setFirstName(user.firstName ?? null);
       setLastName(user.lastName ?? null);
       setRank(user.rank ?? null);
-      setRankInput(user.rank?.toString() ?? "");
+
+      // Находим соответствующий ранг по числовому значению
+      const userRank = ranks.find(
+        (r) => r.from <= (user.rank ?? 0) && (user.rank ?? 0) <= r.to
+      );
+      setRankInput(userRank?.title ?? "");
+
       setBio(user.bio ?? null);
       setCity(user.city ?? null);
       setPlayingPosition(user.playingPosition ?? null);
+      setProfiles(user.padelProfiles ?? null);
 
       // Преобразуем дату рождения из ISO в формат дд.мм.гггг
       if (user.birthDate) {
@@ -59,6 +68,14 @@ export const EditProfile = () => {
       }
     }
   }, [user]);
+
+  const handleRankChange = (rankTitle: string) => {
+    setRankInput(rankTitle);
+    const selectedRank = ranks.find((r) => r.title === rankTitle);
+    if (selectedRank) {
+      setRank(selectedRank.from);
+    }
+  };
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -181,35 +198,10 @@ export const EditProfile = () => {
           value={lastName ?? ""}
           maxLength={100}
         />
-        <Input
+        <RankInput
           title="Ранг"
           value={rankInput}
-          maxLength={4}
-          onChangeFunction={(raw) => {
-            const sanitized = raw.replace(",", ".");
-
-            if (!/^\d*\.?\d*$/.test(sanitized)) return;
-
-            setRankInput(raw);
-
-            if (/^\d+(\.\d+)?$/.test(sanitized)) {
-              setRank(parseFloat(sanitized));
-            } else {
-              setRank(null);
-            }
-          }}
-          onBlur={() => {
-            const cleaned = rankInput.replace(",", ".").trim();
-
-            if (/^\d+(\.\d+)?$/.test(cleaned)) {
-              const num = parseFloat(cleaned);
-              setRank(num);
-              setRankInput(String(num));
-            } else {
-              setRank(null);
-              setRankInput("");
-            }
-          }}
+          onChangeFunction={handleRankChange}
         />
         <Textarea
           onChangeFunction={setBio}

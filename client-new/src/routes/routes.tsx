@@ -17,6 +17,7 @@ import { CreateGame } from "../pages/new-event/create-game";
 import { EditProfile } from "../pages/profile/my-profile/edit";
 import { UserProfile } from "../pages/profile/user-profile";
 import { TournamentsHistory } from "../pages/profile/my-profile/tournaments-history";
+import { Loyalty } from "../pages/loyalty";
 
 const authRoutes: RouteObject[] = [
   {
@@ -117,6 +118,10 @@ export const routes: RouteObject[] = [
               { path: "tournament", element: <CreateTournament /> },
               { path: "game", element: <CreateGame /> },
             ],
+          },
+          {
+            path: "loyalty",
+            element: <Loyalty />,
           },
         ],
       },

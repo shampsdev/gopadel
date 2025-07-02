@@ -12,7 +12,16 @@ const router = createBrowserRouter(routes);
 
 function App() {
   const { setToken } = useAuthStore();
-  const { setAvatarUrl, setUsername, avatarUrl, username } = useTgUserStore();
+  const {
+    setAvatarUrl,
+    setUsername,
+    setFirstName,
+    setLastName,
+    avatarUrl,
+    username,
+    firstName,
+    lastName,
+  } = useTgUserStore();
   const initData = useRawInitData();
   const initUserData = initDataUser();
 
@@ -34,7 +43,27 @@ function App() {
         setUsername(initUserData.username);
       }
     }
-  }, [initUserData, avatarUrl, username, setAvatarUrl, setUsername]);
+
+    if (initUserData?.first_name) {
+      if (firstName === undefined) {
+        setFirstName(initUserData.first_name);
+      }
+    }
+
+    if (initUserData?.last_name) {
+      if (lastName === undefined) {
+        setLastName(initUserData.last_name);
+      }
+    }
+  }, [
+    initUserData,
+    avatarUrl,
+    username,
+    setAvatarUrl,
+    setUsername,
+    setFirstName,
+    setLastName,
+  ]);
 
   return (
     <QueryClientProvider client={queryClient}>

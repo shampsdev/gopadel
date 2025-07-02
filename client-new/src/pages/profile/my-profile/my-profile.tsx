@@ -62,16 +62,18 @@ export const MyProfile = () => {
           </div>
         </div>
         <div className="py-5 border-b border-[#DADCE0]">
-          <div className="flex flex-row justify-between items-center gap-[18px]">
-            <div className="w-[42px] h-[42px] bg-[#AFFF3F] rounded-full flex flex-col items-center justify-center">
-              {Icons.SharpStar()}
+          <Link to="../loyalty">
+            <div className="flex flex-row justify-between items-center gap-[18px]">
+              <div className="w-[42px] h-[42px] bg-[#AFFF3F] rounded-full flex flex-col items-center justify-center">
+                {Icons.SharpStar()}
+              </div>
+              <div className="flex flex-col gap-[2px] flex-grow">
+                <p className="text-[16px]">{user?.loyalty.name}</p>
+                <p className="text-[14px] text-[#868D98]">Уровень лояльности</p>
+              </div>
+              <div>{Icons.ArrowRight("#A4A9B4")}</div>
             </div>
-            <div className="flex flex-col gap-[2px] flex-grow">
-              <p className="text-[16px]">{user?.loyalty.name}</p>
-              <p className="text-[14px] text-[#868D98]">Уровень лояльности</p>
-            </div>
-            <div>{Icons.ArrowRight("#A4A9B4")}</div>
-          </div>
+          </Link>
         </div>
         <div className="py-5 border-b border-[#DADCE0]">
           <div className="flex flex-col gap-[10px]">

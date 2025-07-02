@@ -6,8 +6,8 @@ export const NewEvent = () => {
   return (
     <div className="flex flex-col gap-9">
       <div className="flex flex-col gap-2">
-        <p>Новое событие</p>
-        <p>Выберите тип мероприятия</p>
+        <p className="text-[24px] font-medium">Новое событие</p>
+        <p className="text-[16px] text-[#5D6674]">Выберите тип мероприятия</p>
       </div>
 
       <div className="flex flex-col gap-4">

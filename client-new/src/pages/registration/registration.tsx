@@ -3,19 +3,36 @@ import Logo from "../../assets/logo.png";
 import useTgUserStore from "../../shared/stores/tg-user.store";
 import { Input } from "../../components/ui/froms/input";
 import { Textarea } from "../../components/ui/froms/textarea";
+import { RankInput } from "../../components/ui/froms/rank-input";
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router";
 import { usePatchMe } from "../../api/hooks/mutations/patch-me";
 import { uploadAvatar } from "../../api/user";
 import { useAuthStore } from "../../shared/stores/auth.store";
+import { ranks } from "../../shared/constants/ranking";
 
 export const Registration = () => {
-  const { avatarUrl, username } = useTgUserStore();
+  const {
+    avatarUrl,
+    username,
+    firstName: tgFirstName,
+    lastName: tgLastName,
+  } = useTgUserStore();
 
-  const [firstName, setFirstName] = useState<string | null>(null);
-  const [lastName, setLastName] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState<string | null>(
+    tgFirstName ?? null
+  );
+  const [lastName, setLastName] = useState<string | null>(tgLastName ?? null);
   const [rank, setRank] = useState<number | null>(0);
   const [rankInput, setRankInput] = useState<string>("");
+
+  const handleRankChange = (rankTitle: string) => {
+    setRankInput(rankTitle);
+    const selectedRank = ranks.find((r) => r.title === rankTitle);
+    if (selectedRank) {
+      setRank(selectedRank.from);
+    }
+  };
   const [bio, setBio] = useState<string | null>(null);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -71,7 +88,7 @@ export const Registration = () => {
         rank: rank ?? 0,
         isRegistered: true,
       });
-      navigate("/");
+      navigate("../");
     } catch (error) {
       alert("Уупс, что-то пошло не так");
     }
@@ -112,35 +129,10 @@ export const Registration = () => {
           value={lastName ?? ""}
           maxLength={100}
         />
-        <Input
+        <RankInput
           title="Ранг"
           value={rankInput}
-          maxLength={4}
-          onChangeFunction={(raw) => {
-            const sanitized = raw.replace(",", ".");
-
-            if (!/^\d*\.?\d*$/.test(sanitized)) return;
-
-            setRankInput(raw);
-
-            if (/^\d+(\.\d+)?$/.test(sanitized)) {
-              setRank(parseFloat(sanitized));
-            } else {
-              setRank(null);
-            }
-          }}
-          onBlur={() => {
-            const cleaned = rankInput.replace(",", ".").trim();
-
-            if (/^\d+(\.\d+)?$/.test(cleaned)) {
-              const num = parseFloat(cleaned);
-              setRank(num);
-              setRankInput(String(num));
-            } else {
-              setRank(null);
-              setRankInput("");
-            }
-          }}
+          onChangeFunction={handleRankChange}
         />
         <Textarea
           onChangeFunction={setBio}
