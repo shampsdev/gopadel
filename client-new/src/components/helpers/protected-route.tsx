@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 export const ProtectedRoute = () => {
   const { setAuth } = useAuthStore();
-  const { isLoading, isError } = useGetMe();
+  const { data: me, isLoading, isError } = useGetMe();
 
   useEffect(() => {
     if (!isLoading && !isError) {
@@ -21,5 +21,8 @@ export const ProtectedRoute = () => {
     return <Navigate to="/about" />;
   }
 
+  if (!me?.isRegistered) {
+    return <Navigate to="/registration" />;
+  }
   return <Outlet />;
 };
