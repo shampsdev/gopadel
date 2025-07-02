@@ -196,8 +196,6 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 		tournament.Club = club
 		tournament.Organizator = organizator
 		registration.User = &user
-		registration.Tournament = &tournament
-
 		registrations = append(registrations, &registration)
 	}
 

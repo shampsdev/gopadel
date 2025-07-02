@@ -213,7 +213,6 @@ func (r *PaymentRepo) Filter(ctx context.Context, filter *domain.FilterPayment) 
 				if tournamentType.Valid {
 					tournament.TournamentType = tournamentType.String
 				}
-				registration.Tournament = &tournament
 			}
 
 			payment.Registration = &registration

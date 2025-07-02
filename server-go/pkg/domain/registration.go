@@ -18,7 +18,31 @@ type Registration struct {
 	Date         time.Time          `json:"date"`
 	Status       RegistrationStatus `json:"status"`
 	User         *User              `json:"user,omitempty"`
-	Tournament   *Tournament        `json:"tournament,omitempty"`
+}
+
+type RegistrationWithTournament struct {
+	ID           string                    `json:"id"`
+	UserID       string                    `json:"userId"`
+	TournamentID string                    `json:"tournamentId"`
+	Date         time.Time                 `json:"date"`
+	Status       RegistrationStatus        `json:"status"`
+	User         *User                     `json:"user,omitempty"`
+	Tournament   *TournamentForRegistration `json:"tournament,omitempty"`
+}
+// без юзеров
+type TournamentForRegistration struct {
+	ID             string    `json:"id"`
+	Name           string    `json:"name"`
+	StartTime      time.Time `json:"startTime"`
+	EndTime        time.Time `json:"endTime"`
+	Price          int       `json:"price"`
+	RankMin        float64   `json:"rankMin"`
+	RankMax        float64   `json:"rankMax"`
+	MaxUsers       int       `json:"maxUsers"`
+	Description    string    `json:"description"`
+	Club           Club      `json:"club"`
+	TournamentType string    `json:"tournamentType"`
+	Organizator    User      `json:"organizator"`
 }
 
 type CreateRegistration struct {

@@ -103,7 +103,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Returns all registrations for the current user",
+                "description": "Returns all registrations for the current user with tournament information",
                 "consumes": [
                     "application/json"
                 ],
@@ -116,11 +116,11 @@ const docTemplate = `{
                 "summary": "Get my registrations",
                 "responses": {
                     "200": {
-                        "description": "List of registrations",
+                        "description": "List of registrations with tournament details",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/domain.Registration"
+                                "$ref": "#/definitions/domain.RegistrationWithTournament"
                             }
                         }
                     },
@@ -1152,9 +1152,6 @@ const docTemplate = `{
                 "status": {
                     "$ref": "#/definitions/domain.RegistrationStatus"
                 },
-                "tournament": {
-                    "$ref": "#/definitions/domain.Tournament"
-                },
                 "tournamentId": {
                     "type": "string"
                 },
@@ -1180,6 +1177,32 @@ const docTemplate = `{
                 "RegistrationStatusCanceled",
                 "RegistrationStatusCanceledByUser"
             ]
+        },
+        "domain.RegistrationWithTournament": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/domain.RegistrationStatus"
+                },
+                "tournament": {
+                    "$ref": "#/definitions/domain.TournamentForRegistration"
+                },
+                "tournamentId": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/domain.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
         },
         "domain.Tournament": {
             "type": "object",
@@ -1210,6 +1233,47 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/domain.Registration"
                     }
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rankMax": {
+                    "type": "number"
+                },
+                "rankMin": {
+                    "type": "number"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "tournamentType": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.TournamentForRegistration": {
+            "type": "object",
+            "properties": {
+                "club": {
+                    "$ref": "#/definitions/domain.Club"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "maxUsers": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "organizator": {
+                    "$ref": "#/definitions/domain.User"
                 },
                 "price": {
                     "type": "integer"

@@ -85,8 +85,6 @@ definitions:
         type: string
       status:
         $ref: '#/definitions/domain.RegistrationStatus'
-      tournament:
-        $ref: '#/definitions/domain.Tournament'
       tournamentId:
         type: string
       user:
@@ -106,6 +104,23 @@ definitions:
     - RegistrationStatusActive
     - RegistrationStatusCanceled
     - RegistrationStatusCanceledByUser
+  domain.RegistrationWithTournament:
+    properties:
+      date:
+        type: string
+      id:
+        type: string
+      status:
+        $ref: '#/definitions/domain.RegistrationStatus'
+      tournament:
+        $ref: '#/definitions/domain.TournamentForRegistration'
+      tournamentId:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      userId:
+        type: string
+    type: object
   domain.Tournament:
     properties:
       club:
@@ -126,6 +141,33 @@ definitions:
         items:
           $ref: '#/definitions/domain.Registration'
         type: array
+      price:
+        type: integer
+      rankMax:
+        type: number
+      rankMin:
+        type: number
+      startTime:
+        type: string
+      tournamentType:
+        type: string
+    type: object
+  domain.TournamentForRegistration:
+    properties:
+      club:
+        $ref: '#/definitions/domain.Club'
+      description:
+        type: string
+      endTime:
+        type: string
+      id:
+        type: string
+      maxUsers:
+        type: integer
+      name:
+        type: string
+      organizator:
+        $ref: '#/definitions/domain.User'
       price:
         type: integer
       rankMax:
@@ -450,15 +492,16 @@ paths:
     get:
       consumes:
       - application/json
-      description: Returns all registrations for the current user
+      description: Returns all registrations for the current user with tournament
+        information
       produces:
       - application/json
       responses:
         "200":
-          description: List of registrations
+          description: List of registrations with tournament details
           schema:
             items:
-              $ref: '#/definitions/domain.Registration'
+              $ref: '#/definitions/domain.RegistrationWithTournament'
             type: array
         "401":
           description: User not authorized

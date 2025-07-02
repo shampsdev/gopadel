@@ -245,6 +245,54 @@ func (r *Registration) GetUserRegistrations(ctx context.Context, userID string) 
 	return r.registrationRepo.Filter(ctx, filter)
 }
 
+// для эндпоинта /registrations/my
+func (r *Registration) GetUserRegistrationsWithTournament(ctx context.Context, userID string) ([]*domain.RegistrationWithTournament, error) {
+	filter := &domain.FilterRegistration{
+		UserID: &userID,
+	}
+
+	registrations, err := r.registrationRepo.Filter(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*domain.RegistrationWithTournament, 0, len(registrations))
+	for _, reg := range registrations {
+		regWithTournament := &domain.RegistrationWithTournament{
+			ID:           reg.ID,
+			UserID:       reg.UserID,
+			TournamentID: reg.TournamentID,
+			Date:         reg.Date,
+			Status:       reg.Status,
+			User:         reg.User,
+		}
+
+		tournament, err := r.getTournamentByID(ctx, reg.TournamentID)
+		if err != nil {
+			continue
+		}
+
+		regWithTournament.Tournament = &domain.TournamentForRegistration{
+			ID:             tournament.ID,
+			Name:           tournament.Name,
+			StartTime:      tournament.StartTime,
+			EndTime:        tournament.EndTime,
+			Price:          tournament.Price,
+			RankMin:        tournament.RankMin,
+			RankMax:        tournament.RankMax,
+			MaxUsers:       tournament.MaxUsers,
+			Description:    tournament.Description,
+			Club:           tournament.Club,
+			TournamentType: tournament.TournamentType,
+			Organizator:    tournament.Organizator,
+		}
+
+		result = append(result, regWithTournament)
+	}
+
+	return result, nil
+}
+
 // Все реги турнира
 func (r *Registration) GetTournamentRegistrations(ctx context.Context, tournamentID string) ([]*domain.Registration, error) {
 	filter := &domain.FilterRegistration{

@@ -11,11 +11,11 @@ import (
 
 // GetMyRegistrations godoc
 // @Summary Get my registrations
-// @Description Returns all registrations for the current user
+// @Description Returns all registrations for the current user with tournament information
 // @Tags registration
 // @Accept json
 // @Produce json
-// @Success 200 {array} domain.Registration "List of registrations"
+// @Success 200 {array} domain.RegistrationWithTournament "List of registrations with tournament details"
 // @Failure 401 {object} map[string]string "User not authorized"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Security ApiKeyAuth
@@ -24,7 +24,7 @@ func GetMyRegistrations(registrationCase *usecase.Registration, userCase *usecas
 	return func(c *gin.Context) {
 		user := middlewares.MustGetUser(c)
 
-		registrations, err := registrationCase.GetUserRegistrations(c.Request.Context(), user.ID)
+		registrations, err := registrationCase.GetUserRegistrationsWithTournament(c.Request.Context(), user.ID)
 		if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to get user registrations") {
 			return
 		}
