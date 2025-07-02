@@ -7,6 +7,7 @@ import type { FilterTournament } from "../../types/filter.type";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { motion } from "framer-motion";
+import { HomeNavbar } from "../../components/widgets/home-navbar";
 
 // Мок-данные для рангов
 const mockRanks: Rank[] = ranks;
@@ -82,6 +83,7 @@ export const Tournaments = () => {
 
   return (
     <>
+      <HomeNavbar />
       <div className="flex flex-row items-center py-6 px-5 border-[#EBEDF0] justify-between border-[1px] gap-6 rounded-[24px] bg-white">
         <p className="flex-1 flex-grow text-[14px] text-[#5D6674]">
           Только со свободными местами

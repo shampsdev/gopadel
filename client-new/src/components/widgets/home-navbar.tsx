@@ -48,25 +48,25 @@ export const HomeNavbar = () => {
       title: "Все",
       icon: Icons.Ball(),
       activeIcon: Icons.Ball("#000"),
-      link: "",
+      link: "../",
     },
     {
       title: "Турниры",
       icon: Icons.Medal(),
       activeIcon: Icons.Medal("#000"),
-      link: "tournaments",
+      link: "../tournaments",
     },
     {
       title: "Игры",
       icon: Icons.Padel(),
       activeIcon: Icons.Padel("#000"),
-      link: "games",
+      link: "../games",
     },
     {
       title: "Тренировки",
       icon: Icons.Target(),
       activeIcon: Icons.Target("#000"),
-      link: "training",
+      link: "../training",
     },
   ];
 
@@ -84,8 +84,13 @@ export const HomeNavbar = () => {
           activeIcon={item.activeIcon}
           onClick={() => handleFilterChange(item.link)}
           variant={
-            (item.link === "" && location.pathname === "/") ||
-            (item.link !== "" && location.pathname.endsWith(item.link))
+            (item.link === "../" && location.pathname === "/") ||
+            (item.link === "../tournaments" &&
+              location.pathname.endsWith("/tournaments")) ||
+            (item.link === "../games" &&
+              location.pathname.endsWith("/games")) ||
+            (item.link === "../training" &&
+              location.pathname.endsWith("/training"))
               ? "active"
               : "default"
           }

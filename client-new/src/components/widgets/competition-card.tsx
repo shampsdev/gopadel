@@ -41,7 +41,7 @@ export const CompetitionCard = ({
         <div className="flex flex-row justify-between">
           <div className="flex flex-col gap-1 flex-1">
             <p className="text-[20px]">{rank.title}</p>
-            <div className="flex flex-row items-center gap-1 text-[#868D98]">
+            <div className="flex flex-row flex-wrap items-center gap-1 text-[#868D98]">
               Организатор: <p className="text-[#5D6674]">{organizerName}</p>
             </div>
           </div>
