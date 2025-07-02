@@ -748,58 +748,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/tournaments/{tournament_id}/participants": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get all participants of a tournament with status ACTIVE, PENDING, or CANCELED_BY_USER",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tournaments"
-                ],
-                "summary": "Get tournament participants",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournament_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of tournament participants",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Registration"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Tournament not found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
         "/tournaments/{tournament_id}/waitlist": {
             "get": {
                 "security": [

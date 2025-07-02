@@ -29,7 +29,7 @@ func (t *Tournament) Create(ctx context.Context, tournament *domain.CreateTourna
 	}
 	
 	filter := &domain.FilterTournament{ID: id}
-	tournaments, err := t.TournamentRepo.Filter(ctx, filter)
+	tournaments, err := t.Filter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get created tournament: %w", err)
 	}
@@ -48,7 +48,7 @@ func (t *Tournament) Patch(ctx context.Context, id string, tournament *domain.Pa
 	}
 	
 	filter := &domain.FilterTournament{ID: id}
-	tournaments, err := t.TournamentRepo.Filter(ctx, filter)
+	tournaments, err := t.Filter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get updated tournament: %w", err)
 	}
@@ -86,7 +86,7 @@ func (t *Tournament) GetTournamentByID(ctx context.Context, tournamentID string)
 		ID: tournamentID,
 	}
 	
-	tournaments, err := t.TournamentRepo.Filter(ctx, filter)
+	tournaments, err := t.Filter(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func (t *Tournament) GetTournamentParticipants(ctx context.Context, tournamentID
 	}
 
 	// Фильтруем только нужные статусы: ACTIVE, PENDING, CANCELED_BY_USER
-	var participants []*domain.Registration
+	participants := make([]*domain.Registration, 0)
 	for _, reg := range registrations {
 		if reg.Status == domain.RegistrationStatusActive || 
 		   reg.Status == domain.RegistrationStatusPending || 

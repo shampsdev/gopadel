@@ -15,7 +15,7 @@ type Tournament struct {
 	Club           Club            `json:"club"`
 	TournamentType string          `json:"tournamentType"`
 	Organizator    User            `json:"organizator"`
-	Participants   []*Registration `json:"participants,omitempty"`
+	Participants   []*Registration `json:"participants"`
 }
 
 type CreateTournament struct {

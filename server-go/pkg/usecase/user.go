@@ -90,33 +90,13 @@ func (u *User) GetByTGData(ctx context.Context, tgData *domain.UserTGData) (*dom
 		return nil, err
 	}
 
-	tgData.Avatar, err = u.telegramAvatarLocation(tgData.Avatar)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user avatar: %w", err)
-	}
-
 	needUpdate := false
 	if tgData.TelegramUsername != user.TelegramUsername {
 		needUpdate = true
 	}
 
-	// if avatar changed
-	if !strings.Contains(user.Avatar, names.ForUserAvatar(user.TelegramID, tgData.Avatar)) {
-		var err error
-		tgData.Avatar, err = u.storage.SaveImageByURL(ctx, tgData.Avatar, names.ForUserAvatar(user.TelegramID, tgData.Avatar))
-		user.Avatar = tgData.Avatar
-		slogx.FromCtx(ctx).Debug("user avatar changed", "user", user.ID, "old_avatar", user.Avatar, "new_avatar", tgData.Avatar)
-		if err != nil {
-			return nil, fmt.Errorf("failed to upload user avatar: %w", err)
-		}
-		needUpdate = true
-	}
-
 	if needUpdate {
 		err = u.userRepo.Patch(ctx, user.ID, &domain.PatchUser{
-			FirstName:        &tgData.FirstName,
-			LastName:         &tgData.LastName,
-			Avatar:           &user.Avatar,
 			TelegramUsername: &tgData.TelegramUsername,
 		})
 		if err != nil {
@@ -126,25 +106,6 @@ func (u *User) GetByTGData(ctx context.Context, tgData *domain.UserTGData) (*dom
 
 	u.tgDataCache.Store(tgData.TelegramID, user)
 	return user, nil
-}
-
-func (u *User) telegramAvatarLocation(userpicURL string) (string, error) {
-	httpCli := &http.Client{
-		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-	resp, err := httpCli.Head(userpicURL)
-	if err != nil {
-		return "", fmt.Errorf("failed to get userpic: %w", err)
-	}
-	defer resp.Body.Close()
-
-	location := resp.Header.Get("Location")
-	if location == "" {
-		return userpicURL, nil
-	}
-	return location, nil
 }
 
 func (u *User) cacheCleaner(ctx context.Context) {
