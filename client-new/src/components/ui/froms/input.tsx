@@ -9,6 +9,7 @@ export interface InputProps {
   onBlur?: () => void;
   fillNotRequired?: boolean;
   placeholder?: string;
+  hasError?: boolean;
 }
 
 export const Input = (props: InputProps) => {
@@ -16,8 +17,11 @@ export const Input = (props: InputProps) => {
     <section>
       <fieldset
         className={`border-2 rounded-[14px] px-3 relative transition-all 
-          ${"border-[#EBEDF0] text-[#A4A9B4] focus-within:border-[#000] focus-within:text-[#000]"} 
-          `}
+          ${
+            props.hasError
+              ? "border-red-500 text-red-500 focus-within:border-red-600 focus-within:text-red-600"
+              : "border-[#EBEDF0] text-[#A4A9B4] focus-within:border-[#000] focus-within:text-[#000]"
+          }`}
       >
         <legend className="px-2 text-[15px] font-semibold transition-all duration-100">
           {props.title}

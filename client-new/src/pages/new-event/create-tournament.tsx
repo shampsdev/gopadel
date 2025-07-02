@@ -5,7 +5,12 @@ import {
   formatDateInput,
   parseDateToISO,
   validateDateFormat,
+  formatTimeInput,
+  validateTimeFormat,
+  createStartAndEndTime,
+  formatISODateToMoscow,
 } from "../../utils/date-format";
+import { Button } from "../../components/ui/button";
 
 export const CreateTournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -13,23 +18,96 @@ export const CreateTournament = () => {
   const [title, setTitle] = useState<string | null>(null);
   const [date, setDate] = useState<string | null>(null);
   const [dateISO, setDateISO] = useState<string | null>(null);
+  const [dateError, setDateError] = useState<boolean>(false);
 
   const [time, setTime] = useState<string | null>(null);
+  const [startTime, setStartTime] = useState<string | null>(null);
+  const [endTime, setEndTime] = useState<string | null>(null);
+  const [timeError, setTimeError] = useState<boolean>(false);
   const [clubName, setClubName] = useState<string | null>(null);
   const [clubAddress, setClubAddress] = useState<string | null>(null);
 
   const [type, setType] = useState<string | null>(null);
-  const [rank, setRank] = useState<number | null>(0);
+  const [rank, setRank] = useState<number | null>(null);
   const [rankInput, setRankInput] = useState<string>("");
 
-  const [price, setPrice] = useState<number | null>(0);
-  const [maxUsers, setMaxUsers] = useState<number | null>(0);
+  const [price, setPrice] = useState<number | null>(null);
+  const [priceInput, setPriceInput] = useState<string>("");
+  const [maxUsers, setMaxUsers] = useState<number | null>(null);
+  const [maxUsersInput, setMaxUsersInput] = useState<string>("");
+
+  // Проверяем валидность всех обязательных полей
+  const isFormValid = () => {
+    return (
+      title &&
+      date &&
+      time &&
+      validateDateFormat(date) &&
+      validateTimeFormat(time) &&
+      clubName &&
+      clubAddress &&
+      type &&
+      rank !== null &&
+      rank > 0 &&
+      price !== null &&
+      price > 0 &&
+      maxUsers !== null &&
+      maxUsers > 0
+    );
+  };
+
+  const handleCreateTournament = () => {
+    if (!date || !time) {
+      console.log("Необходимо указать дату и время");
+      return;
+    }
+
+    if (!validateDateFormat(date)) {
+      console.log("Неверный формат даты");
+      return;
+    }
+
+    if (!validateTimeFormat(time)) {
+      console.log("Неверный формат времени");
+      return;
+    }
+
+    const { startTime: start, endTime: end } = createStartAndEndTime(
+      date,
+      time
+    );
+
+    if (!start || !end) {
+      console.log("Ошибка при создании времени начала и окончания");
+      return;
+    }
+
+    setStartTime(start);
+    setEndTime(end);
+
+    const tournamentData = {
+      title,
+      startTime: start,
+      endTime: end,
+      clubName,
+      clubAddress,
+      type,
+      rank,
+      price,
+      maxUsers,
+    };
+
+    console.log("Данные турнира:", tournamentData);
+  };
+
   return (
     <div className="flex flex-col gap-[40px] h-[150vh]">
-      <div className="flex flex-col gap-12">
-        <div className="flex flex-col gap-2">
-          <p>Новый турнир</p>
-          <p>Добавьте информацию о событии</p>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2 px-[12px]">
+          <p className="text-[24px] font-medium">Новый турнир</p>
+          <p className="text-[#5D6674] text-[16px]">
+            Добавьте информацию о событии
+          </p>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -38,6 +116,7 @@ export const CreateTournament = () => {
             title={"Название"}
             value={title ?? ""}
             maxLength={100}
+            hasError={!title}
           />
           <Input
             onChangeFunction={(value) => {
@@ -51,43 +130,75 @@ export const CreateTournament = () => {
                 setDateISO(null);
               }
             }}
-            title={"Дата (дд.мм.гг)"}
+            onBlur={() => {
+              if (!validateDateFormat(date ?? "")) {
+                setDateError(true);
+              } else {
+                setDateError(false);
+              }
+            }}
+            title={"Дата"}
             value={date ?? ""}
             maxLength={8}
             placeholder={"дд.мм.гг"}
+            hasError={dateError}
           />
           <Input
-            onChangeFunction={setTime}
+            onChangeFunction={(value) => {
+              const formatted = formatTimeInput(value);
+              setTime(formatted);
+
+              if (validateTimeFormat(formatted)) {
+                setTimeError(false);
+              } else {
+                setTimeError(formatted.length > 0);
+              }
+            }}
+            onBlur={() => {
+              if (!validateTimeFormat(time ?? "")) {
+                setTimeError(true);
+              } else {
+                setTimeError(false);
+              }
+            }}
             title={"Время"}
             value={time ?? ""}
-            maxLength={100}
+            maxLength={11}
+            placeholder={"чч:мм-чч:мм"}
+            hasError={timeError}
           />
           <Input
             onChangeFunction={setClubName}
             title={"Место"}
             value={clubName ?? ""}
             maxLength={100}
+            hasError={!clubName}
           />
           <Input
             onChangeFunction={setClubAddress}
             title={"Адрес"}
             value={clubAddress ?? ""}
             maxLength={240}
+            hasError={!clubAddress}
           />
           <Input
             onChangeFunction={setType}
             title={"Тип"}
             value={type ?? ""}
             maxLength={100}
+            hasError={!type}
           />
           <Input
             title="Ранг"
             value={rankInput}
             maxLength={4}
+            placeholder={"0"}
+            hasError={rank === null || rank === 0}
             onChangeFunction={(raw) => {
-              const sanitized = raw.replace(",", ".");
+              const sanitized = raw.replace(",", ".").replace(/[^\d.]/g, "");
 
-              if (!/^\d*\.?\d*$/.test(sanitized)) return;
+              const parts = sanitized.split(".");
+              if (parts.length > 2) return;
 
               setRankInput(raw);
 
@@ -112,37 +223,73 @@ export const CreateTournament = () => {
           />
           <Input
             title={"Стоимость участия"}
-            value={`${price} ₽`}
-            maxLength={100}
+            value={priceInput}
+            maxLength={10}
+            placeholder={"0"}
+            hasError={price === null}
             onChangeFunction={(raw) => {
-              const sanitized = raw.replace(",", ".");
+              const sanitized = raw.replace(/[^\d]/g, "");
 
-              if (!/^\d*\.?\d*$/.test(sanitized)) return;
+              setPriceInput(sanitized);
 
-              setPrice(parseFloat(sanitized));
+              if (sanitized) {
+                setPrice(parseInt(sanitized));
+              } else {
+                setPrice(null);
+              }
+            }}
+            onBlur={() => {
+              // При потере фокуса форматируем число
+              if (priceInput && /^\d+$/.test(priceInput)) {
+                const num = parseInt(priceInput);
+                setPrice(num);
+                setPriceInput(String(num));
+              } else {
+                setPrice(null);
+                setPriceInput("");
+              }
             }}
           />
           <Input
             title={"Максимальное количество участников"}
-            value={`${maxUsers}`}
-            maxLength={100}
+            value={maxUsersInput}
+            maxLength={3}
+            placeholder={"0"}
+            hasError={maxUsers === null}
             onChangeFunction={(raw) => {
-              const sanitized = raw.replace(",", ".");
+              const sanitized = raw.replace(/[^\d]/g, "");
 
-              if (!/^\d*$/.test(sanitized)) return;
+              setMaxUsersInput(sanitized);
 
-              setMaxUsers(parseInt(sanitized));
+              if (sanitized) {
+                setMaxUsers(parseInt(sanitized));
+              } else {
+                setMaxUsers(null);
+              }
+            }}
+            onBlur={() => {
+              // При потере фокуса форматируем число
+              if (maxUsersInput && /^\d+$/.test(maxUsersInput)) {
+                const num = parseInt(maxUsersInput);
+                setMaxUsers(num);
+                setMaxUsersInput(String(num));
+              } else {
+                setMaxUsers(null);
+                setMaxUsersInput("");
+              }
             }}
           />
         </div>
       </div>
 
-      <div>BUTTON</div>
-
-      {/* Временная отладочная информация */}
-      {dateISO && (
-        <div className="text-xs text-gray-500 mt-4">ISO дата: {dateISO}</div>
-      )}
+      <div className="mx-auto">
+        <Button
+          onClick={handleCreateTournament}
+          className={!isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4]" : ""}
+        >
+          Создать турнир
+        </Button>
+      </div>
     </div>
   );
 };
