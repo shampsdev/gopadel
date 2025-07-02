@@ -11,7 +11,7 @@ BEGIN
     
     -- If no users exist, create a default one
     IF default_user_id IS NULL THEN
-        INSERT INTO users (telegram_id, first_name, second_name, rank, loyalty_id, is_registered, bio)
+        INSERT INTO users (telegram_id, first_name, last_name, rank, loyalty_id, is_registered, bio)
         VALUES (999999999, 'Тестовый', 'Организатор', 3.5, 1, true, 'Тестовый пользователь для организации турниров')
         RETURNING id INTO default_user_id;
     END IF;
