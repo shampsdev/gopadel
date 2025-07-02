@@ -1,3 +1,4 @@
+import type { FilterUser } from "../types/filter.type";
 import type { PatchUser } from "../types/patch-user.type";
 import type { User } from "../types/user.type";
 import { api } from "./axios.instance";
@@ -71,4 +72,16 @@ export const uploadAvatar = async (
   );
 
   return response.data.url;
+};
+
+export const getUsers = async (
+  token: string,
+  filter: FilterUser
+): Promise<User[] | null> => {
+  const response = await api.post<User[]>("/users/filter", filter, {
+    headers: {
+      "X-Api-Token": token,
+    },
+  });
+  return response.data;
 };

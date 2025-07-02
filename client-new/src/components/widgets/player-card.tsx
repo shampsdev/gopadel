@@ -1,6 +1,7 @@
 import { Icons } from "../../assets/icons";
 import type { Loyalty } from "../../types/loyalty.type";
 import type { PlayingPosition } from "../../types/playing-position.type";
+import { getRankTitle } from "../../utils/rank-title";
 
 interface PlayerCardProps {
   avatar: string;
@@ -26,14 +27,17 @@ export const PlayerCard = ({
   return (
     <div className="px-[10px] py-[16px] border-[#EBEDF0] border-[1px] w-full rounded-[20px] flex flex-col gap-3">
       <div className="flex flex-row items-center relative gap-[10px]">
-        <div className="w-[68px] h-[68px] rounded-full relative">
-          <img src={avatar} className="object-cover rounded-full" />
-          <div className="absolute bottom-[-6px] right-[-5px] p-[6px] rounded-full bg-[#AFFF3F]">
-            {loyalty.id === "gold" ? Icons.SharpStar() : <></>}
-          </div>
+        <div className="w-[68px] h-[68px] relative rounded-full">
+          <img
+            src={avatar}
+            className="object-cover w-full h-full rounded-full"
+          />
+          {/* <div className="absolute bottom-[-6px] right-[-5px] p-[6px] rounded-full bg-[#AFFF3F]">
+            {Icons.SharpStar()}
+          </div> */}
         </div>
 
-        <div className="flex flex-col gap-[5px] text-[#5D6674]">
+        <div className="flex flex-col gap-[5px] text-[#5D6674] px-[12px]">
           <h1 className="text-black text-[16px]">
             {firstName} {lastName}
           </h1>
@@ -45,14 +49,18 @@ export const PlayerCard = ({
             <div className="w-[14px] h-[14px]">
               {Icons.Star(undefined, "14px", "14px")}
             </div>
-            <p>{rank}</p>
+            <p>{getRankTitle(rank)}</p>
           </div>
 
           <div className="flex flex-row items-center gap-[8px] text-[12px]">
             <div className="w-[14px] h-[14px]">
               {Icons.Cage(undefined, "14px", "14px")}
             </div>
-            <p>{position}</p>
+            <p>
+              {position === "left" && "Левый"}
+              {position === "right" && "Правый"}
+              {position === "both" && "В обоих"}
+            </p>
           </div>
         </div>
 
@@ -61,7 +69,7 @@ export const PlayerCard = ({
         </div>
       </div>
 
-      <div className="text-[#5D6674] text-[12px]">
+      <div className="text-[#5D6674] text-[12px] px-[12px]">
         <p>{bio}</p>
       </div>
     </div>

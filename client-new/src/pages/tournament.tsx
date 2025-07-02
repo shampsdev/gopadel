@@ -1,51 +1,48 @@
 import { useParams } from "react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import type { Tournament as TournamentType } from "../types/tournament.type";
 import { Icons } from "../assets/icons";
 import { getRankTitle } from "../utils/rank-title";
 import { useTelegramBackButton } from "../shared/hooks/useTelegramBackButton";
+import { useGetTournaments } from "../api/hooks/useGetTournaments";
+import { useEffect } from "react";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   const { id } = useParams();
-  const queryClient = useQueryClient();
 
-  const cachedTournaments = queryClient.getQueryData([
-    "tournaments",
-    {},
-  ]) as TournamentType[];
-
-  const tournament = cachedTournaments?.find(
-    (t: TournamentType) => t.id === id
-  );
-
-  const waitlist = 1;
+  const { data: tournament, isLoading } = useGetTournaments({ id: id! });
+  // const { data: waitlist, isLoading: waitlistLoading } =
+  //   useGetTournamentWaitlist(id!);
 
   const getPersonWord = (count: number) => {
     if (count === 1) return "человек";
     if (count >= 2 && count <= 4) return "человека";
     return "человек";
   };
+  useEffect(() => {
+    console.log(tournament?.[0]);
+  }, [tournament]);
+
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div className="pb-[100px]">
       <div className="flex flex-col gap-8 pb-[100px]">
         <div className="flex flex-col gap-7">
-          <h1>{tournament?.name}</h1>
+          <h1>{tournament?.[0]?.name}</h1>
           <div className="flex flex-col gap-5">
             <div className="flex flex-row justify-between">
               <div className="flex flex-col gap-[2px]">
                 <p className="text-[14px] text-[#5D6674]">
-                  {tournament?.startTime}
+                  {tournament?.[0].startTime}
                 </p>
                 <p className="text-[14px] text-[#5D6674]">
-                  {tournament?.endTime}
+                  {tournament?.[0].endTime}
                 </p>
               </div>
 
               <div className="flex flex-col">
                 <p className="text-[14px] text-[#5D6674]">
-                  {tournament?.price} ₽
+                  {tournament?.[0].price} ₽
                 </p>
                 <p>участие</p>
               </div>
@@ -53,16 +50,16 @@ export const Tournament = () => {
 
             <div className="flex flex-row justify-between">
               <div className="flex flex-col">
-                <p>{tournament?.club.name}</p>
-                <p>{tournament?.club.address}</p>
+                <p>{tournament?.[0].club.name}</p>
+                <p>{tournament?.[0].club.address}</p>
               </div>
               <div>{Icons.Location()}</div>
             </div>
 
             <div className="flex flex-row justify-between">
               <div className="flex flex-col">
-                <p>Тип: {tournament?.tournamentType}</p>
-                <p>Ранг: {getRankTitle(tournament?.rankMin || 0)}</p>
+                <p>Тип: {tournament?.[0].tournamentType}</p>
+                <p>Ранг: {getRankTitle(tournament?.[0].rankMin || 0)}</p>
               </div>
               <div>{Icons.Star()}</div>
             </div>
@@ -74,7 +71,8 @@ export const Tournament = () => {
             <div className="flex flex-row gap-[7px]">
               <p>Участники</p>
               <p className="text-[14px] text-[#F34338]">
-                {/* {tournament?.participants.length} / {tournament?.maxUsers} */}
+                {tournament?.[0].participants.length} /{" "}
+                {tournament?.[0].maxUsers}
               </p>
             </div>
 
@@ -88,7 +86,8 @@ export const Tournament = () => {
             <div className="flex flex-col gap-[2px]">
               <p>Список ожидания</p>
               <p>
-                {waitlist} {getPersonWord(waitlist)}
+                {/* {tournament?.[0].waitlist}{" "}
+                {getPersonWord(tournament?.[0].waitlist)} */}
               </p>
             </div>
           </div>
@@ -98,7 +97,7 @@ export const Tournament = () => {
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-row justify-between">
-            <p>Организатор: {tournament?.organizator.firstName}</p>
+            <p>Организатор: {}</p>
 
             <div className="flex flex-row items-center gap-[10px]">
               <p>Написать</p>
