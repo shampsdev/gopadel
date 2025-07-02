@@ -4,6 +4,7 @@ import { getRankTitle } from "../../../utils/rank-title";
 import { useGetMe } from "../../../api/hooks/useGetMe";
 import { Link } from "react-router";
 import { formatBirthDate } from "../../../utils/date-format";
+import { formatUrl, getDisplayName } from "../../../utils/format-url";
 
 export const MyProfile = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -82,11 +83,11 @@ export const MyProfile = () => {
               {user?.padelProfiles.split("\n").map((url: string) => (
                 <a
                   key={url}
-                  href={url}
-                  className="flex no-underline md:underline flex-row items-center"
+                  href={formatUrl(url)}
+                  className="flex no-underline md:underline flex-row items-center bg-[#F8F8FA] rounded-[30px] px-[20px] gap-4 py-[14px]"
                 >
-                  <div>{Icons.Star()}</div>
-                  <p>{url}</p>
+                  <div>{Icons.Link()}</div>
+                  <p className="text-[16px]">{getDisplayName(url)}</p>
                 </a>
               ))}
             </div>
@@ -103,7 +104,7 @@ export const MyProfile = () => {
         <div className="py-5">
           <div className="flex flex-col gap-[10px]">
             <p className="text-[#868D98] text-[16px]">О себе</p>
-            <p>{user?.bio}</p>
+            <p className="text-[16px]">{user?.bio}</p>
           </div>
         </div>
       </div>

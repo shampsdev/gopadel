@@ -1,7 +1,9 @@
 import { useGetMyRegistrations } from "../../../api/hooks/useGetMyRegistrations";
 import { CompetitionHistoryCard } from "../../../components/widgets/competition-history-card";
+import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
 
 export const TournamentsHistory = () => {
+  useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   const { data: registrations } = useGetMyRegistrations();
 
   return (

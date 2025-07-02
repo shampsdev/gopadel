@@ -1,7 +1,9 @@
 import { LoyaltyAccordion } from "../components/ui/loyalty-accordion";
 import { useGetLoyalties } from "../api/hooks/useGetLoyalties";
+import { useTelegramBackButton } from "../shared/hooks/useTelegramBackButton";
 
 export const Loyalty = () => {
+  useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   const { data: loyalties, isLoading } = useGetLoyalties();
   return (
     <div className="flex flex-col gap-9 pb-[100px]">
