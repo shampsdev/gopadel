@@ -6,6 +6,8 @@ import { Textarea } from "../../components/ui/froms/textarea";
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router";
 import { usePatchMe } from "../../api/hooks/mutations/patch-me";
+import { uploadAvatar } from "../../api/user";
+import { useAuthStore } from "../../shared/stores/auth.store";
 
 export const Registration = () => {
   const { avatarUrl, username } = useTgUserStore();
@@ -18,7 +20,11 @@ export const Registration = () => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(
+    null
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { token } = useAuthStore();
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -34,7 +40,7 @@ export const Registration = () => {
     }
   };
 
-  const displayAvatarUrl = previewUrl || avatarUrl;
+  const displayAvatarUrl = previewUrl || uploadedAvatarUrl || avatarUrl;
 
   const patchMeMutation = usePatchMe();
 
@@ -42,8 +48,23 @@ export const Registration = () => {
 
   const registration = async () => {
     try {
+      let finalAvatarUrl = avatarUrl;
+
+      console.log("selectedFile", selectedFile);
+
+      if (selectedFile) {
+        try {
+          finalAvatarUrl = await uploadAvatar(token!, selectedFile);
+          setUploadedAvatarUrl(finalAvatarUrl);
+        } catch (error) {
+          console.error("Ошибка загрузки аватара:", error);
+          alert("Ошибка загрузки аватара");
+          return;
+        }
+      }
+
       await patchMeMutation.mutateAsync({
-        avatar: displayAvatarUrl!,
+        avatar: finalAvatarUrl!,
         bio: bio ?? "",
         firstName: firstName ?? "",
         lastName: lastName ?? "",
@@ -57,7 +78,7 @@ export const Registration = () => {
   };
 
   return (
-    <div className="flex flex-col gap-11 mt-3 pb-[100px]">
+    <div className="flex flex-col just gap-11 mt-3 pb-[100px]">
       <div className="flex flex-row gap-7 items-center">
         <div
           className="aspect-square max-h-[160px] rounded-full overflow-hidden"

@@ -9,11 +9,14 @@ import { Players } from "../pages/home/players";
 import { Tournaments } from "../pages/home/tournaments";
 import { Competitions } from "../pages/home/competitions";
 import { Tournament } from "../pages/tournament";
-import { MyProfile } from "../pages/my-profile";
+import { MyProfile } from "../pages/profile/my-profile/my-profile";
 import { TournamentPlayers } from "../pages/tournament-players";
 import { NewEvent } from "../pages/new-event/new-event";
 import { CreateTournament } from "../pages/new-event/create-tournament";
 import { CreateGame } from "../pages/new-event/create-game";
+import { EditProfile } from "../pages/profile/my-profile/edit";
+import { UserProfile } from "../pages/profile/user-profile";
+import { TournamentsHistory } from "../pages/profile/my-profile/tournaments-history";
 
 const authRoutes: RouteObject[] = [
   {
@@ -45,7 +48,7 @@ export const routes: RouteObject[] = [
   {
     path: "registration",
     element: (
-      <div className="max-w-[90%] mx-auto">
+      <div className="max-w-[90%] justify-between mx-auto">
         <AnimatedOutlet />
       </div>
     ),
@@ -87,7 +90,15 @@ export const routes: RouteObject[] = [
             element: <Players />,
           },
           { path: "league", element: <div>League</div> },
-          { path: "profile", element: <MyProfile /> },
+          {
+            path: "profile",
+            children: [
+              { path: "", element: <MyProfile /> },
+              { path: "edit", element: <EditProfile /> },
+              { path: ":id", element: <UserProfile /> },
+              { path: "tournaments", element: <TournamentsHistory /> },
+            ],
+          },
           {
             path: "tournament",
             children: [

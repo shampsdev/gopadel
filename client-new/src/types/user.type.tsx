@@ -4,7 +4,7 @@ import type { PlayingPosition } from "./playing-position.type";
 export interface User {
   avatar: string;
   bio: string;
-  birthData: string;
+  birthDate: string;
   city: string;
   firstName: string;
   lastName: string;

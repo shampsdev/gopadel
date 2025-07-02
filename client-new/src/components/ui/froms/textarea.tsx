@@ -6,6 +6,7 @@ export interface TextareaProps {
   maxLength: number;
   onFocus?: () => void;
   onBlur?: () => void;
+  placeholder?: string;
   fillNotRequired?: boolean;
 }
 export const Textarea = (props: TextareaProps) => {
@@ -53,11 +54,12 @@ export const Textarea = (props: TextareaProps) => {
           }}
           onKeyDown={limitNewlines}
           maxLength={props.maxLength}
+          placeholder={props.placeholder}
           style={{
             whiteSpace: "pre-wrap",
             overflow: "hidden",
           }}
-          className="resize-none w-full  outline-none pb-[6px] py-[3px] px-[16px] bg-transparent text-black"
+          className="resize-none w-full min-h-[110px] outline-none pb-[6px] py-[3px] px-[16px] bg-transparent text-black"
         />
       </fieldset>
     </section>

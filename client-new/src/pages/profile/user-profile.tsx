@@ -1,8 +1,8 @@
 import { useParams } from "react-router";
-import { Icons } from "../assets/icons";
-import { useTelegramBackButton } from "../shared/hooks/useTelegramBackButton";
-import type { User } from "../types/user.type";
-import { getRankTitle } from "../utils/rank-title";
+import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
+import type { User } from "../../types/user.type";
+import { getRankTitle } from "../../utils/rank-title";
+import { Icons } from "../../assets/icons";
 
 export const UserProfile = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -11,7 +11,7 @@ export const UserProfile = () => {
   const user: User = {
     avatar: "",
     bio: "",
-    birthData: "",
+    birthDate: "",
     city: "",
     firstName: "",
     lastName: "",
@@ -62,13 +62,6 @@ export const UserProfile = () => {
             <p>Уровень лояльности</p>
           </div>
         </div>
-
-        <div className="flex flex-row justify-between items-center">
-          <div>{Icons.Star()}</div>
-          <p>Достижения игрока</p>
-          <div>{Icons.ArrowRight()}</div>
-        </div>
-
         <div className="flex flex-col gap-[10px]">
           <p>Профили по падел</p>
           <div className="flex flex-col gap-2">
@@ -87,7 +80,7 @@ export const UserProfile = () => {
 
         <div className="flex flex-row items-center">
           <p>Дата рождения</p>
-          <p>{user.birthData}</p>
+          <p>{user.birthDate}</p>
         </div>
 
         <div className="flex flex-col gap-[10px]">

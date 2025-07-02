@@ -2,6 +2,7 @@ import type { Tournament } from "./tournament.type";
 import type { User } from "./user.type";
 
 export interface Registration {
+  status: RegistrationStatus;
   date: string;
   id: string;
   statis: RegistrationStatus;

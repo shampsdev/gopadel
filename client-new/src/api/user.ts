@@ -51,3 +51,24 @@ export const getMe = async (token: string): Promise<User | null> => {
     throw error;
   }
 };
+
+export const uploadAvatar = async (
+  token: string,
+  file: File
+): Promise<string> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await api.post<{ url: string }>(
+    "/images/upload/avatar",
+    formData,
+    {
+      headers: {
+        "X-Api-Token": token,
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data.url;
+};

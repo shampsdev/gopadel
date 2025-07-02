@@ -29,6 +29,36 @@ export const validateDateFormat = (dateString: string): boolean => {
   );
 };
 
+// Функция для валидации даты рождения в формате дд.мм.гггг
+export const validateBirthDate = (dateString: string): boolean => {
+  // Строгая проверка формата
+  const dateRegex = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/;
+  const match = dateString.match(dateRegex);
+
+  if (!match) return false;
+
+  const day = parseInt(match[1]);
+  const month = parseInt(match[2]);
+  const year = parseInt(match[3]);
+
+  // Проверяем, что все части даты заполнены
+  if (!day || !month || !year) return false;
+
+  // Проверяем корректность дня и месяца
+  if (day < 1 || day > 31 || month < 1 || month > 12) return false;
+
+  // Проверяем год (только 4 цифры для даты рождения)
+  if (year < 1900 || year > new Date().getFullYear()) return false;
+
+  // Проверяем существование даты
+  const date = new Date(year, month - 1, day);
+  return (
+    date.getDate() === day &&
+    date.getMonth() === month - 1 &&
+    date.getFullYear() === year
+  );
+};
+
 // Функция для форматирования ввода даты
 export const formatDateInput = (value: string): string => {
   // Удаляем все символы кроме цифр и точек
@@ -86,6 +116,19 @@ export const parseDateToISO = (dateString: string): string | null => {
   return adjustedDate.toISOString();
 };
 
+// Функция для преобразования даты рождения в формате дд.мм.гггг в ISO формат
+export const parseBirthDateToISO = (dateString: string): string | null => {
+  if (!validateBirthDate(dateString)) return null;
+
+  const [day, month, year] = dateString.split(".");
+
+  // Создаем дату в полночь по UTC (без московского смещения для даты рождения)
+  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+
+  // Преобразуем в ISO формат
+  return date.toISOString();
+};
+
 // Функция для получения текущей даты в формате дд.мм.гг по МСК
 export const getCurrentDateFormatted = (): string => {
   const now = new Date();
@@ -113,6 +156,20 @@ export const formatISODateToMoscow = (isoDate: string): string => {
   const minutes = String(moscowTime.getUTCMinutes()).padStart(2, "0");
 
   return `${day}.${month}.${year} ${hours}:${minutes}`;
+};
+
+// Функция для форматирования даты рождения из ISO в формат дд.мм.гггг
+export const formatBirthDate = (isoDate: string): string => {
+  try {
+    const date = new Date(isoDate);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = String(date.getFullYear());
+    return `${day}.${month}.${year}`;
+  } catch (error) {
+    console.error("Ошибка форматирования даты рождения:", error);
+    return "";
+  }
 };
 
 // Функция для валидации времени в формате hh:mm-hh:mm
