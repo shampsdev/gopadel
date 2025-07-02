@@ -61,7 +61,7 @@ func (u *User) GetByTelegramID(ctx context.Context, id int64) (*domain.User, err
 }
 
 func (u *User) GetMe(ctx Context) (*domain.User, error) {
-	return ctx.User, nil
+	return repo.First(u.userRepo.Filter)(ctx, &domain.FilterUser{ID: &ctx.User.ID})
 }
 
 func (u *User) PatchMe(ctx Context, patch *domain.PatchUser) (*domain.User, error) {
@@ -69,7 +69,7 @@ func (u *User) PatchMe(ctx Context, patch *domain.PatchUser) (*domain.User, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch user: %w", err)
 	}
-	
+	u.tgDataCache.Delete(ctx.User.TelegramID)
 	return repo.First(u.userRepo.Filter)(ctx, &domain.FilterUser{ID: &ctx.User.ID})
 }
 

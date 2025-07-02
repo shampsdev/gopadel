@@ -198,8 +198,17 @@ func (r *UserRepo) Patch(ctx context.Context, id string, user *domain.PatchUser)
 	if err != nil {
 		return fmt.Errorf("failed to build SQL: %w", err)
 	}
-	_, err = r.db.Exec(ctx, sql, args...)
-	return err
+
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update user: %w", err)
+	}
+	
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("user with id %s not found", id)
+	}
+	
+	return nil
 }
 
 func (r *UserRepo) Delete(ctx context.Context, id string) error {
