@@ -88,7 +88,9 @@ export const Registration = () => {
         rank: rank ?? 0,
         isRegistered: true,
       });
-      navigate("../");
+      console.log("before navigate");
+      navigate("/");
+      console.log("after navigate");
     } catch (error) {
       alert("Уупс, что-то пошло не так");
     }

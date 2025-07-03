@@ -65,12 +65,9 @@ export const Competitions = () => {
     return {
       id: tournament.id,
       rank,
-      organizerName:
-        `${tournament.organizator?.firstName || ""} ${
-          tournament.organizator?.lastName || ""
-        }`.trim() ||
-        tournament.club?.name ||
-        "Неизвестно",
+      organizerName: `${tournament.organizator?.firstName || ""} ${
+        tournament.organizator?.lastName || ""
+      }`,
       date: new Date(tournament.startTime).toLocaleDateString("ru-RU", {
         day: "numeric",
         month: "long",
@@ -86,6 +83,7 @@ export const Competitions = () => {
       playersAmount: participantsCount,
       participating: false,
       competitionType: "tournament",
+      title: tournament.name || "",
     };
   };
 
@@ -160,6 +158,7 @@ export const Competitions = () => {
             competition.competitionType === "tournament" ? (
               <Link key={competition.id} to={`/tournament/${competition.id}`}>
                 <CompetitionCard
+                  title={competition.title}
                   rank={competition.rank}
                   organizerName={competition.organizerName}
                   date={competition.date}
@@ -175,6 +174,7 @@ export const Competitions = () => {
             ) : (
               <CompetitionCard
                 key={competition.id}
+                title={competition.title}
                 rank={competition.rank}
                 organizerName={competition.organizerName}
                 date={competition.date}

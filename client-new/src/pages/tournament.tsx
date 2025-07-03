@@ -18,7 +18,10 @@ export const Tournament = () => {
 
   const [isCopied, setIsCopied] = useState(false);
 
-  const { data: tournament, isLoading } = useGetTournaments({ id: id! });
+  const { data: tournament, isLoading } = useGetTournaments({
+    id: id!,
+    isAvailable: true,
+  });
   const { data: waitlist } = useGetTournamentWaitlist(id!);
 
   const getPersonWord = (count: number) => {
@@ -144,19 +147,19 @@ export const Tournament = () => {
               )}
           </div>
 
-          <div className="bg-[#F8F8FA] rounded-[20px] py-[6px] px-[14px] text-[12px] text-[#5D6674]">
-            смотреть все
-          </div>
+          {tournament?.[0].participants.length > 0 && (
+            <Link to={`players`}>
+              <div className="bg-[#F8F8FA] rounded-[20px] py-[6px] px-[14px] text-[12px] text-[#5D6674]">
+                смотреть все
+              </div>
+            </Link>
+          )}
         </div>
 
         <div className="px-[12px]">
           <TournamentPlayers
             tournamentId={id!}
-            registrations={
-              tournament?.[0].participants
-                ? Array(10).fill(tournament[0].participants).flat()
-                : []
-            }
+            registrations={tournament?.[0].participants}
           />
         </div>
 

@@ -6,6 +6,7 @@ import { useGetUsers } from "../../api/hooks/useGetUsers";
 import { formatBirthDate } from "../../utils/date-format";
 import { formatUrl, getDisplayName } from "../../utils/format-url";
 import { useAuthStore } from "../../shared/stores/auth.store";
+import { openTelegramLink } from "@telegram-apps/sdk-react";
 
 export const UserProfile = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -23,9 +24,9 @@ export const UserProfile = () => {
   return (
     <div className="flex flex-col gap-11 pb-[150px]">
       <div className="px-[8px] flex flex-row items-center gap-7 ">
-        <div className="w-[80px] h-[80px] rounded-full overflow-none">
+        <div className="w-[80px] h-[80px] rounded-full overflow-hidden">
           <img
-            className="object-cover rounded-full"
+            className="object-cover w-full h-full"
             src={user[0].avatar}
             alt="avatar"
           />
@@ -117,14 +118,19 @@ export const UserProfile = () => {
       </div>
 
       <div className="w-fit mx-auto">
-        <Link to="edit">
-          <div className="flex bg-[#34AADF]/20 flex-row py-[18px] px-[21px] rounded-[30px] gap-[16px] items-center">
-            <p className="text-[#1392CB]">Написать в Telegram</p>
-            <div className="w-[22px] h-[22px] flex flex-col justify-center items-center">
-              {Icons.Telegram()}
-            </div>
+        <div
+          onClick={() => {
+            if (user[0].telegramUsername) {
+              openTelegramLink(`https://t.me/${user[0].telegramUsername}`);
+            }
+          }}
+          className="flex bg-[#34AADF]/20 flex-row py-[18px] px-[21px] rounded-[30px] gap-[16px] items-center"
+        >
+          <p className="text-[#1392CB]">Написать в Telegram</p>
+          <div className="w-[22px] h-[22px] flex flex-col justify-center items-center">
+            {Icons.Telegram()}
           </div>
-        </Link>
+        </div>
       </div>
     </div>
   );

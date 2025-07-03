@@ -50,7 +50,7 @@ export const cancelRegistrationAfterPayment = async (
   tournamentId: string
 ): Promise<Registration | null> => {
   const response = await api.post(
-    `/registrations/${tournamentId}/cancel`,
+    `/registrations/${tournamentId}/cancel-paid`,
     {},
     {
       headers: {

@@ -105,9 +105,11 @@ export const routes: RouteObject[] = [
             children: [
               {
                 path: ":id",
-                element: <Tournament />,
 
-                children: [{ path: "players", element: <TournamentPlayers /> }],
+                children: [
+                  { path: "", element: <Tournament /> },
+                  { path: "players", element: <TournamentPlayers /> },
+                ],
               },
             ],
           },

@@ -18,7 +18,6 @@ export const TournamentPlayers = ({ registrations }: TurnamentPlayers) => {
   const [showRightShadow, setShowRightShadow] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const location = useLocation();
 
   const goToUserProfile = (userId: string, event: React.MouseEvent) => {
     navigate(`/profile/${userId}`);
@@ -40,7 +39,7 @@ export const TournamentPlayers = ({ registrations }: TurnamentPlayers) => {
     const container = scrollContainerRef.current;
     if (container) {
       container.addEventListener("scroll", checkScroll);
-      // Initial check
+
       checkScroll();
 
       return () => container.removeEventListener("scroll", checkScroll);
@@ -67,13 +66,13 @@ export const TournamentPlayers = ({ registrations }: TurnamentPlayers) => {
                   )}
                   onClick={(e) => goToUserProfile(registration.user.id, e)}
                 >
-                  {registration.status === "PENDING" && (
+                  {registration.status === "ACTIVE" && (
                     <div className="absolute bg-[#AFFF3F] top-0 right-0 w-[24px] z-10 h-[24px] rounded-full flex items-center justify-center">
                       {Icons.Success("black")}
                     </div>
                   )}
                   {registration.status === "CANCELED_BY_USER" && (
-                    <div className="absolute bg-[#F34338] top-0 left-0 w-[24px] h-[24px] rounded-full flex items-center justify-center">
+                    <div className="absolute bg-[#F34338] top-0 right-0 w-[24px] z-10 h-[24px] rounded-full flex items-center justify-center">
                       {Icons.Success("black")}
                     </div>
                   )}
@@ -86,11 +85,7 @@ export const TournamentPlayers = ({ registrations }: TurnamentPlayers) => {
                       <img
                         src={registration.user.avatar}
                         alt={fullName}
-                        className={twMerge(
-                          "w-full h-full object-cover",
-                          registration.status === "CANCELED_BY_USER" &&
-                            "filter grayscale"
-                        )}
+                        className={twMerge("w-full h-full object-cover")}
                       />
                     ) : (
                       <div

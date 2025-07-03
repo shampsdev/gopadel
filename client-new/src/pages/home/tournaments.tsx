@@ -43,7 +43,11 @@ export const Tournaments = () => {
     isAvailable: showOnlyAvailable || undefined,
   };
 
-  const { data: tournaments, isLoading, error } = useGetTournaments(filter);
+  const {
+    data: tournaments,
+    isLoading,
+    error,
+  } = useGetTournaments({ isAvailable: true });
 
   return (
     <>
@@ -90,6 +94,7 @@ export const Tournaments = () => {
         {tournaments?.map((competition: Tournament) => (
           <Link key={competition.id} to={`/tournament/${competition.id}`}>
             <CompetitionCard
+              title={competition.name}
               key={competition.id}
               rank={
                 mockRanks.find(

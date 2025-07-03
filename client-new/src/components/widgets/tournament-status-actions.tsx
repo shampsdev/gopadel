@@ -20,7 +20,6 @@ import {
   isUserInWaitlist,
 } from "../../utils/tournament-status-checks";
 import { Button } from "../ui/button";
-import { cancelRegistrationBeforePayment } from "../../api/registrations";
 import { useCancelRegistrationBeforePayment } from "../../api/hooks/mutations/registration/cancel-registration-before-payment";
 
 interface TournamentStatusActionsProps {
@@ -70,6 +69,7 @@ export const TournamentStatusActions = ({
           <div className="flex flex-col text-center gap-[18px]">
             <div className="mb-10 flex flex-row gap-4 justify-center">
               <Button
+                className="bg-[#FF5053] text-white"
                 onClick={async () => {
                   await cancelRegistrationAfterPayment(tournament.id);
                 }}
@@ -115,7 +115,7 @@ export const TournamentStatusActions = ({
                 onClick={async () => {
                   const payment = await createPaymentForTournamentRegistration({
                     tournamentId: tournament.id,
-                    returnUrl: `https://t.me/${BOT_NAME}/app?startapp=${tournament.id}`,
+                    returnUrl: `https://t.me/study_stats_bot/app?startapp=${tournament.id}`,
                   });
                   window.open(payment?.paymentLink, "_blank");
                 }}

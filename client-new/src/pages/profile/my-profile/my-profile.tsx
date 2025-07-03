@@ -14,9 +14,9 @@ export const MyProfile = () => {
   return (
     <div className="flex flex-col gap-11 pb-[150px]">
       <div className="px-[8px] flex flex-row items-center gap-7 ">
-        <div className="w-[80px] h-[80px] rounded-full overflow-none">
+        <div className="w-[80px] h-[80px] rounded-full overflow-hidden">
           <img
-            className="object-cover rounded-full"
+            className="object-cover w-full h-full"
             src={user?.avatar}
             alt="avatar"
           />
