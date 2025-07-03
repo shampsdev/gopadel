@@ -21,6 +21,8 @@ type User interface {
 
 type AdminUser interface {
 	Filter(ctx context.Context, filter *domain.FilterAdminUser) ([]*domain.AdminUser, error)
+	GetByUsername(ctx context.Context, username string) (*domain.AdminUser, error)
+	UpdatePassword(ctx context.Context, id string, passwordHash string) error
 }
 
 type Club interface {

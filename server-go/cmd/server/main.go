@@ -17,10 +17,13 @@ import (
 
 // @title           GoPadel server
 // @version         1.0
-// @description     Manage chats, users
+// @description     Manage chats, users, tournaments. For JWT authentication use 'Bearer <token>' format in Authorization header.
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name X-API-Token
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	cfg := config.Load(".env")
 	cfg.Print()

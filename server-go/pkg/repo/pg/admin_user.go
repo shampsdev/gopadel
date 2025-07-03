@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
+	"github.com/shampsdev/go-telegram-template/pkg/repo"
 )
 
 type AdminUserRepo struct {
@@ -26,7 +27,7 @@ func NewAdminUserRepo(db *pgxpool.Pool) *AdminUserRepo {
 
 func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUser) ([]*domain.AdminUser, error) {
 	s := r.psql.Select(
-		`"id"`, `"is_superuser"`, `"user_id"`, `"username"`,
+		`"id"`, `"is_superuser"`, `"user_id"`, `"username"`, `"password_hash"`,
 	).From(`"admin_users"`)
 
 	if filter.ID != nil {
@@ -63,12 +64,14 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 	for rows.Next() {
 		var adminUser domain.AdminUser
 		var username pgtype.Text
+		var passwordHash pgtype.Text
 
 		err := rows.Scan(
 			&adminUser.ID,
 			&adminUser.IsSuperUser,
 			&adminUser.UserID,
 			&username,
+			&passwordHash,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
@@ -77,9 +80,68 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 		if username.Valid {
 			adminUser.Username = username.String
 		}
+		if passwordHash.Valid {
+			adminUser.PasswordHash = passwordHash.String
+		}
 
 		adminUsers = append(adminUsers, &adminUser)
 	}
 
 	return adminUsers, nil
+}
+
+func (r *AdminUserRepo) GetByUsername(ctx context.Context, username string) (*domain.AdminUser, error) {
+	s := r.psql.Select(
+		`"id"`, `"is_superuser"`, `"user_id"`, `"username"`, `"password_hash"`,
+	).From(`"admin_users"`).Where(sq.Eq{`"username"`: username})
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	var adminUser domain.AdminUser
+	var usernameVal pgtype.Text
+	var passwordHash pgtype.Text
+
+	err = r.db.QueryRow(ctx, sql, args...).Scan(
+		&adminUser.ID,
+		&adminUser.IsSuperUser,
+		&adminUser.UserID,
+		&usernameVal,
+		&passwordHash,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, repo.ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute SQL: %w", err)
+	}
+
+	if usernameVal.Valid {
+		adminUser.Username = usernameVal.String
+	}
+	if passwordHash.Valid {
+		adminUser.PasswordHash = passwordHash.String
+	}
+
+	return &adminUser, nil
+}
+
+func (r *AdminUserRepo) UpdatePassword(ctx context.Context, id string, passwordHash string) error {
+	s := r.psql.Update(`"admin_users"`).
+		Set(`"password_hash"`, passwordHash).
+		Where(sq.Eq{`"id"`: id})
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	_, err = r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to execute SQL: %w", err)
+	}
+
+	return nil
 } 

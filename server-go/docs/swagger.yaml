@@ -1,4 +1,38 @@
 definitions:
+  domain.AdminLogin:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  domain.AdminMe:
+    properties:
+      is_superuser:
+        type: boolean
+      username:
+        type: string
+    type: object
+  domain.AdminPasswordChange:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  domain.AdminToken:
+    properties:
+      access_token:
+        type: string
+      token_type:
+        type: string
+    type: object
   domain.Club:
     properties:
       address:
@@ -43,6 +77,11 @@ definitions:
     - startTime
     - tournamentType
     type: object
+  domain.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
   domain.FilterTournament:
     properties:
       id:
@@ -77,6 +116,11 @@ definitions:
       name:
         type: string
       requirements:
+        type: string
+    type: object
+  domain.MessageResponse:
+    properties:
+      message:
         type: string
     type: object
   domain.PatchTournament:
@@ -345,6 +389,87 @@ info:
   title: GoPadel server
   version: "1.0"
 paths:
+  /admin/auth/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change password for currently authenticated admin
+      parameters:
+      - description: Password change data
+        in: body
+        name: password
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AdminPasswordChange'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Change admin password
+      tags:
+      - admin-auth
+  /admin/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate admin user and return JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AdminLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AdminToken'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Admin login
+      tags:
+      - admin-auth
+  /admin/auth/me:
+    get:
+      description: Get information about currently authenticated admin
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AdminMe'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get current admin info
+      tags:
+      - admin-auth
   /api/v1/yookassa_webhook:
     post:
       consumes:
@@ -1214,5 +1339,10 @@ securityDefinitions:
   ApiKeyAuth:
     in: header
     name: X-API-Token
+    type: apiKey
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
     type: apiKey
 swagger: "2.0"
