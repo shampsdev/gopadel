@@ -1,3 +1,10 @@
+import { useCancelRegistrationAfterPayment } from "../../api/hooks/mutations/registration/cancel-registration-after-payment";
+import { useCreatePaymentForTournamentRegistration } from "../../api/hooks/mutations/registration/create-payment-for-tournament-registration";
+import { useReactivateCancelledRegistration } from "../../api/hooks/mutations/registration/reactivate-cancelled-registration";
+import { useRegisterToTournament } from "../../api/hooks/mutations/registration/register-to-tournament";
+import { useAddUserToWaitlist } from "../../api/hooks/mutations/waitlist/add-user-to-waitlist";
+import { useRemoveUserFromWaitlist } from "../../api/hooks/mutations/waitlist/remove-user-from-waitlist";
+import { BOT_NAME } from "../../shared/constants/api";
 import { Icons } from "../../assets/icons";
 import type { Tournament } from "../../types/tournament.type";
 import type { User } from "../../types/user.type";
@@ -13,6 +20,8 @@ import {
   isUserInWaitlist,
 } from "../../utils/tournament-status-checks";
 import { Button } from "../ui/button";
+import { cancelRegistrationBeforePayment } from "../../api/registrations";
+import { useCancelRegistrationBeforePayment } from "../../api/hooks/mutations/registration/cancel-registration-before-payment";
 
 interface TournamentStatusActionsProps {
   tournament: Tournament;
@@ -25,6 +34,17 @@ export const TournamentStatusActions = ({
   user,
   waitlist,
 }: TournamentStatusActionsProps) => {
+  const { mutateAsync: addUserToWaitlist } = useAddUserToWaitlist();
+  const { mutateAsync: removeUserFromWaitlist } = useRemoveUserFromWaitlist();
+  const { mutateAsync: registerToTournament } = useRegisterToTournament();
+  const { mutateAsync: createPaymentForTournamentRegistration } =
+    useCreatePaymentForTournamentRegistration();
+  const { mutateAsync: reactivateCancelledRegistration } =
+    useReactivateCancelledRegistration();
+  const { mutateAsync: cancelRegistrationAfterPayment } =
+    useCancelRegistrationAfterPayment();
+  const { mutateAsync: cancelRegistrationBeforePayment } =
+    useCancelRegistrationBeforePayment();
   if (isTournamentFinished(tournament)) {
     return (
       <div className="flex flex-col text-center gap-[18px]">
@@ -49,7 +69,13 @@ export const TournamentStatusActions = ({
         return (
           <div className="flex flex-col text-center gap-[18px]">
             <div className="mb-10 flex flex-row gap-4 justify-center">
-              <Button onClick={() => {}}>Отменить регистрацию</Button>
+              <Button
+                onClick={async () => {
+                  await cancelRegistrationAfterPayment(tournament.id);
+                }}
+              >
+                Отменить регистрацию
+              </Button>
             </div>
           </div>
         );
@@ -60,7 +86,13 @@ export const TournamentStatusActions = ({
           <div className="flex flex-col text-center gap-[18px]">
             <div>Вы отказались от участия</div>
             <div className="mb-10 flex flex-row gap-4 justify-center">
-              <Button onClick={() => {}}>Вернуться к участию</Button>
+              <Button
+                onClick={async () => {
+                  await reactivateCancelledRegistration(tournament.id);
+                }}
+              >
+                Вернуться к участию
+              </Button>
             </div>
           </div>
         );
@@ -71,10 +103,25 @@ export const TournamentStatusActions = ({
           <div className="flex flex-col text-center gap-[18px]">
             <div>Вы зарегистрированы</div>
             <div className="mb-10 flex flex-row gap-4 justify-center">
-              <Button className="bg-[#FF5053] text-white" onClick={() => {}}>
+              <Button
+                className="bg-[#FF5053] text-white"
+                onClick={async () => {
+                  await cancelRegistrationBeforePayment(tournament.id);
+                }}
+              >
                 Не участвую
               </Button>
-              <Button onClick={() => {}}>Оплатить</Button>
+              <Button
+                onClick={async () => {
+                  const payment = await createPaymentForTournamentRegistration({
+                    tournamentId: tournament.id,
+                    returnUrl: `https://t.me/${BOT_NAME}/app?startapp=${tournament.id}`,
+                  });
+                  window.open(payment?.paymentLink, "_blank");
+                }}
+              >
+                Оплатить
+              </Button>
             </div>
           </div>
         );
@@ -87,7 +134,13 @@ export const TournamentStatusActions = ({
       if (isRankAllowed(tournament, user)) {
         return (
           <div className="mb-10 flex flex-row gap-4 justify-center">
-            <Button onClick={() => {}}>Зарегистрироваться</Button>
+            <Button
+              onClick={async () => {
+                await registerToTournament(tournament.id);
+              }}
+            >
+              Зарегистрироваться
+            </Button>
           </div>
         );
       }
@@ -110,7 +163,12 @@ export const TournamentStatusActions = ({
           <div className="flex flex-col text-center gap-[18px]">
             <div>Вы в листе ожидания</div>
             <div className="mb-10 flex flex-row gap-4 justify-center">
-              <Button className="bg-[#FF5053] text-white" onClick={() => {}}>
+              <Button
+                className="bg-[#FF5053] text-white"
+                onClick={async () => {
+                  await removeUserFromWaitlist(tournament.id);
+                }}
+              >
                 Покинуть лист ожидания
               </Button>
             </div>
@@ -122,7 +180,13 @@ export const TournamentStatusActions = ({
           <div className="flex flex-col text-center gap-[18px]">
             <div>Сейчас мест нет, но вы можете записаться в лист ожидания</div>
             <div className="mb-10 flex flex-row gap-4 justify-center">
-              <Button onClick={() => {}}>В лист ожидания</Button>
+              <Button
+                onClick={async () => {
+                  await addUserToWaitlist(tournament.id);
+                }}
+              >
+                В лист ожидания
+              </Button>
             </div>
           </div>
         );

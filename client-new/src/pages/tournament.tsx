@@ -8,6 +8,8 @@ import { useGetTournamentWaitlist } from "../api/hooks/useGetTournamentWaitlist"
 import { TournamentPlayers } from "../components/widgets/tournament-players";
 import { useAuthStore } from "../shared/stores/auth.store";
 import { TournamentStatusActions } from "../components/widgets/tournament-status-actions";
+import { isTournamentFinished } from "../utils/tournament-status-checks";
+import { openTelegramLink } from "@telegram-apps/sdk-react";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -17,16 +19,7 @@ export const Tournament = () => {
   const [isCopied, setIsCopied] = useState(false);
 
   const { data: tournament, isLoading } = useGetTournaments({ id: id! });
-  const { data: waitlist, isLoading: waitlistLoading } =
-    useGetTournamentWaitlist(id!);
-
-  // Проверяем, что турнир еще не закончился
-  const isTournamentFinished = () => {
-    if (!tournament?.[0]?.endTime) return false;
-    const now = new Date();
-    const endTime = new Date(tournament[0].endTime);
-    return now > endTime;
-  };
+  const { data: waitlist } = useGetTournamentWaitlist(id!);
 
   const getPersonWord = (count: number) => {
     if (count === 1) return "человек";
@@ -167,7 +160,7 @@ export const Tournament = () => {
           />
         </div>
 
-        {!isTournamentFinished() && (
+        {!isTournamentFinished(tournament?.[0]) && (
           <Link to={`/tournament/${id}/waitlist`}>
             <div className="flex flex-row items-center gap-[18px] py-[17px] px-[16px] rounded-[30px] bg-[#F8F8FA]">
               <div className="flex w-[42px] h-[42px] justify-center items-center bg-[#AFFF3F] rounded-full">
@@ -190,11 +183,21 @@ export const Tournament = () => {
           <div className="flex flex-row flex-wrap items-center gap-1 text-[#5D6674]">
             Организатор:
             <p className="text-black font-medium">
-              {tournament?.[0].club.name}
+              {tournament?.[0].organizator.firstName}{" "}
+              {tournament?.[0].organizator.lastName}
             </p>
           </div>
 
-          <div className="flex flex-row items-center gap-[10px] px-[16px] py-[12px] text-white rounded-[30px] bg-black">
+          <div
+            onClick={() => {
+              if (tournament[0].organizator.telegramUsername) {
+                openTelegramLink(
+                  `https://t.me/${tournament[0].organizator.telegramUsername}`
+                );
+              }
+            }}
+            className="flex flex-row items-center gap-[10px] px-[16px] py-[12px] text-white rounded-[30px] bg-black"
+          >
             <p className="text-[14px] font-medium">Написать</p>
             <div className="">{Icons.Message()}</div>
           </div>

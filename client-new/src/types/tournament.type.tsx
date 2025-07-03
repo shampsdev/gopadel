@@ -3,7 +3,6 @@ import type { Registration } from "./registration.type";
 import type { User } from "./user.type";
 
 export interface Tournament {
-  organizer: any;
   date: string;
   location: any;
   type: string;
