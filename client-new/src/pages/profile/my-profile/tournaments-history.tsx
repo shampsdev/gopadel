@@ -8,7 +8,7 @@ export const TournamentsHistory = () => {
   const { data: registrations } = useGetMyRegistrations();
 
   return (
-    <div className="flex flex-col gap-9">
+    <div className="flex flex-col gap-9 pb-[100px]">
       <div className="flex flex-col px-[12px] gap-4">
         <p className="text-[24px] font-medium">Мои турниры</p>
       </div>

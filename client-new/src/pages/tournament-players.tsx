@@ -4,7 +4,7 @@ import { useGetTournaments } from "../api/hooks/useGetTournaments";
 import { useTelegramBackButton } from "../shared/hooks/useTelegramBackButton";
 
 export const TournamentPlayers = () => {
-  useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
+  useTelegramBackButton({ showOnMount: true });
   const { id } = useParams();
 
   const { data: tournaments, isLoading } = useGetTournaments({ id: id });
@@ -25,7 +25,10 @@ export const TournamentPlayers = () => {
         <div className="flex flex-col gap-[20px] justify-around">
           {tournaments[0].participants.map((userRegistration) => {
             return (
-              <div className="flex flex-row  gap-[21px]">
+              <div
+                key={userRegistration.id}
+                className="flex flex-row  gap-[21px]"
+              >
                 <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
                   <img
                     className="object-cover w-full h-full"

@@ -1,14 +1,25 @@
 import { backButton } from "@telegram-apps/sdk-react";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
 export const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
-  if (backButton.isMounted()) {
-    backButton.onClick(() => {
-      navigate(-1);
-    });
-  }
+
+  useEffect(() => {
+    if (backButton.isMounted()) {
+      const handleBackClick = () => {
+        navigate(-1);
+      };
+
+      backButton.onClick(handleBackClick);
+
+      // Cleanup при размонтировании
+      return () => {
+        backButton.offClick(handleBackClick);
+      };
+    }
+  }, [backButton, navigate]);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
