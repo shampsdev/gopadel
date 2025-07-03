@@ -17,7 +17,14 @@ export const TournamentPlayers = () => {
         <div className="flex flex-col gap-4">
           <p>Участники турнира</p>
           <div className="flex flex-col gap-[6px]">
-            <p>Сейчас зарегистрировано: {tournaments[0].participants.length}</p>
+            <p>
+              Сейчас зарегистрировано:{" "}
+              {
+                tournaments[0].participants.filter(
+                  (participant) => participant.status === "ACTIVE"
+                ).length
+              }
+            </p>
             <p>Максимум: {tournaments[0].maxUsers}</p>
           </div>
         </div>

@@ -18,6 +18,7 @@ import { EditProfile } from "../pages/profile/my-profile/edit";
 import { UserProfile } from "../pages/profile/user-profile";
 import { TournamentsHistory } from "../pages/profile/my-profile/tournaments-history";
 import { Loyalty } from "../pages/loyalty";
+import { StartDataChecker } from "../components/helpers/startdata-checker";
 
 const authRoutes: RouteObject[] = [
   {
@@ -47,83 +48,91 @@ const authRoutes: RouteObject[] = [
 
 export const routes: RouteObject[] = [
   {
-    path: "registration",
-    element: (
-      <div className="max-w-[90%] justify-between mx-auto">
-        <AnimatedOutlet />
-      </div>
-    ),
-    children: [{ path: "", element: <Registration /> }],
-  },
-  ...authRoutes,
-  {
     path: "",
-    element: <ProtectedRoute />,
+    element: <StartDataChecker />,
+
     children: [
       {
+        path: "registration",
+        element: (
+          <div className="max-w-[90%] justify-between mx-auto">
+            <AnimatedOutlet />
+          </div>
+        ),
+        children: [{ path: "", element: <Registration /> }],
+      },
+      ...authRoutes,
+
+      {
         path: "",
-        element: <MainLayout />,
+        element: <ProtectedRoute />,
         children: [
           {
             path: "",
-            element: <Home />,
+            element: <MainLayout />,
             children: [
               {
                 path: "",
-                element: <Competitions />,
-              },
-              {
-                path: "tournaments",
-                element: <Tournaments />,
-              },
-              {
-                path: "games",
-                element: <div>Games</div>,
-              },
-              {
-                path: "training",
-                element: <div>Training</div>,
-              },
-            ],
-          },
-          {
-            path: "players",
-            element: <Players />,
-          },
-          { path: "league", element: <div>League</div> },
-          {
-            path: "profile",
-            children: [
-              { path: "", element: <MyProfile /> },
-              { path: "edit", element: <EditProfile /> },
-              { path: ":id", element: <UserProfile /> },
-              { path: "tournaments", element: <TournamentsHistory /> },
-            ],
-          },
-          {
-            path: "tournament",
-            children: [
-              {
-                path: ":id",
-
+                element: <Home />,
                 children: [
-                  { path: "", element: <Tournament /> },
-                  { path: "players", element: <TournamentPlayers /> },
+                  {
+                    path: "",
+                    element: <Competitions />,
+                  },
+                  {
+                    path: "tournaments",
+                    element: <Tournaments />,
+                  },
+                  {
+                    path: "games",
+                    element: <div>Games</div>,
+                  },
+                  {
+                    path: "training",
+                    element: <div>Training</div>,
+                  },
                 ],
               },
+              {
+                path: "players",
+                element: <Players />,
+              },
+              { path: "league", element: <div>League</div> },
+              {
+                path: "profile",
+                children: [
+                  { path: "", element: <MyProfile /> },
+                  { path: "edit", element: <EditProfile /> },
+                  { path: ":id", element: <UserProfile /> },
+                  { path: "tournaments", element: <TournamentsHistory /> },
+                ],
+              },
+              {
+                path: "tournament",
+                children: [
+                  {
+                    path: ":id",
+
+                    children: [
+                      { path: "", element: <Tournament /> },
+                      { path: "players", element: <TournamentPlayers /> },
+                    ],
+                  },
+                ],
+              },
+              {
+                path: "new-event",
+                children: [
+                  { path: "", element: <NewEvent /> },
+                  { path: "tournament", element: <CreateTournament /> },
+                  { path: "game", element: <CreateGame /> },
+                ],
+              },
+              {
+                path: "loyalty",
+                element: <Loyalty />,
+              },
             ],
-          },
-          {
-            path: "new-event",
-            children: [
-              { path: "", element: <NewEvent /> },
-              { path: "tournament", element: <CreateTournament /> },
-              { path: "game", element: <CreateGame /> },
-            ],
-          },
-          {
-            path: "loyalty",
-            element: <Loyalty />,
           },
         ],
       },

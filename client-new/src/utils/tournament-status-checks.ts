@@ -10,7 +10,12 @@ export const isTournamentFinished = (tournament: TournamentType) => {
 };
 
 export const participatingAvailable = (tournament: TournamentType) => {
-  return tournament.maxUsers > tournament.participants.length;
+  return (
+    tournament.maxUsers >
+    tournament.participants.filter(
+      (participant) => participant.status === "ACTIVE"
+    ).length
+  );
 };
 
 export const isUserRegistered = (tournament: TournamentType, user: User) => {

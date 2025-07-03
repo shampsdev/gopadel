@@ -115,7 +115,7 @@ export const TournamentStatusActions = ({
                 onClick={async () => {
                   const payment = await createPaymentForTournamentRegistration({
                     tournamentId: tournament.id,
-                    returnUrl: `https://t.me/study_stats_bot/app?startapp=${tournament.id}`,
+                    returnUrl: `https://t.me/study_stats_bot/aboba?startapp=${tournament.id}`,
                   });
                   window.open(payment?.paymentLink, "_blank");
                 }}

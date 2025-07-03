@@ -132,17 +132,26 @@ export const Tournament = () => {
               tournament?.[0].participants.length <
                 tournament?.[0].maxUsers && (
                 <p className="text-[14px] text-[#000000]">
-                  {tournament?.[0].participants.length} /{" "}
-                  {tournament?.[0].maxUsers}
+                  {
+                    tournament?.[0].participants.filter(
+                      (participant) => participant.status === "ACTIVE"
+                    ).length
+                  }
+                  / {tournament?.[0].maxUsers}
                 </p>
               )}
 
             {tournament &&
-              tournament?.[0].participants.length >=
-                tournament?.[0].maxUsers && (
+              tournament?.[0].participants.filter(
+                (participant) => participant.status === "ACTIVE"
+              ).length >= tournament?.[0].maxUsers && (
                 <p className="text-[14px] text-[#F34338]">
-                  {tournament?.[0].participants.length} /{" "}
-                  {tournament?.[0].maxUsers}
+                  {
+                    tournament?.[0].participants.filter(
+                      (participant) => participant.status === "ACTIVE"
+                    ).length
+                  }
+                  / {tournament?.[0].maxUsers}
                 </p>
               )}
           </div>
@@ -212,7 +221,9 @@ export const Tournament = () => {
           </div>
           <div
             onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
+              navigator.clipboard.writeText(
+                `https://t.me/study_stats_bot/aboba?startapp=${id}`
+              );
               setIsCopied(true);
               setTimeout(() => {
                 setIsCopied(false);
