@@ -8,9 +8,9 @@ import { AnimatedOutlet } from "../components/helpers/animated-outlet";
 import { Players } from "../pages/home/players";
 import { Tournaments } from "../pages/home/tournaments";
 import { Competitions } from "../pages/home/competitions";
-import { Tournament } from "../pages/tournament";
+import { Tournament } from "../pages/tournament/tournament";
 import { MyProfile } from "../pages/profile/my-profile/my-profile";
-import { TournamentPlayers } from "../pages/tournament-players";
+import { TournamentPlayers } from "../pages/tournament/tournament-players";
 import { NewEvent } from "../pages/new-event/new-event";
 import { CreateTournament } from "../pages/new-event/create-tournament";
 import { CreateGame } from "../pages/new-event/create-game";
@@ -19,6 +19,7 @@ import { UserProfile } from "../pages/profile/user-profile";
 import { TournamentsHistory } from "../pages/profile/my-profile/tournaments-history";
 import { Loyalty } from "../pages/loyalty";
 import { StartDataChecker } from "../components/helpers/startdata-checker";
+import { TournamentWaitlist } from "../pages/tournament/tournament-waitlist";
 
 const authRoutes: RouteObject[] = [
   {
@@ -116,6 +117,7 @@ export const routes: RouteObject[] = [
                     children: [
                       { path: "", element: <Tournament /> },
                       { path: "players", element: <TournamentPlayers /> },
+                      { path: "waitlist", element: <TournamentWaitlist /> },
                     ],
                   },
                 ],

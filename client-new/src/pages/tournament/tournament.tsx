@@ -1,14 +1,14 @@
 import { Link, useParams } from "react-router";
-import { Icons } from "../assets/icons";
-import { getRankTitle } from "../utils/rank-title";
-import { useTelegramBackButton } from "../shared/hooks/useTelegramBackButton";
-import { useGetTournaments } from "../api/hooks/useGetTournaments";
+import { Icons } from "../../assets/icons";
+import { getRankTitle } from "../../utils/rank-title";
+import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
+import { useGetTournaments } from "../../api/hooks/useGetTournaments";
 import { useEffect, useState } from "react";
-import { useGetTournamentWaitlist } from "../api/hooks/useGetTournamentWaitlist";
-import { TournamentPlayers } from "../components/widgets/tournament-players";
-import { useAuthStore } from "../shared/stores/auth.store";
-import { TournamentStatusActions } from "../components/widgets/tournament-status-actions";
-import { isTournamentFinished } from "../utils/tournament-status-checks";
+import { useGetTournamentWaitlist } from "../../api/hooks/useGetTournamentWaitlist";
+import { TournamentPlayers } from "../../components/widgets/tournament-players";
+import { useAuthStore } from "../../shared/stores/auth.store";
+import { TournamentStatusActions } from "../../components/widgets/tournament-status-actions";
+import { isTournamentFinished } from "../../utils/tournament-status-checks";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { twMerge } from "tailwind-merge";
 
