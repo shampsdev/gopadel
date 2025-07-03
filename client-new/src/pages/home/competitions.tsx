@@ -82,7 +82,7 @@ export const Competitions = () => {
       playersCapacity: tournament.maxUsers,
       playersAmount: participantsCount,
       participating: false,
-      competitionType: "tournament",
+      competitionType: tournament.type,
       title: tournament.name || "",
     };
   };
@@ -94,7 +94,6 @@ export const Competitions = () => {
   const allCompetitions = [
     ...transformedTournaments.map((tournament: any) => ({
       ...tournament,
-      type: "tournament",
     })),
     ...mockGames,
     ...mockTrainings,

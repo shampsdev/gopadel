@@ -21,13 +21,16 @@ export const PageWrapper = ({ children }: { children: React.ReactNode }) => {
     }
   }, [backButton, navigate]);
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0, transition: { duration: 0.15 } }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className="mx-auto pt-[12px] max-h-screen overflow-y-scroll "
-    >
+    <div className="mx-auto pt-[12px] max-h-screen overflow-y-scroll ">
       {children}
-    </motion.div>
+    </div>
+    // <motion.div
+    //   initial={{ opacity: 0, y: 20 }}
+    //   animate={{ opacity: 1, y: 0, transition: { duration: 0.15 } }}
+    //   transition={{ duration: 0.3, ease: "easeOut" }}
+    //   className="mx-auto pt-[12px] max-h-screen overflow-y-scroll "
+    // >
+    //   {children}
+    // </motion.div>
   );
 };
