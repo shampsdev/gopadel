@@ -7,6 +7,6 @@ export interface FilterTournament {
 export interface FilterUser {
   firstName?: string;
   id?: string;
-  string?: string;
+  lastName?: string;
   telegramId?: string;
 }

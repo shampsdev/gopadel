@@ -1,5 +1,4 @@
 import { Icons } from "../../assets/icons";
-import type { Loyalty } from "../../types/loyalty.type";
 import type { PlayingPosition } from "../../types/playing-position.type";
 import { getRankTitle } from "../../utils/rank-title";
 
@@ -11,7 +10,6 @@ interface PlayerCardProps {
   rank: number;
   position: PlayingPosition;
   bio: string;
-  loyalty: Loyalty;
 }
 
 export const PlayerCard = ({
@@ -22,7 +20,6 @@ export const PlayerCard = ({
   rank,
   position,
   bio,
-  loyalty,
 }: PlayerCardProps) => {
   return (
     <div className="px-[10px] py-[16px] border-[#EBEDF0] border-[1px] w-full rounded-[20px] flex flex-col gap-3">
@@ -32,9 +29,6 @@ export const PlayerCard = ({
             src={avatar}
             className="object-cover w-full h-full rounded-full"
           />
-          {/* <div className="absolute bottom-[-6px] right-[-5px] p-[6px] rounded-full bg-[#AFFF3F]">
-            {Icons.SharpStar()}
-          </div> */}
         </div>
 
         <div className="flex flex-col gap-[5px] text-[#5D6674] px-[12px]">
