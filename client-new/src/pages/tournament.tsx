@@ -10,6 +10,7 @@ import { useAuthStore } from "../shared/stores/auth.store";
 import { TournamentStatusActions } from "../components/widgets/tournament-status-actions";
 import { isTournamentFinished } from "../utils/tournament-status-checks";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
+import { twMerge } from "tailwind-merge";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -45,40 +46,50 @@ export const Tournament = () => {
         <div className="flex flex-col">
           <div className="py-5 border-b border-[#DADCE0]">
             <div className="flex flex-row justify-between items-center">
-              <div className="flex flex-col gap-[2px]">
-                <p className="text-[14px] text-[#5D6674]">
+              <div className="flex flex-col gap-[2px]  text-[14px] text-[#5D6674] ">
+                <p className="text-[#000000] text-[16px]">
                   {tournament?.[0].startTime &&
                     new Date(tournament[0].startTime).toLocaleDateString(
                       "ru-RU",
                       {
-                        day: "numeric",
+                        day: "2-digit",
                         month: "long",
-                        hour: "2-digit",
-                        minute: "2-digit",
                         timeZone: "Europe/Moscow",
+                        weekday: "long",
                       }
                     )}
                 </p>
-                <p className="text-[14px] text-[#5D6674]">
-                  {tournament?.[0].endTime &&
-                    new Date(tournament[0].endTime).toLocaleDateString(
+                <div className="text-[14px] text-[#868D98] ">
+                  {tournament?.[0].startTime &&
+                    new Date(tournament[0].startTime).toLocaleTimeString(
                       "ru-RU",
                       {
-                        day: "numeric",
-                        month: "long",
                         hour: "2-digit",
                         minute: "2-digit",
                         timeZone: "Europe/Moscow",
                       }
                     )}
-                </p>
+                  {" - "}
+                  {tournament?.[0].endTime &&
+                    new Date(tournament[0].endTime).toLocaleTimeString(
+                      "ru-RU",
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        timeZone: "Europe/Moscow",
+                      }
+                    )}
+                </div>
               </div>
 
               <div className="flex flex-col">
-                <p className="text-[14px] text-[#5D6674]">
-                  {tournament?.[0].price} ₽
+                <p className="text-[20px] text-[#5D6674]">
+                  <span className="text-black font-semibold text-[20px]">
+                    {tournament?.[0].price}
+                  </span>{" "}
+                  ₽
                 </p>
-                <p>участие</p>
+                <p className="text-[12px] text-[#868D98]">участие</p>
               </div>
             </div>
           </div>
@@ -215,7 +226,12 @@ export const Tournament = () => {
           </div>
         </div>
 
-        <div className="flex flex-row items-center gap-[18px] py-[20px] pl-[28px] pr-[16px] rounded-[30px] bg-[#F8F8FA]">
+        <div
+          className={twMerge(
+            "flex flex-row items-center gap-[18px] py-[20px] pl-[28px] pr-[16px] rounded-[30px] bg-[#F8F8FA]",
+            isCopied ? "text-[#77BE14] bg-[#E7FFC6]" : ""
+          )}
+        >
           <div className="flex flex-col gap-[2px] flex-grow">
             <p>{isCopied ? "Ссылка скопирована!" : "Поделиться турниром"}</p>
           </div>
@@ -229,8 +245,11 @@ export const Tournament = () => {
                 setIsCopied(false);
               }, 2000);
             }}
+            className="flex flex-col justify-center items-center w-[21px] h-[21px]"
           >
-            {Icons.Copy()}
+            {isCopied
+              ? Icons.Approve("#77BE14", "w-[21px] h-[21px]")
+              : Icons.Copy()}
           </div>
         </div>
       </div>

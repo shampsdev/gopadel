@@ -85,7 +85,7 @@ export const CompetitionHistoryCard = ({
         )}
         {status === "PENDING" && <p>Ожидает подтверждения</p>}
         {status === "ACTIVE" && (
-          <p className="text-[#AFFF3F]">Участие подтверждено</p>
+          <p className="text-[#77BE14]">Участие подтверждено</p>
         )}
       </div>
     </div>

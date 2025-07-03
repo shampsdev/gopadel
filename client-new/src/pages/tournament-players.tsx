@@ -30,40 +30,58 @@ export const TournamentPlayers = () => {
         </div>
 
         <div className="flex flex-col gap-[20px] justify-around">
-          {tournaments[0].participants.map((userRegistration) => {
-            return (
-              <div
-                key={userRegistration.id}
-                className="flex flex-row  gap-[21px]"
-              >
-                <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
-                  <img
-                    className="object-cover w-full h-full"
-                    src={userRegistration.user.avatar}
-                    alt="avatar"
-                  />
-                </div>
+          {tournaments[0].participants
+            .filter(
+              (participant) =>
+                participant.status === "ACTIVE" ||
+                participant.status === "CANCELED_BY_USER" ||
+                participant.status === "PENDING"
+            )
+            .map((userRegistration) => {
+              return (
+                <div
+                  key={userRegistration.id}
+                  className="flex flex-row items-center gap-[21px]"
+                >
+                  <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
+                    <img
+                      className="object-cover w-full h-full"
+                      src={userRegistration.user.avatar}
+                      alt="avatar"
+                    />
+                  </div>
 
-                <div className="flex flex-row flex-grow flex-1 ">
-                  <div className="flex flex-col gap-[2px]">
-                    <p className="text-[14px]">
-                      {userRegistration.user.firstName}{" "}
-                      {userRegistration.user.lastName}
-                    </p>
-                    <p className="text-[#868D98] text-[14px]">
-                      {getRankTitle(userRegistration.user.rank)}
-                    </p>
+                  <div className="flex flex-row gap-[21px] flex-1 flex-grow ">
+                    <div className="flex flex-row flex-grow flex-1 ">
+                      <div className="flex flex-col gap-[2px]">
+                        <p className="text-[14px]">
+                          {userRegistration.user.firstName}{" "}
+                          {userRegistration.user.lastName}
+                        </p>
+                        <p className="text-[#868D98] text-[14px]">
+                          {getRankTitle(userRegistration.user.rank)}
+                        </p>
+                      </div>
+                    </div>
+                    {userRegistration.status === "CANCELED_BY_USER" && (
+                      <div className="w-fit rounded-[30px] px-[10px] py-[6px] bg-[#F34338] bg-opacity-[24%] text-[#F34338] text-[12px] h-full flex flex-col items-start">
+                        отменил(а)
+                      </div>
+                    )}
+                    {userRegistration.status === "PENDING" && (
+                      <div className="w-fit bg-[#F8F8FA] text-[#A4A9B4] h-full flex flex-col rounded-[30px] px-[10px] py-[6px] items-start text-[12px]">
+                        ожидает оплаты
+                      </div>
+                    )}
+                    {userRegistration.status === "ACTIVE" && (
+                      <div className="w-fit bg-[#E7FFC6] text-[#77BE14] h-full flex flex-col rounded-[30px] px-[10px] py-[6px] items-start text-[12px]">
+                        оплатил(a)
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {userRegistration.status === "PENDING" && (
-                  <div className="w-fit bg-[#E7FFC6] h-full flex flex-col items-start">
-                    оплатил(a)
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       </div>
     );

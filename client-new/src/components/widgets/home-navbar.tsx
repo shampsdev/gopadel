@@ -21,20 +21,20 @@ const NavbarItem = ({
 }: NavbarItemProps) => {
   const variants = {
     active: "bg-[#AFFF3F] text-black",
-    default: "bg-[#F8F8FA] text-[#868D98]",
+    default: "bg-[#F8F8FA] text-[#868D98] justify-center",
   };
 
   return (
     <div
       onClick={onClick}
       className={twMerge(
-        "flex flex-col gap-[6px] items-center px-3 py-2 rounded-[12px] cursor-pointer",
+        "flex flex-col gap-[4px] items-center px-3 py-[10px] rounded-[12px] cursor-pointer",
         variants[variant],
         className
       )}
     >
       {variant === "default" ? icon : activeIcon}
-      <p>{title}</p>
+      {variant === "active" && <p>{title}</p>}
     </div>
   );
 };
