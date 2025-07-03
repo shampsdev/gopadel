@@ -5,6 +5,7 @@ import { useTelegramBackButton } from "../shared/hooks/useTelegramBackButton";
 import { useGetTournaments } from "../api/hooks/useGetTournaments";
 import { useEffect } from "react";
 import { useGetTournamentWaitlist } from "../api/hooks/useGetTournamentWaitlist";
+import { TournamentPlayers } from "../components/widgets/tournament-players";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -133,17 +134,6 @@ export const Tournament = () => {
                   {tournament?.[0].maxUsers}
                 </p>
               )}
-
-            <p
-              className={
-                (tournament?.[0].participants.length || 0) <
-                (tournament?.[0].maxUsers || 0)
-                  ? "text-[14px] text-[#F34338]"
-                  : "text-[14px] text-[#000000]"
-              }
-            >
-              {tournament?.[0].participants.length} / {tournament?.[0].maxUsers}
-            </p>
           </div>
 
           <div className="bg-[#F8F8FA] rounded-[20px] py-[6px] px-[14px] text-[12px] text-[#5D6674]">
@@ -151,15 +141,21 @@ export const Tournament = () => {
           </div>
         </div>
 
-        <div>карусель пользователей</div>
+        <TournamentPlayers
+          tournamentId={id!}
+          registrations={
+            tournament?.[0].participants
+              ? Array(10).fill(tournament[0].participants).flat()
+              : []
+          }
+        />
 
         <div className="flex flex-row items-center flex-1">
           <div>Иконка</div>
           <div className="flex flex-col gap-[2px]">
             <p>Список ожидания</p>
             <p>
-              {/* {tournament?.[0].waitlist}{" "}
-                {getPersonWord(tournament?.[0].waitlist)} */}
+              {waitlist?.length} {getPersonWord(waitlist?.length || 0)}
             </p>
           </div>
         </div>

@@ -7,5 +7,6 @@ export const useGetTournamentWaitlist = (id: string) => {
   return useQuery({
     queryKey: ["tournament-waitlist", id],
     queryFn: () => getTournamentWaitlist(token ?? "", id),
+    enabled: !!id && !!token,
   });
 };

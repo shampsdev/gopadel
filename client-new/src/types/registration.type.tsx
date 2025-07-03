@@ -1,3 +1,4 @@
+import type { RegistrationStatus } from "./registration-status";
 import type { Tournament } from "./tournament.type";
 import type { User } from "./user.type";
 
@@ -11,9 +12,3 @@ export interface Registration {
   user: User;
   userId: string;
 }
-
-export type RegistrationStatus =
-  | "PENDING"
-  | "ACTIVE"
-  | "CANCELLED"
-  | "CANCELLED_BY_USER";
