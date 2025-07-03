@@ -89,6 +89,7 @@ export const routes: RouteObject[] = [
           {
             path: "players",
             element: <Players />,
+            children: [{ path: ":id", element: <UserProfile /> }],
           },
           { path: "league", element: <div>League</div> },
           {
