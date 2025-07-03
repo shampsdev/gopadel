@@ -35,7 +35,7 @@ export const Players = () => {
       />
       <div className="flex flex-col gap-4 pb-[100px]">
         {filteredUsers?.map((player) => (
-          <Link key={player.id} to={`/players/${player.id}`}>
+          <Link key={player.id} to={`/profile/${player.id}`}>
             <PlayerCard
               avatar={player.avatar}
               firstName={player.firstName}

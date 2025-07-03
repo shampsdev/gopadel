@@ -1,11 +1,11 @@
 import { twMerge } from "tailwind-merge";
 import { Icons } from "../../assets/icons";
-import type { Rank } from "../../types/rank.type";
 import type { RegistrationStatus } from "../../types/registration.type";
+import { getRankTitle } from "../../utils/rank-title";
 
 export interface CompetitionHistoryCardProps {
   className?: string;
-  rank: Rank;
+  rank: number;
   organizerName: string;
   date: string;
   locationTitle: string;
@@ -36,7 +36,7 @@ export const CompetitionHistoryCard = ({
       <div className="flex flex-col gap-5">
         <div className="flex flex-row justify-between">
           <div className="flex flex-col gap-1 flex-1">
-            <p className="text-[20px]">{rank.title}</p>
+            <p className="text-[20px]">{getRankTitle(rank ?? 0)}</p>
             <div className="flex flex-row flex-wrap items-center gap-1 text-[#868D98]">
               Организатор: <p className="text-[#5D6674]">{organizerName}</p>
             </div>
@@ -70,13 +70,13 @@ export const CompetitionHistoryCard = ({
 
           <div className="flex flex-row items-center gap-3">
             {Icons.Star()}
-            <p>{rank.title}</p>
+            <p>{getRankTitle(rank)}</p>
           </div>
         </div>
       </div>
 
       <div className="flex flex-row justify-between items-center">
-        <p className="text-[22px] text-[#868D98]  ">статус</p>
+        <p className="text-[16px] text-[#868D98]">статус</p>
         {status === "CANCELLED_BY_USER" && (
           <p className="text-[#F34338]">Вы отменили участие</p>
         )}

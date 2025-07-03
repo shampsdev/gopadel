@@ -25,10 +25,12 @@ export const PlayerCard = ({
     <div className="px-[10px] py-[16px] border-[#EBEDF0] border-[1px] w-full rounded-[20px] flex flex-col gap-3">
       <div className="flex flex-row items-center relative gap-[10px]">
         <div className="w-[68px] h-[68px] relative rounded-full">
-          <img
-            src={avatar}
-            className="object-cover w-full h-full rounded-full"
-          />
+          {avatar.length > 0 && (
+            <img
+              src={avatar}
+              className="object-cover w-full h-full rounded-full"
+            />
+          )}
         </div>
 
         <div className="flex flex-col gap-[5px] text-[#5D6674] px-[12px]">

@@ -45,42 +45,6 @@ export const Tournaments = () => {
 
   const { data: tournaments, isLoading, error } = useGetTournaments(filter);
 
-  const transformTournamentToCompetition = (tournament: Tournament) => {
-    const rank =
-      mockRanks.find(
-        (r) => r.from <= tournament.rankMin && r.to >= tournament.rankMin
-      ) || mockRanks[0];
-    const participantsCount = tournament.participants?.length || 0;
-
-    return {
-      id: tournament.id,
-      rank,
-      organizerName:
-        `${tournament.organizator?.firstName || ""} ${
-          tournament.organizator?.lastName || ""
-        }`.trim() ||
-        tournament.club?.name ||
-        "Неизвестно",
-      date: new Date(tournament.startTime).toLocaleDateString("ru-RU", {
-        day: "numeric",
-        month: "long",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      locationTitle: tournament.club?.name || "Неизвестное место",
-      address: tournament.club?.address || "Адрес не указан",
-      type: tournament.tournamentType || "Турнир",
-      cost: tournament.price,
-      playersCapacity: tournament.maxUsers,
-      playersAmount: participantsCount,
-      participating: false,
-    };
-  };
-
-  const transformedCompetitions = tournaments
-    ? tournaments.map(transformTournamentToCompetition)
-    : [];
-
   return (
     <>
       <HomeNavbar />
@@ -117,26 +81,40 @@ export const Tournaments = () => {
           </div>
         )}
 
-        {!isLoading && !error && transformedCompetitions.length === 0 && (
+        {!isLoading && !error && tournaments?.length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500">Турниры не найдены</p>
           </div>
         )}
 
-        {transformedCompetitions.map((competition: any) => (
+        {tournaments?.map((competition: Tournament) => (
           <Link key={competition.id} to={`/tournament/${competition.id}`}>
             <CompetitionCard
               key={competition.id}
-              rank={competition.rank}
-              organizerName={competition.organizerName}
-              date={competition.date}
-              locationTitle={competition.locationTitle}
-              address={competition.address}
-              type={competition.type}
-              cost={competition.cost}
-              playersCapacity={competition.playersCapacity}
-              playersAmount={competition.playersAmount}
-              participating={competition.participating}
+              rank={
+                mockRanks.find(
+                  (r) =>
+                    r.from <= competition.rankMin && r.to >= competition.rankMin
+                ) || mockRanks[0]
+              }
+              organizerName={`${competition.organizator.firstName} ${competition.organizator.lastName}`}
+              date={new Date(competition.startTime).toLocaleDateString(
+                "ru-RU",
+                {
+                  day: "numeric",
+                  month: "long",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  timeZone: "Europe/Moscow",
+                }
+              )}
+              locationTitle={competition.club.name}
+              address={competition.club.address}
+              type={competition.tournamentType}
+              cost={competition.price}
+              playersCapacity={competition.maxUsers}
+              playersAmount={competition.participants?.length || 0}
+              participating={false}
             />
           </Link>
         ))}

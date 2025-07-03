@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { useGetMyRegistrations } from "../../../api/hooks/useGetMyRegistrations";
 import { CompetitionHistoryCard } from "../../../components/widgets/competition-history-card";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
@@ -14,18 +15,33 @@ export const TournamentsHistory = () => {
 
       <div className="flex flex-col gap-4">
         {registrations?.map((registration) => (
-          <CompetitionHistoryCard
-            key={registration.id}
-            rank={registration.tournament.rank}
-            organizerName={registration.tournament.organizer.name}
-            date={registration.date}
-            locationTitle={registration.tournament.location.city}
-            address={""}
-            type={""}
-            playersCapacity={0}
-            playersAmount={0}
-            status={registration.status}
-          />
+          <Link
+            key={registration.tournament.id}
+            to={`/tournament/${registration.tournament.id}`}
+          >
+            <CompetitionHistoryCard
+              rank={registration.tournament.rankMin}
+              organizerName={
+                registration.tournament.organizator.firstName +
+                " " +
+                registration.tournament.organizator.lastName
+              }
+              date={new Date(
+                registration.tournament.startTime
+              ).toLocaleDateString("ru-RU", {
+                day: "numeric",
+                month: "long",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+              locationTitle={registration.tournament.club.name}
+              address={registration.tournament.club.address}
+              type={registration.tournament.tournamentType}
+              playersCapacity={registration.tournament.playersCapacity}
+              playersAmount={registration.tournament.playersAmount}
+              status={registration.status}
+            />
+          </Link>
         ))}
       </div>
     </div>

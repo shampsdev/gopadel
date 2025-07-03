@@ -40,12 +40,14 @@ export const MyProfile = () => {
       </Link>
 
       <div className="flex flex-col px-[12px] space-y-0">
-        <div className="pb-5 border-b border-[#DADCE0]">
-          <div className="flex flex-row justify-between">
-            <p className="text-[#868D98] text-[16px]">Город</p>
-            <p className="text-[16px]">{user?.city}</p>
+        {user?.city && (
+          <div className="pb-5 border-b border-[#DADCE0]">
+            <div className="flex flex-row justify-between">
+              <p className="text-[#868D98] text-[16px]">Город</p>
+              <p className="text-[16px]">{user?.city}</p>
+            </div>
           </div>
-        </div>
+        )}
         <div className="py-5 border-b border-[#DADCE0]">
           <div className="flex flex-row justify-between">
             <p className="text-[#868D98] text-[16px]">Ранг</p>
@@ -76,37 +78,43 @@ export const MyProfile = () => {
             </div>
           </Link>
         </div>
-        <div className="py-5 border-b border-[#DADCE0]">
-          <div className="flex flex-col gap-[10px]">
-            <p className="text-[#868D98] text-[16px]">Профили по падел</p>
-            <div className="flex flex-col gap-2">
-              {user?.padelProfiles.split("\n").map((url: string) => (
-                <a
-                  key={url}
-                  href={formatUrl(url)}
-                  className="flex no-underline md:underline flex-row items-center bg-[#F8F8FA] rounded-[30px] px-[20px] gap-4 py-[14px]"
-                >
-                  <div>{Icons.Link()}</div>
-                  <p className="text-[16px]">{getDisplayName(url)}</p>
-                </a>
-              ))}
+        {user?.padelProfiles && user?.padelProfiles.length > 0 && (
+          <div className="py-5 border-b border-[#DADCE0]">
+            <div className="flex flex-col gap-[10px]">
+              <p className="text-[#868D98] text-[16px]">Профили по падел</p>
+              <div className="flex flex-col gap-2">
+                {user?.padelProfiles.split("\n").map((url: string) => (
+                  <a
+                    key={url}
+                    href={formatUrl(url)}
+                    className="flex no-underline md:underline flex-row items-center bg-[#F8F8FA] rounded-[30px] px-[20px] gap-4 py-[14px]"
+                  >
+                    <div>{Icons.Link()}</div>
+                    <p className="text-[16px]">{getDisplayName(url)}</p>
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="py-5 border-b border-[#DADCE0]">
-          <div className="flex flex-row justify-between">
-            <p className="text-[#868D98] text-[16px]">Дата рождения</p>
-            <p className="text-[16px]">
-              {user?.birthDate ? formatBirthDate(user.birthDate) : ""}
-            </p>
+        )}
+        {user?.birthDate && (
+          <div className="py-5 border-b border-[#DADCE0]">
+            <div className="flex flex-row justify-between">
+              <p className="text-[#868D98] text-[16px]">Дата рождения</p>
+              <p className="text-[16px]">
+                {user?.birthDate ? formatBirthDate(user.birthDate) : ""}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="py-5">
-          <div className="flex flex-col gap-[10px]">
-            <p className="text-[#868D98] text-[16px]">О себе</p>
-            <p className="text-[16px]">{user?.bio}</p>
+        )}
+        {user?.bio && (
+          <div className="py-5">
+            <div className="flex flex-col gap-[10px]">
+              <p className="text-[#868D98] text-[16px]">О себе</p>
+              <p className="text-[16px]">{user?.bio}</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="w-fit mx-auto">

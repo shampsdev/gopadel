@@ -76,6 +76,7 @@ export const Competitions = () => {
         month: "long",
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: "Europe/Moscow",
       }),
       locationTitle: tournament.club?.name || "Неизвестное место",
       address: tournament.club?.address || "Адрес не указан",

@@ -4,14 +4,15 @@ import { getRankTitle } from "../utils/rank-title";
 import { useTelegramBackButton } from "../shared/hooks/useTelegramBackButton";
 import { useGetTournaments } from "../api/hooks/useGetTournaments";
 import { useEffect } from "react";
+import { useGetTournamentWaitlist } from "../api/hooks/useGetTournamentWaitlist";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   const { id } = useParams();
 
   const { data: tournament, isLoading } = useGetTournaments({ id: id! });
-  // const { data: waitlist, isLoading: waitlistLoading } =
-  //   useGetTournamentWaitlist(id!);
+  const { data: waitlist, isLoading: waitlistLoading } =
+    useGetTournamentWaitlist(id!);
 
   const getPersonWord = (count: number) => {
     if (count === 1) return "человек";
@@ -25,18 +26,39 @@ export const Tournament = () => {
   if (isLoading) return <div>Loading...</div>;
 
   return (
-    <div className="pb-[100px]">
-      <div className="flex flex-col gap-8 pb-[100px]">
-        <div className="flex flex-col gap-7">
-          <h1>{tournament?.[0]?.name}</h1>
-          <div className="flex flex-col gap-5">
-            <div className="flex flex-row justify-between">
+    <div className="flex flex-col gap-8 pb-[100px]">
+      <div className="flex flex-col gap-7 px-[12px]">
+        <h1 className="text-[24px] font-medium">{tournament?.[0]?.name}</h1>
+
+        <div className="flex flex-col">
+          <div className="py-5 border-b border-[#DADCE0]">
+            <div className="flex flex-row justify-between items-center">
               <div className="flex flex-col gap-[2px]">
                 <p className="text-[14px] text-[#5D6674]">
-                  {tournament?.[0].startTime}
+                  {tournament?.[0].startTime &&
+                    new Date(tournament[0].startTime).toLocaleDateString(
+                      "ru-RU",
+                      {
+                        day: "numeric",
+                        month: "long",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        timeZone: "Europe/Moscow",
+                      }
+                    )}
                 </p>
                 <p className="text-[14px] text-[#5D6674]">
-                  {tournament?.[0].endTime}
+                  {tournament?.[0].endTime &&
+                    new Date(tournament[0].endTime).toLocaleDateString(
+                      "ru-RU",
+                      {
+                        day: "numeric",
+                        month: "long",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        timeZone: "Europe/Moscow",
+                      }
+                    )}
                 </p>
               </div>
 
@@ -47,72 +69,121 @@ export const Tournament = () => {
                 <p>участие</p>
               </div>
             </div>
+          </div>
 
-            <div className="flex flex-row justify-between">
-              <div className="flex flex-col">
-                <p>{tournament?.[0].club.name}</p>
-                <p>{tournament?.[0].club.address}</p>
+          <div className="py-5 border-b border-[#DADCE0]">
+            <div className="flex flex-row justify-between items-center">
+              <div className="flex flex-col gap-[2px]">
+                <p className="text-[16px] ">{tournament?.[0].club.name}</p>
+                <p className="text-[14px] text-[#868D98]">
+                  {tournament?.[0].club.address}
+                </p>
               </div>
-              <div>{Icons.Location()}</div>
+
+              <div className="w-[42px] h-[42px] bg-[#F8F8FA] rounded-full flex flex-col justify-center items-center">
+                {Icons.Location("black")}
+              </div>
             </div>
+          </div>
 
-            <div className="flex flex-row justify-between">
-              <div className="flex flex-col">
-                <p>Тип: {tournament?.[0].tournamentType}</p>
-                <p>Ранг: {getRankTitle(tournament?.[0].rankMin || 0)}</p>
+          <div className="pt-5">
+            <div className="flex flex-row justify-between items-center">
+              <div className="flex flex-col gap-[2px]">
+                <div className="text-[16px] gap-1 text-[#868D98] flex flex-row items-center">
+                  <p>Тип:</p>
+                  <p className="text-black">
+                    {tournament?.[0].tournamentType.toLowerCase()}
+                  </p>
+                </div>
+                <div className="text-[16px] text-[#868D98] gap-1 flex flex-row items-center">
+                  <p>Ранг:</p>
+                  <p className="text-black">
+                    {getRankTitle(tournament?.[0].rankMin || 0)}
+                  </p>
+                </div>
               </div>
-              <div>{Icons.Star()}</div>
+
+              <div className="w-[42px] h-[42px] bg-[#F8F8FA] rounded-full flex flex-col justify-center items-center">
+                {Icons.Star("black")}
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-row justify-between">
-            <div className="flex flex-row gap-[7px]">
-              <p>Участники</p>
-              <p className="text-[14px] text-[#F34338]">
-                {tournament?.[0].participants.length} /{" "}
-                {tournament?.[0].maxUsers}
-              </p>
-            </div>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-row justify-between items-center px-[12px]">
+          <div className="flex flex-row gap-[7px] items-center">
+            <p>Участники</p>
 
-            <div className="">смотреть все</div>
+            {tournament &&
+              tournament?.[0].participants.length <
+                tournament?.[0].maxUsers && (
+                <p className="text-[14px] text-[#000000]">
+                  {tournament?.[0].participants.length} /{" "}
+                  {tournament?.[0].maxUsers}
+                </p>
+              )}
+
+            {tournament &&
+              tournament?.[0].participants.length >=
+                tournament?.[0].maxUsers && (
+                <p className="text-[14px] text-[#F34338]">
+                  {tournament?.[0].participants.length} /{" "}
+                  {tournament?.[0].maxUsers}
+                </p>
+              )}
+
+            <p
+              className={
+                (tournament?.[0].participants.length || 0) <
+                (tournament?.[0].maxUsers || 0)
+                  ? "text-[14px] text-[#F34338]"
+                  : "text-[14px] text-[#000000]"
+              }
+            >
+              {tournament?.[0].participants.length} / {tournament?.[0].maxUsers}
+            </p>
           </div>
 
-          <div>карусель пользователей</div>
+          <div className="bg-[#F8F8FA] rounded-[20px] py-[6px] px-[14px] text-[12px] text-[#5D6674]">
+            смотреть все
+          </div>
+        </div>
 
-          <div className="flex flex-row items-center flex-1">
-            <div>Иконка</div>
-            <div className="flex flex-col gap-[2px]">
-              <p>Список ожидания</p>
-              <p>
-                {/* {tournament?.[0].waitlist}{" "}
+        <div>карусель пользователей</div>
+
+        <div className="flex flex-row items-center flex-1">
+          <div>Иконка</div>
+          <div className="flex flex-col gap-[2px]">
+            <p>Список ожидания</p>
+            <p>
+              {/* {tournament?.[0].waitlist}{" "}
                 {getPersonWord(tournament?.[0].waitlist)} */}
-              </p>
-            </div>
+            </p>
           </div>
-
-          <div>{Icons.ArrowRight()}</div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-row justify-between">
-            <p>Организатор: {}</p>
+        <div>{Icons.ArrowRight()}</div>
+      </div>
 
-            <div className="flex flex-row items-center gap-[10px]">
-              <p>Написать</p>
-              <div>{Icons.Ball()}</div>
-            </div>
-          </div>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-row justify-between">
+          <p>Организатор: {}</p>
 
-          <div className="flex flex-row items-center justify-between">
-            <p>Поделиться турниром</p>
+          <div className="flex flex-row items-center gap-[10px]">
+            <p>Написать</p>
             <div>{Icons.Ball()}</div>
           </div>
         </div>
 
-        <div className="flex justify-center">статус оплаты/реги</div>
+        <div className="flex flex-row items-center justify-between">
+          <p>Поделиться турниром</p>
+          <div>{Icons.Ball()}</div>
+        </div>
       </div>
+
+      <div className="flex justify-center">статус оплаты/реги</div>
     </div>
   );
 };

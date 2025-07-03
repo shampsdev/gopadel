@@ -4,12 +4,13 @@ import { useEffect } from "react";
 import { useGetMe } from "../../api/hooks/useGetMe";
 
 export const ProtectedRoute = () => {
-  const { setAuth } = useAuthStore();
+  const { setAuth, setUser } = useAuthStore();
   const { data: me, isLoading, isError, isFetched } = useGetMe();
 
   useEffect(() => {
     if (!isLoading && !isError) {
       setAuth(true);
+      setUser(me ?? null);
     }
   }, [isLoading, isError, setAuth]);
 
