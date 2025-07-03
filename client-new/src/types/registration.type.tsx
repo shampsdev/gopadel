@@ -6,7 +6,6 @@ export interface Registration {
   status: RegistrationStatus;
   date: string;
   id: string;
-  statis: RegistrationStatus;
   tournament: Tournament;
   tournamentId: string;
   user: User;

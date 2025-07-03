@@ -8,6 +8,10 @@ import { useGetTournamentWaitlist } from "../api/hooks/useGetTournamentWaitlist"
 import { TournamentPlayers } from "../components/widgets/tournament-players";
 import { Button } from "../components/ui/button";
 import { useAuthStore } from "../shared/stores/auth.store";
+import type { Tournament as TournamentType } from "../types/tournament.type";
+import type { User } from "../types/user.type";
+import type { Waitlist } from "../types/waitlist.type";
+import { TournamentStatusActions } from "../components/widgets/tournament-status-actions";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -38,6 +42,8 @@ export const Tournament = () => {
   }, [tournament]);
 
   if (isLoading) return <div>Loading...</div>;
+
+  if (!tournament?.[0] || !user || !waitlist) return <></>;
 
   return (
     <div className="flex flex-col gap-8 pb-[100px]">
@@ -216,11 +222,11 @@ export const Tournament = () => {
         </div>
       </div>
 
-      {isTournamentFinished() && (
-        <div className="flex flex-row gap-4 justify-center bg-[#EBEDF0]">
-          <Button>Турнир завершен</Button>
-        </div>
-      )}
+      <TournamentStatusActions
+        tournament={tournament?.[0]}
+        user={user}
+        waitlist={waitlist || []}
+      />
     </div>
   );
 };

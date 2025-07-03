@@ -18,7 +18,7 @@ export const getTournaments = async (
 export const getTournamentWaitlist = async (
   token: string,
   id: string
-): Promise<Waitlist[] | null> => {
+): Promise<Waitlist | null> => {
   const response = await api.get(`/tournaments/${id}/waitlist`, {
     headers: {
       "X-Api-Token": token,
