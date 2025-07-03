@@ -16,7 +16,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param tournament_id path string true "Tournament ID"
-// @Success 200 {object} map[string]string "User removed from waitlist"
+// @Success 200 {array} domain.WaitlistUser "Tournament waitlist users after removal"
 // @Failure 400 {object} map[string]string "Invalid tournament ID"
 // @Failure 401 {object} map[string]string "User not authorized"
 // @Failure 404 {object} map[string]string "Tournament not found or user not in waitlist"
@@ -45,6 +45,12 @@ func RemoveFromTournamentWaitlist(waitlistCase *usecase.Waitlist) gin.HandlerFun
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "Successfully removed from waitlist"})
+		// Получаем обновленный список пользователей waitlist
+		waitlistUsers, err := waitlistCase.GetTournamentWaitlistUsers(c.Request.Context(), tournamentID)
+		if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to get updated waitlist") {
+			return
+		}
+
+		c.JSON(http.StatusOK, waitlistUsers)
 	}
 } 

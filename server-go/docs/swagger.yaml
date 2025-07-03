@@ -303,19 +303,6 @@ definitions:
       telegramUsername:
         type: string
     type: object
-  domain.Waitlist:
-    properties:
-      date:
-        type: string
-      id:
-        type: integer
-      tournamentId:
-        type: string
-      user:
-        $ref: '#/definitions/domain.User'
-      userId:
-        type: string
-    type: object
   domain.WaitlistUser:
     properties:
       date:
@@ -911,11 +898,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: User removed from waitlist
+          description: Tournament waitlist users after removal
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            items:
+              $ref: '#/definitions/domain.WaitlistUser'
+            type: array
         "400":
           description: Invalid tournament ID
           schema:
@@ -1002,9 +989,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: User added to waitlist
+          description: Tournament waitlist users after adding
           schema:
-            $ref: '#/definitions/domain.Waitlist'
+            items:
+              $ref: '#/definitions/domain.WaitlistUser'
+            type: array
         "400":
           description: Invalid tournament ID or tournament has ended
           schema:

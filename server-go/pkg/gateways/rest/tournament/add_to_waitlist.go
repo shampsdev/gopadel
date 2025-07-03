@@ -16,7 +16,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param tournament_id path string true "Tournament ID"
-// @Success 200 {object} domain.Waitlist "User added to waitlist"
+// @Success 200 {array} domain.WaitlistUser "Tournament waitlist users after adding"
 // @Failure 400 {object} map[string]string "Invalid tournament ID or tournament has ended"
 // @Failure 401 {object} map[string]string "User not authorized"
 // @Failure 404 {object} map[string]string "Tournament not found"
@@ -33,7 +33,7 @@ func AddToTournamentWaitlist(waitlistCase *usecase.Waitlist) gin.HandlerFunc {
 			return
 		}
 
-		waitlistEntry, err := waitlistCase.AddToWaitlist(c.Request.Context(), user.ID, tournamentID)
+		_, err := waitlistCase.AddToWaitlist(c.Request.Context(), user.ID, tournamentID)
 		if err != nil {
 			switch {
 			case err.Error() == "tournament not found":
@@ -48,6 +48,12 @@ func AddToTournamentWaitlist(waitlistCase *usecase.Waitlist) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, waitlistEntry)
+		// Получаем обновленный список пользователей waitlist
+		waitlistUsers, err := waitlistCase.GetTournamentWaitlistUsers(c.Request.Context(), tournamentID)
+		if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to get updated waitlist") {
+			return
+		}
+
+		c.JSON(http.StatusOK, waitlistUsers)
 	}
 } 

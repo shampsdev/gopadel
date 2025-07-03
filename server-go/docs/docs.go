@@ -988,9 +988,12 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "User added to waitlist",
+                        "description": "Tournament waitlist users after adding",
                         "schema": {
-                            "$ref": "#/definitions/domain.Waitlist"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.WaitlistUser"
+                            }
                         }
                     },
                     "400": {
@@ -1068,11 +1071,11 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "User removed from waitlist",
+                        "description": "Tournament waitlist users after removal",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.WaitlistUser"
                             }
                         }
                     },
@@ -1806,26 +1809,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "telegramUsername": {
-                    "type": "string"
-                }
-            }
-        },
-        "domain.Waitlist": {
-            "type": "object",
-            "properties": {
-                "date": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "tournamentId": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/domain.User"
-                },
-                "userId": {
                     "type": "string"
                 }
             }
