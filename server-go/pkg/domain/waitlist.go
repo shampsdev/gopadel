@@ -8,7 +8,11 @@ type Waitlist struct {
 	TournamentID string    `json:"tournamentId"`
 	Date         time.Time `json:"date"`
 	User         *User     `json:"user,omitempty"`
-	Tournament   *Tournament `json:"tournament,omitempty"`
+}
+
+type WaitlistUser struct {
+	User *User `json:"user"`
+	Date time.Time `json:"date"`
 }
 
 type CreateWaitlist struct {

@@ -15,7 +15,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param tournament_id path string true "Tournament ID"
-// @Success 200 {array} domain.Waitlist "Tournament waitlist"
+// @Success 200 {array} domain.WaitlistUser "Tournament waitlist users"
 // @Failure 400 {object} map[string]string "Invalid tournament ID"
 // @Failure 404 {object} map[string]string "Tournament not found"
 // @Failure 500 {object} map[string]string "Internal server error"
@@ -29,11 +29,11 @@ func GetTournamentWaitlist(waitlistCase *usecase.Waitlist) gin.HandlerFunc {
 			return
 		}
 
-		waitlists, err := waitlistCase.GetTournamentWaitlist(c.Request.Context(), tournamentID)
+		waitlistUsers, err := waitlistCase.GetTournamentWaitlistUsers(c.Request.Context(), tournamentID)
 		if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to get tournament waitlist") {
 			return
 		}
 
-		c.JSON(http.StatusOK, waitlists)
+		c.JSON(http.StatusOK, waitlistUsers)
 	}
 }

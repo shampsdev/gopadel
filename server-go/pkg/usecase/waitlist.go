@@ -42,6 +42,23 @@ func (w *Waitlist) GetTournamentWaitlist(ctx context.Context, tournamentID strin
 	return w.WaitlistRepo.Filter(ctx, filter)
 }
 
+func (w *Waitlist) GetTournamentWaitlistUsers(ctx context.Context, tournamentID string) ([]*domain.WaitlistUser, error) {
+	waitlists, err := w.GetTournamentWaitlist(ctx, tournamentID)
+	if err != nil {
+		return nil, err
+	}
+
+	waitlistUsers := make([]*domain.WaitlistUser, len(waitlists))
+	for i, waitlist := range waitlists {
+		waitlistUsers[i] = &domain.WaitlistUser{
+			User: waitlist.User,
+			Date: waitlist.Date,
+		}
+	}
+
+	return waitlistUsers, nil
+}
+
 func (w *Waitlist) AddToWaitlist(ctx context.Context, userID, tournamentID string) (*domain.Waitlist, error) {
 	tournament, err := w.TournamentCase.GetTournamentByID(ctx, tournamentID)
 	if err != nil {

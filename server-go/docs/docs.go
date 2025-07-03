@@ -777,11 +777,11 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Tournament waitlist",
+                        "description": "Tournament waitlist users",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/domain.Waitlist"
+                                "$ref": "#/definitions/domain.WaitlistUser"
                             }
                         }
                     },
@@ -1626,9 +1626,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "tournament": {
-                    "$ref": "#/definitions/domain.Tournament"
-                },
                 "tournamentId": {
                     "type": "string"
                 },
@@ -1637,6 +1634,17 @@ const docTemplate = `{
                 },
                 "userId": {
                     "type": "string"
+                }
+            }
+        },
+        "domain.WaitlistUser": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/domain.User"
                 }
             }
         },
