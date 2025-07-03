@@ -16,6 +16,9 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases) {
 	// Create PENDING registration or update CANCELED -> PENDING
 	g.POST("/:tournament_id", RegisterForTournament(cases.Registration, cases.User))
 	
+	// Create payment for tournament registration
+	g.POST("/:tournament_id/payment", CreatePayment(cases.Payment, cases.User))
+
 	// Cancel registration before payment (PENDING -> CANCELED)
 	g.POST("/:tournament_id/cancel", CancelBeforePayment(cases.Registration, cases.User))
 	

@@ -127,6 +127,39 @@ definitions:
       telegramUsername:
         type: string
     type: object
+  domain.Payment:
+    properties:
+      amount:
+        type: integer
+      confirmationToken:
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      paymentId:
+        type: string
+      paymentLink:
+        type: string
+      registration:
+        $ref: '#/definitions/domain.Registration'
+      registrationId:
+        type: string
+      status:
+        $ref: '#/definitions/domain.PaymentStatus'
+    type: object
+  domain.PaymentStatus:
+    enum:
+    - pending
+    - waiting_for_capture
+    - succeeded
+    - canceled
+    type: string
+    x-enum-varnames:
+    - PaymentStatusPending
+    - PaymentStatusWaitingForCapture
+    - PaymentStatusSucceeded
+    - PaymentStatusCanceled
   domain.PlayingPosition:
     enum:
     - right
@@ -296,12 +329,77 @@ definitions:
         example: https://example.com/image.jpg
         type: string
     type: object
+  registration.CreatePaymentRequest:
+    properties:
+      returnUrl:
+        type: string
+    required:
+    - returnUrl
+    type: object
+  webhook.WebhookEvent:
+    properties:
+      event:
+        type: string
+      object:
+        $ref: '#/definitions/webhook.WebhookEventObject'
+      type:
+        type: string
+    type: object
+  webhook.WebhookEventObject:
+    properties:
+      id:
+        type: string
+      status:
+        type: string
+    type: object
 info:
   contact: {}
   description: Manage chats, users
   title: GoPadel server
   version: "1.0"
 paths:
+  /api/v1/yookassa_webhook:
+    post:
+      consumes:
+      - application/json
+      description: Handles payment status updates from YooKassa
+      parameters:
+      - description: Webhook event
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/webhook.WebhookEvent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: YooKassa webhook for payment notifications
+      tags:
+      - webhook
   /images/upload/avatar:
     post:
       consumes:
@@ -498,6 +596,60 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Cancel registration after payment
+      tags:
+      - registration
+  /registrations/{tournament_id}/payment:
+    post:
+      consumes:
+      - application/json
+      description: Creates payment in YooKassa for existing PENDING registration.
+        Returns existing payment if it's already in success/pending status.
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: tournament_id
+        required: true
+        type: string
+      - description: Payment creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/registration.CreatePaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payment created or existing payment returned
+          schema:
+            $ref: '#/definitions/domain.Payment'
+        "400":
+          description: Invalid request data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: No pending registration found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create payment for tournament registration
       tags:
       - registration
   /registrations/{tournament_id}/reactivate:

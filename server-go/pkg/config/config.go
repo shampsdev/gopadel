@@ -37,6 +37,10 @@ type Config struct {
 	Log struct {
 		Handler string `envconfig:"LOG_HANDLER" default:"tint"`
 	}
+	YooKassa struct {
+		ShopID    string `envconfig:"SHOP_ID"`
+		SecretKey string `envconfig:"SHOP_SECRET"`
+	}
 
 	S3 S3Config
 }

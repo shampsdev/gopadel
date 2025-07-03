@@ -7,6 +7,70 @@
         "version": "1.0"
     },
     "paths": {
+        "/api/v1/yookassa_webhook": {
+            "post": {
+                "description": "Handles payment status updates from YooKassa",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "webhook"
+                ],
+                "summary": "YooKassa webhook for payment notifications",
+                "parameters": [
+                    {
+                        "description": "Webhook event",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/webhook.WebhookEvent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/images/upload/avatar": {
             "post": {
                 "security": [
@@ -346,6 +410,88 @@
                     },
                     "404": {
                         "description": "Registration not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/registrations/{tournament_id}/payment": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Creates payment in YooKassa for existing PENDING registration. Returns existing payment if it's already in success/pending status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registration"
+                ],
+                "summary": "Create payment for tournament registration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tournament ID",
+                        "name": "tournament_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Payment creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/registration.CreatePaymentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment created or existing payment returned",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Payment"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "User not authorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No pending registration found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1397,6 +1543,53 @@
                 }
             }
         },
+        "domain.Payment": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "confirmationToken": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "paymentId": {
+                    "type": "string"
+                },
+                "paymentLink": {
+                    "type": "string"
+                },
+                "registration": {
+                    "$ref": "#/definitions/domain.Registration"
+                },
+                "registrationId": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/domain.PaymentStatus"
+                }
+            }
+        },
+        "domain.PaymentStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "waiting_for_capture",
+                "succeeded",
+                "canceled"
+            ],
+            "x-enum-varnames": [
+                "PaymentStatusPending",
+                "PaymentStatusWaitingForCapture",
+                "PaymentStatusSucceeded",
+                "PaymentStatusCanceled"
+            ]
+        },
         "domain.PlayingPosition": {
             "type": "string",
             "enum": [
@@ -1646,6 +1839,42 @@
                 "url": {
                     "type": "string",
                     "example": "https://example.com/image.jpg"
+                }
+            }
+        },
+        "registration.CreatePaymentRequest": {
+            "type": "object",
+            "required": [
+                "returnUrl"
+            ],
+            "properties": {
+                "returnUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "webhook.WebhookEvent": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "type": "string"
+                },
+                "object": {
+                    "$ref": "#/definitions/webhook.WebhookEventObject"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "webhook.WebhookEventObject": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         }

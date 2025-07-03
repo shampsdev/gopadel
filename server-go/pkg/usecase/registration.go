@@ -397,4 +397,13 @@ func (r *Registration) validateAvailableSlots(ctx context.Context, tournamentID 
 	}
 
 	return nil
+}
+
+// UpdateRegistrationStatus обновляет статус регистрации по ID
+func (r *Registration) UpdateRegistrationStatus(ctx context.Context, registrationID string, status domain.RegistrationStatus) error {
+	patch := &domain.PatchRegistration{
+		Status: &status,
+	}
+
+	return r.registrationRepo.Patch(ctx, registrationID, patch)
 } 

@@ -43,7 +43,7 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	tournamentCase := NewTournament(ctx, tournamentRepo, registrationRepo)
 	loyaltyCase := NewLoyalty(ctx, loyaltyRepo)
 	registrationCase := NewRegistration(ctx, registrationRepo, tournamentRepo)
-	paymentCase := NewPayment(ctx, paymentRepo)
+	paymentCase := NewPayment(ctx, paymentRepo, registrationRepo, tournamentRepo, cfg)
 	waitlistCase := NewWaitlist(ctx, waitlistRepo, tournamentCase)
 
 	return Cases{
