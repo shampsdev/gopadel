@@ -182,7 +182,7 @@ export const Tournament = () => {
           />
         </div>
 
-        {!isTournamentFinished(tournament?.[0]) && (
+        {waitlist && waitlist.length > 0 && (
           <Link to={`/tournament/${id}/waitlist`}>
             <div className="flex flex-row items-center gap-[18px] py-[17px] px-[16px] rounded-[30px] bg-[#F8F8FA]">
               <div className="flex w-[42px] h-[42px] justify-center items-center bg-[#AFFF3F] rounded-full">
