@@ -5,7 +5,6 @@ import type { User } from "./user.type";
 export interface Tournament {
   date: string;
   location: any;
-  type: string;
   playersCapacity: number;
   playersAmount: number;
   club: Club;

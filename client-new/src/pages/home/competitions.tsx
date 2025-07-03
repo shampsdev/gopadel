@@ -2,8 +2,6 @@ import {
   CompetitionCard,
   type CompetitionCardProps,
 } from "../../components/widgets/competition-card";
-import { ranks } from "../../shared/constants/ranking";
-import type { Rank } from "../../types/rank.type";
 import { useGetTournaments } from "../../api/hooks/useGetTournaments";
 import type { Tournament } from "../../types/tournament.type";
 import type { FilterTournament } from "../../types/filter.type";
@@ -11,9 +9,6 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
-
-// Мок-данные для рангов
-const mockRanks: Rank[] = ranks;
 
 // Мок-данные для игр
 const mockGames: CompetitionCardProps[] = [];
@@ -56,15 +51,9 @@ export const Competitions = () => {
   const transformTournamentToCompetition = (
     tournament: Tournament
   ): CompetitionCardProps & { id: string; competitionType: string } => {
-    const rank =
-      mockRanks.find(
-        (r) => r.from <= tournament.rankMin && r.to >= tournament.rankMin
-      ) || mockRanks[0];
-    const participantsCount = tournament.participants?.length || 0;
-
     return {
       id: tournament.id,
-      rank,
+      rank: tournament.rankMin,
       organizerName: `${tournament.organizator?.firstName || ""} ${
         tournament.organizator?.lastName || ""
       }`,
@@ -80,10 +69,12 @@ export const Competitions = () => {
       type: tournament.tournamentType || "Турнир",
       cost: tournament.price,
       playersCapacity: tournament.maxUsers,
-      playersAmount: participantsCount,
+      playersAmount: tournament.participants.filter(
+        (participant) => participant.status === "ACTIVE"
+      ).length,
       participating: false,
-      competitionType: tournament.type,
       title: tournament.name || "",
+      competitionType: "tournament",
     };
   };
 

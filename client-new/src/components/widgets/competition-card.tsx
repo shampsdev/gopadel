@@ -1,11 +1,11 @@
 import { twMerge } from "tailwind-merge";
 import { Icons } from "../../assets/icons";
-import type { Rank } from "../../types/rank.type";
+import { getRankTitle } from "../../utils/rank-title";
 
 export interface CompetitionCardProps {
   className?: string;
   title: string;
-  rank: Rank;
+  rank: number;
   organizerName: string;
   date: string;
   locationTitle: string;
@@ -76,7 +76,7 @@ export const CompetitionCard = ({
 
           <div className="flex flex-row items-center gap-3">
             {Icons.Star()}
-            <p>{rank.title}</p>
+            <p>{getRankTitle(rank)}</p>
           </div>
         </div>
       </div>
