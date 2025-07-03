@@ -86,11 +86,14 @@ definitions:
     properties:
       id:
         type: string
-      isAvalible:
-        description: true if tournament is not started and not full
-        type: boolean
       name:
         type: string
+      notEnded:
+        description: default true
+        type: boolean
+      notFull:
+        description: true if tournament is not full
+        type: boolean
       organizatorId:
         type: string
     type: object
@@ -385,7 +388,8 @@ definitions:
     type: object
 info:
   contact: {}
-  description: Manage chats, users
+  description: Manage chats, users, tournaments. For JWT authentication use 'Bearer
+    <token>' format in Authorization header.
   title: GoPadel server
   version: "1.0"
 paths:
@@ -417,7 +421,7 @@ paths:
           schema:
             $ref: '#/definitions/domain.ErrorResponse'
       security:
-      - Bearer: []
+      - BearerAuth: []
       summary: Change admin password
       tags:
       - admin-auth
@@ -466,7 +470,7 @@ paths:
           schema:
             $ref: '#/definitions/domain.ErrorResponse'
       security:
-      - Bearer: []
+      - BearerAuth: []
       summary: Get current admin info
       tags:
       - admin-auth
@@ -1340,8 +1344,7 @@ securityDefinitions:
     in: header
     name: X-API-Token
     type: apiKey
-  Bearer:
-    description: Type "Bearer" followed by a space and JWT token.
+  BearerAuth:
     in: header
     name: Authorization
     type: apiKey

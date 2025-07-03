@@ -53,6 +53,7 @@ func (u *User) Create(ctx context.Context, userTGData *domain.UserTGData) (*doma
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
+	u.tgDataCache.Delete(user.TelegramID)
 	return repo.First(u.userRepo.Filter)(ctx, &domain.FilterUser{ID: &id})
 }
 

@@ -50,8 +50,12 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 		s = s.Where(sq.Eq{`"t"."organizator_id"`: *filter.OrganizatorID})
 	}
 
-	if filter.IsAvalible {
-		s = s.Having(`"t"."start_time" > NOW() AND COUNT(CASE WHEN "r"."status" IN ('PENDING', 'ACTIVE') THEN 1 END) < "t"."max_users"`)
+	if filter.NotEnded == nil || *filter.NotEnded {
+		s = s.Where(`("t"."end_time" IS NOT NULL AND "t"."end_time" > NOW()) OR ("t"."end_time" IS NULL AND "t"."start_time" + INTERVAL '1 hour' > NOW())`)
+	}
+
+	if filter.NotFull != nil && *filter.NotFull {
+		s = s.Having(`COUNT(CASE WHEN "r"."status" IN ('PENDING', 'ACTIVE') THEN 1 END) < "t"."max_users"`)
 	}
 
 	s = s.OrderBy(`"t"."start_time" ASC`)

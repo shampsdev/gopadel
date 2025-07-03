@@ -46,8 +46,9 @@ type PatchTournament struct {
 }
 
 type FilterTournament struct {
-	ID           string `json:"id"`
-	Name         string `json:"name"`
-	IsAvalible   bool   `json:"isAvalible"` // true if tournament is not started and not full
+	ID            string  `json:"id"`
+	Name          string  `json:"name"`
+	NotFull       *bool   `json:"notFull,omitempty"`       // true if tournament is not full
+	NotEnded      *bool   `json:"notEnded,omitempty"`      // default true
 	OrganizatorID *string `json:"organizatorId,omitempty"`
 }

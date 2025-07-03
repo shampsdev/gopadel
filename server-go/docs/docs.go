@@ -19,7 +19,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "Bearer": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Change password for currently authenticated admin",
@@ -116,7 +116,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "Bearer": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get information about currently authenticated admin",
@@ -1620,12 +1620,16 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "isAvalible": {
-                    "description": "true if tournament is not started and not full",
-                    "type": "boolean"
-                },
                 "name": {
                     "type": "string"
+                },
+                "notEnded": {
+                    "description": "default true",
+                    "type": "boolean"
+                },
+                "notFull": {
+                    "description": "true if tournament is not full",
+                    "type": "boolean"
                 },
                 "organizatorId": {
                     "type": "string"
@@ -2072,8 +2076,7 @@ const docTemplate = `{
             "name": "X-API-Token",
             "in": "header"
         },
-        "Bearer": {
-            "description": "Type \"Bearer\" followed by a space and JWT token.",
+        "BearerAuth": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
@@ -2088,7 +2091,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "GoPadel server",
-	Description:      "Manage chats, users",
+	Description:      "Manage chats, users, tournaments. For JWT authentication use 'Bearer <token>' format in Authorization header.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
