@@ -21,7 +21,6 @@ export const Tournament = () => {
 
   const { data: tournament, isLoading } = useGetTournaments({
     id: id!,
-    isAvailable: true,
   });
   const { data: waitlist } = useGetTournamentWaitlist(id!);
 

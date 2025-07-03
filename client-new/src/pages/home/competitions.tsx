@@ -43,7 +43,8 @@ export const Competitions = () => {
   };
 
   const filter: FilterTournament = {
-    isAvailable: showOnlyAvailable || undefined,
+    notFull: showOnlyAvailable || undefined,
+    notEnded: true,
   };
 
   const { data: tournaments, isLoading, error } = useGetTournaments(filter);

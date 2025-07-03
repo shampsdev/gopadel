@@ -1,7 +1,9 @@
 export interface FilterTournament {
   id?: string;
-  isAvailable?: boolean;
   name?: string;
+  notEnded?: boolean;
+  notFull?: boolean;
+  organizatorId?: string;
 }
 
 export interface FilterUser {
