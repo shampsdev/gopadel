@@ -28,13 +28,14 @@ export const RankInput = ({
         (rank) =>
           rank.title.toLowerCase().includes(value.toLowerCase()) ||
           rank.from.toString().includes(value) ||
-          rank.to.toString().includes(value)
+          rank.to.toString().includes(value) ||
+          Math.floor(rank.from).toString().includes(value) ||
+          Math.floor(rank.to).toString().includes(value)
       );
-      setFilteredRanks(filtered.slice(0, 5));
+      setFilteredRanks(filtered.slice(0, 6));
       setShowSuggestions(filtered.length > 0);
     } else if (isFocused) {
-      // Показываем все ранги при фокусе, если поле пустое
-      setFilteredRanks(ranks.slice(0, 5));
+      setFilteredRanks(ranks.slice(0, 6));
       setShowSuggestions(true);
     } else {
       setFilteredRanks([]);
@@ -90,8 +91,7 @@ export const RankInput = ({
             if (value && filteredRanks.length > 0) {
               setShowSuggestions(true);
             } else {
-              // Показываем все ранги при фокусе на пустом поле
-              setFilteredRanks(ranks.slice(0, 5));
+              setFilteredRanks(ranks.slice(0, 6));
               setShowSuggestions(true);
             }
           }}
@@ -112,7 +112,7 @@ export const RankInput = ({
               className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-[16px]"
               onClick={() => handleRankSelect(rank)}
             >
-              {rank.title} ({rank.from}-{rank.to})
+              {rank.title} ({rank.from.toFixed(1)}-{rank.to.toFixed(1)})
             </div>
           ))}
         </div>

@@ -1,19 +1,32 @@
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { Icons } from "../assets/icons";
 import { getRankTitle } from "../utils/rank-title";
 import { useTelegramBackButton } from "../shared/hooks/useTelegramBackButton";
 import { useGetTournaments } from "../api/hooks/useGetTournaments";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useGetTournamentWaitlist } from "../api/hooks/useGetTournamentWaitlist";
 import { TournamentPlayers } from "../components/widgets/tournament-players";
+import { Button } from "../components/ui/button";
+import { useAuthStore } from "../shared/stores/auth.store";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   const { id } = useParams();
+  const { user } = useAuthStore();
+
+  const [isCopied, setIsCopied] = useState(false);
 
   const { data: tournament, isLoading } = useGetTournaments({ id: id! });
   const { data: waitlist, isLoading: waitlistLoading } =
     useGetTournamentWaitlist(id!);
+
+  // Проверяем, что турнир еще не закончился
+  const isTournamentFinished = () => {
+    if (!tournament?.[0]?.endTime) return false;
+    const now = new Date();
+    const endTime = new Date(tournament[0].endTime);
+    return now > endTime;
+  };
 
   const getPersonWord = (count: number) => {
     if (count === 1) return "человек";
@@ -152,36 +165,62 @@ export const Tournament = () => {
           />
         </div>
 
-        <div className="flex flex-row items-center flex-1">
-          <div>Иконка</div>
-          <div className="flex flex-col gap-[2px]">
-            <p>Список ожидания</p>
-            <p>
-              {waitlist?.length} {getPersonWord(waitlist?.length || 0)}
+        {!isTournamentFinished() && (
+          <Link to={`/tournament/${id}/waitlist`}>
+            <div className="flex flex-row items-center gap-[18px] py-[17px] px-[16px] rounded-[30px] bg-[#F8F8FA]">
+              <div className="flex w-[42px] h-[42px] justify-center items-center bg-[#AFFF3F] rounded-full">
+                {Icons.Clock("black")}
+              </div>
+              <div className="flex flex-col gap-[2px] flex-grow">
+                <p>Список ожидания</p>
+                <p>
+                  {waitlist?.length} {getPersonWord(waitlist?.length || 0)}
+                </p>
+              </div>
+              <div>{Icons.ArrowRight("black")}</div>
+            </div>
+          </Link>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3 ">
+        <div className="flex flex-row justify-between pl-[28px] py-[16px] border-[EBEDF0] border-[1px] rounded-[30px] pr-[16px]">
+          <div className="flex flex-row flex-wrap items-center gap-1 text-[#5D6674]">
+            Организатор:
+            <p className="text-black font-medium">
+              {tournament?.[0].club.name}
             </p>
           </div>
-        </div>
 
-        <div>{Icons.ArrowRight()}</div>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-row justify-between">
-          <p>Организатор: {}</p>
-
-          <div className="flex flex-row items-center gap-[10px]">
-            <p>Написать</p>
-            <div>{Icons.Ball()}</div>
+          <div className="flex flex-row items-center gap-[10px] px-[16px] py-[12px] text-white rounded-[30px] bg-black">
+            <p className="text-[14px] font-medium">Написать</p>
+            <div className="">{Icons.Message()}</div>
           </div>
         </div>
 
-        <div className="flex flex-row items-center justify-between">
-          <p>Поделиться турниром</p>
-          <div>{Icons.Ball()}</div>
+        <div className="flex flex-row items-center gap-[18px] py-[20px] pl-[28px] pr-[16px] rounded-[30px] bg-[#F8F8FA]">
+          <div className="flex flex-col gap-[2px] flex-grow">
+            <p>{isCopied ? "Ссылка скопирована!" : "Поделиться турниром"}</p>
+          </div>
+          <div
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              setIsCopied(true);
+              setTimeout(() => {
+                setIsCopied(false);
+              }, 2000);
+            }}
+          >
+            {Icons.Copy()}
+          </div>
         </div>
       </div>
 
-      <div className="flex justify-center">статус оплаты/реги</div>
+      {isTournamentFinished() && (
+        <div className="flex flex-row gap-4 justify-center bg-[#EBEDF0]">
+          <Button>Турнир завершен</Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { twMerge } from "tailwind-merge";
 import { Icons } from "../../assets/icons";
-import type { RegistrationStatus } from "../../types/registration.type";
 import { getRankTitle } from "../../utils/rank-title";
+import type { RegistrationStatus } from "../../types/registration-status";
 
 export interface CompetitionHistoryCardProps {
   className?: string;
@@ -77,10 +77,10 @@ export const CompetitionHistoryCard = ({
 
       <div className="flex flex-row justify-between items-center">
         <p className="text-[16px] text-[#868D98]">статус</p>
-        {status === "CANCELLED_BY_USER" && (
+        {status === "CANCELED_BY_USER" && (
           <p className="text-[#F34338]">Вы отменили участие</p>
         )}
-        {status === "CANCELLED" && (
+        {status === "CANCELED" && (
           <p className="text-[#F34338]">Участие отменено</p>
         )}
         {status === "PENDING" && <p>Ожидает подтверждения</p>}
