@@ -103,7 +103,9 @@ export const TournamentPlayers = ({ registrations }: TurnamentPlayers) => {
                       </div>
                     )}
                   </div>
-                  <p className={twMerge("text-center text-[12px] text-black ")}>
+                  <div
+                    className={twMerge("text-center text-[12px] text-black ")}
+                  >
                     {registration.user.id === user?.id ? (
                       <div>Вы</div>
                     ) : (
@@ -112,7 +114,7 @@ export const TournamentPlayers = ({ registrations }: TurnamentPlayers) => {
                         <div>{registration.user.lastName}</div>
                       </>
                     )}
-                  </p>
+                  </div>
                 </div>
               );
             })

@@ -141,14 +141,16 @@ export const Tournament = () => {
           </div>
         </div>
 
-        <TournamentPlayers
-          tournamentId={id!}
-          registrations={
-            tournament?.[0].participants
-              ? Array(10).fill(tournament[0].participants).flat()
-              : []
-          }
-        />
+        <div className="px-[12px]">
+          <TournamentPlayers
+            tournamentId={id!}
+            registrations={
+              tournament?.[0].participants
+                ? Array(10).fill(tournament[0].participants).flat()
+                : []
+            }
+          />
+        </div>
 
         <div className="flex flex-row items-center flex-1">
           <div>Иконка</div>
