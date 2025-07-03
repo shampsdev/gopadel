@@ -6,11 +6,7 @@ import { useGetTournaments } from "../api/hooks/useGetTournaments";
 import { useEffect, useState } from "react";
 import { useGetTournamentWaitlist } from "../api/hooks/useGetTournamentWaitlist";
 import { TournamentPlayers } from "../components/widgets/tournament-players";
-import { Button } from "../components/ui/button";
 import { useAuthStore } from "../shared/stores/auth.store";
-import type { Tournament as TournamentType } from "../types/tournament.type";
-import type { User } from "../types/user.type";
-import type { Waitlist } from "../types/waitlist.type";
 import { TournamentStatusActions } from "../components/widgets/tournament-status-actions";
 
 export const Tournament = () => {

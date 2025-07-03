@@ -26,3 +26,31 @@ export const getTournamentWaitlist = async (
   });
   return response.data;
 };
+
+export const addUserToWaitlist = async (
+  token: string,
+  tournamentId: string
+): Promise<Waitlist | null> => {
+  const response = await api.post(
+    `/tournaments/${tournamentId}/waitlist`,
+    {},
+    {
+      headers: {
+        "X-Api-Token": token,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const removeUserFromWaitlist = async (
+  token: string,
+  tournamentId: string
+): Promise<Waitlist | null> => {
+  const response = await api.delete(`/tournaments/${tournamentId}/waitlist`, {
+    headers: {
+      "X-Api-Token": token,
+    },
+  });
+  return response.data;
+};
