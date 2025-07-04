@@ -150,7 +150,7 @@ export const CreateTournament = () => {
 
   if (isAdminLoading || courtsLoading) return <Preloader />;
 
-  if (isAdmin) {
+  if (!isAdmin?.admin) {
     return (
       <div className="flex flex-col h-screen w-full">
         <div className="flex-1 flex flex-col text-center items-center justify-center gap-11">
