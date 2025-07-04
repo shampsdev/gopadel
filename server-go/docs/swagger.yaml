@@ -2270,6 +2270,28 @@ paths:
       summary: Create me
       tags:
       - users
+  /users/me/admin:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Admin status
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Check if user is admin
+      tags:
+      - users
   /users/me/bio:
     get:
       consumes:

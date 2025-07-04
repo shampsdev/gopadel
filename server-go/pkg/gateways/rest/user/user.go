@@ -18,4 +18,5 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases) {
 	gAuth.Group("/me").
 		GET("", GetMe(cases.User)).PATCH("", PatchMe(cases.User))
 	gAuth.Group("/me").GET("/bio", GetUserBio(cases.User))
+	gAuth.Group("/me").GET("/admin", GetMeAdmin(cases.AdminUser))
 }
