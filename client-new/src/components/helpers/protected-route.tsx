@@ -23,32 +23,43 @@ export const ProtectedRoute = () => {
   }, [isLoading, isError, setAuth]);
 
   useEffect(() => {
-    if (
-      me !== undefined &&
-      me !== null &&
-      !clubsLoading &&
-      myClubs &&
-      initData &&
-      !joinClubMutation.isPending
-    ) {
-      const parsedData = parseStartParam(initData);
+    const handleClubJoin = async () => {
+      if (
+        me !== undefined &&
+        me !== null &&
+        !clubsLoading &&
+        myClubs &&
+        initData &&
+        initData.length > 0 &&
+        !joinClubMutation.isPending
+      ) {
+        try {
+          const parsedData = parseStartParam(initData);
 
-      if (parsedData.courtId) {
-        const clubExists = myClubs.some(
-          (club) => club.id === parsedData.courtId
-        );
+          if (parsedData.courtId) {
+            const clubExists = myClubs.some(
+              (club) => club.id === parsedData.courtId
+            );
 
-        if (!clubExists) {
-          joinClubMutation.mutate(parsedData.courtId);
-        }
-      } else {
-        const globalClubExists = myClubs.some((club) => club.id === "global");
+            if (!clubExists) {
+              await joinClubMutation.mutateAsync(parsedData.courtId);
+            }
+          } else {
+            const globalClubExists = myClubs.some(
+              (club) => club.id === "global"
+            );
 
-        if (!globalClubExists) {
-          joinClubMutation.mutate("global");
+            if (!globalClubExists) {
+              await joinClubMutation.mutateAsync("global");
+            }
+          }
+        } catch (error) {
+          console.error("Ошибка при присоединении к клубу:", error);
         }
       }
-    }
+    };
+
+    handleClubJoin();
   }, [me, clubsLoading, myClubs, initData, joinClubMutation.isPending]);
 
   if (isLoading || clubsLoading) {
