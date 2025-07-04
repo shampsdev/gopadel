@@ -55,6 +55,18 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 		s = s.Where(sq.Eq{`"u"."telegram_id"`: *filter.TelegramID})
 	}
 
+	if filter.TelegramUsername != nil {
+		s = s.Where(sq.ILike{`"u"."telegram_username"`: "%" + *filter.TelegramUsername + "%"})
+	}
+
+	if filter.FirstName != nil {
+		s = s.Where(sq.ILike{`"u"."first_name"`: "%" + *filter.FirstName + "%"})
+	}
+
+	if filter.LastName != nil {
+		s = s.Where(sq.ILike{`"u"."last_name"`: "%" + *filter.LastName + "%"})
+	}
+
 	sql, args, err := s.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build SQL: %w", err)
@@ -72,7 +84,8 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 	users := []*domain.User{}
 	for rows.Next() {
 		var user domain.User
-		var bio, city, birthDate, padelProfiles pgtype.Text
+		var telegramUsername, avatar, bio, city, padelProfiles pgtype.Text
+		var birthDate pgtype.Date
 		var playingPosition pgtype.Text
 		var rank pgtype.Float8
 		var isRegistered pgtype.Bool
@@ -85,10 +98,10 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 		err := rows.Scan(
 			&user.ID,
 			&user.TelegramID,
-			&user.TelegramUsername,
+			&telegramUsername,
 			&user.FirstName,
 			&user.LastName,
-			&user.Avatar,
+			&avatar,
 			&bio,
 			&rank,
 			&city,
@@ -106,6 +119,12 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 
+		if telegramUsername.Valid {
+			user.TelegramUsername = telegramUsername.String
+		}
+		if avatar.Valid {
+			user.Avatar = avatar.String
+		}
 		if bio.Valid {
 			user.Bio = bio.String
 		}
@@ -116,7 +135,7 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 			user.City = city.String
 		}
 		if birthDate.Valid {
-			user.BirthDate = birthDate.String
+			user.BirthDate = birthDate.Time.Format("2006-01-02")
 		}
 		if playingPosition.Valid {
 			user.PlayingPosition = domain.PlayingPosition(playingPosition.String)
@@ -179,12 +198,24 @@ func (r *UserRepo) Patch(ctx context.Context, id string, user *domain.PatchUser)
 	if user.IsRegistered != nil {
 		s = s.Set("is_registered", true)
 	}
+	if user.LoyaltyID != nil {
+		s = s.Set("loyalty_id", *user.LoyaltyID)
+	}
 	sql, args, err := s.ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build SQL: %w", err)
 	}
-	_, err = r.db.Exec(ctx, sql, args...)
-	return err
+
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update user: %w", err)
+	}
+	
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("user with id %s not found", id)
+	}
+	
+	return nil
 }
 
 func (r *UserRepo) Delete(ctx context.Context, id string) error {

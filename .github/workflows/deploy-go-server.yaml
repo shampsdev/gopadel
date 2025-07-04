@@ -21,7 +21,7 @@ jobs:
       id-token: write
     secrets: inherit
     with:
-      dockerfile_path: 'server/Dockerfile.server'
+      dockerfile_path: 'server-go/Dockerfile.server'
       context_path: 'server-go'
       image_name: 'gopadel-server'
       environment: ${{ github.event.inputs.environment }}

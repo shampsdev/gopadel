@@ -37,6 +37,14 @@ type Config struct {
 	Log struct {
 		Handler string `envconfig:"LOG_HANDLER" default:"tint"`
 	}
+	YooKassa struct {
+		ShopID    string `envconfig:"SHOP_ID"`
+		SecretKey string `envconfig:"SHOP_SECRET"`
+	}
+	JWT struct {
+		SecretKey            string        `envconfig:"JWT_SECRET_KEY"`
+		AccessTokenExpireHours int         `envconfig:"JWT_ACCESS_TOKEN_EXPIRE_HOURS" default:"24"`
+	}
 
 	S3 S3Config
 }

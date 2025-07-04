@@ -10,16 +10,26 @@ import (
 )
 
 type Cases struct {
-	User       *User
-	Image      *Image
-	Club       *Club
-	Tournament *Tournament
+	User         *User
+	AdminUser    *AdminUser
+	Image        *Image
+	Club         *Club
+	Tournament   *Tournament
+	Loyalty      *Loyalty
+	Registration *Registration
+	Payment      *Payment
+	Waitlist     *Waitlist
 }
 
 func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	userRepo := pg.NewUserRepo(db)
+	adminUserRepo := pg.NewAdminUserRepo(db)
 	clubRepo := pg.NewClubRepo(db)
 	tournamentRepo := pg.NewTournamentRepo(db)
+	loyaltyRepo := pg.NewLoyaltyRepo(db)
+	registrationRepo := pg.NewRegistrationRepo(db)
+	paymentRepo := pg.NewPaymentRepo(db)
+	waitlistRepo := pg.NewWaitlistRepo(db)
 
 	storage, err := s3.NewStorage(cfg.S3)
 	if err != nil {
@@ -27,14 +37,24 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	}
 
 	userCase := NewUser(ctx, userRepo, storage)
+	adminUserCase := NewAdminUser(ctx, adminUserRepo, cfg)
 	imageCase := NewImage(ctx, storage)
 	clubCase := NewClub(ctx, clubRepo)
-	tournamentCase := NewTournament(ctx, tournamentRepo)
+	tournamentCase := NewTournament(ctx, tournamentRepo, registrationRepo)
+	loyaltyCase := NewLoyalty(ctx, loyaltyRepo)
+	registrationCase := NewRegistration(ctx, registrationRepo, tournamentRepo, paymentRepo)
+	paymentCase := NewPayment(ctx, paymentRepo, registrationRepo, tournamentRepo, cfg)
+	waitlistCase := NewWaitlist(ctx, waitlistRepo, tournamentCase)
 
 	return Cases{
-		User:       userCase,
-		Image:      imageCase,
-		Club:       clubCase,
-		Tournament: tournamentCase,
+		User:         userCase,
+		AdminUser:    adminUserCase,
+		Image:        imageCase,
+		Club:         clubCase,
+		Tournament:   tournamentCase,
+		Loyalty:      loyaltyCase,
+		Registration: registrationCase,
+		Payment:      paymentCase,
+		Waitlist:     waitlistCase,
 	}
 }
