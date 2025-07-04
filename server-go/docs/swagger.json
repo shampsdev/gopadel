@@ -3215,6 +3215,7 @@
         "domain.CreateTournament": {
             "type": "object",
             "required": [
+                "clubId",
                 "courtId",
                 "maxUsers",
                 "name",
@@ -3225,6 +3226,9 @@
                 "tournamentType"
             ],
             "properties": {
+                "clubId": {
+                    "type": "string"
+                },
                 "courtId": {
                     "type": "string"
                 },
@@ -3439,6 +3443,9 @@
         "domain.PatchTournament": {
             "type": "object",
             "properties": {
+                "clubId": {
+                    "type": "string"
+                },
                 "courtId": {
                     "type": "string"
                 },
@@ -3671,6 +3678,9 @@
         "domain.Tournament": {
             "type": "object",
             "properties": {
+                "clubId": {
+                    "type": "string"
+                },
                 "court": {
                     "$ref": "#/definitions/domain.Court"
                 },

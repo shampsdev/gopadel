@@ -3223,6 +3223,7 @@ const docTemplate = `{
         "domain.CreateTournament": {
             "type": "object",
             "required": [
+                "clubId",
                 "courtId",
                 "maxUsers",
                 "name",
@@ -3233,6 +3234,9 @@ const docTemplate = `{
                 "tournamentType"
             ],
             "properties": {
+                "clubId": {
+                    "type": "string"
+                },
                 "courtId": {
                     "type": "string"
                 },
@@ -3447,6 +3451,9 @@ const docTemplate = `{
         "domain.PatchTournament": {
             "type": "object",
             "properties": {
+                "clubId": {
+                    "type": "string"
+                },
                 "courtId": {
                     "type": "string"
                 },
@@ -3679,6 +3686,9 @@ const docTemplate = `{
         "domain.Tournament": {
             "type": "object",
             "properties": {
+                "clubId": {
+                    "type": "string"
+                },
                 "court": {
                     "$ref": "#/definitions/domain.Court"
                 },

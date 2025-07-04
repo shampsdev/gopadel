@@ -169,6 +169,8 @@ definitions:
     type: object
   domain.CreateTournament:
     properties:
+      clubId:
+        type: string
       courtId:
         type: string
       description:
@@ -192,6 +194,7 @@ definitions:
       tournamentType:
         type: string
     required:
+    - clubId
     - courtId
     - maxUsers
     - name
@@ -318,6 +321,8 @@ definitions:
     type: object
   domain.PatchTournament:
     properties:
+      clubId:
+        type: string
       courtId:
         type: string
       description:
@@ -476,6 +481,8 @@ definitions:
     type: object
   domain.Tournament:
     properties:
+      clubId:
+        type: string
       court:
         $ref: '#/definitions/domain.Court'
       description:
