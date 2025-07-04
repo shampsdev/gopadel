@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { Icons } from "../../assets/icons";
 import { getRankTitle } from "../../utils/rank-title";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
@@ -12,18 +12,21 @@ import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { twMerge } from "tailwind-merge";
 import { Preloader } from "../../components/widgets/preloader";
 import { BOT_NAME } from "../../shared/constants/api";
+import { useIsAdmin } from "../../api/hooks/useIsAdmin";
+import { Button } from "../../components/ui/button";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   const { id } = useParams();
   const { user } = useAuthStore();
-
+  const navigate = useNavigate();
   const [isCopied, setIsCopied] = useState(false);
 
   const { data: tournament, isLoading } = useGetTournaments({
     id: id!,
   });
   const { data: waitlist } = useGetTournamentWaitlist(id!);
+  const { data: isAdmin } = useIsAdmin();
 
   const getPersonWord = (count: number) => {
     if (count === 1) return "человек";
@@ -150,7 +153,8 @@ export const Tournament = () => {
                     >
                       {user.loyalty.discount > 0
                         ? Math.round(
-                            tournament?.[0].price * (1 - user.loyalty.discount)
+                            tournament?.[0].price *
+                              (1 - user.loyalty.discount / 100)
                           )
                         : tournament?.[0].price}
                     </span>{" "}
@@ -310,6 +314,18 @@ export const Tournament = () => {
         user={user}
         waitlist={waitlist || []}
       />
+
+      {isAdmin?.admin && (
+        <div className="mb-10 flex flex-row gap-4 justify-center">
+          <Button
+            onClick={async () => {
+              navigate(`/tournament/${id}/edit`);
+            }}
+          >
+            Редактировать
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

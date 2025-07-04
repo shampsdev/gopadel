@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Input } from "../../components/ui/froms/input";
 import { Textarea } from "../../components/ui/froms/textarea";
@@ -13,31 +14,35 @@ import {
 import { Button } from "../../components/ui/button";
 import { RankSelector } from "../../components/ui/froms/rank-selector";
 import { ranks } from "../../shared/constants/ranking";
-import type { CreateTournament as CreateTournamentType } from "../../types/create-tournament";
+import type { PatchTournament } from "../../types/patch-tournament";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { useGetCourts } from "../../api/hooks/useGetCourts";
-import { useCreateTournament } from "../../api/hooks/mutations/tournament/useCreateTournament";
-import { useNavigate } from "react-router";
+import { usePatchTournament } from "../../api/hooks/mutations/tournament/usePatchTournament";
+import { useDeleteTournament } from "../../api/hooks/mutations/tournament/useDeleteTournament";
 import { useIsAdmin } from "../../api/hooks/useIsAdmin";
 import { Preloader } from "../../components/widgets/preloader";
 import AboutImage from "../../assets/about.png";
+import { useGetTournaments } from "../../api/hooks/useGetTournaments";
+import { Icons } from "../../assets/icons";
+import { useModalStore } from "../../shared/stores/modal.store";
 
-export const CreateTournament = () => {
+export const TournamentEdit = () => {
+  const { id } = useParams();
   const { user } = useAuthStore();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
-
-  const [title, setTitle] = useState<string | null>(null);
+  const { openModal } = useModalStore();
+  const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [date, setDate] = useState<string | null>(null);
-  const [dateError, setDateError] = useState<boolean>(true);
+  const [date, setDate] = useState<string>("");
+  const [dateError, setDateError] = useState<boolean>(false);
 
-  const [time, setTime] = useState<string | null>(null);
-  const [timeError, setTimeError] = useState<boolean>(true);
-  const [clubName, setClubName] = useState<string | null>(null);
-  const [clubAddress, setClubAddress] = useState<string | null>(null);
+  const [time, setTime] = useState<string>("");
+  const [timeError, setTimeError] = useState<boolean>(false);
+  const [clubName, setClubName] = useState<string>("");
+  const [clubAddress, setClubAddress] = useState<string>("");
 
-  const [type, setType] = useState<string | null>(null);
+  const [type, setType] = useState<string>("");
   const [courtId, setCourtId] = useState<string>("");
   const [rank, setRank] = useState<number | null>(null);
   const [rankInput, setRankInput] = useState<string>("");
@@ -46,8 +51,96 @@ export const CreateTournament = () => {
 
   const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
 
-  const { mutateAsync: createTournament, isPending: isCreatingTournament } =
-    useCreateTournament();
+  const { mutateAsync: patchTournament, isPending: isUpdatingTournament } =
+    usePatchTournament(id!);
+
+  const { mutateAsync: deleteTournament, isPending: isDeletingTournament } =
+    useDeleteTournament();
+
+  const { data: tournaments, isLoading: tournamentLoading } = useGetTournaments(
+    { id: id! }
+  );
+  const tournament = tournaments?.[0];
+
+  console.log("Tournaments data:", tournaments);
+  console.log("Tournament ID:", id);
+  console.log("Selected tournament:", tournament);
+  console.log("Tournament loading:", tournamentLoading);
+
+  useEffect(() => {
+    if (tournament) {
+      console.log("Tournament data:", tournament);
+      console.log(
+        "RankMin:",
+        tournament.rankMin,
+        "RankMax:",
+        tournament.rankMax
+      );
+
+      setTitle(tournament.name || "");
+      setDescription(tournament.description || "");
+
+      // Форматируем дату и время
+      const startDate = new Date(tournament.startTime);
+      const endDate = new Date(tournament.endTime);
+
+      const formattedDate = startDate
+        .toLocaleDateString("ru-RU", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
+        .replace(/\//g, ".");
+
+      const startTime = startDate.toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      const endTime = endDate.toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      setDate(formattedDate);
+      setTime(`${startTime}-${endTime}`);
+      setClubName(tournament.club?.name || "");
+      setClubAddress(tournament.club?.address || "");
+      setType(tournament.tournamentType || "");
+      setCourtId(tournament.club?.id || "");
+
+      // Находим ранг - исправляем логику поиска
+      console.log("Available ranks:", ranks);
+      const min = Math.min(tournament.rankMin, tournament.rankMax);
+      const max = Math.max(tournament.rankMin, tournament.rankMax);
+
+      const selectedRank = ranks.find(
+        (r) => Math.abs(r.from - min) < 0.01 && Math.abs(r.to - max) < 0.01
+      );
+
+      console.log("Selected rank:", selectedRank);
+
+      if (selectedRank) {
+        setRankInput(selectedRank.title);
+        setRank(selectedRank.from);
+      } else {
+        // Если точного совпадения нет, попробуем найти по диапазону
+        const fallbackRank = ranks.find(
+          (r) => tournament.rankMin >= r.from && tournament.rankMin < r.to
+        );
+        if (fallbackRank) {
+          console.log("Using fallback rank:", fallbackRank);
+          setRankInput(fallbackRank.title);
+          setRank(fallbackRank.from);
+        }
+      }
+
+      setPrice(tournament.price);
+      setPriceInput(tournament.price.toString());
+      setMaxUsers(tournament.maxUsers);
+      setMaxUsersInput(tournament.maxUsers.toString());
+    }
+  }, [tournament]);
 
   const handleRankChange = (rankTitle: string) => {
     setRankInput(rankTitle);
@@ -57,12 +150,11 @@ export const CreateTournament = () => {
     }
   };
 
-  const [price, setPrice] = useState<number | null>(null);
+  const [price, setPrice] = useState<number>(0);
   const [priceInput, setPriceInput] = useState<string>("");
-  const [maxUsers, setMaxUsers] = useState<number | null>(null);
+  const [maxUsers, setMaxUsers] = useState<number>(0);
   const [maxUsersInput, setMaxUsersInput] = useState<string>("");
 
-  // Проверяем валидность всех обязательных полей
   const isFormValid = () => {
     return (
       title &&
@@ -83,7 +175,7 @@ export const CreateTournament = () => {
     );
   };
 
-  const handleCreateTournament = async () => {
+  const handleUpdateTournament = async () => {
     if (!date || !time) {
       console.log("Необходимо указать дату и время");
       return;
@@ -114,39 +206,43 @@ export const CreateTournament = () => {
       return;
     }
 
-    const tournamentData: CreateTournamentType = {
+    const tournamentData: PatchTournament = {
       clubId: courtId,
       description: description,
       endTime: end,
-      maxUsers: maxUsers ?? 0,
-      name: title ?? "",
-      organizatorId: user?.id ?? "",
-      price: price ?? 0,
+      maxUsers: maxUsers,
+      name: title,
+      price: price,
       rankMax: ranks.find((r) => r.title === rankInput)?.from ?? 0,
       rankMin: ranks.find((r) => r.title === rankInput)?.to ?? 0,
       startTime: start,
-      tournamentType: type ?? "",
+      tournamentType: type,
     };
 
     try {
-      console.log(tournamentData);
-      Object.keys(tournamentData).forEach((key) => {
-        console.log(key, tournamentData[key as keyof CreateTournamentType]);
-      });
-      const tournament = await createTournament(tournamentData);
-      if (tournament?.id) {
-        navigate(`/tournament/${tournament?.id}`);
-      } else {
-        alert("Турнир успешно создан");
-        navigate("/");
-      }
+      await patchTournament(tournamentData);
+      navigate(-1);
     } catch (error) {
-      alert("Ошибка при создании турнира");
+      alert("Ошибка при обновлении турнира");
       console.error(error);
     }
   };
 
-  if (isAdminLoading || courtsLoading) return <Preloader />;
+  const handleDeleteTournament = async () => {
+    openModal({
+      title: "Уверены, что хотите удалить событие?",
+      subtitle: "Восстановить заполненную информацию будет невозможно",
+      declineButtonText: "Отмена",
+      acceptButtonText: "Удалить",
+      declineButtonOnClick: () => {},
+      acceptButtonOnClick: async () => {
+        await deleteTournament(id!);
+      },
+    });
+  };
+
+  if (isAdminLoading || courtsLoading || tournamentLoading)
+    return <Preloader />;
 
   if (!isAdmin?.admin) {
     return (
@@ -156,7 +252,28 @@ export const CreateTournament = () => {
           <div className="flex flex-col gap-4">
             <div className="font-semibold text-[20px]">Функция недоступна</div>
             <div className="text-[#868D98]">
-              Создание турниров доступно только администраторам
+              Редактирование турниров доступно только администраторам
+            </div>
+          </div>
+        </div>
+        <div className="mt-auto pb-10">
+          <Button className="mx-auto" onClick={() => navigate("/")}>
+            Назад
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!tournament) {
+    return (
+      <div className="flex flex-col h-screen w-full">
+        <div className="flex-1 flex flex-col text-center items-center justify-center gap-11">
+          <img src={AboutImage} className="object-cover w-[70%]" />
+          <div className="flex flex-col gap-4">
+            <div className="font-semibold text-[20px]">Турнир не найден</div>
+            <div className="text-[#868D98]">
+              Запрашиваемый турнир не существует
             </div>
           </div>
         </div>
@@ -173,9 +290,9 @@ export const CreateTournament = () => {
     <div className="flex flex-col gap-[40px] pb-[100px]">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2 px-[12px]">
-          <p className="text-[24px] font-medium">Новый турнир</p>
+          <p className="text-[24px] font-medium">Редактировать турнир</p>
           <p className="text-[#5D6674] text-[16px]">
-            Добавьте информацию о событии
+            Измените информацию о событии
           </p>
         </div>
 
@@ -183,7 +300,7 @@ export const CreateTournament = () => {
           <Input
             onChangeFunction={setTitle}
             title={"Название"}
-            value={title ?? ""}
+            value={title}
             maxLength={100}
             hasError={!title}
           />
@@ -207,14 +324,14 @@ export const CreateTournament = () => {
               }
             }}
             onBlur={() => {
-              if (!validateDateFormat(date ?? "")) {
+              if (!validateDateFormat(date)) {
                 setDateError(true);
               } else {
                 setDateError(false);
               }
             }}
             title={"Дата"}
-            value={date ?? ""}
+            value={date}
             maxLength={8}
             placeholder={"дд.мм.гг"}
             hasError={dateError}
@@ -231,14 +348,14 @@ export const CreateTournament = () => {
               }
             }}
             onBlur={() => {
-              if (!validateTimeFormat(time ?? "")) {
+              if (!validateTimeFormat(time)) {
                 setTimeError(true);
               } else {
                 setTimeError(false);
               }
             }}
             title={"Время"}
-            value={time ?? ""}
+            value={time}
             maxLength={11}
             placeholder={"чч:мм-чч:мм"}
             hasError={timeError}
@@ -246,21 +363,21 @@ export const CreateTournament = () => {
           <Input
             onChangeFunction={setClubName}
             title={"Место"}
-            value={clubName ?? ""}
+            value={clubName}
             maxLength={100}
             hasError={!clubName}
           />
           <Input
             onChangeFunction={setClubAddress}
             title={"Адрес"}
-            value={clubAddress ?? ""}
+            value={clubAddress}
             maxLength={240}
             hasError={!clubAddress}
           />
           <Input
             onChangeFunction={setType}
             title={"Тип"}
-            value={type ?? ""}
+            value={type}
             maxLength={100}
             hasError={!type}
           />
@@ -293,7 +410,7 @@ export const CreateTournament = () => {
               if (sanitized) {
                 setPrice(parseInt(sanitized));
               } else {
-                setPrice(null);
+                setPrice(0);
               }
             }}
             onBlur={() => {
@@ -303,7 +420,7 @@ export const CreateTournament = () => {
                 setPrice(num);
                 setPriceInput(String(num));
               } else {
-                setPrice(null);
+                setPrice(0);
                 setPriceInput("");
               }
             }}
@@ -322,7 +439,7 @@ export const CreateTournament = () => {
               if (sanitized) {
                 setMaxUsers(parseInt(sanitized));
               } else {
-                setMaxUsers(null);
+                setMaxUsers(0);
               }
             }}
             onBlur={() => {
@@ -332,25 +449,33 @@ export const CreateTournament = () => {
                 setMaxUsers(num);
                 setMaxUsersInput(String(num));
               } else {
-                setMaxUsers(null);
+                setMaxUsers(0);
                 setMaxUsersInput("");
               }
             }}
           />
+          <Button
+            disabled={isDeletingTournament}
+            onClick={handleDeleteTournament}
+            className="w-full flex justify-between bg-[#f344387a] text-[#F34338]"
+          >
+            <div>Удалить турнир</div>
+            <div>{Icons.Delete()}</div>
+          </Button>
         </div>
       </div>
 
-      <div className="mx-auto">
+      <div className="flex flex-col gap-4 mx-auto">
         <Button
-          disabled={isCreatingTournament}
+          disabled={isUpdatingTournament}
           onClick={() => {
             if (isFormValid()) {
-              handleCreateTournament();
+              handleUpdateTournament();
             }
           }}
           className={!isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4]" : ""}
         >
-          Создать турнир
+          Сохранить изменения
         </Button>
       </div>
     </div>
