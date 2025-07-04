@@ -16,9 +16,12 @@ import { ranks } from "../../shared/constants/ranking";
 import type { CreateTournament as CreateTournamentType } from "../../types/create-tournament";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { useGetCourts } from "../../api/hooks/useGetCourts";
+import { useCreateTournament } from "../../api/hooks/mutations/tournament/useCreateTournament";
+import { useNavigate } from "react-router";
 
 export const CreateTournament = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
   const [title, setTitle] = useState<string | null>(null);
@@ -38,6 +41,9 @@ export const CreateTournament = () => {
   const [rankInput, setRankInput] = useState<string>("");
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
+
+  const { mutateAsync: createTournament, isPending: isCreatingTournament } =
+    useCreateTournament();
 
   const handleRankChange = (rankTitle: string) => {
     setRankInput(rankTitle);
@@ -73,7 +79,7 @@ export const CreateTournament = () => {
     );
   };
 
-  const handleCreateTournament = () => {
+  const handleCreateTournament = async () => {
     setCourtTouched(true);
     if (!date || !time) {
       console.log("Необходимо указать дату и время");
@@ -118,6 +124,14 @@ export const CreateTournament = () => {
       startTime: start,
       tournamentType: type ?? "",
     };
+
+    try {
+      const tournament = await createTournament(tournamentData);
+      navigate(`/tournaments/${tournament?.id}`);
+    } catch (error) {
+      alert("Ошибка при создании турнира");
+      console.error(error);
+    }
   };
 
   return (
@@ -294,6 +308,7 @@ export const CreateTournament = () => {
 
       <div className="mx-auto">
         <Button
+          disabled={isCreatingTournament}
           onClick={handleCreateTournament}
           className={!isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4]" : ""}
         >
