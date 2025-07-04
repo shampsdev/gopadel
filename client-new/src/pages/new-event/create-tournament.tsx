@@ -57,7 +57,7 @@ export const CreateTournament = () => {
       rank !== null &&
       rank > 0 &&
       price !== null &&
-      price > 0 &&
+      price >= 0 &&
       maxUsers !== null &&
       maxUsers > 0
     );
