@@ -3,7 +3,7 @@ import { Icons } from "../../assets/icons";
 import { getRankTitle } from "../../utils/rank-title";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { useGetTournaments } from "../../api/hooks/useGetTournaments";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useGetTournamentWaitlist } from "../../api/hooks/useGetTournamentWaitlist";
 import { TournamentPlayers } from "../../components/widgets/tournament-players";
 import { useAuthStore } from "../../shared/stores/auth.store";
@@ -33,13 +33,19 @@ export const Tournament = () => {
     if (count >= 2 && count <= 4) return "человека";
     return "человек";
   };
-  useEffect(() => {
-    console.log(tournament?.[0]);
-  }, [tournament]);
 
   if (isLoading) return <Preloader />;
 
   if (!tournament?.[0] || !user || !waitlist) return <></>;
+
+  if (!tournament?.[0])
+    return (
+      <div className="flex flex-col gap-8 pb-[100px]">
+        <div className="flex flex-col gap-7 px-[12px]">
+          <h1 className="text-[24px] font-medium">Турнир не найден</h1>
+        </div>
+      </div>
+    );
 
   return (
     <div className="flex flex-col gap-8 pb-[100px]">
@@ -295,7 +301,7 @@ export const Tournament = () => {
           <div
             onClick={() => {
               navigator.clipboard.writeText(
-                `https://t.me/${BOT_NAME}/app?startapp=${id}`
+                `https://t.me/${BOT_NAME}/app?startapp=tour-${id}`
               );
               setIsCopied(true);
               setTimeout(() => {

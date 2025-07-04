@@ -67,8 +67,6 @@ export const Registration = () => {
     try {
       let finalAvatarUrl = avatarUrl;
 
-      console.log("selectedFile", selectedFile);
-
       if (selectedFile) {
         try {
           finalAvatarUrl = await uploadAvatar(token!, selectedFile);
@@ -88,9 +86,7 @@ export const Registration = () => {
         rank: rank ?? 0,
         isRegistered: true,
       });
-      console.log("before navigate");
       navigate("/");
-      console.log("after navigate");
     } catch (error) {
       alert("Уупс, что-то пошло не так");
     }

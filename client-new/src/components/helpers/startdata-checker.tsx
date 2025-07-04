@@ -1,6 +1,7 @@
 import { initDataStartParam } from "@telegram-apps/sdk-react";
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
+import { parseStartParam } from "../../utils/start-data-parse";
 
 export const StartDataChecker = () => {
   const initData = initDataStartParam();
@@ -8,10 +9,14 @@ export const StartDataChecker = () => {
 
   useEffect(() => {
     if (initData && initData.length > 0) {
-      console.log("initData", initData);
-      navigate(`/tournament/${initData}`);
+      // Парсим startParam
+      const parsedData = parseStartParam(initData);
+
+      if (parsedData.tournamentId) {
+        navigate(`/tournament/${parsedData.tournamentId}`);
+      }
     }
-  }, [initData]);
+  }, [initData, navigate]);
 
   return (
     <>

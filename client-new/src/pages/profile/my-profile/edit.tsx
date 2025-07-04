@@ -157,8 +157,6 @@ export const EditProfile = () => {
         birthDataISO = parseBirthDateToISO(birthDate);
       }
 
-      console.log("avatarUrl", avatarUrl);
-      console.log("birthDataISO", birthDataISO);
       await patchMeMutation.mutateAsync({
         avatar: avatarUrl!,
         bio: bio ?? "",
@@ -172,15 +170,6 @@ export const EditProfile = () => {
         padelProfiles: profiles ?? "",
       });
 
-      console.log("send", {
-        avatar: avatarUrl!,
-        bio: bio ?? "",
-        firstName: firstName ?? "",
-        birthData: birthDataISO,
-        lastName: lastName ?? "",
-        rank: rank ?? 0,
-        padelProfiles: profiles ?? "",
-      });
       navigate(-1);
     } catch (error) {
       alert("Уупс, что-то пошло не так");

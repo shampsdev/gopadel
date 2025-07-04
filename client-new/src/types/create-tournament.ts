@@ -10,4 +10,5 @@ export interface CreateTournament {
   rankMin: number;
   startTime: string;
   tournamentType: string;
+  clubId: string;
 }
