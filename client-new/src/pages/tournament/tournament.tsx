@@ -143,7 +143,9 @@ export const Tournament = () => {
                 <p className="text-[14px] text-[#000000]">
                   {
                     tournament?.[0].participants.filter(
-                      (participant) => participant.status === "ACTIVE"
+                      (participant) =>
+                        participant.status === "ACTIVE" ||
+                        participant.status === "PENDING"
                     ).length
                   }
                   / {tournament?.[0].maxUsers}
@@ -152,12 +154,16 @@ export const Tournament = () => {
 
             {tournament &&
               tournament?.[0].participants.filter(
-                (participant) => participant.status === "ACTIVE"
+                (participant) =>
+                  participant.status === "ACTIVE" ||
+                  participant.status === "PENDING"
               ).length >= tournament?.[0].maxUsers && (
                 <p className="text-[14px] text-[#F34338]">
                   {
                     tournament?.[0].participants.filter(
-                      (participant) => participant.status === "ACTIVE"
+                      (participant) =>
+                        participant.status === "ACTIVE" ||
+                        participant.status === "PENDING"
                     ).length
                   }
                   / {tournament?.[0].maxUsers}

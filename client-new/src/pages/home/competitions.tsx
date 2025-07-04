@@ -70,8 +70,9 @@ export const Competitions = () => {
       type: tournament.tournamentType || "Турнир",
       cost: tournament.price,
       playersCapacity: tournament.maxUsers,
-      playersAmount: tournament.participants.filter(
-        (participant) => participant.status === "ACTIVE"
+      playersAmount: tournament.participants?.filter(
+        (participant) =>
+          participant.status === "ACTIVE" || participant.status === "PENDING"
       ).length,
       participating: false,
       title: tournament.name || "",
@@ -111,34 +112,18 @@ export const Competitions = () => {
             backgroundColor: showOnlyAvailable ? "#AFFF3F" : "#F8F8FA",
           }}
           transition={{ duration: 0.3 }}
+          style={{ zIndex: 0 }}
         >
           <motion.div
-            className="h-[20px] w-[20px] rounded-full bg-white shadow-sm absolute left-1"
+            className="h-[20px] w-[20px] rounded-full bg-white shadow-sm absolute z-10 left-1"
             animate={{ x: showOnlyAvailable ? 32 : 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            style={{ zIndex: 0 }}
           />
         </motion.div>
       </div>
 
       <div className="flex flex-col gap-4  mt-4">
-        {isLoading && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">Загрузка событий...</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="text-center py-8">
-            <p className="text-red-500">Ошибка загрузки событий</p>
-          </div>
-        )}
-
-        {!isLoading && !error && filteredCompetitions.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">События не найдены</p>
-          </div>
-        )}
-
         {filteredCompetitions.map(
           (
             competition: CompetitionCardProps & {

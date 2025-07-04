@@ -13,7 +13,8 @@ export const participatingAvailable = (tournament: TournamentType) => {
   return (
     tournament.maxUsers >
     tournament.participants.filter(
-      (participant) => participant.status === "ACTIVE"
+      (participant) =>
+        participant.status === "ACTIVE" || participant.status === "PENDING"
     ).length
   );
 };

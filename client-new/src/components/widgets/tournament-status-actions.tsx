@@ -21,6 +21,7 @@ import {
 } from "../../utils/tournament-status-checks";
 import { Button } from "../ui/button";
 import { useCancelRegistrationBeforePayment } from "../../api/hooks/mutations/registration/cancel-registration-before-payment";
+import { useModalStore } from "../../shared/stores/modal.store";
 
 interface TournamentStatusActionsProps {
   tournament: Tournament;
@@ -33,6 +34,7 @@ export const TournamentStatusActions = ({
   user,
   waitlist,
 }: TournamentStatusActionsProps) => {
+  const { openModal } = useModalStore();
   const { mutateAsync: addUserToWaitlist } = useAddUserToWaitlist();
   const { mutateAsync: removeUserFromWaitlist } = useRemoveUserFromWaitlist();
   const { mutateAsync: registerToTournament } = useRegisterToTournament();
@@ -71,7 +73,16 @@ export const TournamentStatusActions = ({
               <Button
                 className="bg-[#FF5053] text-white"
                 onClick={async () => {
-                  await cancelRegistrationAfterPayment(tournament.id);
+                  openModal({
+                    title: "Уверены, что хотите отказаться от участия?",
+                    subtitle: "Ваше место сможет занять другой участник",
+                    declineButtonText: "Назад",
+                    acceptButtonText: "Отменить регистрацию",
+                    declineButtonOnClick: () => {},
+                    acceptButtonOnClick: async () => {
+                      await cancelRegistrationAfterPayment(tournament.id);
+                    },
+                  });
                 }}
               >
                 Отменить регистрацию
@@ -106,7 +117,16 @@ export const TournamentStatusActions = ({
               <Button
                 className="bg-[#FF5053] text-white"
                 onClick={async () => {
-                  await cancelRegistrationBeforePayment(tournament.id);
+                  openModal({
+                    title: "Уверены, что хотите отказаться от участия?",
+                    subtitle: "Ваше место сможет занять другой участник",
+                    declineButtonText: "Назад",
+                    acceptButtonText: "Отменить регистрацию",
+                    declineButtonOnClick: () => {},
+                    acceptButtonOnClick: async () => {
+                      await cancelRegistrationBeforePayment(tournament.id);
+                    },
+                  });
                 }}
               >
                 Не участвую

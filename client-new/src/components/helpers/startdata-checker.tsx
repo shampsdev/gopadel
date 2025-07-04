@@ -13,5 +13,9 @@ export const StartDataChecker = () => {
     }
   }, [initData]);
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+    </>
+  );
 };

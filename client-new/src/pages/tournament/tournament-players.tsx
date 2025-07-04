@@ -21,7 +21,9 @@ export const TournamentPlayers = () => {
               Сейчас зарегистрировано:{" "}
               {
                 tournaments[0].participants.filter(
-                  (participant) => participant.status === "ACTIVE"
+                  (participant) =>
+                    participant.status === "ACTIVE" ||
+                    participant.status === "PENDING"
                 ).length
               }
             </p>

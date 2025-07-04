@@ -9,9 +9,6 @@ import { Link, useLocation, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
 
-// Мок-данные для рангов
-const mockRanks: Rank[] = ranks;
-
 export const Tournaments = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -40,14 +37,11 @@ export const Tournaments = () => {
   };
 
   const filter: FilterTournament = {
-    isAvailable: showOnlyAvailable || undefined,
+    notFull: showOnlyAvailable || undefined,
+    notEnded: true,
   };
 
-  const {
-    data: tournaments,
-    isLoading,
-    error,
-  } = useGetTournaments({ isAvailable: true });
+  const { data: tournaments, isLoading, error } = useGetTournaments(filter);
 
   return (
     <>
@@ -57,17 +51,19 @@ export const Tournaments = () => {
           Только со свободными местами
         </p>
         <motion.div
-          className="h-[28px] w-[60px] rounded-[16px] flex items-center cursor-pointer relative"
+          className="h-[28px] w-[60px] rounded-[16px] z-10 flex items-center cursor-pointer relative"
           onClick={toggleSwitch}
           animate={{
             backgroundColor: showOnlyAvailable ? "#AFFF3F" : "#F8F8FA",
           }}
           transition={{ duration: 0.3 }}
+          style={{ zIndex: 0 }}
         >
           <motion.div
-            className="h-[20px] w-[20px] rounded-full bg-white shadow-sm absolute left-1"
+            className="h-[20px] w-[20px] z-10 rounded-full bg-white shadow-sm absolute left-1"
             animate={{ x: showOnlyAvailable ? 32 : 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            style={{ zIndex: 0 }}
           />
         </motion.div>
       </div>
@@ -96,12 +92,7 @@ export const Tournaments = () => {
             <CompetitionCard
               title={competition.name}
               key={competition.id}
-              rank={
-                mockRanks.find(
-                  (r) =>
-                    r.from <= competition.rankMin && r.to >= competition.rankMin
-                ) || mockRanks[0]
-              }
+              rank={competition.rankMin}
               organizerName={`${competition.organizator.firstName} ${competition.organizator.lastName}`}
               date={new Date(competition.startTime).toLocaleDateString(
                 "ru-RU",
@@ -118,7 +109,13 @@ export const Tournaments = () => {
               type={competition.tournamentType}
               cost={competition.price}
               playersCapacity={competition.maxUsers}
-              playersAmount={competition.participants?.length || 0}
+              playersAmount={
+                competition.participants?.filter(
+                  (participant) =>
+                    participant.status === "ACTIVE" ||
+                    participant.status === "PENDING"
+                ).length || 0
+              }
               participating={false}
             />
           </Link>

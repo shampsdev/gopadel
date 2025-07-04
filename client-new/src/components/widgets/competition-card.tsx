@@ -93,7 +93,7 @@ export const CompetitionCard = ({
             </p>
           </div>
 
-          {playersAmount === playersCapacity && !participating && (
+          {playersAmount >= playersCapacity && !participating && (
             <div className="px-[10px] bg-[#F34338] bg-opacity-25 text-[#F34338] text-[14px] py-[6px] rounded-[10px]">
               мест нет
             </div>

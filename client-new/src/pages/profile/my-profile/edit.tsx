@@ -85,7 +85,6 @@ export const EditProfile = () => {
     }
   };
 
-  // Функции валидации
   const validateFirstName = (value: string) => {
     const isValid = value.length > 0;
     setFirstNameError(!isValid);
@@ -95,12 +94,6 @@ export const EditProfile = () => {
   const validateLastName = (value: string) => {
     const isValid = value.length > 0;
     setLastNameError(!isValid);
-    return isValid;
-  };
-
-  const validateRank = (value: string) => {
-    const isValid = value.length > 0;
-    setRankError(!isValid);
     return isValid;
   };
 
