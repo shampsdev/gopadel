@@ -11,8 +11,8 @@ import { parseStartParam } from "../../utils/start-data-parse";
 export const ProtectedRoute = () => {
   const { setAuth, setUser } = useAuthStore();
   const { data: me, isLoading, isError, isFetched } = useGetMe();
-  const { data: myClubs, isLoading: clubsLoading } = useGetMyClubs();
-  const joinClubMutation = useJoinClub();
+  const { data: myClubs } = useGetMyClubs();
+  const joinClub = useJoinClub();
   const initData = initDataStartParam();
 
   useEffect(() => {
@@ -23,28 +23,26 @@ export const ProtectedRoute = () => {
   }, [isLoading, isError, setAuth]);
 
   useEffect(() => {
-    if (me?.isRegistered && !clubsLoading && myClubs && initData) {
+    if (me?.isRegistered && myClubs && initData) {
       const parsedData = parseStartParam(initData);
 
       if (parsedData.courtId) {
         const clubExists = myClubs.some(
           (club) => club.id === parsedData.courtId
         );
-
         if (!clubExists) {
-          joinClubMutation.mutate(parsedData.courtId);
+          joinClub.mutate(parsedData.courtId);
         }
       } else {
         const globalClubExists = myClubs.some((club) => club.id === "global");
-
         if (!globalClubExists) {
-          joinClubMutation.mutate("global");
+          joinClub.mutate("global");
         }
       }
     }
-  }, [me?.isRegistered, clubsLoading, myClubs, initData, joinClubMutation]);
+  }, [me?.isRegistered, myClubs, initData]);
 
-  if (isLoading || clubsLoading) {
+  if (isLoading) {
     return <Preloader />;
   }
 
@@ -53,9 +51,7 @@ export const ProtectedRoute = () => {
   }
 
   if (!me?.isRegistered && isFetched) {
-    console.log("me", me);
     return <Navigate to="/registration" />;
   }
-
   return <Outlet />;
 };
