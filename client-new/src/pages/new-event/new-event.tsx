@@ -36,7 +36,7 @@ export const NewEvent = () => {
             {Icons.Padel("black")}
           </div>
           <div className="flex flex-row items-center flex-1 justify-between flex-grow gap-[10px]">
-            <p>Добавить добавить игру</p>
+            <p>Добавить игру</p>
             <div>{Icons.ArrowRight()}</div>
           </div>
         </div>
