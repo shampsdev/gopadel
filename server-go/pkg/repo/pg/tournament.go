@@ -34,7 +34,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 		`COUNT(CASE WHEN "r"."status" IN ('PENDING', 'ACTIVE') THEN 1 END) AS active_registrations`,
 	).
 		From(`"tournaments" AS t`).
-		Join(`"clubs" AS c ON "t"."club_id" = "c"."id"`).
+		Join(`"courts" AS c ON "t"."court_id" = "c"."id"`).
 		Join(`"users" AS u ON "t"."organizator_id" = "u"."id"`).
 		LeftJoin(`"registrations" AS r ON "t"."id" = "r"."tournament_id"`).
 		GroupBy(`"t"."id"`, `"c"."id"`, `"u"."id"`)
@@ -80,7 +80,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 		var tournament domain.Tournament
 		var endTime pgtype.Timestamp
 		var description pgtype.Text
-		var clubID, clubName, clubAddress string
+		var courtID, courtName, courtAddress string
 		var userID string
 		var userTelegramID int64
 		var userTelegramUsername pgtype.Text
@@ -106,9 +106,9 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 			&tournament.MaxUsers,
 			&description,
 			&tournament.TournamentType,
-			&clubID,
-			&clubName,
-			&clubAddress,
+			&courtID,
+			&courtName,
+			&courtAddress,
 			&userID,
 			&userTelegramID,
 			&userTelegramUsername,
@@ -135,10 +135,10 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 			tournament.Description = description.String
 		}
 
-		tournament.Club = domain.Club{
-			ID:      clubID,
-			Name:    clubName,
-			Address: clubAddress,
+		tournament.Court = domain.Court{
+			ID:      courtID,
+			Name:    courtName,
+			Address: courtAddress,
 		}
 
 		organizator := domain.User{
@@ -194,7 +194,7 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 		From(`"tournaments" AS t`).
 		Join(`"registrations" AS reg ON "t"."id" = "reg"."tournament_id"`).
 		Join(`"users" AS u ON "reg"."user_id" = "u"."id"`).
-		Join(`"clubs" AS c ON "t"."club_id" = "c"."id"`).
+		Join(`"courts" AS c ON "t"."court_id" = "c"."id"`).
 		Join(`"users" AS org ON "t"."organizator_id" = "org"."id"`).
 		Where(sq.Eq{`"u"."id"`: userID}).
 		Where(sq.Eq{`"reg"."status"`: []string{"ACTIVE", "CANCELED"}}).
@@ -219,7 +219,7 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 		var tournament domain.Tournament
 		var endTime pgtype.Timestamp
 		var description pgtype.Text
-		var clubID, clubName, clubAddress string
+		var courtID, courtName, courtAddress string
 		var orgID string
 		var orgTelegramID int64
 		var orgTelegramUsername pgtype.Text
@@ -244,9 +244,9 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 			&tournament.MaxUsers,
 			&description,
 			&tournament.TournamentType,
-			&clubID,
-			&clubName,
-			&clubAddress,
+			&courtID,
+			&courtName,
+			&courtAddress,
 			&orgID,
 			&orgTelegramID,
 			&orgTelegramUsername,
@@ -272,10 +272,10 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 			tournament.Description = description.String
 		}
 
-		tournament.Club = domain.Club{
-			ID:      clubID,
-			Name:    clubName,
-			Address: clubAddress,
+		tournament.Court = domain.Court{
+			ID:      courtID,
+			Name:    courtName,
+			Address: courtAddress,
 		}
 
 		organizator := domain.User{
@@ -323,10 +323,10 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 func (r *TournamentRepo) Create(ctx context.Context, tournament *domain.CreateTournament) (string, error) {
 	s := r.psql.Insert(`"tournaments"`).
 		Columns("name", "start_time", "end_time", "price", "rank_min", "rank_max", 
-				"max_users", "description", "club_id", "tournament_type", "organizator_id").
+				"max_users", "description", "court_id", "tournament_type", "organizator_id").
 		Values(tournament.Name, tournament.StartTime, tournament.EndTime, tournament.Price,
 			   tournament.RankMin, tournament.RankMax, tournament.MaxUsers, tournament.Description,
-			   tournament.ClubID, tournament.TournamentType, tournament.OrganizatorID).
+			   tournament.CourtID, tournament.TournamentType, tournament.OrganizatorID).
 		Suffix("RETURNING id")
 
 	sql, args, err := s.ToSql()
@@ -366,8 +366,8 @@ func (r *TournamentRepo) Patch(ctx context.Context, id string, tournament *domai
 	if tournament.Description != nil {
 		s = s.Set("description", *tournament.Description)
 	}
-	if tournament.ClubID != nil {
-		s = s.Set("club_id", *tournament.ClubID)
+	if tournament.CourtID != nil {
+		s = s.Set("court_id", *tournament.CourtID)
 	}
 	if tournament.TournamentType != nil {
 		s = s.Set("tournament_type", *tournament.TournamentType)

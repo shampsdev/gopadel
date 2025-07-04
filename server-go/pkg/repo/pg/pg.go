@@ -6,7 +6,7 @@ import "github.com/shampsdev/go-telegram-template/pkg/repo"
 var (
 	_ repo.User         = &UserRepo{}
 	_ repo.AdminUser    = &AdminUserRepo{}
-	_ repo.Club         = &ClubRepo{}
+	_ repo.Court        = &CourtRepo{}
 	_ repo.Tournament   = &TournamentRepo{}
 	_ repo.Loyalty      = &LoyaltyRepo{}
 	_ repo.Registration = &RegistrationRepo{}

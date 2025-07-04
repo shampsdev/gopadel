@@ -7,7 +7,7 @@ import (
 )
 
 func Setup(r *gin.RouterGroup, useCases usecase.Cases) {
-	handler := NewHandler(useCases.Club)
+	handler := NewHandler(useCases.Court)
 	
 	courtsGroup := r.Group("/courts")
 	{

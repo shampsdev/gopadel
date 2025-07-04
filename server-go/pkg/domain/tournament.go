@@ -12,7 +12,7 @@ type Tournament struct {
 	RankMax        float64         `json:"rankMax"`
 	MaxUsers       int             `json:"maxUsers"`
 	Description    string          `json:"description"`
-	Club           Club            `json:"club"`
+	Court          Court           `json:"court"`
 	TournamentType string          `json:"tournamentType"`
 	Organizator    User            `json:"organizator"`
 	Participants   []*Registration `json:"participants"`
@@ -27,7 +27,7 @@ type CreateTournament struct {
 	RankMax        float64   `json:"rankMax" binding:"required"`
 	MaxUsers       int       `json:"maxUsers" binding:"required"`
 	Description    string    `json:"description"`
-	ClubID         string    `json:"clubId" binding:"required"`
+	CourtID        string    `json:"courtId" binding:"required"`
 	TournamentType string    `json:"tournamentType" binding:"required"`
 	OrganizatorID  string    `json:"organizatorId" binding:"required"`
 }
@@ -41,7 +41,7 @@ type PatchTournament struct {
 	RankMax        *float64   `json:"rankMax,omitempty"`
 	MaxUsers       *int       `json:"maxUsers,omitempty"`
 	Description    *string    `json:"description,omitempty"`
-	ClubID         *string    `json:"clubId,omitempty"`
+	CourtID        *string    `json:"courtId,omitempty"`
 	TournamentType *string    `json:"tournamentType,omitempty"`
 }
 

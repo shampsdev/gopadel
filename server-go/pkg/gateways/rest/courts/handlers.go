@@ -11,12 +11,12 @@ import (
 )
 
 type Handler struct {
-	clubCase *usecase.Club
+	courtCase *usecase.Court
 }
 
-func NewHandler(clubCase *usecase.Club) *Handler {
+func NewHandler(courtCase *usecase.Court) *Handler {
 	return &Handler{
-		clubCase: clubCase,
+		courtCase: courtCase,
 	}
 }
 
@@ -26,7 +26,7 @@ func NewHandler(clubCase *usecase.Club) *Handler {
 // @Tags courts
 // @Accept json
 // @Produce json
-// @Success 200 {array} domain.Club "List of courts"
+// @Success 200 {array} domain.Court "List of courts"
 // @Failure 401 {object} map[string]string "User not authorized"
 // @Failure 403 {object} map[string]string "Admin rights required"
 // @Failure 500 {object} map[string]string "Internal server error"
@@ -35,14 +35,14 @@ func NewHandler(clubCase *usecase.Club) *Handler {
 func (h *Handler) GetCourts(c *gin.Context) {
 	user := middlewares.MustGetUser(c)
 
-	filter := &domain.FilterClub{}
-	courts, err := h.clubCase.GetAll(usecase.NewContext(c, user), filter)
+	filter := &domain.FilterCourt{}
+	courts, err := h.courtCase.GetAll(usecase.NewContext(c, user), filter)
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to get courts") {
 		return
 	}
 
 	if courts == nil {
-		courts = []*domain.Club{}
+		courts = []*domain.Court{}
 	}
 
 	c.JSON(http.StatusOK, courts)

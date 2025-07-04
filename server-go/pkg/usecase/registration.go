@@ -336,7 +336,7 @@ func (r *Registration) GetUserRegistrationsWithTournament(ctx context.Context, u
 			continue
 		}
 
-		regWithTournament.Tournament = &domain.TournamentForRegistration{
+		tournamentForReg := domain.TournamentForRegistration{
 			ID:             tournament.ID,
 			Name:           tournament.Name,
 			StartTime:      tournament.StartTime,
@@ -346,10 +346,12 @@ func (r *Registration) GetUserRegistrationsWithTournament(ctx context.Context, u
 			RankMax:        tournament.RankMax,
 			MaxUsers:       tournament.MaxUsers,
 			Description:    tournament.Description,
-			Club:           tournament.Club,
+			Court:          tournament.Court,
 			TournamentType: tournament.TournamentType,
 			Organizator:    tournament.Organizator,
 		}
+
+		regWithTournament.Tournament = &tournamentForReg
 
 		result = append(result, regWithTournament)
 	}

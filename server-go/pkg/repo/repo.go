@@ -28,10 +28,10 @@ type AdminUser interface {
 	UpdatePassword(ctx context.Context, id string, passwordHash string) error
 }
 
-type Club interface {
-	Create(ctx context.Context, club *domain.CreateClub) (string, error)
-	Patch(ctx context.Context, id string, club *domain.PatchClub) error
-	Filter(ctx context.Context, filter *domain.FilterClub) ([]*domain.Club, error)
+type Court interface {
+	Create(ctx context.Context, court *domain.CreateCourt) (string, error)
+	Patch(ctx context.Context, id string, court *domain.PatchCourt) error
+	Filter(ctx context.Context, filter *domain.FilterCourt) ([]*domain.Court, error)
 	Delete(ctx context.Context, id string) error
 }
 

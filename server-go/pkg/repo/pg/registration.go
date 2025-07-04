@@ -42,37 +42,36 @@ func (r *RegistrationRepo) Create(ctx context.Context, registration *domain.Crea
 
 func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegistration) ([]*domain.Registration, error) {
 	s := r.psql.Select(
-		`"r"."id"`, `"r"."user_id"`, `"r"."tournament_id"`, `"r"."date"`, `"r"."status"`,
+		`"reg"."id"`, `"reg"."user_id"`, `"reg"."tournament_id"`, `"reg"."date"`, `"reg"."status"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
-		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`,
+		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`, `"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"org"."id"`, `"org"."telegram_id"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 	).
-		From(`"registrations" AS r`).
-		LeftJoin(`"users" AS u ON "r"."user_id" = "u"."id"`).
-		LeftJoin(`"tournaments" AS t ON "r"."tournament_id" = "t"."id"`).
-		LeftJoin(`"clubs" AS c ON "t"."club_id" = "c"."id"`).
-		LeftJoin(`"users" AS org ON "t"."organizator_id" = "org"."id"`)
+		From(`"registrations" AS reg`).
+		Join(`"users" AS u ON "reg"."user_id" = "u"."id"`).
+		Join(`"tournaments" AS t ON "reg"."tournament_id" = "t"."id"`).
+		LeftJoin(`"courts" AS c ON "t"."court_id" = "c"."id"`).
+		Join(`"users" AS org ON "t"."organizator_id" = "org"."id"`)
 
 	if filter.ID != nil {
-		s = s.Where(sq.Eq{`"r"."id"`: *filter.ID})
+		s = s.Where(sq.Eq{`"reg"."id"`: *filter.ID})
 	}
 
 	if filter.UserID != nil {
-		s = s.Where(sq.Eq{`"r"."user_id"`: *filter.UserID})
+		s = s.Where(sq.Eq{`"reg"."user_id"`: *filter.UserID})
 	}
 
 	if filter.TournamentID != nil {
-		s = s.Where(sq.Eq{`"r"."tournament_id"`: *filter.TournamentID})
+		s = s.Where(sq.Eq{`"reg"."tournament_id"`: *filter.TournamentID})
 	}
 
 	if filter.Status != nil {
-		s = s.Where(sq.Eq{`"r"."status"`: *filter.Status})
+		s = s.Where(sq.Eq{`"reg"."status"`: *filter.Status})
 	}
 
-	s = s.OrderBy(`"r"."date" DESC`)
+	s = s.OrderBy(`"reg"."date" DESC`)
 
 	sql, args, err := s.ToSql()
 	if err != nil {
@@ -93,7 +92,7 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 		var registration domain.Registration
 		var user domain.User
 		var tournament domain.Tournament
-		var club domain.Club
+		var court domain.Court
 		var organizator domain.User
 
 		// Nullable fields
@@ -137,9 +136,9 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 			&tournament.MaxUsers,
 			&tournamentDescription,
 			&tournament.TournamentType,
-			&club.ID,
-			&club.Name,
-			&club.Address,
+			&court.ID,
+			&court.Name,
+			&court.Address,
 			&organizator.ID,
 			&organizator.TelegramID,
 			&organizator.FirstName,
@@ -193,7 +192,7 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 		}
 
 		// Set related entities
-		tournament.Club = club
+		tournament.Court = court
 		tournament.Organizator = organizator
 		registration.User = &user
 		registrations = append(registrations, &registration)
@@ -245,7 +244,7 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 		From(`"registrations" AS r`).
 		LeftJoin(`"users" AS u ON "r"."user_id" = "u"."id"`).
 		LeftJoin(`"tournaments" AS t ON "r"."tournament_id" = "t"."id"`).
-		LeftJoin(`"clubs" AS c ON "t"."club_id" = "c"."id"`).
+		LeftJoin(`"courts" AS c ON "t"."court_id" = "c"."id"`).
 		LeftJoin(`"users" AS org ON "t"."organizator_id" = "org"."id"`)
 
 	if filter.ID != nil {
@@ -301,7 +300,7 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 		var registration domain.RegistrationWithPayments
 		var user domain.User
 		var tournament domain.TournamentForRegistration
-		var club domain.Club
+		var court domain.Court
 		var organizator domain.User
 
 		// Nullable fields
@@ -345,9 +344,9 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 			&tournament.MaxUsers,
 			&tournamentDescription,
 			&tournament.TournamentType,
-			&club.ID,
-			&club.Name,
-			&club.Address,
+			&court.ID,
+			&court.Name,
+			&court.Address,
 			&organizator.ID,
 			&organizator.TelegramID,
 			&organizator.FirstName,
@@ -401,7 +400,7 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 		}
 
 		// Set related entities
-		tournament.Club = club
+		tournament.Court = court
 		tournament.Organizator = organizator
 		registration.User = &user
 		registration.Tournament = &tournament

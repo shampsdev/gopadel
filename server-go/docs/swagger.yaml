@@ -103,7 +103,7 @@ definitions:
       username:
         type: string
     type: object
-  domain.Club:
+  domain.Court:
     properties:
       address:
         type: string
@@ -135,7 +135,7 @@ definitions:
     - user_id
     - username
     type: object
-  domain.CreateClub:
+  domain.CreateCourt:
     properties:
       address:
         type: string
@@ -158,7 +158,7 @@ definitions:
     type: object
   domain.CreateTournament:
     properties:
-      clubId:
+      courtId:
         type: string
       description:
         type: string
@@ -181,7 +181,7 @@ definitions:
       tournamentType:
         type: string
     required:
-    - clubId
+    - courtId
     - maxUsers
     - name
     - organizatorId
@@ -275,7 +275,7 @@ definitions:
       username:
         type: string
     type: object
-  domain.PatchClub:
+  domain.PatchCourt:
     properties:
       address:
         type: string
@@ -295,7 +295,7 @@ definitions:
     type: object
   domain.PatchTournament:
     properties:
-      clubId:
+      courtId:
         type: string
       description:
         type: string
@@ -453,8 +453,8 @@ definitions:
     type: object
   domain.Tournament:
     properties:
-      club:
-        $ref: '#/definitions/domain.Club'
+      court:
+        $ref: '#/definitions/domain.Court'
       description:
         type: string
       endTime:
@@ -484,8 +484,8 @@ definitions:
     type: object
   domain.TournamentForRegistration:
     properties:
-      club:
-        $ref: '#/definitions/domain.Club'
+      court:
+        $ref: '#/definitions/domain.Court'
       description:
         type: string
       endTime:
@@ -805,7 +805,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/domain.Club'
+              $ref: '#/definitions/domain.Court'
             type: array
         "401":
           description: Unauthorized
@@ -830,14 +830,14 @@ paths:
         name: court
         required: true
         schema:
-          $ref: '#/definitions/domain.CreateClub'
+          $ref: '#/definitions/domain.CreateCourt'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/domain.Club'
+            $ref: '#/definitions/domain.Court'
         "400":
           description: Bad Request
           schema:
@@ -900,6 +900,42 @@ paths:
       summary: Delete court (Admin)
       tags:
       - admin-courts
+    get:
+      description: Get court by ID. Available for any admin.
+      parameters:
+      - description: Court ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Court'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get court (Admin)
+      tags:
+      - admin-courts
     patch:
       consumes:
       - application/json
@@ -915,14 +951,14 @@ paths:
         name: court
         required: true
         schema:
-          $ref: '#/definitions/domain.PatchClub'
+          $ref: '#/definitions/domain.PatchCourt'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.Club'
+            $ref: '#/definitions/domain.Court'
         "400":
           description: Bad Request
           schema:
@@ -1483,7 +1519,7 @@ paths:
           description: List of courts
           schema:
             items:
-              $ref: '#/definitions/domain.Club'
+              $ref: '#/definitions/domain.Court'
             type: array
         "401":
           description: User not authorized

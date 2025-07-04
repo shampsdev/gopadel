@@ -219,7 +219,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/domain.Club"
+                                "$ref": "#/definitions/domain.Court"
                             }
                         }
                     },
@@ -261,7 +261,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.CreateClub"
+                            "$ref": "#/definitions/domain.CreateCourt"
                         }
                     }
                 ],
@@ -269,7 +269,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/domain.Club"
+                            "$ref": "#/definitions/domain.Court"
                         }
                     },
                     "400": {
@@ -300,6 +300,62 @@
             }
         },
         "/admin/courts/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get court by ID. Available for any admin.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-courts"
+                ],
+                "summary": "Get court (Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Court ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Court"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -393,7 +449,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.PatchClub"
+                            "$ref": "#/definitions/domain.PatchCourt"
                         }
                     }
                 ],
@@ -401,7 +457,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Club"
+                            "$ref": "#/definitions/domain.Court"
                         }
                     },
                     "400": {
@@ -1415,7 +1471,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/domain.Club"
+                                "$ref": "#/definitions/domain.Court"
                             }
                         }
                     },
@@ -2927,7 +2983,7 @@
                 }
             }
         },
-        "domain.Club": {
+        "domain.Court": {
             "type": "object",
             "properties": {
                 "address": {
@@ -2974,7 +3030,7 @@
                 }
             }
         },
-        "domain.CreateClub": {
+        "domain.CreateCourt": {
             "type": "object",
             "required": [
                 "address",
@@ -3009,7 +3065,7 @@
         "domain.CreateTournament": {
             "type": "object",
             "required": [
-                "clubId",
+                "courtId",
                 "maxUsers",
                 "name",
                 "organizatorId",
@@ -3019,7 +3075,7 @@
                 "tournamentType"
             ],
             "properties": {
-                "clubId": {
+                "courtId": {
                     "type": "string"
                 },
                 "description": {
@@ -3184,7 +3240,7 @@
                 }
             }
         },
-        "domain.PatchClub": {
+        "domain.PatchCourt": {
             "type": "object",
             "properties": {
                 "address": {
@@ -3215,7 +3271,7 @@
         "domain.PatchTournament": {
             "type": "object",
             "properties": {
-                "clubId": {
+                "courtId": {
                     "type": "string"
                 },
                 "description": {
@@ -3447,8 +3503,8 @@
         "domain.Tournament": {
             "type": "object",
             "properties": {
-                "club": {
-                    "$ref": "#/definitions/domain.Club"
+                "court": {
+                    "$ref": "#/definitions/domain.Court"
                 },
                 "description": {
                     "type": "string"
@@ -3494,8 +3550,8 @@
         "domain.TournamentForRegistration": {
             "type": "object",
             "properties": {
-                "club": {
-                    "$ref": "#/definitions/domain.Club"
+                "court": {
+                    "$ref": "#/definitions/domain.Court"
                 },
                 "description": {
                     "type": "string"

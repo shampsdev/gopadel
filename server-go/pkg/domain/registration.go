@@ -53,7 +53,7 @@ type TournamentForRegistration struct {
 	RankMax        float64   `json:"rankMax"`
 	MaxUsers       int       `json:"maxUsers"`
 	Description    string    `json:"description"`
-	Club           Club      `json:"club"`
+	Court          Court     `json:"court"`
 	TournamentType string    `json:"tournamentType"`
 	Organizator    User      `json:"organizator"`
 }
