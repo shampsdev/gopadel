@@ -1,11 +1,10 @@
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import AboutImage from "../../assets/about.png";
 import { Button } from "../../components/ui/button";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 
 export const CreateGame = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
-  const navigate = useNavigate();
   return (
     <div className="flex flex-col mt-[40px] w-full">
       <div className="flex flex-col text-center items-center justify-center gap-11 flex-grow  h-full">
