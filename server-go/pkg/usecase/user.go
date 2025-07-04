@@ -78,6 +78,15 @@ func (u *User) Filter(ctx Context, filter *domain.FilterUser) ([]*domain.User, e
 	return u.userRepo.Filter(ctx, filter)
 }
 
+func (u *User) FilterForUser(ctx *Context, filter *domain.FilterUser) ([]*domain.User, error) {
+	// Автоматически добавляем фильтрацию по клубам пользователя
+	if ctx.User != nil && filter.FilterByUserClubs == nil {
+		filter.FilterByUserClubs = &ctx.User.ID
+	}
+
+	return u.userRepo.Filter(ctx.Context, filter)
+}
+
 func (u *User) AdminFilter(ctx context.Context, filter *domain.FilterUser) ([]*domain.User, error) {
 	return u.userRepo.Filter(ctx, filter)
 }

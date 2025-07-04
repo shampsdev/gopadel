@@ -27,7 +27,7 @@ func NewTournamentRepo(db *pgxpool.Pool) *TournamentRepo {
 func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTournament) ([]*domain.Tournament, error) {
 	s := r.psql.Select(
 		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`,
+		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
@@ -52,11 +52,17 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 	}
 
 	if filter.NotEnded == nil || *filter.NotEnded {
-		s = s.Where(`("t"."end_time" IS NOT NULL AND "t"."end_time" > NOW()) OR ("t"."end_time" IS NULL AND "t"."start_time" + INTERVAL '1 hour' > NOW())`)
+		s = s.Where(`(("t"."end_time" IS NOT NULL AND "t"."end_time" > NOW()) OR ("t"."end_time" IS NULL AND "t"."start_time" + INTERVAL '1 hour' > NOW()))`)
 	}
 
 	if filter.NotFull != nil && *filter.NotFull {
 		s = s.Having(`COUNT(CASE WHEN "r"."status" IN ('PENDING', 'ACTIVE') THEN 1 END) < "t"."max_users"`)
+	}
+
+	// Фильтрация по клубам пользователя - показываем турниры из клубов, в которых состоит пользователь
+	if filter.FilterByUserClubs != nil {
+		s = s.Join(`"clubs_users" AS cu_filter ON "t"."club_id" = "cu_filter"."club_id"`).
+			Where(sq.Eq{`"cu_filter"."user_id"`: *filter.FilterByUserClubs})
 	}
 
 	s = s.OrderBy(`"t"."start_time" ASC`)
@@ -65,6 +71,8 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 	if err != nil {
 		return nil, fmt.Errorf("failed to build SQL: %w", err)
 	}
+
+
 
 	rows, err := r.db.Query(ctx, sql, args...)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -105,6 +113,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 			&tournament.RankMax,
 			&tournament.MaxUsers,
 			&description,
+			&tournament.ClubID,
 			&tournament.TournamentType,
 			&courtID,
 			&courtName,
@@ -186,7 +195,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID string) ([]*domain.Tournament, error) {
 	s := r.psql.Select(
 		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`,
+		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"org"."id"`, `"org"."telegram_id"`, `"org"."telegram_username"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 		`"org"."bio"`, `"org"."rank"`, `"org"."city"`, `"org"."birth_date"`, `"org"."playing_position"`, `"org"."padel_profiles"`, `"org"."is_registered"`,
@@ -243,6 +252,7 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 			&tournament.RankMax,
 			&tournament.MaxUsers,
 			&description,
+			&tournament.ClubID,
 			&tournament.TournamentType,
 			&courtID,
 			&courtName,
@@ -323,10 +333,10 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 func (r *TournamentRepo) Create(ctx context.Context, tournament *domain.CreateTournament) (string, error) {
 	s := r.psql.Insert(`"tournaments"`).
 		Columns("name", "start_time", "end_time", "price", "rank_min", "rank_max", 
-				"max_users", "description", "court_id", "tournament_type", "organizator_id").
+				"max_users", "description", "court_id", "club_id", "tournament_type", "organizator_id").
 		Values(tournament.Name, tournament.StartTime, tournament.EndTime, tournament.Price,
 			   tournament.RankMin, tournament.RankMax, tournament.MaxUsers, tournament.Description,
-			   tournament.CourtID, tournament.TournamentType, tournament.OrganizatorID).
+			   tournament.CourtID, tournament.ClubID, tournament.TournamentType, tournament.OrganizatorID).
 		Suffix("RETURNING id")
 
 	sql, args, err := s.ToSql()
@@ -368,6 +378,9 @@ func (r *TournamentRepo) Patch(ctx context.Context, id string, tournament *domai
 	}
 	if tournament.CourtID != nil {
 		s = s.Set("court_id", *tournament.CourtID)
+	}
+	if tournament.ClubID != nil {
+		s = s.Set("club_id", *tournament.ClubID)
 	}
 	if tournament.TournamentType != nil {
 		s = s.Set("tournament_type", *tournament.TournamentType)

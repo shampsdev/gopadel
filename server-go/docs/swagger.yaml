@@ -103,6 +103,17 @@ definitions:
       username:
         type: string
     type: object
+  domain.Club:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   domain.Court:
     properties:
       address:
@@ -212,8 +223,18 @@ definitions:
       username:
         type: string
     type: object
+  domain.FilterClub:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   domain.FilterTournament:
     properties:
+      filterByUserClubs:
+        description: user ID to filter by user's clubs
+        type: string
       id:
         type: string
       name:
@@ -229,6 +250,8 @@ definitions:
     type: object
   domain.FilterUser:
     properties:
+      filterByUserClubs:
+        type: string
       firstName:
         type: string
       id:
@@ -1506,6 +1529,88 @@ paths:
       summary: YooKassa webhook for payment notifications
       tags:
       - webhook
+  /clubs/{club_id}/join:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Club ID
+        in: path
+        name: club_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Club data
+          schema:
+            $ref: '#/definitions/domain.Club'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Join club
+      tags:
+      - clubs
+  /clubs/filter:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Filter parameters
+        in: body
+        name: filter
+        schema:
+          $ref: '#/definitions/domain.FilterClub'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of clubs
+          schema:
+            items:
+              $ref: '#/definitions/domain.Club'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Filter clubs
+      tags:
+      - clubs
+  /clubs/my:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of user's clubs
+          schema:
+            items:
+              $ref: '#/definitions/domain.Club'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get my clubs
+      tags:
+      - clubs
   /courts:
     get:
       consumes:

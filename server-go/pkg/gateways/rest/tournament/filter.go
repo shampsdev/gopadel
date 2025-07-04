@@ -33,7 +33,8 @@ func Filter(tournamentCase *usecase.Tournament) gin.HandlerFunc {
 			return
 		}
 
-		tournaments, err := tournamentCase.Filter(usecase.NewContext(c, user), &filterTournament)
+		ctx := usecase.NewContext(c, user)
+		tournaments, err := tournamentCase.FilterForUser(&ctx, &filterTournament)
 		if err != nil {
 			ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to filter tournaments")
 			return

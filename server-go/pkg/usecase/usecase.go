@@ -14,6 +14,7 @@ type Cases struct {
 	AdminUser    *AdminUser
 	Image        *Image
 	Court        *Court
+	Club         *Club
 	Tournament   *Tournament
 	Loyalty      *Loyalty
 	Registration *Registration
@@ -25,6 +26,7 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	userRepo := pg.NewUserRepo(db)
 	adminUserRepo := pg.NewAdminUserRepo(db)
 	courtRepo := pg.NewCourtRepo(db)
+	clubRepo := pg.NewClubRepo(db)
 	tournamentRepo := pg.NewTournamentRepo(db)
 	loyaltyRepo := pg.NewLoyaltyRepo(db)
 	registrationRepo := pg.NewRegistrationRepo(db)
@@ -40,6 +42,7 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	adminUserCase := NewAdminUser(ctx, adminUserRepo, cfg)
 	imageCase := NewImage(ctx, storage)
 	courtCase := NewCourt(ctx, courtRepo)
+	clubCase := NewClub(ctx, clubRepo)
 	tournamentCase := NewTournament(ctx, tournamentRepo, registrationRepo)
 	loyaltyCase := NewLoyalty(ctx, loyaltyRepo)
 	registrationCase := NewRegistration(ctx, registrationRepo, tournamentRepo, paymentRepo)
@@ -51,6 +54,7 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 		AdminUser:    adminUserCase,
 		Image:        imageCase,
 		Court:        courtCase,
+		Club:         clubCase,
 		Tournament:   tournamentCase,
 		Loyalty:      loyaltyCase,
 		Registration: registrationCase,

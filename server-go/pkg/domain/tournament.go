@@ -13,6 +13,7 @@ type Tournament struct {
 	MaxUsers       int             `json:"maxUsers"`
 	Description    string          `json:"description"`
 	Court          Court           `json:"court"`
+	ClubID         string          `json:"clubId"`
 	TournamentType string          `json:"tournamentType"`
 	Organizator    User            `json:"organizator"`
 	Participants   []*Registration `json:"participants"`
@@ -28,6 +29,7 @@ type CreateTournament struct {
 	MaxUsers       int       `json:"maxUsers" binding:"required"`
 	Description    string    `json:"description"`
 	CourtID        string    `json:"courtId" binding:"required"`
+	ClubID         string    `json:"clubId" binding:"required"`
 	TournamentType string    `json:"tournamentType" binding:"required"`
 	OrganizatorID  string    `json:"organizatorId" binding:"required"`
 }
@@ -42,13 +44,15 @@ type PatchTournament struct {
 	MaxUsers       *int       `json:"maxUsers,omitempty"`
 	Description    *string    `json:"description,omitempty"`
 	CourtID        *string    `json:"courtId,omitempty"`
+	ClubID         *string    `json:"clubId,omitempty"`
 	TournamentType *string    `json:"tournamentType,omitempty"`
 }
 
 type FilterTournament struct {
-	ID            string  `json:"id"`
-	Name          string  `json:"name"`
-	NotFull       *bool   `json:"notFull,omitempty"`       // true if tournament is not full
-	NotEnded      *bool   `json:"notEnded,omitempty"`      // default true
-	OrganizatorID *string `json:"organizatorId,omitempty"`
+	ID               string  `json:"id"`
+	Name             string  `json:"name"`
+	NotFull          *bool   `json:"notFull,omitempty"`       // true if tournament is not full
+	NotEnded         *bool   `json:"notEnded,omitempty"`      // default true
+	OrganizatorID    *string `json:"organizatorId,omitempty"`
+	FilterByUserClubs *string `json:"filterByUserClubs,omitempty"` // user ID to filter by user's clubs
 }

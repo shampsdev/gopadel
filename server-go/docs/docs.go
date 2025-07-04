@@ -1455,6 +1455,139 @@ const docTemplate = `{
                 }
             }
         },
+        "/clubs/filter": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "clubs"
+                ],
+                "summary": "Filter clubs",
+                "parameters": [
+                    {
+                        "description": "Filter parameters",
+                        "name": "filter",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/domain.FilterClub"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of clubs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Club"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/clubs/my": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "clubs"
+                ],
+                "summary": "Get my clubs",
+                "responses": {
+                    "200": {
+                        "description": "List of user's clubs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Club"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/clubs/{club_id}/join": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "clubs"
+                ],
+                "summary": "Join club",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Club ID",
+                        "name": "club_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Club data",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Club"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/courts": {
             "get": {
                 "security": [
@@ -2991,6 +3124,23 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.Club": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.Court": {
             "type": "object",
             "properties": {
@@ -3152,9 +3302,24 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.FilterClub": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.FilterTournament": {
             "type": "object",
             "properties": {
+                "filterByUserClubs": {
+                    "description": "user ID to filter by user's clubs",
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -3177,6 +3342,9 @@ const docTemplate = `{
         "domain.FilterUser": {
             "type": "object",
             "properties": {
+                "filterByUserClubs": {
+                    "type": "string"
+                },
                 "firstName": {
                     "type": "string"
                 },

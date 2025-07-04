@@ -42,9 +42,9 @@ func (r *UserRepo) Create(ctx context.Context, user *domain.CreateUser) (string,
 
 func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*domain.User, error) {
 	s := r.psql.Select(
-		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
+		`DISTINCT "u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`,
-		`"u"."is_registered"`, `"l"."id"`, `"l"."name"`, `"l"."discount"`, `"l"."description"`, `"l"."requirements"`,
+		`"u"."is_registered"`, `"l"."id"`, `"l"."name"`, `"l"."discount"`, `"l"."description"`,
 	).Join(`"loyalties" AS l ON "u"."loyalty_id" = "l"."id"`).From(`"users" AS u`)
 
 	if filter.ID != nil {
@@ -65,6 +65,14 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 
 	if filter.LastName != nil {
 		s = s.Where(sq.ILike{`"u"."last_name"`: "%" + *filter.LastName + "%"})
+	}
+
+	// Фильтрация по общим клубам
+	if filter.FilterByUserClubs != nil {
+		s = s.Join(`"clubs_users" AS cu ON "u"."id" = "cu"."user_id"`).
+			Join(`"clubs_users" AS cu_filter ON "cu"."club_id" = "cu_filter"."club_id"`).
+			Where(sq.Eq{`"cu_filter"."user_id"`: *filter.FilterByUserClubs}).
+			Where(sq.NotEq{`"u"."id"`: *filter.FilterByUserClubs}) // исключаем самого пользователя
 	}
 
 	sql, args, err := s.ToSql()
@@ -93,7 +101,6 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 		var loyaltyName pgtype.Text
 		var loyaltyDiscount pgtype.Int4
 		var loyaltyDescription pgtype.Text
-		var loyaltyRequirements pgtype.Text
 
 		err := rows.Scan(
 			&user.ID,
@@ -113,7 +120,6 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 			&loyaltyName,
 			&loyaltyDiscount,
 			&loyaltyDescription,
-			&loyaltyRequirements,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
@@ -153,7 +159,7 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 				Name:         loyaltyName.String,
 				Discount:     int(loyaltyDiscount.Int32),
 				Description:  loyaltyDescription.String,
-				Requirements: loyaltyRequirements.String,
+				Requirements: "", // Оставляем пустым чтобы избежать проблем с JSON типом
 			}
 		}
 
