@@ -34,8 +34,6 @@ export const CreateTournament = () => {
 
   const [time, setTime] = useState<string | null>(null);
   const [timeError, setTimeError] = useState<boolean>(true);
-  const [clubName, setClubName] = useState<string | null>(null);
-  const [clubAddress, setClubAddress] = useState<string | null>(null);
 
   const [type, setType] = useState<string | null>(null);
   const [courtId, setCourtId] = useState<string>("");
@@ -62,7 +60,6 @@ export const CreateTournament = () => {
   const [maxUsers, setMaxUsers] = useState<number | null>(null);
   const [maxUsersInput, setMaxUsersInput] = useState<string>("");
 
-  // Проверяем валидность всех обязательных полей
   const isFormValid = () => {
     return (
       title &&
@@ -70,8 +67,6 @@ export const CreateTournament = () => {
       time &&
       validateDateFormat(date) &&
       validateTimeFormat(time) &&
-      clubName &&
-      clubAddress &&
       type &&
       courtId &&
       rank !== null &&
@@ -115,7 +110,7 @@ export const CreateTournament = () => {
     }
 
     const tournamentData: CreateTournamentType = {
-      clubId: courtId,
+      courtId: courtId,
       description: description,
       endTime: end,
       maxUsers: maxUsers ?? 0,
@@ -243,20 +238,7 @@ export const CreateTournament = () => {
             placeholder={"чч:мм-чч:мм"}
             hasError={timeError}
           />
-          <Input
-            onChangeFunction={setClubName}
-            title={"Место"}
-            value={clubName ?? ""}
-            maxLength={100}
-            hasError={!clubName}
-          />
-          <Input
-            onChangeFunction={setClubAddress}
-            title={"Адрес"}
-            value={clubAddress ?? ""}
-            maxLength={240}
-            hasError={!clubAddress}
-          />
+
           <Input
             onChangeFunction={setType}
             title={"Тип"}
