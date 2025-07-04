@@ -103,7 +103,7 @@ export const CompetitionCard = ({
                 )}
               >
                 {user.loyalty.discount > 0
-                  ? Math.round(cost * (1 - user.loyalty.discount))
+                  ? Math.round(cost * (1 - user.loyalty.discount / 100))
                   : cost}
               </span>{" "}
               ₽

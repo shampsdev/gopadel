@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Input } from "../../components/ui/froms/input";
+import { Textarea } from "../../components/ui/froms/textarea";
 import {
   formatDateInput,
   validateDateFormat,
@@ -11,10 +12,14 @@ import {
 import { Button } from "../../components/ui/button";
 import { RankSelector } from "../../components/ui/froms/rank-selector";
 import { ranks } from "../../shared/constants/ranking";
+import { useCreateTournament } from "../../api/hooks/mutations/tournaments/create-tournament";
+import type { CreateTournament as CreateTournamentType } from "../../types/create-tournament";
+import { useAuthStore } from "../../shared/stores/auth.store";
 
 export const CreateTournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
-
+  const { mutate: createTournament, isPending } = useCreateTournament();
+  const { user } = useAuthStore();
   const [title, setTitle] = useState<string | null>(null);
   const [date, setDate] = useState<string | null>(null);
   const [dateError, setDateError] = useState<boolean>(true);
@@ -23,6 +28,7 @@ export const CreateTournament = () => {
   const [timeError, setTimeError] = useState<boolean>(true);
   const [clubName, setClubName] = useState<string | null>(null);
   const [clubAddress, setClubAddress] = useState<string | null>(null);
+  const [description, setDescription] = useState<string>("");
 
   const [type, setType] = useState<string | null>(null);
   const [rank, setRank] = useState<number | null>(null);
@@ -53,7 +59,7 @@ export const CreateTournament = () => {
       clubAddress &&
       type &&
       rank !== null &&
-      rank > 0 &&
+      rank >= 0 &&
       price !== null &&
       price > 0 &&
       maxUsers !== null &&
@@ -87,19 +93,21 @@ export const CreateTournament = () => {
       return;
     }
 
-    const tournamentData = {
-      title,
-      startTime: start,
+    const tournamentData: CreateTournamentType = {
+      clubId: "",
+      description: description,
       endTime: end,
-      clubName,
-      clubAddress,
-      type,
-      rank,
-      price,
-      maxUsers,
+      maxUsers: maxUsers ?? 0,
+      name: title ?? "",
+      organizatorId: user?.id ?? "",
+      price: price ?? 0,
+      rankMax: ranks.find((r) => r.title === rankInput)?.from ?? 0,
+      rankMin: ranks.find((r) => r.title === rankInput)?.to ?? 0,
+      startTime: start,
+      tournamentType: type ?? "",
     };
 
-    console.log("Данные турнира:", tournamentData);
+    createTournament(tournamentData);
   };
 
   return (
@@ -119,6 +127,14 @@ export const CreateTournament = () => {
             value={title ?? ""}
             maxLength={100}
             hasError={!title}
+          />
+          <Textarea
+            onChangeFunction={setDescription}
+            title={"Описание"}
+            value={description}
+            maxLength={500}
+            placeholder={"Описание турнира (необязательно)"}
+            hasError={false}
           />
           <Input
             onChangeFunction={(value) => {
@@ -193,7 +209,7 @@ export const CreateTournament = () => {
             title="Ранг"
             value={rankInput}
             onChangeFunction={handleRankChange}
-            hasError={rank === null || rank === 0}
+            hasError={rank === null}
           />
           <Input
             title={"Стоимость участия"}

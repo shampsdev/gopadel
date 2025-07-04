@@ -1,3 +1,4 @@
+import type { CreateTournament } from "../types/create-tournament";
 import type { FilterTournament } from "../types/filter.type";
 import type { PatchTournament } from "../types/patch-tournament.type";
 import type { Tournament } from "../types/tournament.type";
@@ -58,7 +59,7 @@ export const removeUserFromWaitlist = async (
 
 export const createTournament = async (
   token: string,
-  tournament: Tournament
+  tournament: CreateTournament
 ): Promise<Tournament | null> => {
   const response = await api.post("/tournaments", tournament, {
     headers: {
