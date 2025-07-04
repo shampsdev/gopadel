@@ -227,7 +227,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/domain.Club"
+                                "$ref": "#/definitions/domain.Court"
                             }
                         }
                     },
@@ -269,7 +269,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.CreateClub"
+                            "$ref": "#/definitions/domain.CreateCourt"
                         }
                     }
                 ],
@@ -277,7 +277,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/domain.Club"
+                            "$ref": "#/definitions/domain.Court"
                         }
                     },
                     "400": {
@@ -308,6 +308,62 @@ const docTemplate = `{
             }
         },
         "/admin/courts/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get court by ID. Available for any admin.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-courts"
+                ],
+                "summary": "Get court (Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Court ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Court"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -401,7 +457,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.PatchClub"
+                            "$ref": "#/definitions/domain.PatchCourt"
                         }
                     }
                 ],
@@ -409,7 +465,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Club"
+                            "$ref": "#/definitions/domain.Court"
                         }
                     },
                     "400": {
@@ -1389,6 +1445,64 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/courts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Returns a list of all courts. Only available for authenticated Telegram admins.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courts"
+                ],
+                "summary": "Get all courts",
+                "responses": {
+                    "200": {
+                        "description": "List of courts",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Court"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "User not authorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Admin rights required",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2877,7 +2991,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.Club": {
+        "domain.Court": {
             "type": "object",
             "properties": {
                 "address": {
@@ -2924,7 +3038,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.CreateClub": {
+        "domain.CreateCourt": {
             "type": "object",
             "required": [
                 "address",
@@ -2959,18 +3073,17 @@ const docTemplate = `{
         "domain.CreateTournament": {
             "type": "object",
             "required": [
-                "clubId",
+                "courtId",
                 "maxUsers",
                 "name",
                 "organizatorId",
-                "price",
                 "rankMax",
                 "rankMin",
                 "startTime",
                 "tournamentType"
             ],
             "properties": {
-                "clubId": {
+                "courtId": {
                     "type": "string"
                 },
                 "description": {
@@ -3135,7 +3248,7 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.PatchClub": {
+        "domain.PatchCourt": {
             "type": "object",
             "properties": {
                 "address": {
@@ -3166,7 +3279,7 @@ const docTemplate = `{
         "domain.PatchTournament": {
             "type": "object",
             "properties": {
-                "clubId": {
+                "courtId": {
                     "type": "string"
                 },
                 "description": {
@@ -3398,8 +3511,8 @@ const docTemplate = `{
         "domain.Tournament": {
             "type": "object",
             "properties": {
-                "club": {
-                    "$ref": "#/definitions/domain.Club"
+                "court": {
+                    "$ref": "#/definitions/domain.Court"
                 },
                 "description": {
                     "type": "string"
@@ -3445,8 +3558,8 @@ const docTemplate = `{
         "domain.TournamentForRegistration": {
             "type": "object",
             "properties": {
-                "club": {
-                    "$ref": "#/definitions/domain.Club"
+                "court": {
+                    "$ref": "#/definitions/domain.Court"
                 },
                 "description": {
                     "type": "string"

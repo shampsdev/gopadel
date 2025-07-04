@@ -11,22 +11,22 @@ import (
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 )
 
-type ClubRepo struct {
+type CourtRepo struct {
 	db   *pgxpool.Pool
 	psql sq.StatementBuilderType
 }
 
-func NewClubRepo(db *pgxpool.Pool) *ClubRepo {
-	return &ClubRepo{
+func NewCourtRepo(db *pgxpool.Pool) *CourtRepo {
+	return &CourtRepo{
 		db:   db,
 		psql: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 	}
 }
 
-func (r *ClubRepo) Create(ctx context.Context, club *domain.CreateClub) (string, error) {
-	s := r.psql.Insert(`"clubs"`).
+func (r *CourtRepo) Create(ctx context.Context, court *domain.CreateCourt) (string, error) {
+	s := r.psql.Insert(`"courts"`).
 		Columns("name", "address").
-		Values(club.Name, club.Address).
+		Values(court.Name, court.Address).
 		Suffix("RETURNING id")
 
 	sql, args, err := s.ToSql()
@@ -37,14 +37,14 @@ func (r *ClubRepo) Create(ctx context.Context, club *domain.CreateClub) (string,
 	var id string
 	err = r.db.QueryRow(ctx, sql, args...).Scan(&id)
 	if err != nil {
-		return "", fmt.Errorf("failed to create club: %w", err)
+		return "", fmt.Errorf("failed to create court: %w", err)
 	}
 
 	return id, nil
 }
 
-func (r *ClubRepo) Filter(ctx context.Context, filter *domain.FilterClub) ([]*domain.Club, error) {
-	s := r.psql.Select("id", "name", "address").From(`"clubs"`)
+func (r *CourtRepo) Filter(ctx context.Context, filter *domain.FilterCourt) ([]*domain.Court, error) {
+	s := r.psql.Select("id", "name", "address").From(`"courts"`)
 
 	if filter.ID != nil {
 		s = s.Where(sq.Eq{"id": *filter.ID})
@@ -61,48 +61,48 @@ func (r *ClubRepo) Filter(ctx context.Context, filter *domain.FilterClub) ([]*do
 
 	rows, err := r.db.Query(ctx, sql, args...)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return []*domain.Club{}, nil
+		return []*domain.Court{}, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute SQL: %w", err)
 	}
 	defer rows.Close()
 
-	clubs := []*domain.Club{}
+	courts := []*domain.Court{}
 	for rows.Next() {
-		var club domain.Club
+		var court domain.Court
 
 		err := rows.Scan(
-			&club.ID,
-			&club.Name,
-			&club.Address,
+			&court.ID,
+			&court.Name,
+			&court.Address,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 
-		clubs = append(clubs, &club)
+		courts = append(courts, &court)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("error iterating rows: %w", err)
 	}
 
-	return clubs, nil
+	return courts, nil
 }
 
-func (r *ClubRepo) Patch(ctx context.Context, id string, club *domain.PatchClub) error {
-	s := r.psql.Update(`"clubs"`).Where(sq.Eq{"id": id})
+func (r *CourtRepo) Patch(ctx context.Context, id string, court *domain.PatchCourt) error {
+	s := r.psql.Update(`"courts"`).Where(sq.Eq{"id": id})
 
 	hasUpdates := false
 
-	if club.Name != nil {
-		s = s.Set("name", *club.Name)
+	if court.Name != nil {
+		s = s.Set("name", *court.Name)
 		hasUpdates = true
 	}
 
-	if club.Address != nil {
-		s = s.Set("address", *club.Address)
+	if court.Address != nil {
+		s = s.Set("address", *court.Address)
 		hasUpdates = true
 	}
 
@@ -117,18 +117,18 @@ func (r *ClubRepo) Patch(ctx context.Context, id string, club *domain.PatchClub)
 
 	result, err := r.db.Exec(ctx, sql, args...)
 	if err != nil {
-		return fmt.Errorf("failed to update club: %w", err)
+		return fmt.Errorf("failed to update court: %w", err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("club with id %s not found", id)
+		return fmt.Errorf("court with id %s not found", id)
 	}
 
 	return nil
 }
 
-func (r *ClubRepo) Delete(ctx context.Context, id string) error {
-	s := r.psql.Delete(`"clubs"`).Where(sq.Eq{"id": id})
+func (r *CourtRepo) Delete(ctx context.Context, id string) error {
+	s := r.psql.Delete(`"courts"`).Where(sq.Eq{"id": id})
 
 	sql, args, err := s.ToSql()
 	if err != nil {
@@ -137,27 +137,27 @@ func (r *ClubRepo) Delete(ctx context.Context, id string) error {
 
 	result, err := r.db.Exec(ctx, sql, args...)
 	if err != nil {
-		return fmt.Errorf("failed to delete club: %w", err)
+		return fmt.Errorf("failed to delete court: %w", err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("club with id %s not found", id)
+		return fmt.Errorf("court with id %s not found", id)
 	}
 
 	return nil
 }
 
-// GetByID получает клуб по ID (вспомогательный метод)
-func (r *ClubRepo) GetByID(ctx context.Context, id string) (*domain.Club, error) {
-	filter := &domain.FilterClub{ID: &id}
-	clubs, err := r.Filter(ctx, filter)
+// GetByID получает корт по ID (вспомогательный метод)
+func (r *CourtRepo) GetByID(ctx context.Context, id string) (*domain.Court, error) {
+	filter := &domain.FilterCourt{ID: &id}
+	courts, err := r.Filter(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(clubs) == 0 {
-		return nil, fmt.Errorf("club with id %s not found", id)
+	if len(courts) == 0 {
+		return nil, fmt.Errorf("court with id %s not found", id)
 	}
 
-	return clubs[0], nil
-}
+	return courts[0], nil
+} 

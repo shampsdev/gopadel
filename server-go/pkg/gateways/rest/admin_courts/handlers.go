@@ -11,34 +11,34 @@ import (
 )
 
 type Handler struct {
-	clubCase *usecase.Club
+	courtCase *usecase.Court
 }
 
-func NewHandler(clubCase *usecase.Club) *Handler {
+func NewHandler(courtCase *usecase.Court) *Handler {
 	return &Handler{
-		clubCase: clubCase,
+		courtCase: courtCase,
 	}
 }
 
-// GetAllCourts получает все корты для админов
+// GetCourts получает все корты для админов
 // @Summary Get all courts (Admin)
 // @Description Get all courts. Available for any admin.
 // @Tags admin-courts
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {array} domain.Club
+// @Success 200 {array} domain.Court
 // @Failure 401 {object} domain.ErrorResponse
 // @Failure 500 {object} domain.ErrorResponse
 // @Router /admin/courts [get]
-func (h *Handler) GetAllCourts(c *gin.Context) {
-	filter := &domain.FilterClub{}
-	courts, err := h.clubCase.GetAll(usecase.NewContext(c, nil), filter)
+func (h *Handler) GetCourts(c *gin.Context) {
+	filter := &domain.FilterCourt{}
+	courts, err := h.courtCase.GetAll(usecase.NewContext(c, nil), filter)
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to get courts") {
 		return
 	}
 
 	if courts == nil {
-		courts = []*domain.Club{}
+		courts = []*domain.Court{}
 	}
 
 	c.JSON(http.StatusOK, courts)
@@ -51,27 +51,27 @@ func (h *Handler) GetAllCourts(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param court body domain.CreateClub true "Court data"
-// @Success 201 {object} domain.Club
+// @Param court body domain.CreateCourt true "Court data"
+// @Success 201 {object} domain.Court
 // @Failure 400 {object} domain.ErrorResponse
 // @Failure 401 {object} domain.ErrorResponse
 // @Failure 403 {object} domain.ErrorResponse
 // @Failure 500 {object} domain.ErrorResponse
 // @Router /admin/courts [post]
 func (h *Handler) CreateCourt(c *gin.Context) {
-	var createData domain.CreateClub
+	var createData domain.CreateCourt
 	if err := c.ShouldBindJSON(&createData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	id, err := h.clubCase.Create(usecase.NewContext(c, nil), &createData)
+	id, err := h.courtCase.Create(usecase.NewContext(c, nil), &createData)
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to create court") {
 		return
 	}
 
 	// Возвращаем созданный корт
-	court, err := h.clubCase.GetByID(usecase.NewContext(c, nil), id)
+	court, err := h.courtCase.GetByID(usecase.NewContext(c, nil), id)
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to get created court") {
 		return
 	}
@@ -79,7 +79,40 @@ func (h *Handler) CreateCourt(c *gin.Context) {
 	c.JSON(http.StatusCreated, court)
 }
 
-// PatchCourt обновляет корт
+// GetCourt получает корт по ID
+// @Summary Get court (Admin)
+// @Description Get court by ID. Available for any admin.
+// @Tags admin-courts
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Court ID"
+// @Success 200 {object} domain.Court
+// @Failure 400 {object} domain.ErrorResponse
+// @Failure 401 {object} domain.ErrorResponse
+// @Failure 404 {object} domain.ErrorResponse
+// @Failure 500 {object} domain.ErrorResponse
+// @Router /admin/courts/{id} [get]
+func (h *Handler) GetCourt(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Court ID is required"})
+		return
+	}
+
+	court, err := h.courtCase.GetByID(usecase.NewContext(c, nil), id)
+	if err != nil {
+		if err.Error() == fmt.Sprintf("court with id %s not found", id) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to get court")
+		return
+	}
+
+	c.JSON(http.StatusOK, court)
+}
+
+// UpdateCourt обновляет корт
 // @Summary Update court (Admin)
 // @Description Update court data. Available only for superuser.
 // @Tags admin-courts
@@ -87,30 +120,30 @@ func (h *Handler) CreateCourt(c *gin.Context) {
 // @Produce json
 // @Security BearerAuth
 // @Param id path string true "Court ID"
-// @Param court body domain.PatchClub true "Court update data"
-// @Success 200 {object} domain.Club
+// @Param court body domain.PatchCourt true "Court update data"
+// @Success 200 {object} domain.Court
 // @Failure 400 {object} domain.ErrorResponse
 // @Failure 401 {object} domain.ErrorResponse
 // @Failure 403 {object} domain.ErrorResponse
 // @Failure 404 {object} domain.ErrorResponse
 // @Failure 500 {object} domain.ErrorResponse
 // @Router /admin/courts/{id} [patch]
-func (h *Handler) PatchCourt(c *gin.Context) {
+func (h *Handler) UpdateCourt(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Court ID is required"})
 		return
 	}
 
-	var patchData domain.PatchClub
+	var patchData domain.PatchCourt
 	if err := c.ShouldBindJSON(&patchData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := h.clubCase.Update(usecase.NewContext(c, nil), id, &patchData)
+	err := h.courtCase.Update(usecase.NewContext(c, nil), id, &patchData)
 	if err != nil {
-		if err.Error() == fmt.Sprintf("club with id %s not found", id) {
+		if err.Error() == fmt.Sprintf("court with id %s not found", id) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
@@ -119,7 +152,7 @@ func (h *Handler) PatchCourt(c *gin.Context) {
 	}
 
 	// Возвращаем обновленный корт
-	court, err := h.clubCase.GetByID(usecase.NewContext(c, nil), id)
+	court, err := h.courtCase.GetByID(usecase.NewContext(c, nil), id)
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to get updated court") {
 		return
 	}
@@ -148,9 +181,9 @@ func (h *Handler) DeleteCourt(c *gin.Context) {
 		return
 	}
 
-	err := h.clubCase.Delete(usecase.NewContext(c, nil), id)
+	err := h.courtCase.Delete(usecase.NewContext(c, nil), id)
 	if err != nil {
-		if err.Error() == fmt.Sprintf("club with id %s not found", id) {
+		if err.Error() == fmt.Sprintf("court with id %s not found", id) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}

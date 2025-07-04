@@ -7,23 +7,20 @@ import (
 )
 
 func Setup(r *gin.RouterGroup, useCases usecase.Cases) {
-	handler := NewHandler(useCases.Club)
+	handler := NewHandler(useCases.Court)
 	
 	adminCourtsGroup := r.Group("/admin/courts")
 	{
 		adminCourtsGroup.Use(middlewares.RequireAdminJWT(useCases.AdminUser))
 		
-		// GET /admin/courts - получить все корты (любой админ)
-		adminCourtsGroup.GET("", handler.GetAllCourts)
+		adminCourtsGroup.GET("", handler.GetCourts)
 		
-		// Эндпоинты для изменения данных требуют права суперпользователя
 		superUserGroup := adminCourtsGroup.Group("")
 		superUserGroup.Use(middlewares.RequireAdminSuperuser())
 		
 		superUserGroup.POST("", handler.CreateCourt)
-		
-		superUserGroup.PATCH("/:id", handler.PatchCourt)
-		
+		superUserGroup.GET("/:id", handler.GetCourt)
+		superUserGroup.PATCH("/:id", handler.UpdateCourt)
 		superUserGroup.DELETE("/:id", handler.DeleteCourt)
 	}
 } 
