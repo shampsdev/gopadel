@@ -1471,6 +1471,44 @@ paths:
       summary: YooKassa webhook for payment notifications
       tags:
       - webhook
+  /courts:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of all courts. Only available for authenticated
+        Telegram admins.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of courts
+          schema:
+            items:
+              $ref: '#/definitions/domain.Club'
+            type: array
+        "401":
+          description: User not authorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Admin rights required
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all courts
+      tags:
+      - courts
   /images/upload/avatar:
     post:
       consumes:

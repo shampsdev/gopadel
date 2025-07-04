@@ -1399,6 +1399,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/courts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Returns a list of all courts. Only available for authenticated Telegram admins.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courts"
+                ],
+                "summary": "Get all courts",
+                "responses": {
+                    "200": {
+                        "description": "List of courts",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Club"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "User not authorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Admin rights required",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/images/upload/avatar": {
             "post": {
                 "security": [
