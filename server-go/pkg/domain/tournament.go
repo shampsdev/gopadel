@@ -22,7 +22,7 @@ type CreateTournament struct {
 	Name           string    `json:"name" binding:"required"`
 	StartTime      time.Time `json:"startTime" binding:"required"`
 	EndTime        time.Time `json:"endTime"`
-	Price          int       `json:"price" binding:"required"`
+	Price          int       `json:"price"`
 	RankMin        float64   `json:"rankMin" binding:"required"`
 	RankMax        float64   `json:"rankMax" binding:"required"`
 	MaxUsers       int       `json:"maxUsers" binding:"required"`

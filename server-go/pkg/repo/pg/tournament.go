@@ -89,7 +89,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 		var userBio pgtype.Text
 		var userRank float64
 		var userCity pgtype.Text
-		var userBirthDate pgtype.Text
+		var userBirthDate pgtype.Date
 		var userPlayingPosition pgtype.Text
 		var userPadelProfiles pgtype.Text
 		var userIsRegistered pgtype.Bool
@@ -164,7 +164,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 			organizator.City = userCity.String
 		}
 		if userBirthDate.Valid {
-			organizator.BirthDate = userBirthDate.String
+			organizator.BirthDate = userBirthDate.Time.Format("2006-01-02")
 		}
 		if userPlayingPosition.Valid {
 			organizator.PlayingPosition = domain.PlayingPosition(userPlayingPosition.String)
@@ -228,7 +228,7 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 		var orgBio pgtype.Text
 		var orgRank float64
 		var orgCity pgtype.Text
-		var orgBirthDate pgtype.Text
+		var orgBirthDate pgtype.Date
 		var orgPlayingPosition pgtype.Text
 		var orgPadelProfiles pgtype.Text
 		var orgIsRegistered pgtype.Bool
@@ -301,7 +301,7 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 			organizator.City = orgCity.String
 		}
 		if orgBirthDate.Valid {
-			organizator.BirthDate = orgBirthDate.String
+			organizator.BirthDate = orgBirthDate.Time.Format("2006-01-02")
 		}
 		if orgPlayingPosition.Valid {
 			organizator.PlayingPosition = domain.PlayingPosition(orgPlayingPosition.String)

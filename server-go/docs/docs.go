@@ -3021,7 +3021,6 @@ const docTemplate = `{
                 "maxUsers",
                 "name",
                 "organizatorId",
-                "price",
                 "rankMax",
                 "rankMin",
                 "startTime",
