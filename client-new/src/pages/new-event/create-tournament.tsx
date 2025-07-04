@@ -11,6 +11,8 @@ import {
   formatISODateToMoscow,
 } from "../../utils/date-format";
 import { Button } from "../../components/ui/button";
+import { RankSelector } from "../../components/ui/froms/rank-selector";
+import { ranks } from "../../shared/constants/ranking";
 
 export const CreateTournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -18,18 +20,26 @@ export const CreateTournament = () => {
   const [title, setTitle] = useState<string | null>(null);
   const [date, setDate] = useState<string | null>(null);
   const [dateISO, setDateISO] = useState<string | null>(null);
-  const [dateError, setDateError] = useState<boolean>(false);
+  const [dateError, setDateError] = useState<boolean>(true);
 
   const [time, setTime] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<string | null>(null);
   const [endTime, setEndTime] = useState<string | null>(null);
-  const [timeError, setTimeError] = useState<boolean>(false);
+  const [timeError, setTimeError] = useState<boolean>(true);
   const [clubName, setClubName] = useState<string | null>(null);
   const [clubAddress, setClubAddress] = useState<string | null>(null);
 
   const [type, setType] = useState<string | null>(null);
   const [rank, setRank] = useState<number | null>(null);
   const [rankInput, setRankInput] = useState<string>("");
+
+  const handleRankChange = (rankTitle: string) => {
+    setRankInput(rankTitle);
+    const selectedRank = ranks.find((r) => r.title === rankTitle);
+    if (selectedRank) {
+      setRank(selectedRank.from);
+    }
+  };
 
   const [price, setPrice] = useState<number | null>(null);
   const [priceInput, setPriceInput] = useState<string>("");
@@ -126,8 +136,10 @@ export const CreateTournament = () => {
               if (validateDateFormat(formatted)) {
                 const isoDate = parseDateToISO(formatted);
                 setDateISO(isoDate);
+                setDateError(false);
               } else {
                 setDateISO(null);
+                setDateError(formatted.length > 0);
               }
             }}
             onBlur={() => {
@@ -188,38 +200,11 @@ export const CreateTournament = () => {
             maxLength={100}
             hasError={!type}
           />
-          <Input
+          <RankSelector
             title="Ранг"
             value={rankInput}
-            maxLength={4}
-            placeholder={"0"}
+            onChangeFunction={handleRankChange}
             hasError={rank === null || rank === 0}
-            onChangeFunction={(raw) => {
-              const sanitized = raw.replace(",", ".").replace(/[^\d.]/g, "");
-
-              const parts = sanitized.split(".");
-              if (parts.length > 2) return;
-
-              setRankInput(raw);
-
-              if (/^\d+(\.\d+)?$/.test(sanitized)) {
-                setRank(parseFloat(sanitized));
-              } else {
-                setRank(null);
-              }
-            }}
-            onBlur={() => {
-              const cleaned = rankInput.replace(",", ".").trim();
-
-              if (/^\d+(\.\d+)?$/.test(cleaned)) {
-                const num = parseFloat(cleaned);
-                setRank(num);
-                setRankInput(String(num));
-              } else {
-                setRank(null);
-                setRankInput("");
-              }
-            }}
           />
           <Input
             title={"Стоимость участия"}

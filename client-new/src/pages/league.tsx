@@ -19,11 +19,11 @@ export const League = () => {
         </video>
       </div>
       <div className="mt-auto pb-10">
-        <Link to="">
+        <a href="https://www.russianpadel.ru">
           <Button className="mx-auto flex flex-row items-center">
             <p>Перейти на сайт лиги</p>
           </Button>
-        </Link>
+        </a>
       </div>
     </div>
   );

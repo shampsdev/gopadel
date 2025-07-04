@@ -54,3 +54,15 @@ export const removeUserFromWaitlist = async (
   });
   return response.data;
 };
+
+export const createTournament = async (
+  token: string,
+  tournament: Tournament
+): Promise<Tournament | null> => {
+  const response = await api.post("/tournaments", tournament, {
+    headers: {
+      "X-Api-Token": token,
+    },
+  });
+  return response.data;
+};

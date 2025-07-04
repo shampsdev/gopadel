@@ -1,4 +1,3 @@
-import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { useModalStore } from "../../shared/stores/modal.store";
 import { Button } from "../ui/button";
 

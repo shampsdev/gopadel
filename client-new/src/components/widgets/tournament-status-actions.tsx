@@ -4,7 +4,6 @@ import { useReactivateCancelledRegistration } from "../../api/hooks/mutations/re
 import { useRegisterToTournament } from "../../api/hooks/mutations/registration/register-to-tournament";
 import { useAddUserToWaitlist } from "../../api/hooks/mutations/waitlist/add-user-to-waitlist";
 import { useRemoveUserFromWaitlist } from "../../api/hooks/mutations/waitlist/remove-user-from-waitlist";
-import { BOT_NAME } from "../../shared/constants/api";
 import { Icons } from "../../assets/icons";
 import type { Tournament } from "../../types/tournament.type";
 import type { User } from "../../types/user.type";
