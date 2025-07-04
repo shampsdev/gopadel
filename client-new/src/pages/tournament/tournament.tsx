@@ -80,14 +80,8 @@ export const Tournament = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col">
-                <p className="text-[20px] text-[#5D6674]">
-                  <span className="text-black font-semibold text-[20px]">
-                    {tournament?.[0].price}
-                  </span>{" "}
-                  ₽
-                </p>
-                <p className="text-[12px] text-[#868D98]">участие</p>
+              <div className="flex flex-col items-center justify-center w-[42px] h-[42px] rounded-full bg-[#F8F8FA]">
+                {Icons.Calendar("black")}
               </div>
             </div>
           </div>
@@ -107,7 +101,7 @@ export const Tournament = () => {
             </div>
           </div>
 
-          <div className="pt-5">
+          <div className="pt-5 pb-5 border-b border-[#DADCE0]">
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-col gap-[2px]">
                 <div className="text-[16px] gap-1 text-[#868D98] flex flex-row items-center">
@@ -129,6 +123,59 @@ export const Tournament = () => {
               </div>
             </div>
           </div>
+
+          <div className="py-5 ">
+            <div className="flex flex-row-reverse justify-between items-center">
+              <div className="flex flex-col items-center justify-center w-[42px] h-[42px] rounded-full bg-[#F8F8FA]">
+                {Icons.CreditCard("black")}
+              </div>
+
+              <div className="flex flex-row gap-[6px] ">
+                <div className="flex flex-col">
+                  <div
+                    className={twMerge(
+                      "text-[20px] ",
+                      user.loyalty.discount > 0
+                        ? "text-[#77BE14]"
+                        : "text-[#5D6674]"
+                    )}
+                  >
+                    <span
+                      className={twMerge(
+                        "text-black font-semibold text-[20px]",
+                        user.loyalty.discount > 0 && "text-[#77BE14]"
+                      )}
+                    >
+                      {user.loyalty.discount > 0
+                        ? Math.round(
+                            tournament?.[0].price * (1 - user.loyalty.discount)
+                          )
+                        : tournament?.[0].price}
+                    </span>{" "}
+                    ₽
+                  </div>
+                  <p className="text-[12px] text-[#868D98]">участие</p>
+                </div>
+                {user.loyalty.discount > 0 && (
+                  <div className="text-[14px]  text-[#F34338] line-through">
+                    <span className="font-semibold text-[14px] ">
+                      {tournament?.[0].price}
+                    </span>{" "}
+                    <span className="opacity-40">₽</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {tournament?.[0].description.length && (
+            <div className="flex flex-col pt-[20px] gap-[8px]">
+              <div className="text-[16px] font-medium">Описание турнира</div>
+              <div className="text-[14px] text-[#5D6674]">
+                {tournament?.[0].description}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
