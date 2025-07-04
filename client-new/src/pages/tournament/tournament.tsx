@@ -170,7 +170,7 @@ export const Tournament = () => {
             </div>
           </div>
 
-          {tournament?.[0].description.length && (
+          {tournament?.[0].description.length > 0 && (
             <div className="flex flex-col pt-[20px] gap-[8px]">
               <div className="text-[16px] font-medium">Описание турнира</div>
               <div className="text-[14px] text-[#5D6674]">
