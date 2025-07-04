@@ -5,7 +5,7 @@ import { useGetMe } from "../../api/hooks/useGetMe";
 import { useGetMyClubs } from "../../api/hooks/useGetMyClubs";
 import { useJoinClub } from "../../api/hooks/mutations/clubs/useJoinClub";
 import { Preloader } from "../widgets/preloader";
-import { initDataStartParam, useSignal } from "@telegram-apps/sdk-react";
+import { initDataStartParam } from "@telegram-apps/sdk-react";
 import { parseStartParam } from "../../utils/start-data-parse";
 
 export const ProtectedRoute = () => {
@@ -13,7 +13,7 @@ export const ProtectedRoute = () => {
   const { data: me, isLoading, isError, isFetched } = useGetMe();
   const { data: myClubs, isLoading: clubsLoading } = useGetMyClubs();
   const joinClubMutation = useJoinClub();
-  const initData = useSignal(initDataStartParam);
+  const initData = initDataStartParam();
 
   useEffect(() => {
     if (!isLoading && !isError) {
@@ -23,13 +23,7 @@ export const ProtectedRoute = () => {
   }, [isLoading, isError, setAuth]);
 
   useEffect(() => {
-    if (
-      me !== undefined &&
-      me !== null &&
-      !clubsLoading &&
-      myClubs &&
-      initData
-    ) {
+    if (me !== undefined && !clubsLoading && myClubs && initData) {
       const parsedData = parseStartParam(initData);
 
       if (parsedData.courtId) {
