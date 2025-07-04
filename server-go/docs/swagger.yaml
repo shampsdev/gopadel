@@ -115,6 +115,16 @@ definitions:
     - user_id
     - username
     type: object
+  domain.CreateClub:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+    required:
+    - address
+    - name
+    type: object
   domain.CreateLoyalty:
     properties:
       description:
@@ -242,6 +252,13 @@ definitions:
       user_id:
         type: string
       username:
+        type: string
+    type: object
+  domain.PatchClub:
+    properties:
+      address:
+        type: string
+      name:
         type: string
     type: object
   domain.PatchLoyalty:
@@ -736,6 +753,159 @@ paths:
       summary: Get current admin info
       tags:
       - admin-auth
+  /admin/courts:
+    get:
+      description: Get all courts. Available for any admin.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Club'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all courts (Admin)
+      tags:
+      - admin-courts
+    post:
+      consumes:
+      - application/json
+      description: Create a new court. Available only for superuser.
+      parameters:
+      - description: Court data
+        in: body
+        name: court
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateClub'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Club'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create court (Admin)
+      tags:
+      - admin-courts
+  /admin/courts/{id}:
+    delete:
+      description: Delete court. Available only for superuser.
+      parameters:
+      - description: Court ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete court (Admin)
+      tags:
+      - admin-courts
+    patch:
+      consumes:
+      - application/json
+      description: Update court data. Available only for superuser.
+      parameters:
+      - description: Court ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Court update data
+        in: body
+        name: court
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PatchClub'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Club'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update court (Admin)
+      tags:
+      - admin-courts
   /admin/filter:
     post:
       consumes:

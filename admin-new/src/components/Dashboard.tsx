@@ -17,6 +17,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { UsersPage } from './UsersPage';
 import { AdminsPage } from './AdminsPage';
 import { LoyaltyPage } from './LoyaltyPage';
+import { CourtsPage } from './CourtsPage';
 import type { NavItem } from '../types/navigation';
 
 // Страницы-заглушки
@@ -35,20 +36,7 @@ const TournamentsPage = () => (
   </div>
 );
 
-const CourtsPage = () => (
-  <div className="space-y-6">
-    <div>
-      <h2 className="text-3xl font-bold text-white mb-2">Корты</h2>
-      <p className="text-zinc-400">Управление кортами и клубами</p>
-    </div>
-    <Card className="bg-zinc-900 border-zinc-800">
-      <CardContent className="p-8 text-center">
-        <Building className="h-16 w-16 text-green-400 mx-auto mb-4" />
-        <p className="text-zinc-400">Страница кортов в разработке</p>
-      </CardContent>
-    </Card>
-  </div>
-);
+
 
 const RegistrationsPage = () => (
   <div className="space-y-6">

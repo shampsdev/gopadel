@@ -295,11 +295,12 @@ export const LoyaltyPage: React.FC = () => {
                   {loyalties.map((loyalty) => (
                     <div
                       key={loyalty.id}
-                      className={`p-4 rounded-lg border transition-colors ${
+                      className={`p-4 rounded-lg border transition-colors cursor-pointer ${
                         editingId === loyalty.id
-                          ? 'border-blue-600 bg-blue-600/10'
+                          ? 'border-green-600 bg-green-600/10'
                           : 'border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800'
                       }`}
+                      onClick={() => canEdit && startEdit(loyalty)}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -320,7 +321,10 @@ export const LoyaltyPage: React.FC = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => startEdit(loyalty)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEdit(loyalty);
+                              }}
                               className="bg-zinc-700 border-zinc-600 hover:bg-zinc-600 text-white"
                             >
                               <Edit className="h-4 w-4" />
@@ -328,7 +332,10 @@ export const LoyaltyPage: React.FC = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleDelete(loyalty)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(loyalty);
+                              }}
                               className="bg-red-600 border-red-500 hover:bg-red-700 text-white"
                             >
                               <Trash2 className="h-4 w-4" />
