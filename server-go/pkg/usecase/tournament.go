@@ -81,6 +81,15 @@ func (t *Tournament) Filter(ctx context.Context, filter *domain.FilterTournament
 	return tournaments, nil
 }
 
+func (t *Tournament) FilterForUser(ctx *Context, filter *domain.FilterTournament) ([]*domain.Tournament, error) {
+	// Автоматически добавляем фильтрацию по клубам пользователя
+	if ctx.User != nil && filter.FilterByUserClubs == nil {
+		filter.FilterByUserClubs = &ctx.User.ID
+	}
+
+	return t.Filter(ctx.Context, filter)
+}
+
 func (t *Tournament) GetTournamentByID(ctx context.Context, tournamentID string) (*domain.Tournament, error) {
 	filter := &domain.FilterTournament{
 		ID: tournamentID,

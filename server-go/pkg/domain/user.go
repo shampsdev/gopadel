@@ -54,6 +54,7 @@ type FilterUser struct {
 	TelegramUsername *string `json:"telegramUsername"`
 	FirstName        *string `json:"firstName"`
 	LastName         *string `json:"lastName"`
+	FilterByUserClubs *string `json:"filterByUserClubs,omitempty"`
 }
 
 type AdminPatchUser struct {

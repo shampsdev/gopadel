@@ -33,7 +33,8 @@ func FilterUsers(userCase *usecase.User) gin.HandlerFunc {
 			return
 		}
 
-		users, err := userCase.Filter(usecase.NewContext(c, user), &filterUser)
+		ctx := usecase.NewContext(c, user)
+		users, err := userCase.FilterForUser(&ctx, &filterUser)
 		if err != nil {
 			ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to filter users")
 			return

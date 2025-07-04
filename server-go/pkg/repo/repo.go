@@ -35,6 +35,13 @@ type Court interface {
 	Delete(ctx context.Context, id string) error
 }
 
+type Club interface {
+	Create(ctx context.Context, club *domain.CreateClub) error
+	Filter(ctx context.Context, filter *domain.FilterClub) ([]*domain.Club, error)
+	JoinClub(ctx context.Context, clubID, userID string) error
+	GetUserClubs(ctx context.Context, userID string) ([]*domain.Club, error)
+}
+
 type Loyalty interface {
 	Create(ctx context.Context, loyalty *domain.CreateLoyalty) (string, error)
 	Patch(ctx context.Context, id int, loyalty *domain.PatchLoyalty) error
