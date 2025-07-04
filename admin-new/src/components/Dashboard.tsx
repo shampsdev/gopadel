@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { UsersPage } from './UsersPage';
+import { AdminsPage } from './AdminsPage';
 import type { NavItem } from '../types/navigation';
 
 // Страницы-заглушки
@@ -78,22 +79,7 @@ const LoyaltyPage = () => (
   </div>
 );
 
-const AdminsPage = () => (
-  <div className="space-y-6">
-    <div>
-      <h2 className="text-3xl font-bold text-white mb-2">Администраторы</h2>
-      <p className="text-zinc-400">Управление правами администраторов</p>
-    </div>
-    <Card className="bg-zinc-900 border-zinc-800">
-      <CardContent className="p-8 text-center">
-        <Shield className="h-16 w-16 text-red-400 mx-auto mb-4" />
-        <p className="text-zinc-400">Страница администраторов в разработке</p>
-      </CardContent>
-    </Card>
-  </div>
-);
-
-const HomePage = ({ setCurrentPage }: { setCurrentPage: (page: string) => void }) => (
+const HomePage = ({ setCurrentPage, navItems }: { setCurrentPage: (page: string) => void, navItems: NavItem[] }) => (
   <div className="space-y-8">
     <div>
       <h2 className="text-3xl font-bold text-white mb-2">Панель управления</h2>
@@ -126,8 +112,12 @@ const HomePage = ({ setCurrentPage }: { setCurrentPage: (page: string) => void }
   </div>
 );
 
-// Определение навигационных элементов
-const navItems: NavItem[] = [
+export const Dashboard: React.FC = () => {
+  const { user, logout } = useAuth();
+  const [currentPage, setCurrentPage] = useState('/');
+
+  // Определение навигационных элементов с учетом прав пользователя
+  const allNavItems: NavItem[] = [
   {
     id: 'home',
     title: 'Главная',
@@ -175,20 +165,22 @@ const navItems: NavItem[] = [
     icon: Gift,
     color: 'text-pink-400 hover:border-pink-400/50',
     path: '/loyalty'
-  },
-  {
+    }
+  ];
+
+  // Добавляем раздел администраторов только для суперпользователей
+  if (user?.is_superuser) {
+    allNavItems.push({
     id: 'admins',
     title: 'Администраторы',
     description: 'Управление правами администраторов',
     icon: Shield,
     color: 'text-red-400 hover:border-red-400/50',
     path: '/admins'
+    });
   }
-];
 
-export const Dashboard: React.FC = () => {
-  const { user, logout } = useAuth();
-  const [currentPage, setCurrentPage] = useState('/');
+  const navItems = allNavItems;
 
   const renderPage = () => {
     switch (currentPage) {
@@ -203,9 +195,9 @@ export const Dashboard: React.FC = () => {
       case '/loyalty':
         return <LoyaltyPage />;
       case '/admins':
-        return <AdminsPage />;
+        return user?.is_superuser ? <AdminsPage /> : <HomePage setCurrentPage={setCurrentPage} navItems={navItems} />;
       default:
-        return <HomePage setCurrentPage={setCurrentPage} />;
+        return <HomePage setCurrentPage={setCurrentPage} navItems={navItems} />;
     }
   };
 

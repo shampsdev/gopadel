@@ -2054,6 +2054,9 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 },
+                "user": {
+                    "$ref": "#/definitions/domain.User"
+                },
                 "user_id": {
                     "type": "string"
                 },

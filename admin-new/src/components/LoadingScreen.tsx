@@ -6,7 +6,7 @@ export const LoadingScreen: React.FC = () => {
       <div className="flex flex-col items-center space-y-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
         <div className="text-center">
-          <h2 className="text-white text-xl font-semibold">GoPadel Admin</h2>
+          <h2 className="text-white text-xl font-semibold">GoPadel</h2>
           <p className="text-zinc-400 text-sm">Загрузка панели администрирования...</p>
         </div>
       </div>

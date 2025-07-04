@@ -9,6 +9,7 @@ type AdminUser struct {
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
 	UserID       string `json:"user_id"`
+	User         *User  `json:"user,omitempty"`
 }
 
 type FilterAdminUser struct {

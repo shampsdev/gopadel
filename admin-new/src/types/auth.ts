@@ -11,6 +11,9 @@ export interface AdminToken {
 export interface AdminMe {
   username: string;
   is_superuser: boolean;
+  is_active: boolean;
+  first_name: string;
+  last_name: string;
 }
 
 export interface AdminPasswordChange {

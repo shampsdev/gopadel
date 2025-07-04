@@ -8,6 +8,12 @@ export const usersApi = {
     return response.data;
   },
 
+  // Получение всех пользователей для выбора
+  getAll: async (): Promise<User[]> => {
+    const response = await api.post<User[]>('/admin/users/filter', {});
+    return response.data;
+  },
+
   // Обновление пользователя (только для суперюзера)
   patch: async (id: string, data: AdminPatchUser): Promise<User> => {
     const response = await api.patch<User>(`/admin/users/${id}`, data);
