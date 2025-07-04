@@ -1,6 +1,7 @@
 import { twMerge } from "tailwind-merge";
 import { Icons } from "../../assets/icons";
 import { getRankTitle } from "../../utils/rank-title";
+import { useGetMe } from "../../api/hooks/useGetMe";
 
 export interface CompetitionCardProps {
   className?: string;
@@ -31,6 +32,10 @@ export const CompetitionCard = ({
   title,
   participating,
 }: CompetitionCardProps) => {
+  const { data: user } = useGetMe();
+
+  if (!user) return null;
+
   return (
     <div
       className={twMerge(
@@ -82,9 +87,35 @@ export const CompetitionCard = ({
       </div>
 
       <div className="flex flex-row justify-between items-center">
-        <p className="text-[22px] text-[#868D98]  ">
-          <b className="text-black">{cost}</b> ₽
-        </p>
+        <div className="flex flex-row gap-[6px] ">
+          <div className="flex flex-col">
+            <div
+              className={twMerge(
+                "text-[20px] ",
+                user.loyalty.discount > 0 ? "text-[#77BE14]" : "text-[#5D6674]"
+              )}
+            >
+              <span
+                className={twMerge(
+                  "text-black font-semibold text-[20px]",
+                  user.loyalty.discount > 0 && "text-[#77BE14]"
+                )}
+              >
+                {user.loyalty.discount > 0
+                  ? Math.round(cost * (1 - user.loyalty.discount))
+                  : cost}
+              </span>{" "}
+              ₽
+            </div>
+            <p className="text-[12px] text-[#868D98]">участие</p>
+          </div>
+          {user.loyalty.discount > 0 && (
+            <div className="text-[14px]  text-[#F34338] line-through">
+              <span className="font-semibold text-[14px] ">{cost}</span>{" "}
+              <span className="opacity-40">₽</span>
+            </div>
+          )}
+        </div>
         <div className="flex flex-row gap-3 items-center">
           <div className="flex flex-row items-center gap-2">
             <div className="w-[18px] h-[18px]">{Icons.People()}</div>

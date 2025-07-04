@@ -21,6 +21,7 @@ import {
 import { Button } from "../ui/button";
 import { useCancelRegistrationBeforePayment } from "../../api/hooks/mutations/registration/cancel-registration-before-payment";
 import { useModalStore } from "../../shared/stores/modal.store";
+import { openTelegramLink } from "@telegram-apps/sdk-react";
 
 interface TournamentStatusActionsProps {
   tournament: Tournament;
@@ -93,18 +94,28 @@ export const TournamentStatusActions = ({
 
       if (isUserCancelledParticipating(tournament, user)) {
         return (
-          <div className="flex flex-col text-center gap-[18px]">
-            <div>Вы отказались от участия</div>
-            <div className="mb-10 flex flex-row gap-4 justify-center">
-              <Button
-                onClick={async () => {
-                  await reactivateCancelledRegistration(tournament.id);
-                }}
-              >
-                Вернуться к участию
-              </Button>
+          <>
+            <div className="flex flex-col text-center gap-[18px]">
+              <div>
+                Для возврата средств обращайтесь к{" "}
+                <span
+                  onClick={() => openTelegramLink("https://t.me/Alievskey")}
+                  className="text-[#1599DB] text-[14px] cursor-pointer w-[70%] text-center"
+                >
+                  @Alievskey
+                </span>
+              </div>
+              <div className="mb-10 flex flex-row gap-4 justify-center">
+                <Button
+                  onClick={async () => {
+                    await reactivateCancelledRegistration(tournament.id);
+                  }}
+                >
+                  Вернуться к участию
+                </Button>
+              </div>
             </div>
-          </div>
+          </>
         );
       }
 
