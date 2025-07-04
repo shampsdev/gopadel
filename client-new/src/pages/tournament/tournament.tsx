@@ -11,6 +11,7 @@ import { TournamentStatusActions } from "../../components/widgets/tournament-sta
 import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { twMerge } from "tailwind-merge";
 import { Preloader } from "../../components/widgets/preloader";
+import { BOT_NAME } from "../../shared/constants/api";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -290,7 +291,7 @@ export const Tournament = () => {
           <div
             onClick={() => {
               navigator.clipboard.writeText(
-                `https://t.me/study_stats_bot/aboba?startapp=${id}`
+                `https://t.me/${BOT_NAME}/app?startapp=${id}`
               );
               setIsCopied(true);
               setTimeout(() => {
@@ -299,9 +300,7 @@ export const Tournament = () => {
             }}
             className="flex flex-col justify-center items-center w-[21px] h-[21px]"
           >
-            {isCopied
-              ? Icons.Approve("#77BE14", "w-[21px] h-[21px]")
-              : Icons.Copy()}
+            {isCopied ? Icons.Approve("#77BE14", "21", "21") : Icons.Copy()}
           </div>
         </div>
       </div>

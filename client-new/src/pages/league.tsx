@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 import { Button } from "../components/ui/button";
 import videoFile from "../assets/IMG_8675.MP4?url";
 

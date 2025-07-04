@@ -1,5 +1,4 @@
 import { backButton } from "@telegram-apps/sdk-react";
-import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 

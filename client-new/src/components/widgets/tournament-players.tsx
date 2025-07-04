@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import type { Registration } from "../../types/registration.type";
 import { twMerge } from "tailwind-merge";
 import { Icons } from "../../assets/icons";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
+import { BOT_NAME } from "../../shared/constants/api";
 
 interface TurnamentPlayers {
   tournamentId: string;
@@ -23,7 +24,7 @@ export const TournamentPlayers = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const goToUserProfile = (userId: string, event: React.MouseEvent) => {
+  const goToUserProfile = (userId: string) => {
     navigate(`/profile/${userId}`);
   };
 
@@ -60,7 +61,7 @@ export const TournamentPlayers = ({
           <div
             onClick={() => {
               openTelegramLink(
-                `https://t.me/share/url?url=https://t.me/study_stats_bot/aboba?startapp=${tournamentId}`
+                `https://t.me/share/url?url=https://t.me/${BOT_NAME}/app?startapp=${tournamentId}`
               );
             }}
             className="flex flex-col items-center cursor-pointer relative"
@@ -92,7 +93,7 @@ export const TournamentPlayers = ({
                     registration.status === "PENDING" && "opacity-50",
                     registration.status === "CANCELED_BY_USER" && "opacity-75"
                   )}
-                  onClick={(e) => goToUserProfile(registration.user.id, e)}
+                  onClick={() => goToUserProfile(registration.user.id)}
                 >
                   {registration.status === "ACTIVE" && (
                     <div className="absolute bg-[#AFFF3F] top-0 right-0 w-[24px] z-10 h-[24px] rounded-full flex items-center justify-center">

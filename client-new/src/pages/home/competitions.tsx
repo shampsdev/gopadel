@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
+import { Preloader } from "../../components/widgets/preloader";
 
 // Мок-данные для игр
 const mockGames: CompetitionCardProps[] = [];
@@ -47,7 +48,9 @@ export const Competitions = () => {
     notEnded: true,
   };
 
-  const { data: tournaments, isLoading, error } = useGetTournaments(filter);
+  const { data: tournaments, isLoading } = useGetTournaments(filter);
+
+  if (isLoading) return <Preloader />;
 
   const transformTournamentToCompetition = (
     tournament: Tournament

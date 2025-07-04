@@ -22,6 +22,7 @@ import { Button } from "../ui/button";
 import { useCancelRegistrationBeforePayment } from "../../api/hooks/mutations/registration/cancel-registration-before-payment";
 import { useModalStore } from "../../shared/stores/modal.store";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
+import { BOT_NAME } from "../../shared/constants/api";
 
 interface TournamentStatusActionsProps {
   tournament: Tournament;
@@ -145,7 +146,7 @@ export const TournamentStatusActions = ({
                 onClick={async () => {
                   const payment = await createPaymentForTournamentRegistration({
                     tournamentId: tournament.id,
-                    returnUrl: `https://t.me/study_stats_bot/aboba?startapp=${tournament.id}`,
+                    returnUrl: `https://t.me/${BOT_NAME}/app?startapp=${tournament.id}`,
                   });
                   window.open(payment?.paymentLink, "_blank");
                 }}

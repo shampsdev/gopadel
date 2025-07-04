@@ -1,6 +1,4 @@
 import { CompetitionCard } from "../../components/widgets/competition-card";
-import { ranks } from "../../shared/constants/ranking";
-import type { Rank } from "../../types/rank.type";
 import { useGetTournaments } from "../../api/hooks/useGetTournaments";
 import type { Tournament } from "../../types/tournament.type";
 import type { FilterTournament } from "../../types/filter.type";
@@ -42,7 +40,9 @@ export const Tournaments = () => {
     notEnded: true,
   };
 
-  const { data: tournaments, isLoading, error } = useGetTournaments(filter);
+  const { data: tournaments, isLoading } = useGetTournaments(filter);
+
+  if (isLoading) return <Preloader />;
 
   return (
     <>
@@ -70,24 +70,6 @@ export const Tournaments = () => {
       </div>
 
       <div className="flex flex-col gap-4 pb-[100px] mt-4">
-        {isLoading && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">Загрузка турниров...</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="text-center py-8">
-            <p className="text-red-500">Ошибка загрузки турниров</p>
-          </div>
-        )}
-
-        {!isLoading && !error && tournaments?.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">Турниры не найдены</p>
-          </div>
-        )}
-
         {tournaments?.map((competition: Tournament) => (
           <Link key={competition.id} to={`/tournament/${competition.id}`}>
             <CompetitionCard

@@ -1,2 +1,2 @@
-export const API_URL = import.meta.env.VITE_API_BASE_URL;
-export const BOT_NAME = import.meta.env.VITE_BOT_NAME || "gopadel_bot";
+export const API_URL = window.api.API_URL;
+export const BOT_NAME = window.api.BOT_USERNAME;

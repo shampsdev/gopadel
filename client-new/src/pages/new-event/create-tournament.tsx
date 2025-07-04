@@ -3,12 +3,10 @@ import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton"
 import { Input } from "../../components/ui/froms/input";
 import {
   formatDateInput,
-  parseDateToISO,
   validateDateFormat,
   formatTimeInput,
   validateTimeFormat,
   createStartAndEndTime,
-  formatISODateToMoscow,
 } from "../../utils/date-format";
 import { Button } from "../../components/ui/button";
 import { RankSelector } from "../../components/ui/froms/rank-selector";
@@ -19,12 +17,9 @@ export const CreateTournament = () => {
 
   const [title, setTitle] = useState<string | null>(null);
   const [date, setDate] = useState<string | null>(null);
-  const [dateISO, setDateISO] = useState<string | null>(null);
   const [dateError, setDateError] = useState<boolean>(true);
 
   const [time, setTime] = useState<string | null>(null);
-  const [startTime, setStartTime] = useState<string | null>(null);
-  const [endTime, setEndTime] = useState<string | null>(null);
   const [timeError, setTimeError] = useState<boolean>(true);
   const [clubName, setClubName] = useState<string | null>(null);
   const [clubAddress, setClubAddress] = useState<string | null>(null);
@@ -92,9 +87,6 @@ export const CreateTournament = () => {
       return;
     }
 
-    setStartTime(start);
-    setEndTime(end);
-
     const tournamentData = {
       title,
       startTime: start,
@@ -134,11 +126,8 @@ export const CreateTournament = () => {
               setDate(formatted);
 
               if (validateDateFormat(formatted)) {
-                const isoDate = parseDateToISO(formatted);
-                setDateISO(isoDate);
                 setDateError(false);
               } else {
-                setDateISO(null);
                 setDateError(formatted.length > 0);
               }
             }}
