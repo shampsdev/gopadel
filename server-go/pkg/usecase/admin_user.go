@@ -43,6 +43,63 @@ func (a *AdminUser) GetByUserID(ctx context.Context, userID string) (*domain.Adm
 	return adminUsers[0], nil
 }
 
+func (a *AdminUser) Create(ctx context.Context, createData *domain.CreateAdminUser) (string, error) {
+	// Хешируем пароль
+	hashedPassword, err := utils.HashPassword(createData.Password)
+	if err != nil {
+		return "", fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	// Создаем копию с хешированным паролем
+	adminUserWithHash := &domain.CreateAdminUser{
+		Username:    createData.Username,
+		Password:    hashedPassword,
+		IsSuperUser: createData.IsSuperUser,
+		IsActive:    createData.IsActive,
+		FirstName:   createData.FirstName,
+		LastName:    createData.LastName,
+		UserID:      createData.UserID,
+	}
+
+	return a.adminUserRepo.Create(ctx, adminUserWithHash)
+}
+
+func (a *AdminUser) Patch(ctx context.Context, id string, patchData *domain.PatchAdminUser) (*domain.AdminUser, error) {
+	// Если есть пароль, хешируем его
+	if patchData.Password != nil {
+		hashedPassword, err := utils.HashPassword(*patchData.Password)
+		if err != nil {
+			return nil, fmt.Errorf("failed to hash password: %w", err)
+		}
+		patchData.Password = &hashedPassword
+	}
+
+	err := a.adminUserRepo.Patch(ctx, id, patchData)
+	if err != nil {
+		return nil, err
+	}
+
+	// Используем Filter вместо GetByID
+	filter := &domain.FilterAdminUser{
+		ID: &id,
+	}
+	
+	adminUsers, err := a.adminUserRepo.Filter(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	
+	if len(adminUsers) == 0 {
+		return nil, repo.ErrNotFound
+	}
+	
+	return adminUsers[0], nil
+}
+
+func (a *AdminUser) Delete(ctx context.Context, id string) error {
+	return a.adminUserRepo.Delete(ctx, id)
+}
+
 // Authenticate проверяет логин и пароль админа
 func (a *AdminUser) Authenticate(ctx context.Context, username, password string) (*domain.AdminUser, error) {
 	admin, err := a.adminUserRepo.GetByUsername(ctx, username)

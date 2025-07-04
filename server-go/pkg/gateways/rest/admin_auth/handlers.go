@@ -61,6 +61,9 @@ func (h *Handler) Me(c *gin.Context) {
 	response := &domain.AdminMe{
 		Username:    admin.Username,
 		IsSuperUser: admin.IsSuperUser,
+		IsActive:    admin.IsActive,
+		FirstName:   admin.FirstName,
+		LastName:    admin.LastName,
 	}
 	
 	c.JSON(http.StatusOK, response)

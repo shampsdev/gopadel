@@ -27,23 +27,35 @@ func NewAdminUserRepo(db *pgxpool.Pool) *AdminUserRepo {
 
 func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUser) ([]*domain.AdminUser, error) {
 	s := r.psql.Select(
-		`"id"`, `"is_superuser"`, `"user_id"`, `"username"`, `"password_hash"`,
+		`"id"`, `"username"`, `"password_hash"`, `"is_superuser"`, `"is_active"`, `"first_name"`, `"last_name"`, `"user_id"`,
 	).From(`"admin_users"`)
 
 	if filter.ID != nil {
 		s = s.Where(sq.Eq{`"id"`: *filter.ID})
 	}
 
+	if filter.Username != nil {
+		s = s.Where(sq.ILike{`"username"`: "%" + *filter.Username + "%"})
+	}
+
 	if filter.IsSuperUser != nil {
 		s = s.Where(sq.Eq{`"is_superuser"`: *filter.IsSuperUser})
 	}
 
-	if filter.UserID != nil {
-		s = s.Where(sq.Eq{`"user_id"`: *filter.UserID})
+	if filter.IsActive != nil {
+		s = s.Where(sq.Eq{`"is_active"`: *filter.IsActive})
 	}
 
-	if filter.Username != nil {
-		s = s.Where(sq.ILike{`"username"`: "%" + *filter.Username + "%"})
+	if filter.FirstName != nil {
+		s = s.Where(sq.ILike{`"first_name"`: "%" + *filter.FirstName + "%"})
+	}
+
+	if filter.LastName != nil {
+		s = s.Where(sq.ILike{`"last_name"`: "%" + *filter.LastName + "%"})
+	}
+
+	if filter.UserID != nil {
+		s = s.Where(sq.Eq{`"user_id"`: *filter.UserID})
 	}
 
 	sql, args, err := s.ToSql()
@@ -63,15 +75,17 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 	adminUsers := []*domain.AdminUser{}
 	for rows.Next() {
 		var adminUser domain.AdminUser
-		var username pgtype.Text
-		var passwordHash pgtype.Text
+		var username, passwordHash, firstName, lastName, userID pgtype.Text
 
 		err := rows.Scan(
 			&adminUser.ID,
-			&adminUser.IsSuperUser,
-			&adminUser.UserID,
 			&username,
 			&passwordHash,
+			&adminUser.IsSuperUser,
+			&adminUser.IsActive,
+			&firstName,
+			&lastName,
+			&userID,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
@@ -83,6 +97,15 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 		if passwordHash.Valid {
 			adminUser.PasswordHash = passwordHash.String
 		}
+		if firstName.Valid {
+			adminUser.FirstName = firstName.String
+		}
+		if lastName.Valid {
+			adminUser.LastName = lastName.String
+		}
+		if userID.Valid {
+			adminUser.UserID = userID.String
+		}
 
 		adminUsers = append(adminUsers, &adminUser)
 	}
@@ -92,7 +115,7 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 
 func (r *AdminUserRepo) GetByUsername(ctx context.Context, username string) (*domain.AdminUser, error) {
 	s := r.psql.Select(
-		`"id"`, `"is_superuser"`, `"user_id"`, `"username"`, `"password_hash"`,
+		`"id"`, `"username"`, `"password_hash"`, `"is_superuser"`, `"is_active"`, `"first_name"`, `"last_name"`, `"user_id"`,
 	).From(`"admin_users"`).Where(sq.Eq{`"username"`: username})
 
 	sql, args, err := s.ToSql()
@@ -101,15 +124,17 @@ func (r *AdminUserRepo) GetByUsername(ctx context.Context, username string) (*do
 	}
 
 	var adminUser domain.AdminUser
-	var usernameVal pgtype.Text
-	var passwordHash pgtype.Text
+	var usernameVal, passwordHash, firstName, lastName, userID pgtype.Text
 
 	err = r.db.QueryRow(ctx, sql, args...).Scan(
 		&adminUser.ID,
-		&adminUser.IsSuperUser,
-		&adminUser.UserID,
 		&usernameVal,
 		&passwordHash,
+		&adminUser.IsSuperUser,
+		&adminUser.IsActive,
+		&firstName,
+		&lastName,
+		&userID,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, repo.ErrNotFound
@@ -124,8 +149,97 @@ func (r *AdminUserRepo) GetByUsername(ctx context.Context, username string) (*do
 	if passwordHash.Valid {
 		adminUser.PasswordHash = passwordHash.String
 	}
+	if firstName.Valid {
+		adminUser.FirstName = firstName.String
+	}
+	if lastName.Valid {
+		adminUser.LastName = lastName.String
+	}
+	if userID.Valid {
+		adminUser.UserID = userID.String
+	}
 
 	return &adminUser, nil
+}
+
+func (r *AdminUserRepo) Create(ctx context.Context, adminUser *domain.CreateAdminUser) (string, error) {
+	s := r.psql.Insert(`"admin_users"`).
+		Columns(`"username"`, `"password_hash"`, `"is_superuser"`, `"is_active"`, `"first_name"`, `"last_name"`, `"user_id"`).
+		Values(adminUser.Username, adminUser.Password, adminUser.IsSuperUser, adminUser.IsActive, adminUser.FirstName, adminUser.LastName, adminUser.UserID).
+		Suffix(`RETURNING "id"`)
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return "", fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	var id string
+	err = r.db.QueryRow(ctx, sql, args...).Scan(&id)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute SQL: %w", err)
+	}
+
+	return id, nil
+}
+
+func (r *AdminUserRepo) Patch(ctx context.Context, id string, adminUser *domain.PatchAdminUser) error {
+	s := r.psql.Update(`"admin_users"`).Where(sq.Eq{`"id"`: id})
+
+	if adminUser.Username != nil {
+		s = s.Set(`"username"`, *adminUser.Username)
+	}
+
+	if adminUser.Password != nil {
+		s = s.Set(`"password_hash"`, *adminUser.Password)
+	}
+
+	if adminUser.IsSuperUser != nil {
+		s = s.Set(`"is_superuser"`, *adminUser.IsSuperUser)
+	}
+
+	if adminUser.IsActive != nil {
+		s = s.Set(`"is_active"`, *adminUser.IsActive)
+	}
+
+	if adminUser.FirstName != nil {
+		s = s.Set(`"first_name"`, *adminUser.FirstName)
+	}
+
+	if adminUser.LastName != nil {
+		s = s.Set(`"last_name"`, *adminUser.LastName)
+	}
+
+	if adminUser.UserID != nil {
+		s = s.Set(`"user_id"`, *adminUser.UserID)
+	}
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	_, err = r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to execute SQL: %w", err)
+	}
+
+	return nil
+}
+
+func (r *AdminUserRepo) Delete(ctx context.Context, id string) error {
+	s := r.psql.Delete(`"admin_users"`).Where(sq.Eq{`"id"`: id})
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	_, err = r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to execute SQL: %w", err)
+	}
+
+	return nil
 }
 
 func (r *AdminUserRepo) UpdatePassword(ctx context.Context, id string, passwordHash string) error {

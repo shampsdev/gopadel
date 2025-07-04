@@ -11,8 +11,14 @@ definitions:
     type: object
   domain.AdminMe:
     properties:
+      first_name:
+        type: string
+      is_active:
+        type: boolean
       is_superuser:
         type: boolean
+      last_name:
+        type: string
       username:
         type: string
     type: object
@@ -58,6 +64,23 @@ definitions:
       token_type:
         type: string
     type: object
+  domain.AdminUser:
+    properties:
+      first_name:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      is_superuser:
+        type: boolean
+      last_name:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
   domain.Club:
     properties:
       address:
@@ -66,6 +89,29 @@ definitions:
         type: string
       name:
         type: string
+    type: object
+  domain.CreateAdminUser:
+    properties:
+      first_name:
+        type: string
+      is_active:
+        type: boolean
+      is_superuser:
+        type: boolean
+      last_name:
+        type: string
+      password:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    required:
+    - first_name
+    - last_name
+    - password
+    - user_id
+    - username
     type: object
   domain.CreateTournament:
     properties:
@@ -105,6 +151,23 @@ definitions:
   domain.ErrorResponse:
     properties:
       error:
+        type: string
+    type: object
+  domain.FilterAdminUser:
+    properties:
+      first_name:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      is_superuser:
+        type: boolean
+      last_name:
+        type: string
+      user_id:
+        type: string
+      username:
         type: string
     type: object
   domain.FilterTournament:
@@ -149,6 +212,23 @@ definitions:
   domain.MessageResponse:
     properties:
       message:
+        type: string
+    type: object
+  domain.PatchAdminUser:
+    properties:
+      first_name:
+        type: string
+      is_active:
+        type: boolean
+      is_superuser:
+        type: boolean
+      last_name:
+        type: string
+      password:
+        type: string
+      user_id:
+        type: string
+      username:
         type: string
     type: object
   domain.PatchTournament:
@@ -420,6 +500,137 @@ info:
   title: GoPadel server
   version: "1.0"
 paths:
+  /admin:
+    post:
+      consumes:
+      - application/json
+      description: Create a new admin user. Available only for superuser.
+      parameters:
+      - description: Admin data
+        in: body
+        name: admin
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateAdminUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.AdminUser'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create admin user
+      tags:
+      - admin
+  /admin/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete admin user. Available only for superuser.
+      parameters:
+      - description: Admin ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete admin user
+      tags:
+      - admin
+    patch:
+      consumes:
+      - application/json
+      description: Update admin user data. Available only for superuser.
+      parameters:
+      - description: Admin ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Admin update data
+        in: body
+        name: admin
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PatchAdminUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AdminUser'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update admin user
+      tags:
+      - admin
   /admin/auth/change-password:
     post:
       consumes:
@@ -501,6 +712,48 @@ paths:
       summary: Get current admin info
       tags:
       - admin-auth
+  /admin/filter:
+    post:
+      consumes:
+      - application/json
+      description: Get filtered list of admin users. Available only for superuser.
+      parameters:
+      - description: Admin filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/domain.FilterAdminUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.AdminUser'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Filter admin users
+      tags:
+      - admin
   /admin/loyalties:
     get:
       description: Get all loyalty levels. Available for any admin.

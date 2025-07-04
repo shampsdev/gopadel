@@ -2,17 +2,43 @@ package domain
 
 type AdminUser struct {
 	ID           string `json:"id"`
-	IsSuperUser  bool   `json:"is_superuser"`
-	UserID       string `json:"user_id"`
 	Username     string `json:"username"`
 	PasswordHash string `json:"-"`
+	IsSuperUser  bool   `json:"is_superuser"`
+	IsActive     bool   `json:"is_active"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	UserID       string `json:"user_id"`
 }
 
 type FilterAdminUser struct {
 	ID          *string `json:"id"`
-	IsSuperUser *bool   `json:"is_superuser"`
-	UserID      *string `json:"user_id"`
 	Username    *string `json:"username"`
+	IsSuperUser *bool   `json:"is_superuser"`
+	IsActive    *bool   `json:"is_active"`
+	FirstName   *string `json:"first_name"`
+	LastName    *string `json:"last_name"`
+	UserID      *string `json:"user_id"`
+}
+
+type CreateAdminUser struct {
+	Username    string `json:"username" binding:"required"`
+	Password    string `json:"password" binding:"required"`
+	IsSuperUser bool   `json:"is_superuser"`
+	IsActive    bool   `json:"is_active"`
+	FirstName   string `json:"first_name" binding:"required"`
+	LastName    string `json:"last_name" binding:"required"`
+	UserID      string `json:"user_id" binding:"required"`
+}
+
+type PatchAdminUser struct {
+	Username    *string `json:"username"`
+	Password    *string `json:"password"`
+	IsSuperUser *bool   `json:"is_superuser"`
+	IsActive    *bool   `json:"is_active"`
+	FirstName   *string `json:"first_name"`
+	LastName    *string `json:"last_name"`
+	UserID      *string `json:"user_id"`
 }
 
 type AdminLogin struct {
@@ -28,6 +54,9 @@ type AdminToken struct {
 type AdminMe struct {
 	Username    string `json:"username"`
 	IsSuperUser bool   `json:"is_superuser"`
+	IsActive    bool   `json:"is_active"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
 }
 
 type AdminPasswordChange struct {
