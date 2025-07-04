@@ -85,3 +85,12 @@ export const getUsers = async (
   });
   return response.data;
 };
+
+export const isAdmin = async (token: string): Promise<boolean | null> => {
+  const response = await api.get<boolean>("/users/me/admin", {
+    headers: {
+      "X-Api-Token": token,
+    },
+  });
+  return response.data;
+};

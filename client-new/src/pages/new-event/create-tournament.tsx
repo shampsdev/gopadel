@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Input } from "../../components/ui/froms/input";
+import { Textarea } from "../../components/ui/froms/textarea";
+import { CourtSelector } from "../../components/ui/froms/court-selector";
 import {
   formatDateInput,
   validateDateFormat,
@@ -11,11 +13,22 @@ import {
 import { Button } from "../../components/ui/button";
 import { RankSelector } from "../../components/ui/froms/rank-selector";
 import { ranks } from "../../shared/constants/ranking";
+import type { CreateTournament as CreateTournamentType } from "../../types/create-tournament";
+import { useAuthStore } from "../../shared/stores/auth.store";
+import { useGetCourts } from "../../api/hooks/useGetCourts";
+import { useCreateTournament } from "../../api/hooks/mutations/tournament/useCreateTournament";
+import { useNavigate } from "react-router";
+import { useIsAdmin } from "../../api/hooks/useIsAdmin";
+import { Preloader } from "../../components/widgets/preloader";
+import AboutImage from "../../assets/about.png";
 
 export const CreateTournament = () => {
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
   const [title, setTitle] = useState<string | null>(null);
+  const [description, setDescription] = useState<string>("");
   const [date, setDate] = useState<string | null>(null);
   const [dateError, setDateError] = useState<boolean>(true);
 
@@ -25,8 +38,17 @@ export const CreateTournament = () => {
   const [clubAddress, setClubAddress] = useState<string | null>(null);
 
   const [type, setType] = useState<string | null>(null);
+  const [courtId, setCourtId] = useState<string>("");
+  const [courtTouched, setCourtTouched] = useState<boolean>(false);
   const [rank, setRank] = useState<number | null>(null);
   const [rankInput, setRankInput] = useState<string>("");
+
+  const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
+
+  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
+
+  const { mutateAsync: createTournament, isPending: isCreatingTournament } =
+    useCreateTournament();
 
   const handleRankChange = (rankTitle: string) => {
     setRankInput(rankTitle);
@@ -52,16 +74,18 @@ export const CreateTournament = () => {
       clubName &&
       clubAddress &&
       type &&
+      courtId &&
       rank !== null &&
-      rank > 0 &&
+      rank >= 0 &&
       price !== null &&
-      price > 0 &&
+      price >= 0 &&
       maxUsers !== null &&
       maxUsers > 0
     );
   };
 
-  const handleCreateTournament = () => {
+  const handleCreateTournament = async () => {
+    setCourtTouched(true);
     if (!date || !time) {
       console.log("Необходимо указать дату и время");
       return;
@@ -77,6 +101,11 @@ export const CreateTournament = () => {
       return;
     }
 
+    if (!courtId) {
+      console.log("Не выбран корт");
+      return;
+    }
+
     const { startTime: start, endTime: end } = createStartAndEndTime(
       date,
       time
@@ -87,23 +116,63 @@ export const CreateTournament = () => {
       return;
     }
 
-    const tournamentData = {
-      title,
-      startTime: start,
+    const tournamentData: CreateTournamentType = {
+      clubId: courtId,
+      description: description,
       endTime: end,
-      clubName,
-      clubAddress,
-      type,
-      rank,
-      price,
-      maxUsers,
+      maxUsers: maxUsers ?? 0,
+      name: title ?? "",
+      organizatorId: user?.id ?? "",
+      price: price ?? 0,
+      rankMax: ranks.find((r) => r.title === rankInput)?.from ?? 0,
+      rankMin: ranks.find((r) => r.title === rankInput)?.to ?? 0,
+      startTime: start,
+      tournamentType: type ?? "",
     };
 
-    console.log("Данные турнира:", tournamentData);
+    try {
+      console.log(tournamentData);
+      Object.keys(tournamentData).forEach((key) => {
+        console.log(key, tournamentData[key as keyof CreateTournamentType]);
+      });
+      const tournament = await createTournament(tournamentData);
+      if (tournament?.id) {
+        navigate(`/tournaments/${tournament?.id}`);
+      } else {
+        alert("Турнир успешно создан");
+        navigate("/");
+      }
+    } catch (error) {
+      alert("Ошибка при создании турнира");
+      console.error(error);
+    }
   };
 
+  if (isAdminLoading || courtsLoading) return <Preloader />;
+
+  if (isAdmin) {
+    return (
+      <div className="flex flex-col h-screen w-full">
+        <div className="flex-1 flex flex-col text-center items-center justify-center gap-11">
+          <img src={AboutImage} className="object-cover w-[70%]" />
+          <div className="flex flex-col gap-4">
+            <div className="font-semibold text-[20px]">Функция недоступна</div>
+            <div className="text-[#868D98]">
+              Создание турниров доступно только администраторам
+            </div>
+          </div>
+        </div>
+        <div className="mt-auto pb-10">
+          <Button className="mx-auto" onClick={() => navigate("/")}>
+            Назад
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-[40px] h-[150vh]">
+    <div className="flex flex-col gap-[40px] pb-[100px]">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2 px-[12px]">
           <p className="text-[24px] font-medium">Новый турнир</p>
@@ -119,6 +188,14 @@ export const CreateTournament = () => {
             value={title ?? ""}
             maxLength={100}
             hasError={!title}
+          />
+          <Textarea
+            onChangeFunction={setDescription}
+            title={"Описание"}
+            value={description}
+            maxLength={500}
+            placeholder={""}
+            hasError={false}
           />
           <Input
             onChangeFunction={(value) => {
@@ -189,11 +266,21 @@ export const CreateTournament = () => {
             maxLength={100}
             hasError={!type}
           />
+          <CourtSelector
+            title="Корт"
+            value={courtId}
+            onChangeFunction={(id) => {
+              setCourtId(id);
+              setCourtTouched(true);
+            }}
+            hasError={!courtId}
+            courts={courts ?? []}
+          />
           <RankSelector
             title="Ранг"
             value={rankInput}
             onChangeFunction={handleRankChange}
-            hasError={rank === null || rank === 0}
+            hasError={rank === null}
           />
           <Input
             title={"Стоимость участия"}
@@ -258,6 +345,7 @@ export const CreateTournament = () => {
 
       <div className="mx-auto">
         <Button
+          disabled={isCreatingTournament}
           onClick={handleCreateTournament}
           className={!isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4]" : ""}
         >
