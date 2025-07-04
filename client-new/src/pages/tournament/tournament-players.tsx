@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router";
 import { getRankTitle } from "../../utils/rank-title";
 import { useGetTournaments } from "../../api/hooks/useGetTournaments";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
+import { Preloader } from "../../components/widgets/preloader";
 
 export const TournamentPlayers = () => {
   useTelegramBackButton({ showOnMount: true });
@@ -9,7 +10,7 @@ export const TournamentPlayers = () => {
 
   const { data: tournaments, isLoading } = useGetTournaments({ id: id });
 
-  if (isLoading) return null;
+  if (isLoading) return <Preloader />;
 
   if (tournaments) {
     return (

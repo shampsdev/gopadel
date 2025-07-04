@@ -2,6 +2,7 @@ import { twMerge } from "tailwind-merge";
 import { Icons } from "../../assets/icons";
 import { getRankTitle } from "../../utils/rank-title";
 import { useGetMe } from "../../api/hooks/useGetMe";
+import { Preloader } from "./preloader";
 
 export interface CompetitionCardProps {
   className?: string;
@@ -34,7 +35,7 @@ export const CompetitionCard = ({
 }: CompetitionCardProps) => {
   const { data: user } = useGetMe();
 
-  if (!user) return null;
+  if (!user) return <Preloader />;
 
   return (
     <div

@@ -7,6 +7,7 @@ import { formatBirthDate } from "../../utils/date-format";
 import { formatUrl, getDisplayName } from "../../utils/format-url";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
+import { Preloader } from "../../components/widgets/preloader";
 
 export const UserProfile = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -15,7 +16,7 @@ export const UserProfile = () => {
 
   const { data: user } = useGetUsers({ id: id ?? "" });
 
-  if (!user) return null;
+  if (!user) return <Preloader />;
 
   if (user[0].id === currentUser?.id) {
     return <Navigate to="/profile" replace />;

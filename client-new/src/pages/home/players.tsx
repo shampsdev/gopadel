@@ -3,6 +3,7 @@ import { useGetUsers } from "../../api/hooks/useGetUsers";
 import { PlayerCard } from "../../components/widgets/player-card";
 import SearchBar from "../../components/widgets/search-bar";
 import { Link } from "react-router";
+import { Preloader } from "../../components/widgets/preloader";
 
 export const Players = () => {
   const { data: users, isLoading } = useGetUsers({});
@@ -24,7 +25,7 @@ export const Players = () => {
     });
   }, [users, searchQuery]);
 
-  if (isLoading) return null;
+  if (isLoading) return <Preloader />;
 
   return (
     <div className="flex flex-col gap-5">

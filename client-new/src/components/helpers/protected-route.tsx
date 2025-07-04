@@ -2,6 +2,7 @@ import { Navigate, Outlet } from "react-router";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { useEffect } from "react";
 import { useGetMe } from "../../api/hooks/useGetMe";
+import { Preloader } from "../widgets/preloader";
 
 export const ProtectedRoute = () => {
   const { setAuth, setUser } = useAuthStore();
@@ -15,7 +16,7 @@ export const ProtectedRoute = () => {
   }, [isLoading, isError, setAuth]);
 
   if (isLoading) {
-    return null;
+    return <Preloader />;
   }
 
   if (isError) {

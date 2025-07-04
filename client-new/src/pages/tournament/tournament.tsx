@@ -10,6 +10,7 @@ import { useAuthStore } from "../../shared/stores/auth.store";
 import { TournamentStatusActions } from "../../components/widgets/tournament-status-actions";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { twMerge } from "tailwind-merge";
+import { Preloader } from "../../components/widgets/preloader";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -32,7 +33,7 @@ export const Tournament = () => {
     console.log(tournament?.[0]);
   }, [tournament]);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <Preloader />;
 
   if (!tournament?.[0] || !user || !waitlist) return <></>;
 

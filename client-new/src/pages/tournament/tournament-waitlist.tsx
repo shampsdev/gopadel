@@ -3,6 +3,7 @@ import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton"
 import { useGetTournamentWaitlist } from "../../api/hooks/useGetTournamentWaitlist";
 import { getRankTitle } from "../../utils/rank-title";
 import { Link } from "react-router";
+import { Preloader } from "../../components/widgets/preloader";
 
 export const TournamentWaitlist = () => {
   useTelegramBackButton({ showOnMount: true });
@@ -10,7 +11,7 @@ export const TournamentWaitlist = () => {
 
   const { data: waitlist, isLoading } = useGetTournamentWaitlist(id!);
 
-  if (isLoading) return null;
+  if (isLoading) return <Preloader />;
 
   if (waitlist) {
     return (

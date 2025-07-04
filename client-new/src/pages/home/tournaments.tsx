@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
+import { Preloader } from "../../components/widgets/preloader";
 
 export const Tournaments = () => {
   const location = useLocation();
