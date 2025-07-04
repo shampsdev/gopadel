@@ -37,7 +37,9 @@ type Club interface {
 
 type Loyalty interface {
 	Create(ctx context.Context, loyalty *domain.CreateLoyalty) (string, error)
+	Patch(ctx context.Context, id int, loyalty *domain.PatchLoyalty) error
 	Filter(ctx context.Context, filter *domain.FilterLoyalty) ([]*domain.Loyalty, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type Tournament interface {

@@ -115,6 +115,17 @@ definitions:
     - user_id
     - username
     type: object
+  domain.CreateLoyalty:
+    properties:
+      description:
+        type: string
+      discount:
+        type: integer
+      name:
+        type: string
+      requirements:
+        type: string
+    type: object
   domain.CreateTournament:
     properties:
       clubId:
@@ -231,6 +242,17 @@ definitions:
       user_id:
         type: string
       username:
+        type: string
+    type: object
+  domain.PatchLoyalty:
+    properties:
+      description:
+        type: string
+      discount:
+        type: integer
+      name:
+        type: string
+      requirements:
         type: string
     type: object
   domain.PatchTournament:
@@ -779,6 +801,122 @@ paths:
       security:
       - BearerAuth: []
       summary: Get all loyalty levels (Admin)
+      tags:
+      - admin-loyalties
+    post:
+      consumes:
+      - application/json
+      description: Create a new loyalty level. Available for any admin.
+      parameters:
+      - description: Loyalty data
+        in: body
+        name: loyalty
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateLoyalty'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Loyalty'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create loyalty level (Admin)
+      tags:
+      - admin-loyalties
+  /admin/loyalties/{id}:
+    delete:
+      description: Delete loyalty level. Available for any admin.
+      parameters:
+      - description: Loyalty ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete loyalty level (Admin)
+      tags:
+      - admin-loyalties
+    patch:
+      consumes:
+      - application/json
+      description: Update loyalty level data. Available for any admin.
+      parameters:
+      - description: Loyalty ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Loyalty update data
+        in: body
+        name: loyalty
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PatchLoyalty'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Loyalty'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update loyalty level (Admin)
       tags:
       - admin-loyalties
   /admin/users/{id}:

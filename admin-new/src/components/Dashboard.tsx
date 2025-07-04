@@ -16,6 +16,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { UsersPage } from './UsersPage';
 import { AdminsPage } from './AdminsPage';
+import { LoyaltyPage } from './LoyaltyPage';
 import type { NavItem } from '../types/navigation';
 
 // Страницы-заглушки
@@ -64,20 +65,7 @@ const RegistrationsPage = () => (
   </div>
 );
 
-const LoyaltyPage = () => (
-  <div className="space-y-6">
-    <div>
-      <h2 className="text-3xl font-bold text-white mb-2">Лояльность</h2>
-      <p className="text-zinc-400">Программы лояльности и скидки</p>
-    </div>
-    <Card className="bg-zinc-900 border-zinc-800">
-      <CardContent className="p-8 text-center">
-        <Gift className="h-16 w-16 text-pink-400 mx-auto mb-4" />
-        <p className="text-zinc-400">Страница лояльности в разработке</p>
-      </CardContent>
-    </Card>
-  </div>
-);
+
 
 const HomePage = ({ setCurrentPage, navItems }: { setCurrentPage: (page: string) => void, navItems: NavItem[] }) => (
   <div className="space-y-8">

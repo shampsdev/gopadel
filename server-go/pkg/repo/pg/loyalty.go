@@ -94,3 +94,69 @@ func (r *LoyaltyRepo) Filter(ctx context.Context, filter *domain.FilterLoyalty) 
 
 	return loyalties, nil
 }
+
+func (r *LoyaltyRepo) Patch(ctx context.Context, id int, loyalty *domain.PatchLoyalty) error {
+	s := r.psql.Update(`"loyalties"`).Where(sq.Eq{"id": id})
+
+	hasUpdates := false
+
+	if loyalty.Name != nil {
+		s = s.Set("name", *loyalty.Name)
+		hasUpdates = true
+	}
+
+	if loyalty.Discount != nil {
+		s = s.Set("discount", *loyalty.Discount)
+		hasUpdates = true
+	}
+
+	if loyalty.Description != nil {
+		s = s.Set("description", *loyalty.Description)
+		hasUpdates = true
+	}
+
+	if loyalty.Requirements != nil {
+		s = s.Set("requirements", *loyalty.Requirements)
+		hasUpdates = true
+	}
+
+	if !hasUpdates {
+		return fmt.Errorf("no fields to update")
+	}
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update loyalty: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("loyalty with id %d not found", id)
+	}
+
+	return nil
+}
+
+func (r *LoyaltyRepo) Delete(ctx context.Context, id int) error {
+	s := r.psql.Delete(`"loyalties"`).Where(sq.Eq{"id": id})
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to delete loyalty: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("loyalty with id %d not found", id)
+	}
+
+	return nil
+}
