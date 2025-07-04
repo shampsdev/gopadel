@@ -69,8 +69,10 @@ export const Tournament = () => {
                         timeZone: "Europe/Moscow",
                       }
                     )}
-                  {" - "}
-                  {tournament?.[0].endTime &&
+                  {new Date(tournament?.[0].endTime).getFullYear() > 2022
+                    ? " - "
+                    : ""}
+                  {new Date(tournament?.[0].endTime).getFullYear() > 2022 &&
                     new Date(tournament[0].endTime).toLocaleTimeString(
                       "ru-RU",
                       {
@@ -171,14 +173,15 @@ export const Tournament = () => {
             </div>
           </div>
 
-          {tournament?.[0].description.length && (
-            <div className="flex flex-col pt-[20px] gap-[8px]">
-              <div className="text-[16px] font-medium">Описание турнира</div>
-              <div className="text-[14px] text-[#5D6674]">
-                {tournament?.[0].description}
+          {tournament?.[0].description !== "" &&
+            tournament?.[0].description.length > 0 && (
+              <div className="flex flex-col pt-[20px] gap-[8px]">
+                <div className="text-[16px] font-medium">Описание турнира</div>
+                <div className="text-[14px] text-[#5D6674]">
+                  {tournament?.[0].description}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </div>
 

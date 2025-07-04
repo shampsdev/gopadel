@@ -3,9 +3,9 @@ import type { Waitlist } from "../types/waitlist.type";
 import type { Tournament as TournamentType } from "../types/tournament.type";
 
 export const isTournamentFinished = (tournament: TournamentType) => {
-  if (!tournament.endTime) return false;
-  const now = new Date();
   const endTime = new Date(tournament.endTime);
+  if (endTime.getFullYear() < 2022) return false;
+  const now = new Date();
   return now > endTime;
 };
 
