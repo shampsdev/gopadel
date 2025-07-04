@@ -14,10 +14,14 @@ export const joinClub = async (
   clubId: string,
   token: string
 ): Promise<Club | null> => {
-  const response = await api.post<Club>(`/clubs/${clubId}/join`, {
-    headers: {
-      "X-Api-Token": token,
-    },
-  });
+  const response = await api.post<Club>(
+    `/clubs/${clubId}/join`,
+    {},
+    {
+      headers: {
+        "X-Api-Token": token,
+      },
+    }
+  );
   return response.data;
 };

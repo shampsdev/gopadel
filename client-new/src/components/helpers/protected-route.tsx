@@ -2,17 +2,18 @@ import { Navigate, Outlet } from "react-router";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { useEffect } from "react";
 import { useGetMe } from "../../api/hooks/useGetMe";
+import { useGetMyClubs } from "../../api/hooks/useGetMyClubs";
+import { useJoinClub } from "../../api/hooks/mutations/clubs/useJoinClub";
 import { Preloader } from "../widgets/preloader";
-import { useClubJoinConditional } from "../../shared/hooks/useClubJoinConditional";
+import { initDataStartParam } from "@telegram-apps/sdk-react";
+import { parseStartParam } from "../../utils/start-data-parse";
 
 export const ProtectedRoute = () => {
   const { setAuth, setUser } = useAuthStore();
   const { data: me, isLoading, isError, isFetched } = useGetMe();
-
-  const { isLoading: clubJoinLoading } = useClubJoinConditional({
-    enabled: !!me?.id,
-    user: me,
-  });
+  const { data: myClubs } = useGetMyClubs();
+  const joinClub = useJoinClub();
+  const initData = initDataStartParam();
 
   useEffect(() => {
     if (!isLoading && !isError) {
@@ -21,7 +22,27 @@ export const ProtectedRoute = () => {
     }
   }, [isLoading, isError, setAuth]);
 
-  if (isLoading || clubJoinLoading) {
+  useEffect(() => {
+    if (me?.isRegistered && myClubs && initData) {
+      const parsedData = parseStartParam(initData);
+
+      if (parsedData.courtId) {
+        const clubExists = myClubs.some(
+          (club) => club.id === parsedData.courtId
+        );
+        if (!clubExists) {
+          joinClub.mutate(parsedData.courtId);
+        }
+      } else {
+        const globalClubExists = myClubs.some((club) => club.id === "global");
+        if (!globalClubExists) {
+          joinClub.mutate("global");
+        }
+      }
+    }
+  }, [me?.isRegistered, myClubs, initData]);
+
+  if (isLoading) {
     return <Preloader />;
   }
 
