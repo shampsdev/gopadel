@@ -150,7 +150,8 @@ export const Tournament = () => {
                     >
                       {user.loyalty.discount > 0
                         ? Math.round(
-                            tournament?.[0].price * (1 - user.loyalty.discount)
+                            tournament?.[0].price *
+                              (1 - user.loyalty.discount / 100)
                           )
                         : tournament?.[0].price}
                     </span>{" "}
@@ -310,6 +311,8 @@ export const Tournament = () => {
         user={user}
         waitlist={waitlist || []}
       />
+
+      {}
     </div>
   );
 };
