@@ -46,7 +46,6 @@ export const getMe = async (token: string): Promise<User | null> => {
         "X-Api-Token": token,
       },
     });
-    console.log("TOKEN:", token);
     return response.data;
   } catch (error) {
     console.error("Ошибка при получении профиля", error);

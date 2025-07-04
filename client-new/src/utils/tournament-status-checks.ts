@@ -30,20 +30,6 @@ export const isUserInWaitlist = (waitlist: Waitlist, user: User) => {
 };
 
 export const isRankAllowed = (tournament: TournamentType, user: User) => {
-  console.log(
-    "RANK CHECNIKG:",
-    tournament.rankMin !== null &&
-      tournament.rankMin !== undefined &&
-      tournament.rankMax !== null &&
-      tournament.rankMax !== undefined &&
-      user.rank !== null &&
-      user.rank !== undefined &&
-      tournament.rankMin <= user.rank &&
-      user.rank < tournament.rankMax,
-    tournament.rankMin,
-    tournament.rankMax,
-    user.rank
-  );
   return (
     tournament.rankMin !== null &&
     tournament.rankMin !== undefined &&

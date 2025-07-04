@@ -60,21 +60,8 @@ export const TournamentEdit = () => {
   );
   const tournament = tournaments?.[0];
 
-  console.log("Tournaments data:", tournaments);
-  console.log("Tournament ID:", id);
-  console.log("Selected tournament:", tournament);
-  console.log("Tournament loading:", tournamentLoading);
-
   useEffect(() => {
     if (tournament) {
-      console.log("Tournament data:", tournament);
-      console.log(
-        "RankMin:",
-        tournament.rankMin,
-        "RankMax:",
-        tournament.rankMax
-      );
-
       setTitle(tournament.name || "");
       setDescription(tournament.description || "");
 
@@ -107,8 +94,6 @@ export const TournamentEdit = () => {
       setType(tournament.tournamentType || "");
       setCourtId(tournament.court?.id || "");
 
-      // Находим ранг - исправляем логику поиска
-      console.log("Available ranks:", ranks);
       const min = Math.min(tournament.rankMin, tournament.rankMax);
       const max = Math.max(tournament.rankMin, tournament.rankMax);
 
@@ -116,18 +101,14 @@ export const TournamentEdit = () => {
         (r) => Math.abs(r.from - min) < 0.01 && Math.abs(r.to - max) < 0.01
       );
 
-      console.log("Selected rank:", selectedRank);
-
       if (selectedRank) {
         setRankInput(selectedRank.title);
         setRank(selectedRank.from);
       } else {
-        // Если точного совпадения нет, попробуем найти по диапазону
         const fallbackRank = ranks.find(
           (r) => tournament.rankMin >= r.from && tournament.rankMin < r.to
         );
         if (fallbackRank) {
-          console.log("Using fallback rank:", fallbackRank);
           setRankInput(fallbackRank.title);
           setRank(fallbackRank.from);
         }
@@ -175,22 +156,18 @@ export const TournamentEdit = () => {
 
   const handleUpdateTournament = async () => {
     if (!date || !time) {
-      console.log("Необходимо указать дату и время");
       return;
     }
 
     if (!validateDateFormat(date)) {
-      console.log("Неверный формат даты");
       return;
     }
 
     if (!validateTimeFormat(time)) {
-      console.log("Неверный формат времени");
       return;
     }
 
     if (!courtId) {
-      console.log("Не выбран корт");
       return;
     }
 
@@ -200,7 +177,6 @@ export const TournamentEdit = () => {
     );
 
     if (!start || !end) {
-      console.log("Ошибка при создании времени начала и окончания");
       return;
     }
 

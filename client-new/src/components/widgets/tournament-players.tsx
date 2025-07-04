@@ -61,7 +61,7 @@ export const TournamentPlayers = ({
           <div
             onClick={() => {
               openTelegramLink(
-                `https://t.me/share/url?url=https://t.me/${BOT_NAME}/app?startapp=${tournamentId}`
+                `https://t.me/share/url?url=https://t.me/${BOT_NAME}/app?startapp=tour-${tournamentId}`
               );
             }}
             className="flex flex-col items-center cursor-pointer relative"

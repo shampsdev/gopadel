@@ -3,6 +3,7 @@ import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton"
 import { Input } from "../../components/ui/froms/input";
 import { Textarea } from "../../components/ui/froms/textarea";
 import { CourtSelector } from "../../components/ui/froms/court-selector";
+import { ClubSelector } from "../../components/ui/froms/club-selector";
 import {
   formatDateInput,
   validateDateFormat,
@@ -16,6 +17,7 @@ import { ranks } from "../../shared/constants/ranking";
 import type { CreateTournament as CreateTournamentType } from "../../types/create-tournament";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { useGetCourts } from "../../api/hooks/useGetCourts";
+import { useGetMyClubs } from "../../api/hooks/useGetMyClubs";
 import { useCreateTournament } from "../../api/hooks/mutations/tournament/useCreateTournament";
 import { useNavigate } from "react-router";
 import { useIsAdmin } from "../../api/hooks/useIsAdmin";
@@ -37,10 +39,12 @@ export const CreateTournament = () => {
 
   const [type, setType] = useState<string | null>(null);
   const [courtId, setCourtId] = useState<string>("");
+  const [clubId, setClubId] = useState<string>("");
   const [rank, setRank] = useState<number | null>(null);
   const [rankInput, setRankInput] = useState<string>("");
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
+  const { data: myClubs = [], isLoading: clubsLoading } = useGetMyClubs();
 
   const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
 
@@ -69,6 +73,7 @@ export const CreateTournament = () => {
       validateTimeFormat(time) &&
       type &&
       courtId &&
+      clubId &&
       rank !== null &&
       rank >= 0 &&
       price !== null &&
@@ -80,22 +85,22 @@ export const CreateTournament = () => {
 
   const handleCreateTournament = async () => {
     if (!date || !time) {
-      console.log("Необходимо указать дату и время");
       return;
     }
 
     if (!validateDateFormat(date)) {
-      console.log("Неверный формат даты");
       return;
     }
 
     if (!validateTimeFormat(time)) {
-      console.log("Неверный формат времени");
       return;
     }
 
     if (!courtId) {
-      console.log("Не выбран корт");
+      return;
+    }
+
+    if (!clubId) {
       return;
     }
 
@@ -105,29 +110,25 @@ export const CreateTournament = () => {
     );
 
     if (!start || !end) {
-      console.log("Ошибка при создании времени начала и окончания");
       return;
     }
 
     const tournamentData: CreateTournamentType = {
       courtId: courtId,
+      clubId: clubId,
       description: description,
       endTime: end,
       maxUsers: maxUsers ?? 0,
       name: title ?? "",
       organizatorId: user?.id ?? "",
       price: price ?? 0,
-      rankMax: ranks.find((r) => r.title === rankInput)?.from ?? 0,
-      rankMin: ranks.find((r) => r.title === rankInput)?.to ?? 0,
+      rankMax: ranks.find((r) => r.title === rankInput)?.to ?? 0,
+      rankMin: ranks.find((r) => r.title === rankInput)?.from ?? 0,
       startTime: start,
       tournamentType: type ?? "",
     };
 
     try {
-      console.log(tournamentData);
-      Object.keys(tournamentData).forEach((key) => {
-        console.log(key, tournamentData[key as keyof CreateTournamentType]);
-      });
       const tournament = await createTournament(tournamentData);
       if (tournament?.id) {
         navigate(`/tournament/${tournament?.id}`);
@@ -141,7 +142,7 @@ export const CreateTournament = () => {
     }
   };
 
-  if (isAdminLoading || courtsLoading) return <Preloader />;
+  if (isAdminLoading || courtsLoading || clubsLoading) return <Preloader />;
 
   if (!isAdmin?.admin) {
     return (
@@ -245,6 +246,15 @@ export const CreateTournament = () => {
             value={type ?? ""}
             maxLength={100}
             hasError={!type}
+          />
+          <ClubSelector
+            title="Клуб"
+            value={clubId}
+            onChangeFunction={(id) => {
+              setClubId(id);
+            }}
+            hasError={!clubId}
+            clubs={myClubs ?? []}
           />
           <CourtSelector
             title="Корт"
