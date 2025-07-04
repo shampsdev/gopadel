@@ -10,7 +10,7 @@ export default function BottomNavbar() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 py-[7px] bg-white flex justify-around items-center">
+    <div className="fixed bottom-0 z-30 left-0 right-0 py-[7px] bg-white flex justify-around items-center">
       <Link to="/">
         <div className="flex flex-col items-center justify-center w-[60px]">
           {Icons.House(isActive("/") ? "#000" : "#A4A9B4")}
