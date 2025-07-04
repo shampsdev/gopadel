@@ -205,7 +205,7 @@ export const TournamentEdit = () => {
     }
 
     const tournamentData: PatchTournament = {
-      clubId: courtId,
+      courtId: courtId,
       description: description,
       endTime: end,
       maxUsers: maxUsers,

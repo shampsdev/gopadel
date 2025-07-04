@@ -1,5 +1,5 @@
 export interface PatchTournament {
-  clubId: string;
+  courtId: string;
   description: string;
   endTime: string;
   maxUsers: number;

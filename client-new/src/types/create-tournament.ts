@@ -1,5 +1,5 @@
 export interface CreateTournament {
-  clubId: string;
+  courtId: string;
   description: string;
   endTime: string;
   maxUsers: number;
