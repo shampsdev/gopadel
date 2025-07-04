@@ -12,13 +12,77 @@ import (
 type Registration struct {
 	registrationRepo repo.Registration
 	tournamentRepo   repo.Tournament
+	paymentRepo      repo.Payment
 }
 
-func NewRegistration(ctx context.Context, registrationRepo repo.Registration, tournamentRepo repo.Tournament) *Registration {
+func NewRegistration(ctx context.Context, registrationRepo repo.Registration, tournamentRepo repo.Tournament, paymentRepo repo.Payment) *Registration {
 	return &Registration{
 		registrationRepo: registrationRepo,
 		tournamentRepo:   tournamentRepo,
+		paymentRepo:      paymentRepo,
 	}
+}
+
+func (r *Registration) AdminFilter(ctx context.Context, adminFilter *domain.AdminFilterRegistration) ([]*domain.RegistrationWithPayments, error) {
+	registrations, err := r.registrationRepo.AdminFilter(ctx, adminFilter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to filter registrations: %w", err)
+	}
+
+	for _, reg := range registrations {
+		paymentFilter := &domain.FilterPayment{
+			RegistrationID: &reg.ID,
+		}
+		payments, err := r.paymentRepo.Filter(ctx, paymentFilter)
+		if err == nil {
+			reg.Payments = payments
+		}
+	}
+
+	return registrations, nil
+}
+
+func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, registrationID string, status domain.RegistrationStatus) (*domain.RegistrationWithPayments, error) {
+	patch := &domain.PatchRegistration{
+		Status: &status,
+	}
+	
+	err := r.registrationRepo.Patch(ctx, registrationID, patch)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update registration status: %w", err)
+	}
+
+	filter := &domain.AdminFilterRegistration{
+		ID: &registrationID,
+	}
+	
+	registrations, err := r.AdminFilter(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get updated registration: %w", err)
+	}
+
+	if len(registrations) == 0 {
+		return nil, fmt.Errorf("updated registration not found")
+	}
+
+	return registrations[0], nil
+}
+
+func (r *Registration) GetRegistrationWithPayments(ctx context.Context, registrationID string) (*domain.RegistrationWithPayments, error) {
+	filter := &domain.AdminFilterRegistration{
+		ID: &registrationID,
+	}
+	
+	registrations, err := r.AdminFilter(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get registration: %w", err)
+	}
+
+	if len(registrations) == 0 {
+		return nil, fmt.Errorf("registration not found")
+	}
+
+	return registrations[0], nil
 }
 
 // Новая рега или обновление существующую CANCELED -> PENDING

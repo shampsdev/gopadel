@@ -20,6 +20,7 @@ import { UsersPage } from './UsersPage';
 import { AdminsPage } from './AdminsPage';
 import { LoyaltyPage } from './LoyaltyPage';
 import { CourtsPage } from './CourtsPage';
+import { RegistrationsPage } from './RegistrationsPage';
 import type { NavItem } from '../types/navigation';
 
 // Страницы-заглушки
@@ -38,20 +39,7 @@ const TournamentsPage = () => (
   </div>
 );
 
-const RegistrationsPage = () => (
-  <div className="space-y-6">
-    <div>
-      <h2 className="text-3xl font-bold text-white mb-2">Регистрации</h2>
-      <p className="text-zinc-400">Управление регистрациями на турниры</p>
-    </div>
-    <Card className="bg-zinc-900 border-zinc-800">
-      <CardContent className="p-8 text-center">
-        <UserCheck className="h-16 w-16 text-purple-400 mx-auto mb-4" />
-        <p className="text-zinc-400">Страница регистраций в разработке</p>
-      </CardContent>
-    </Card>
-  </div>
-);
+
 
 const HomePage = ({ setCurrentPage, navItems }: { setCurrentPage: (page: string) => void, navItems: NavItem[] }) => (
   <div className="space-y-8">

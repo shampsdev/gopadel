@@ -55,6 +55,10 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 		s = s.Where(sq.Eq{`"u"."telegram_id"`: *filter.TelegramID})
 	}
 
+	if filter.TelegramUsername != nil {
+		s = s.Where(sq.ILike{`"u"."telegram_username"`: "%" + *filter.TelegramUsername + "%"})
+	}
+
 	if filter.FirstName != nil {
 		s = s.Where(sq.ILike{`"u"."first_name"`: "%" + *filter.FirstName + "%"})
 	}

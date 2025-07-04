@@ -54,6 +54,7 @@ type Registration interface {
 	Create(ctx context.Context, registration *domain.CreateRegistration) (string, error)
 	Patch(ctx context.Context, id string, registration *domain.PatchRegistration) error
 	Filter(ctx context.Context, filter *domain.FilterRegistration) ([]*domain.Registration, error)
+	AdminFilter(ctx context.Context, filter *domain.AdminFilterRegistration) ([]*domain.RegistrationWithPayments, error)
 	Delete(ctx context.Context, id string) error
 }
 

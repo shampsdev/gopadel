@@ -33,7 +33,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [userSearchTerm, setUserSearchTerm] = useState('');
-  const [selectedUserId, setSelectedUserId] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
@@ -85,7 +84,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         is_superuser: admin.is_superuser,
         is_active: admin.is_active,
       });
-      setSelectedUserId(admin.user_id);
+
       setUserSearchTerm(admin.user?.telegramUsername || '');
     } else if (!admin) {
       setFormData({
@@ -97,7 +96,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         is_superuser: false,
         is_active: true,
       });
-      setSelectedUserId('');
       setUserSearchTerm('');
     }
   }, [admin, isEditing]);
@@ -115,7 +113,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         is_superuser: false,
         is_active: true,
       });
-      setSelectedUserId('');
       setUserSearchTerm('');
       setShowSearchResults(false);
     }
@@ -210,9 +207,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       user_id: '',
       is_superuser: false,
       is_active: true,
-    });
-    setSelectedUserId('');
-    setUserSearchTerm('');
+            });
+        setUserSearchTerm('');
     setShowSearchResults(false);
   };
 
@@ -366,7 +362,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           key={user.id}
                           onClick={() => {
                             setUserSearchTerm(user.telegramUsername);
-                            setSelectedUserId(user.id);
                             setShowSearchResults(false);
                           }}
                           className="flex items-center space-x-2 p-2 hover:bg-zinc-700 cursor-pointer"

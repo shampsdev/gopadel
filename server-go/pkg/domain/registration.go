@@ -29,6 +29,19 @@ type RegistrationWithTournament struct {
 	User         *User                     `json:"user,omitempty"`
 	Tournament   *TournamentForRegistration `json:"tournament,omitempty"`
 }
+
+// Для админки
+type RegistrationWithPayments struct {
+	ID           string             `json:"id"`
+	UserID       string             `json:"userId"`
+	TournamentID string             `json:"tournamentId"`
+	Date         time.Time          `json:"date"`
+	Status       RegistrationStatus `json:"status"`
+	User         *User              `json:"user,omitempty"`
+	Tournament   *TournamentForRegistration `json:"tournament,omitempty"`
+	Payments     []*Payment         `json:"payments,omitempty"`
+}
+
 // без юзеров
 type TournamentForRegistration struct {
 	ID             string    `json:"id"`
@@ -60,4 +73,17 @@ type FilterRegistration struct {
 	UserID       *string             `json:"userId,omitempty"`
 	TournamentID *string             `json:"tournamentId,omitempty"`
 	Status       *RegistrationStatus `json:"status,omitempty"`
+}
+
+// Для фильтрации в админке
+type AdminFilterRegistration struct {
+	ID           *string             `json:"id,omitempty"`
+	UserID       *string             `json:"userId,omitempty"`
+	TournamentID *string             `json:"tournamentId,omitempty"`
+	Status       *RegistrationStatus `json:"status,omitempty"`
+	// Дополнительные поля для удобства фильтрации
+	UserTelegramID       *int64  `json:"userTelegramId,omitempty"`
+	UserTelegramUsername *string `json:"userTelegramUsername,omitempty"`
+	UserFirstName        *string `json:"userFirstName,omitempty"`
+	TournamentName       *string `json:"tournamentName,omitempty"`
 }
