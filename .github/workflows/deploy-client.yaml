@@ -20,8 +20,8 @@ jobs:
       id-token: write
     secrets: inherit
     with:
-      dockerfile_path: 'client/Dockerfile'  
-      context_path: 'client'
-      image_name: 'russianpadel-client'
+      dockerfile_path: 'client-new/Dockerfile'  
+      context_path: 'client-new'
+      image_name: 'gopadel-client'
       environment: ${{ github.event.inputs.environment }}
       secret-service-hash: ${{ github.event.inputs.environment == 'PROD' && 'CLIENT_SERVICE_HASH' || 'CLIENT_SERVICE_HASH_DEV' }}

@@ -9,12 +9,7 @@ on:
         type: choice
         options: [PROD, DEV]
         default: DEV
-      migrate:
-        required: true
-        description: migrate
-        options: [T, F]
-        type: choice
-        default: F
+
 
 jobs:
   deploy:
@@ -26,23 +21,8 @@ jobs:
       id-token: write
     secrets: inherit
     with:
-      dockerfile_path: 'server/Dockerfile.api'
-      context_path: 'server'
-      image_name: 'russianpadel-server'
+      dockerfile_path: 'server-go/Dockerfile.server'
+      context_path: 'server-go'
+      image_name: 'gopadel-server'
       environment: ${{ github.event.inputs.environment }}
       secret-service-hash: ${{ github.event.inputs.environment == 'PROD' && 'SERVER_SERVICE_HASH' || 'SERVER_SERVICE_HASH_DEV' }}
-
-  migrate-db:
-    uses: ./.github/workflows/migrate.yaml
-    permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
-    if: ${{ github.event.inputs.migrate == 'T' }}
-    needs: deploy
-    secrets: inherit
-    with:
-      image_name: 'russianpadel-server'
-      environment: ${{ github.event.inputs.environment }}
-      secret-migrate-hash: ${{ github.event.inputs.environment == 'PROD' && 'MIGRATE_HASH' || 'MIGRATE_HASH_DEV' }}

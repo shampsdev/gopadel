@@ -20,8 +20,8 @@ jobs:
       id-token: write
     secrets: inherit
     with:
-      dockerfile_path: 'server/Dockerfile.bot'
-      context_path: 'server'
-      image_name: 'russianpadel-bot'
+      dockerfile_path: 'server-go/Dockerfile.bot'
+      context_path: 'server-go'
+      image_name: 'gopadel-bot'
       environment: ${{ github.event.inputs.environment }}
       secret-service-hash: ${{ github.event.inputs.environment == 'PROD' && 'BOT_SERVICE_HASH' || 'BOT_SERVICE_HASH_DEV' }}
