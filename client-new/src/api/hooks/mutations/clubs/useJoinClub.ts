@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { joinClub } from "../../../clubs";
-import { useAuthStore } from "../../../../shared/stores/auth.store";
+import { initDataStartParam, useSignal } from "@telegram-apps/sdk-react";
 
 export const useJoinClub = () => {
-  const { token } = useAuthStore();
+  const initData = useSignal(initDataStartParam);
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (clubId: string) => joinClub(clubId, token ?? ""),
+    mutationFn: (clubId: string) => joinClub(clubId, initData! ?? ""),
     mutationKey: ["my-clubs"],
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-clubs"] });
