@@ -21,6 +21,8 @@ import { Loyalty } from "../pages/loyalty";
 import { StartDataChecker } from "../components/helpers/startdata-checker";
 import { TournamentWaitlist } from "../pages/tournament/tournament-waitlist";
 import { League } from "../pages/league";
+import { Games } from "../pages/home/games";
+import { Trainings } from "../pages/home/trainings";
 
 const authRoutes: RouteObject[] = [
   {
@@ -87,11 +89,11 @@ export const routes: RouteObject[] = [
                   },
                   {
                     path: "games",
-                    element: <div>Games</div>,
+                    element: <Games />,
                   },
                   {
                     path: "training",
-                    element: <div>Training</div>,
+                    element: <Trainings />,
                   },
                 ],
               },

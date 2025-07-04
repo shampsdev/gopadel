@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import AboutImage from "../../assets/about.png";
 import { Button } from "../../components/ui/button";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
-export const Games = () => {
+export const Trainings = () => {
   return (
     <>
       <HomeNavbar />
