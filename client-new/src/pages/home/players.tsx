@@ -4,8 +4,10 @@ import { PlayerCard } from "../../components/widgets/player-card";
 import SearchBar from "../../components/widgets/search-bar";
 import { Link } from "react-router";
 import { Preloader } from "../../components/widgets/preloader";
+import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 
 export const Players = () => {
+  useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   const { data: users, isLoading } = useGetUsers({});
   const [searchQuery, setSearchQuery] = useState("");
 

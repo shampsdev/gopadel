@@ -23,7 +23,14 @@ export const ProtectedRoute = () => {
   }, [isLoading, isError, setAuth]);
 
   useEffect(() => {
-    if (me?.isRegistered && !clubsLoading && myClubs && initData) {
+    if (
+      me !== undefined &&
+      me !== null &&
+      !clubsLoading &&
+      myClubs &&
+      initData &&
+      !joinClubMutation.isPending
+    ) {
       const parsedData = parseStartParam(initData);
 
       if (parsedData.courtId) {
@@ -42,7 +49,7 @@ export const ProtectedRoute = () => {
         }
       }
     }
-  }, [me?.isRegistered, clubsLoading, myClubs, initData]);
+  }, [me, clubsLoading, myClubs, initData, joinClubMutation.isPending]);
 
   if (isLoading || clubsLoading) {
     return <Preloader />;
