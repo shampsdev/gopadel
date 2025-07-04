@@ -42,7 +42,7 @@ export const ProtectedRoute = () => {
         }
       }
     }
-  }, [me?.isRegistered, clubsLoading, myClubs, initData, joinClubMutation]);
+  }, [me?.isRegistered, clubsLoading, myClubs, initData]);
 
   if (isLoading || clubsLoading) {
     return <Preloader />;
@@ -53,7 +53,6 @@ export const ProtectedRoute = () => {
   }
 
   if (!me?.isRegistered && isFetched) {
-    console.log("me", me);
     return <Navigate to="/registration" />;
   }
 
