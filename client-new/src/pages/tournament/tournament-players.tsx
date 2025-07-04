@@ -41,11 +41,11 @@ export const TournamentPlayers = () => {
             )
             .map((userRegistration) => {
               return (
-                <Link to={`/profile/${userRegistration.user.id}`}>
-                  <div
-                    key={userRegistration.id}
-                    className="flex flex-row items-center gap-[21px]"
-                  >
+                <Link
+                  key={userRegistration.id}
+                  to={`/profile/${userRegistration.user.id}`}
+                >
+                  <div className="flex flex-row items-center gap-[21px]">
                     <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
                       <img
                         className="object-cover w-full h-full"
