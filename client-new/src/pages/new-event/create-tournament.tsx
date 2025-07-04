@@ -39,7 +39,6 @@ export const CreateTournament = () => {
 
   const [type, setType] = useState<string | null>(null);
   const [courtId, setCourtId] = useState<string>("");
-  const [courtTouched, setCourtTouched] = useState<boolean>(false);
   const [rank, setRank] = useState<number | null>(null);
   const [rankInput, setRankInput] = useState<string>("");
 
@@ -85,7 +84,6 @@ export const CreateTournament = () => {
   };
 
   const handleCreateTournament = async () => {
-    setCourtTouched(true);
     if (!date || !time) {
       console.log("Необходимо указать дату и время");
       return;
@@ -271,7 +269,6 @@ export const CreateTournament = () => {
             value={courtId}
             onChangeFunction={(id) => {
               setCourtId(id);
-              setCourtTouched(true);
             }}
             hasError={!courtId}
             courts={courts ?? []}
