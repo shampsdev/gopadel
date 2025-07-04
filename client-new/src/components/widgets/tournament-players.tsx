@@ -4,6 +4,7 @@ import type { Registration } from "../../types/registration.type";
 import { twMerge } from "tailwind-merge";
 import { Icons } from "../../assets/icons";
 import { useAuthStore } from "../../shared/stores/auth.store";
+import { openTelegramLink } from "@telegram-apps/sdk-react";
 
 interface TurnamentPlayers {
   tournamentId: string;
@@ -12,7 +13,10 @@ interface TurnamentPlayers {
   maxDisplay?: number;
 }
 
-export const TournamentPlayers = ({ registrations }: TurnamentPlayers) => {
+export const TournamentPlayers = ({
+  registrations,
+  tournamentId,
+}: TurnamentPlayers) => {
   const { user } = useAuthStore();
   const [showLeftShadow, setShowLeftShadow] = useState(false);
   const [showRightShadow, setShowRightShadow] = useState(false);
@@ -53,7 +57,31 @@ export const TournamentPlayers = ({ registrations }: TurnamentPlayers) => {
         className="overflow-x-auto scrollbar-hide px-4"
       >
         <div className="flex space-x-4 min-w-max py-2 scroll-smooth">
-          {registrations && registrations.length > 0 ? (
+          <div
+            onClick={() => {
+              openTelegramLink(
+                `https://t.me/share/url?url=https://t.me/study_stats_bot/aboba?startapp=${tournamentId}`
+              );
+            }}
+            className="flex flex-col items-center cursor-pointer relative"
+          >
+            <div
+              className={twMerge(
+                "w-16 h-16 relative rounded-full overflow-hidden mb-1 bg-[#AFFF3F]  flex-shrink-0 flex flex-col items-center justify-center"
+              )}
+            >
+              {Icons.Cross("black")}
+            </div>
+            <div
+              className={twMerge(
+                "text-center text-[12px] font-normal text-black  "
+              )}
+            >
+              <div>Пригласить</div>
+              <div>участника</div>
+            </div>
+          </div>
+          {registrations &&
             registrations.map((registration, index) => {
               const fullName = `${registration.user.firstName} ${registration.user.lastName}`;
               return (
@@ -112,12 +140,7 @@ export const TournamentPlayers = ({ registrations }: TurnamentPlayers) => {
                   </div>
                 </div>
               );
-            })
-          ) : (
-            <span className="text-center text-sm opacity-50">
-              На этот турнир пока никто не зарегистрировался
-            </span>
-          )}
+            })}
         </div>
       </div>
 

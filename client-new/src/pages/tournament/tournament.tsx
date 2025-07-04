@@ -194,7 +194,7 @@ export const Tournament = () => {
                         participant.status === "ACTIVE" ||
                         participant.status === "PENDING"
                     ).length
-                  }
+                  }{" "}
                   / {tournament?.[0].maxUsers}
                 </p>
               )}
