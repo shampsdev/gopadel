@@ -1,4 +1,5 @@
 import type { FilterUser } from "../types/filter.type";
+import type { Admin } from "../types/is-admin.type";
 import type { PatchUser } from "../types/patch-user.type";
 import type { User } from "../types/user.type";
 import { api } from "./axios.instance";
@@ -86,8 +87,8 @@ export const getUsers = async (
   return response.data;
 };
 
-export const isAdmin = async (token: string): Promise<boolean | null> => {
-  const response = await api.get<boolean>("/users/me/admin", {
+export const isAdmin = async (token: string): Promise<Admin | null> => {
+  const response = await api.get<Admin>("/users/me/admin", {
     headers: {
       "X-Api-Token": token,
     },

@@ -39,7 +39,6 @@ export const CreateTournament = () => {
 
   const [type, setType] = useState<string | null>(null);
   const [courtId, setCourtId] = useState<string>("");
-  const [courtTouched, setCourtTouched] = useState<boolean>(false);
   const [rank, setRank] = useState<number | null>(null);
   const [rankInput, setRankInput] = useState<string>("");
 
@@ -85,7 +84,6 @@ export const CreateTournament = () => {
   };
 
   const handleCreateTournament = async () => {
-    setCourtTouched(true);
     if (!date || !time) {
       console.log("Необходимо указать дату и время");
       return;
@@ -150,7 +148,7 @@ export const CreateTournament = () => {
 
   if (isAdminLoading || courtsLoading) return <Preloader />;
 
-  if (isAdmin) {
+  if (!isAdmin?.admin) {
     return (
       <div className="flex flex-col h-screen w-full">
         <div className="flex-1 flex flex-col text-center items-center justify-center gap-11">
@@ -271,7 +269,6 @@ export const CreateTournament = () => {
             value={courtId}
             onChangeFunction={(id) => {
               setCourtId(id);
-              setCourtTouched(true);
             }}
             hasError={!courtId}
             courts={courts ?? []}
