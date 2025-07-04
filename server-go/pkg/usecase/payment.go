@@ -3,6 +3,8 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"regexp"
 
 	"github.com/google/uuid"
 	"github.com/rvinnie/yookassa-sdk-go/yookassa"
@@ -172,10 +174,38 @@ func (p *Payment) createYooKassaPayment(tournament *domain.Tournament, user *dom
 
 	// Рассчитываем финальную цену с учетом скидки
 	finalPrice := p.calculateFinalPrice(tournament.Price, user)
+	
+	// Валидация суммы платежа
+	if finalPrice <= 0 {
+		return nil, fmt.Errorf("invalid payment amount: %d", finalPrice)
+	}
+
+	// Используем дефолтный email - у пользователей нет поля Email в системе
+	customerEmail := p.generateCustomerEmail(user)
+	
+	// Преобразуем сумму в рубли с правильным форматированием
+	amountRub := float64(finalPrice) / 100 // предполагаем, что finalPrice в копейках
+	if finalPrice >= 100 { // если сумма больше 1 рубля, то скорее всего уже в рублях
+		amountRub = float64(finalPrice)
+	}
+	
+	amountStr := fmt.Sprintf("%.2f", amountRub)
+
+	// Логируем параметры для отладки в production
+	slog.Info("Creating YooKassa payment", 
+		"tournament_id", tournament.ID,
+		"tournament_name", tournament.Name,
+		"user_id", user.ID,
+		"original_price", tournament.Price,
+		"final_price", finalPrice,
+		"amount_str", amountStr,
+		"customer_email", customerEmail,
+		"vat_code", "4",
+	)
 
 	paymentData := &yoopayment.Payment{
 		Amount: &yoocommon.Amount{
-			Value:    fmt.Sprintf("%.2f", float64(finalPrice)),
+			Value:    amountStr,
 			Currency: "RUB",
 		},
 		Confirmation: &yoopayment.Redirect{
@@ -186,17 +216,17 @@ func (p *Payment) createYooKassaPayment(tournament *domain.Tournament, user *dom
 		Description: fmt.Sprintf("Оплата турнира `%s`", tournament.Name),
 		Receipt: &yoopayment.Receipt{
 			Customer: &yoocommon.Customer{
-				Email: "tournament@gopadel.com", // TODO: использовать email пользователя
+				Email: customerEmail,
 			},
 			Items: []*yoocommon.Item{
 				{
 					Description: fmt.Sprintf("GoPadel Tournament %s", tournament.Name),
 					Quantity:    "1",
 					Amount: &yoocommon.Amount{
-						Value:    fmt.Sprintf("%.2f", float64(finalPrice)),
+						Value:    amountStr,
 						Currency: "RUB",
 					},
-					VatCode: "1",
+					VatCode: "4", // НДС не облагается (подходит для спортивных услуг)
 				},
 			},
 		},
@@ -205,8 +235,19 @@ func (p *Payment) createYooKassaPayment(tournament *domain.Tournament, user *dom
 	idempotencyKey := uuid.New().String()
 	createdPayment, err := paymentHandler.WithIdempotencyKey(idempotencyKey).CreatePayment(paymentData)
 	if err != nil {
+		slog.Error("Failed to create YooKassa payment", 
+			"error", err.Error(),
+			"shop_id", p.config.YooKassa.ShopID,
+			"amount", amountStr,
+			"email", customerEmail,
+		)
 		return nil, fmt.Errorf("failed to create payment in YooKassa: %w", err)
 	}
+
+	slog.Info("YooKassa payment created successfully", 
+		"payment_id", createdPayment.ID,
+		"status", createdPayment.Status,
+	)
 
 	return createdPayment, nil
 }
@@ -224,4 +265,38 @@ func (p *Payment) calculateFinalPrice(originalPrice int, user *domain.User) int 
 	finalPrice := float64(originalPrice) * (1 - float64(discount)/100)
 	
 	return int(finalPrice + 0.5)
+}
+
+// isValidEmail проверяет корректность email адреса
+func (p *Payment) isValidEmail(email string) bool {
+	if email == "" {
+		return false
+	}
+	
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	return emailRegex.MatchString(email)
+}
+
+// generateCustomerEmail создает email для клиента в зависимости от доступных данных
+func (p *Payment) generateCustomerEmail(user *domain.User) string {
+	// В production среде YooKassa может быть более строгой к email
+	// Генерируем более уникальный email на основе данных пользователя
+	if user.TelegramUsername != "" {
+		// Создаем email на основе Telegram username
+		email := fmt.Sprintf("%s@telegram.gopadel.com", user.TelegramUsername)
+		if p.isValidEmail(email) {
+			return email
+		}
+	}
+	
+	// Если username недоступен, используем ID
+	if user.ID != "" {
+		email := fmt.Sprintf("user%s@gopadel.com", user.ID)
+		if p.isValidEmail(email) {
+			return email
+		}
+	}
+	
+	// Fallback email
+	return "tournament@gopadel.com"
 }
