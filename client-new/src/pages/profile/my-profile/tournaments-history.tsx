@@ -34,8 +34,8 @@ export const TournamentsHistory = () => {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
-              locationTitle={registration.tournament.club.name}
-              address={registration.tournament.club.address}
+              locationTitle={registration.tournament.court.name}
+              address={registration.tournament.court.address}
               type={registration.tournament.tournamentType}
               playersCapacity={registration.tournament.playersCapacity}
               playersAmount={registration.tournament.playersAmount}

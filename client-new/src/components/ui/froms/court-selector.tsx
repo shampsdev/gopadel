@@ -1,12 +1,12 @@
 import { useState } from "react";
-import type { Club } from "../../../types/club.type";
+import type { Court } from "../../../types/court.type";
 
 interface CourtSelectorProps {
   title: string;
   value: string;
   onChangeFunction: (value: string) => void;
   hasError?: boolean;
-  courts: Club[];
+  courts: Court[];
 }
 
 export const CourtSelector = ({

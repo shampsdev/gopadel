@@ -104,10 +104,10 @@ export const TournamentEdit = () => {
 
       setDate(formattedDate);
       setTime(`${startTime}-${endTime}`);
-      setClubName(tournament.club?.name || "");
-      setClubAddress(tournament.club?.address || "");
+      setClubName(tournament.court?.name || "");
+      setClubAddress(tournament.court?.address || "");
       setType(tournament.tournamentType || "");
-      setCourtId(tournament.club?.id || "");
+      setCourtId(tournament.court?.id || "");
 
       // Находим ранг - исправляем логику поиска
       console.log("Available ranks:", ranks);
