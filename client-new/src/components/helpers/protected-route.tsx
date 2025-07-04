@@ -5,7 +5,7 @@ import { useGetMe } from "../../api/hooks/useGetMe";
 import { useGetMyClubs } from "../../api/hooks/useGetMyClubs";
 import { useJoinClub } from "../../api/hooks/mutations/clubs/useJoinClub";
 import { Preloader } from "../widgets/preloader";
-import { initDataStartParam } from "@telegram-apps/sdk-react";
+import { initDataStartParam, useSignal } from "@telegram-apps/sdk-react";
 import { parseStartParam } from "../../utils/start-data-parse";
 
 export const ProtectedRoute = () => {
@@ -13,7 +13,7 @@ export const ProtectedRoute = () => {
   const { data: me, isLoading, isError, isFetched } = useGetMe();
   const { data: myClubs, isLoading: clubsLoading } = useGetMyClubs();
   const joinClubMutation = useJoinClub();
-  const initData = initDataStartParam();
+  const initData = useSignal(initDataStartParam);
 
   useEffect(() => {
     if (!isLoading && !isError) {
@@ -23,44 +23,32 @@ export const ProtectedRoute = () => {
   }, [isLoading, isError, setAuth]);
 
   useEffect(() => {
-    const handleClubJoin = async () => {
-      if (
-        me !== undefined &&
-        me !== null &&
-        !clubsLoading &&
-        myClubs &&
-        initData &&
-        initData.length > 0 &&
-        !joinClubMutation.isPending
-      ) {
-        try {
-          const parsedData = parseStartParam(initData);
+    if (
+      me !== undefined &&
+      me !== null &&
+      !clubsLoading &&
+      myClubs &&
+      initData
+    ) {
+      const parsedData = parseStartParam(initData);
 
-          if (parsedData.courtId) {
-            const clubExists = myClubs.some(
-              (club) => club.id === parsedData.courtId
-            );
+      if (parsedData.courtId) {
+        const clubExists = myClubs.some(
+          (club) => club.id === parsedData.courtId
+        );
 
-            if (!clubExists) {
-              await joinClubMutation.mutateAsync(parsedData.courtId);
-            }
-          } else {
-            const globalClubExists = myClubs.some(
-              (club) => club.id === "global"
-            );
+        if (!clubExists) {
+          joinClubMutation.mutate(parsedData.courtId);
+        }
+      } else {
+        const globalClubExists = myClubs.some((club) => club.id === "global");
 
-            if (!globalClubExists) {
-              await joinClubMutation.mutateAsync("global");
-            }
-          }
-        } catch (error) {
-          console.error("Ошибка при присоединении к клубу:", error);
+        if (!globalClubExists) {
+          joinClubMutation.mutate("global");
         }
       }
-    };
-
-    handleClubJoin();
-  }, [me, clubsLoading, myClubs, initData, joinClubMutation.isPending]);
+    }
+  }, [me, clubsLoading, myClubs, initData]);
 
   if (isLoading || clubsLoading) {
     return <Preloader />;
