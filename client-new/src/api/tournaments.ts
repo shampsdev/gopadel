@@ -1,7 +1,9 @@
 import type { FilterTournament } from "../types/filter.type";
+import type { CreateTournament } from "../types/create-tournament";
 import type { Tournament } from "../types/tournament.type";
 import type { Waitlist } from "../types/waitlist.type";
 import { api } from "./axios.instance";
+import type { PatchTournament } from "../types/patch-tournament";
 
 export const getTournaments = async (
   token: string,
@@ -57,7 +59,7 @@ export const removeUserFromWaitlist = async (
 
 export const createTournament = async (
   token: string,
-  tournament: Tournament
+  tournament: CreateTournament
 ): Promise<Tournament | null> => {
   const response = await api.post("/tournaments", tournament, {
     headers: {
@@ -65,4 +67,29 @@ export const createTournament = async (
     },
   });
   return response.data;
+};
+
+export const patchTournament = async (
+  token: string,
+  tournamentId: string,
+  tournament: PatchTournament
+): Promise<Tournament | null> => {
+  const response = await api.patch(`/tournaments/${tournamentId}`, tournament, {
+    headers: {
+      "X-Api-Token": token,
+    },
+  });
+  return response.data;
+};
+
+export const deleteTournament = async (
+  token: string,
+  tournamentId: string
+): Promise<boolean> => {
+  const response = await api.delete(`/tournaments/${tournamentId}`, {
+    headers: {
+      "X-Api-Token": token,
+    },
+  });
+  return response.status === 204;
 };

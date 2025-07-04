@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Input } from "../../components/ui/froms/input";
 import { Textarea } from "../../components/ui/froms/textarea";
+import { CourtSelector } from "../../components/ui/froms/court-selector";
 import {
   formatDateInput,
   validateDateFormat,
@@ -12,8 +13,12 @@ import {
 import { Button } from "../../components/ui/button";
 import { RankSelector } from "../../components/ui/froms/rank-selector";
 import { ranks } from "../../shared/constants/ranking";
+import type { CreateTournament as CreateTournamentType } from "../../types/create-tournament";
+import { useAuthStore } from "../../shared/stores/auth.store";
+import { useGetCourts } from "../../api/hooks/useGetCourts";
 
 export const CreateTournament = () => {
+  const { user } = useAuthStore();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
   const [title, setTitle] = useState<string | null>(null);
@@ -27,8 +32,12 @@ export const CreateTournament = () => {
   const [clubAddress, setClubAddress] = useState<string | null>(null);
 
   const [type, setType] = useState<string | null>(null);
+  const [courtId, setCourtId] = useState<string>("");
+  const [courtTouched, setCourtTouched] = useState<boolean>(false);
   const [rank, setRank] = useState<number | null>(null);
   const [rankInput, setRankInput] = useState<string>("");
+
+  const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
 
   const handleRankChange = (rankTitle: string) => {
     setRankInput(rankTitle);
@@ -54,8 +63,9 @@ export const CreateTournament = () => {
       clubName &&
       clubAddress &&
       type &&
+      courtId &&
       rank !== null &&
-      rank > 0 &&
+      rank >= 0 &&
       price !== null &&
       price >= 0 &&
       maxUsers !== null &&
@@ -64,6 +74,7 @@ export const CreateTournament = () => {
   };
 
   const handleCreateTournament = () => {
+    setCourtTouched(true);
     if (!date || !time) {
       console.log("Необходимо указать дату и время");
       return;
@@ -79,6 +90,11 @@ export const CreateTournament = () => {
       return;
     }
 
+    if (!courtId) {
+      console.log("Не выбран корт");
+      return;
+    }
+
     const { startTime: start, endTime: end } = createStartAndEndTime(
       date,
       time
@@ -89,20 +105,19 @@ export const CreateTournament = () => {
       return;
     }
 
-    const tournamentData = {
-      title,
-      description,
-      startTime: start,
+    const tournamentData: CreateTournamentType = {
+      clubId: courtId,
+      description: description,
       endTime: end,
-      clubName,
-      clubAddress,
-      type,
-      rank,
-      price,
-      maxUsers,
+      maxUsers: maxUsers ?? 0,
+      name: title ?? "",
+      organizatorId: user?.id ?? "",
+      price: price ?? 0,
+      rankMax: ranks.find((r) => r.title === rankInput)?.from ?? 0,
+      rankMin: ranks.find((r) => r.title === rankInput)?.to ?? 0,
+      startTime: start,
+      tournamentType: type ?? "",
     };
-
-    console.log("Данные турнира:", tournamentData);
   };
 
   return (
@@ -200,11 +215,21 @@ export const CreateTournament = () => {
             maxLength={100}
             hasError={!type}
           />
+          <CourtSelector
+            title="Корт"
+            value={courtId}
+            onChangeFunction={(id) => {
+              setCourtId(id);
+              setCourtTouched(true);
+            }}
+            hasError={courtTouched && !courtId}
+            courts={courts ?? []}
+          />
           <RankSelector
             title="Ранг"
             value={rankInput}
             onChangeFunction={handleRankChange}
-            hasError={rank === null || rank === 0}
+            hasError={rank === null}
           />
           <Input
             title={"Стоимость участия"}
