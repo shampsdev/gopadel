@@ -182,25 +182,25 @@ export const CourtsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
         {/* Форма создания/редактирования */}
         <Card className="bg-zinc-900 border-zinc-800">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center justify-between">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-white flex items-center justify-between text-lg">
               {isCreating ? 'Создать корт' : editingId ? 'Редактировать корт' : 'Форма управления'}
               {(isCreating || editingId) && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={resetForm}
-                  className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white"
+                  className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white ml-2"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {isCreating || editingId ? (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -208,7 +208,7 @@ export const CourtsPage: React.FC = () => {
                   <Input
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 mt-1"
                     placeholder="Например: Корт №1, Центральный корт"
                     required
                   />
@@ -219,17 +219,17 @@ export const CourtsPage: React.FC = () => {
                   <Textarea
                     value={formData.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 min-h-[100px]"
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 min-h-[80px] md:min-h-[100px] mt-1 resize-none"
                     placeholder="Полный адрес корта"
                     required
                   />
                 </div>
 
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 pt-2">
                   <Button
                     type="submit"
                     disabled={saving}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none"
                   >
                     <Save className="h-4 w-4 mr-2" />
                     {saving ? 'Сохранение...' : (isCreating ? 'Создать' : 'Сохранить')}
@@ -238,15 +238,15 @@ export const CourtsPage: React.FC = () => {
                     type="button"
                     variant="outline"
                     onClick={resetForm}
-                    className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white"
+                    className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white flex-1 sm:flex-none"
                   >
                     Отмена
                   </Button>
                 </div>
               </form>
             ) : (
-              <div className="text-center py-8">
-                <p className="text-zinc-400 mb-4">
+              <div className="text-center py-6 md:py-8">
+                <p className="text-zinc-400 mb-4 text-sm md:text-base">
                   {canEdit 
                     ? "Выберите корт для редактирования или создайте новый"
                     : "Только суперпользователи могут управлять кортами"
@@ -268,40 +268,40 @@ export const CourtsPage: React.FC = () => {
 
         {/* Список кортов */}
         <Card className="bg-zinc-900 border-zinc-800">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center justify-between">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-white flex items-center justify-between text-lg">
               Корты
               <Badge variant="outline" className="border-zinc-600 text-zinc-300">
                 {courts.length}
               </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {courts.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-zinc-400">Нет кортов</p>
+              <div className="text-center py-6 md:py-8">
+                <p className="text-zinc-400 text-sm md:text-base">Нет кортов</p>
               </div>
             ) : (
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-4">
+              <ScrollArea className="h-[300px] md:h-[400px] lg:h-[600px]">
+                <div className="space-y-3 md:space-y-4 pr-3">
                   {courts.map((court) => (
                     <div
                       key={court.id}
-                      className={`p-4 rounded-lg border transition-colors cursor-pointer ${
+                      className={`p-3 md:p-4 rounded-lg border transition-colors cursor-pointer ${
                         editingId === court.id
                           ? 'border-green-600 bg-green-600/10'
                           : 'border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800'
                       }`}
                       onClick={() => canEdit && startEdit(court)}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-white font-medium text-lg mb-2">{court.name}</h3>
-                          <p className="text-zinc-400 text-sm">{court.address}</p>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-white font-medium text-base md:text-lg mb-1 md:mb-2 truncate">{court.name}</h3>
+                          <p className="text-zinc-400 text-xs md:text-sm line-clamp-2 md:line-clamp-3">{court.address}</p>
                         </div>
                         
                         {canEdit && (
-                          <div className="flex space-x-2 ml-4">
+                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 flex-shrink-0">
                             <Button
                               size="sm"
                               variant="outline"
@@ -309,9 +309,9 @@ export const CourtsPage: React.FC = () => {
                                 e.stopPropagation();
                                 startEdit(court);
                               }}
-                              className="bg-zinc-700 border-zinc-600 hover:bg-zinc-600 text-white"
+                              className="bg-zinc-700 border-zinc-600 hover:bg-zinc-600 text-white h-8 w-8 p-0"
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                             <Button
                               size="sm"
@@ -320,9 +320,9 @@ export const CourtsPage: React.FC = () => {
                                 e.stopPropagation();
                                 handleDelete(court);
                               }}
-                              className="bg-red-600 border-red-500 hover:bg-red-700 text-white"
+                              className="bg-red-600 border-red-500 hover:bg-red-700 text-white h-8 w-8 p-0"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
                           </div>
                         )}

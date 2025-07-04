@@ -117,8 +117,8 @@ export const UsersPage: React.FC = () => {
             <span>Поиск и фильтры</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+        <CardContent className="p-4 lg:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
             <div className="flex-1">
               <Input
                 placeholder="Поиск по имени или Telegram ID..."
@@ -128,14 +128,15 @@ export const UsersPage: React.FC = () => {
                 className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
               />
             </div>
-            <div className="flex space-x-2">
+            <div className="flex gap-2">
               <Button
                 onClick={handleSearch}
                 disabled={loading}
                 className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none"
               >
                 <Search className="h-4 w-4 mr-2" />
-                Найти
+                <span className="hidden sm:inline">Найти</span>
+                <span className="sm:hidden">Поиск</span>
               </Button>
               <Button
                 onClick={handleRefresh}
@@ -143,8 +144,8 @@ export const UsersPage: React.FC = () => {
                 variant="outline"
                 className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white flex-1 sm:flex-none"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Обновить
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''} ${loading ? '' : 'sm:mr-2'}`} />
+                <span className="hidden sm:inline">Обновить</span>
               </Button>
             </div>
           </div>
@@ -153,31 +154,31 @@ export const UsersPage: React.FC = () => {
 
       {/* Таблица пользователей с фиксированной высотой и скроллом */}
       <Card className="bg-zinc-900 border-zinc-800 flex-1 flex flex-col min-h-0">
-        <CardHeader className="flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg text-white">
+        <CardHeader className="flex-shrink-0 p-4 lg:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle className="text-base lg:text-lg text-white">
               Список пользователей ({users.length})
             </CardTitle>
             {totalPages > 1 && (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <Button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
                   variant="outline"
                   size="sm"
-                  className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white"
+                  className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white h-8 w-8 p-0"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-sm text-zinc-400">
-                  Страница {currentPage} из {totalPages}
+                <span className="text-xs sm:text-sm text-zinc-400 whitespace-nowrap">
+                  {currentPage} / {totalPages}
                 </span>
                 <Button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   variant="outline"
                   size="sm"
-                  className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white"
+                  className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white h-8 w-8 p-0"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>

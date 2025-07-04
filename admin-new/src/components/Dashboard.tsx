@@ -11,7 +11,9 @@ import {
   Shield,
   LogOut,
   User,
-  Home
+  Home,
+  Menu,
+  X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { UsersPage } from './UsersPage';
@@ -36,8 +38,6 @@ const TournamentsPage = () => (
   </div>
 );
 
-
-
 const RegistrationsPage = () => (
   <div className="space-y-6">
     <div>
@@ -53,30 +53,28 @@ const RegistrationsPage = () => (
   </div>
 );
 
-
-
 const HomePage = ({ setCurrentPage, navItems }: { setCurrentPage: (page: string) => void, navItems: NavItem[] }) => (
   <div className="space-y-8">
     <div>
-      <h2 className="text-3xl font-bold text-white mb-2">Панель управления</h2>
+      <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Панель управления</h2>
       <p className="text-zinc-400">Добро пожаловать в административную панель GoPadel</p>
     </div>
     
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
       {navItems.slice(1).map((item) => (
         <Card 
           key={item.id}
           className={`bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-all duration-200 cursor-pointer group ${item.color}`}
           onClick={() => setCurrentPage(item.path)}
         >
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-3 p-4 md:p-6">
             <div className="flex items-center space-x-3">
-              <div className="p-3 rounded-lg bg-zinc-800 group-hover:bg-zinc-700 transition-colors">
-                <item.icon className="h-6 w-6" />
+              <div className="p-2 md:p-3 rounded-lg bg-zinc-800 group-hover:bg-zinc-700 transition-colors">
+                <item.icon className="h-5 w-5 md:h-6 md:w-6" />
               </div>
-              <div>
-                <CardTitle className="text-white text-lg">{item.title}</CardTitle>
-                <CardDescription className="text-zinc-400 text-sm">
+              <div className="min-w-0 flex-1">
+                <CardTitle className="text-white text-base md:text-lg truncate">{item.title}</CardTitle>
+                <CardDescription className="text-zinc-400 text-xs md:text-sm line-clamp-2">
                   {item.description}
                 </CardDescription>
               </div>
@@ -91,6 +89,7 @@ const HomePage = ({ setCurrentPage, navItems }: { setCurrentPage: (page: string)
 export const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const [currentPage, setCurrentPage] = useState('/');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Определение навигационных элементов с учетом прав пользователя
   const allNavItems: NavItem[] = [
@@ -179,34 +178,59 @@ export const Dashboard: React.FC = () => {
 
   const currentNavItem = navItems.find(item => item.path === currentPage) || navItems[0];
 
+  const handlePageChange = (path: string) => {
+    setCurrentPage(path);
+    setSidebarOpen(false); // Закрываем sidebar на мобильных после выбора
+  };
+
   return (
-    <div className="h-screen bg-zinc-950 flex">
+    <div className="h-screen bg-zinc-950 flex relative">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col h-full">
-        <div className="p-6 border-b border-zinc-800">
-          <h1 className="text-xl font-bold text-white">GoPadel Admin</h1>
+      <div className={`
+        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col h-full
+        transform transition-transform duration-300 ease-in-out lg:transform-none
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="p-4 lg:p-6 border-b border-zinc-800 flex items-center justify-between">
+          <h1 className="text-lg lg:text-xl font-bold text-white">GoPadel Admin</h1>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden p-1 h-8 w-8 text-zinc-400 hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
         
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-3 lg:p-4 space-y-1 lg:space-y-2">
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setCurrentPage(item.path)}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-left ${
+              onClick={() => handlePageChange(item.path)}
+              className={`w-full flex items-center space-x-3 px-3 py-2 lg:py-2 rounded-lg transition-colors text-left ${
                 currentPage === item.path
                   ? 'bg-zinc-800 text-white'
                   : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
               }`}
             >
-              <item.icon className={`h-5 w-5 ${item.color.split(' ')[0]}`} />
-              <span className="font-medium">{item.title}</span>
+              <item.icon className={`h-4 w-4 lg:h-5 lg:w-5 ${item.color.split(' ')[0]} flex-shrink-0`} />
+              <span className="font-medium text-sm lg:text-base truncate">{item.title}</span>
             </button>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-zinc-800">
+        <div className="p-3 lg:p-4 border-t border-zinc-800">
           <div className="flex items-center space-x-3 mb-3 px-3 py-2">
-            <User className="h-4 w-4 text-zinc-400" />
+            <User className="h-4 w-4 text-zinc-400 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{user?.username}</p>
               {user?.is_superuser && (
@@ -219,7 +243,7 @@ export const Dashboard: React.FC = () => {
             onClick={logout}
             variant="outline"
             size="sm"
-            className="w-full bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+            className="w-full bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white text-sm"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Выйти
@@ -228,22 +252,33 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-full">
+      <div className="flex-1 flex flex-col h-full w-full lg:w-auto">
         {/* Header */}
-        <header className="bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex-shrink-0">
+        <header className="bg-zinc-900 border-b border-zinc-800 px-4 lg:px-6 py-3 lg:py-4 flex-shrink-0">
           <div className="flex items-center space-x-3">
-            <currentNavItem.icon className={`h-6 w-6 ${currentNavItem.color.split(' ')[0]}`} />
-            <div>
-              <h1 className="text-xl font-semibold text-white">{currentNavItem.title}</h1>
-              <p className="text-sm text-zinc-400">{currentNavItem.description}</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-1 h-8 w-8 text-zinc-400 hover:text-white mr-2"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            
+            <currentNavItem.icon className={`h-5 w-5 lg:h-6 lg:w-6 ${currentNavItem.color.split(' ')[0]} flex-shrink-0`} />
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg lg:text-xl font-semibold text-white truncate">{currentNavItem.title}</h1>
+              <p className="text-xs lg:text-sm text-zinc-400 truncate">{currentNavItem.description}</p>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
         <main className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full p-6">
-            {renderPage()}
+          <ScrollArea className="h-full">
+            <div className="p-4 lg:p-6">
+              {renderPage()}
+            </div>
           </ScrollArea>
         </main>
       </div>
