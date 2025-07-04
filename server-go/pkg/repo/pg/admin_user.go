@@ -88,7 +88,8 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 		
 		// User fields
 		var userID, userTelegramUsername, userFirstName, userLastName, userAvatar, userBio, userCity, userPlayingPosition, userPadelProfiles pgtype.Text
-		var userTelegramID, userRank pgtype.Int8
+		var userTelegramID pgtype.Int8
+		var userRank pgtype.Float8
 		var userIsRegistered pgtype.Bool
 		var userBirthDate pgtype.Date
 		
@@ -171,7 +172,7 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 				user.Bio = userBio.String
 			}
 			if userRank.Valid {
-				user.Rank = float64(userRank.Int64)
+				user.Rank = userRank.Float64
 			}
 			if userCity.Valid {
 				user.City = userCity.String
