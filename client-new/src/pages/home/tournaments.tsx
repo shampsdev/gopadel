@@ -87,8 +87,8 @@ export const Tournaments = () => {
                   timeZone: "Europe/Moscow",
                 }
               )}
-              locationTitle={competition.club.name}
-              address={competition.club.address}
+              locationTitle={competition.court.name}
+              address={competition.court.address}
               type={competition.tournamentType}
               cost={competition.price}
               playersCapacity={competition.maxUsers}

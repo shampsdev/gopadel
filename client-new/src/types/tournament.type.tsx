@@ -1,13 +1,12 @@
-import type { Club } from "./club.type";
+import type { Court } from "./court.type";
 import type { Registration } from "./registration.type";
 import type { User } from "./user.type";
 
 export interface Tournament {
   date: string;
-  location: any;
   playersCapacity: number;
   playersAmount: number;
-  club: Club;
+  court: Court;
   description: string;
   endTime: string;
   id: string;

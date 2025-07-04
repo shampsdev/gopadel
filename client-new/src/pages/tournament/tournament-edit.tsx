@@ -15,7 +15,6 @@ import { Button } from "../../components/ui/button";
 import { RankSelector } from "../../components/ui/froms/rank-selector";
 import { ranks } from "../../shared/constants/ranking";
 import type { PatchTournament } from "../../types/patch-tournament";
-import { useAuthStore } from "../../shared/stores/auth.store";
 import { useGetCourts } from "../../api/hooks/useGetCourts";
 import { usePatchTournament } from "../../api/hooks/mutations/tournament/usePatchTournament";
 import { useDeleteTournament } from "../../api/hooks/mutations/tournament/useDeleteTournament";
@@ -28,7 +27,6 @@ import { useModalStore } from "../../shared/stores/modal.store";
 
 export const TournamentEdit = () => {
   const { id } = useParams();
-  const { user } = useAuthStore();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   const { openModal } = useModalStore();
@@ -104,10 +102,10 @@ export const TournamentEdit = () => {
 
       setDate(formattedDate);
       setTime(`${startTime}-${endTime}`);
-      setClubName(tournament.club?.name || "");
-      setClubAddress(tournament.club?.address || "");
+      setClubName(tournament.court?.name || "");
+      setClubAddress(tournament.court?.address || "");
       setType(tournament.tournamentType || "");
-      setCourtId(tournament.club?.id || "");
+      setCourtId(tournament.court?.id || "");
 
       // Находим ранг - исправляем логику поиска
       console.log("Available ranks:", ranks);

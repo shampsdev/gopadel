@@ -1,3 +1,5 @@
-import type { Club } from "./club.type";
-
-export type Court = Club;
+export interface Court {
+  address: string;
+  id: string;
+  name: string;
+}
