@@ -1,15 +1,18 @@
 package usecase
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
+	"net/http"
 	"regexp"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/rvinnie/yookassa-sdk-go/yookassa"
-	yoocommon "github.com/rvinnie/yookassa-sdk-go/yookassa/common"
-	yoopayment "github.com/rvinnie/yookassa-sdk-go/yookassa/payment"
 	"github.com/shampsdev/go-telegram-template/pkg/config"
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
@@ -20,6 +23,54 @@ type Payment struct {
 	registrationRepo repo.Registration
 	tournamentRepo   repo.Tournament
 	config           *config.Config
+}
+
+// YooKassa API structures
+type YooKassaAmount struct {
+	Value    string `json:"value"`
+	Currency string `json:"currency"`
+}
+
+type YooKassaConfirmation struct {
+	Type      string `json:"type"`
+	ReturnURL string `json:"return_url"`
+}
+
+type YooKassaCustomer struct {
+	Email string `json:"email"`
+}
+
+type YooKassaItem struct {
+	Description    string         `json:"description"`
+	PaymentSubject string         `json:"payment_subject"`
+	Amount         YooKassaAmount `json:"amount"`
+	VatCode        int            `json:"vat_code"`
+	Quantity       int            `json:"quantity"`
+	Measure        string         `json:"measure"`
+	PaymentMode    string         `json:"payment_mode"`
+}
+
+type YooKassaReceipt struct {
+	Customer YooKassaCustomer `json:"customer"`
+	Items    []YooKassaItem   `json:"items"`
+}
+
+type YooKassaPaymentRequest struct {
+	Amount       YooKassaAmount       `json:"amount"`
+	Confirmation YooKassaConfirmation `json:"confirmation"`
+	Capture      bool                 `json:"capture"`
+	Description  string               `json:"description"`
+	Receipt      YooKassaReceipt      `json:"receipt"`
+}
+
+type YooKassaPaymentResponse struct {
+	ID           string                   `json:"id"`
+	Status       string                   `json:"status"`
+	Confirmation YooKassaConfirmationResp `json:"confirmation"`
+}
+
+type YooKassaConfirmationResp struct {
+	ConfirmationURL string `json:"confirmation_url"`
 }
 
 func NewPayment(ctx context.Context, paymentRepo repo.Payment, registrationRepo repo.Registration, tournamentRepo repo.Tournament, cfg *config.Config) *Payment {
@@ -112,13 +163,6 @@ func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, 
 		return nil, fmt.Errorf("failed to create YooKassa payment: %w", err)
 	}
 
-	client := yookassa.NewClient(p.config.YooKassa.ShopID, p.config.YooKassa.SecretKey)
-	paymentHandler := yookassa.NewPaymentHandler(client)
-	paymentLink, err := paymentHandler.ParsePaymentLink(yooPayment)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse payment link: %w", err)
-	}
-
 	finalPrice := p.calculateFinalPrice(tournament.Price, user)
 	
 	// Сохраняем платеж в базе данных
@@ -126,8 +170,8 @@ func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, 
 		PaymentID:         yooPayment.ID,
 		Amount:            finalPrice,
 		Status:            domain.PaymentStatus(yooPayment.Status),
-		PaymentLink:       paymentLink,
-		ConfirmationToken: "", // YooKassa SDK не предоставляет токен подтверждения
+		PaymentLink:       yooPayment.Confirmation.ConfirmationURL,
+		ConfirmationToken: "",
 		RegistrationID:    &registration.ID,
 	}
 
@@ -168,88 +212,108 @@ func (p *Payment) getTournamentByID(ctx context.Context, tournamentID string) (*
 	return tournaments[0], nil
 }
 
-func (p *Payment) createYooKassaPayment(tournament *domain.Tournament, user *domain.User, returnURL string) (*yoopayment.Payment, error) {
-	client := yookassa.NewClient(p.config.YooKassa.ShopID, p.config.YooKassa.SecretKey)
-	paymentHandler := yookassa.NewPaymentHandler(client)
-
-	// Рассчитываем финальную цену с учетом скидки
+func (p *Payment) createYooKassaPayment(tournament *domain.Tournament, user *domain.User, returnURL string) (*YooKassaPaymentResponse, error) {
 	finalPrice := p.calculateFinalPrice(tournament.Price, user)
 	
-	// Валидация суммы платежа
 	if finalPrice <= 0 {
 		return nil, fmt.Errorf("invalid payment amount: %d", finalPrice)
 	}
 
-	// Используем дефолтный email - у пользователей нет поля Email в системе
 	customerEmail := p.generateCustomerEmail(user)
 	
-	// Преобразуем сумму в рубли с правильным форматированием
-	amountRub := float64(finalPrice) / 100 // предполагаем, что finalPrice в копейках
-	if finalPrice >= 100 { // если сумма больше 1 рубля, то скорее всего уже в рублях
-		amountRub = float64(finalPrice)
-	}
-	
-	amountStr := fmt.Sprintf("%.2f", amountRub)
+	amountStr := fmt.Sprintf("%d.00", finalPrice)
 
-	// Логируем параметры для отладки в production
-	slog.Info("Creating YooKassa payment", 
-		"tournament_id", tournament.ID,
-		"tournament_name", tournament.Name,
-		"user_id", user.ID,
-		"original_price", tournament.Price,
-		"final_price", finalPrice,
-		"amount_str", amountStr,
-		"customer_email", customerEmail,
-		"vat_code", "4",
-	)
-
-	paymentData := &yoopayment.Payment{
-		Amount: &yoocommon.Amount{
+	paymentData := YooKassaPaymentRequest{
+		Amount: YooKassaAmount{
 			Value:    amountStr,
 			Currency: "RUB",
 		},
-		Confirmation: &yoopayment.Redirect{
-			Type:      yoopayment.TypeRedirect,
+		Confirmation: YooKassaConfirmation{
+			Type:      "redirect",
 			ReturnURL: returnURL,
 		},
 		Capture:     true,
 		Description: fmt.Sprintf("Оплата турнира `%s`", tournament.Name),
-		Receipt: &yoopayment.Receipt{
-			Customer: &yoocommon.Customer{
+		Receipt: YooKassaReceipt{
+			Customer: YooKassaCustomer{
 				Email: customerEmail,
 			},
-			Items: []*yoocommon.Item{
+			Items: []YooKassaItem{
 				{
-					Description: fmt.Sprintf("GoPadel Tournament %s", tournament.Name),
-					Quantity:    "1",
-					Amount: &yoocommon.Amount{
+					Description:    "GoPadel Tournament",
+					PaymentSubject: "service",
+					Amount: YooKassaAmount{
 						Value:    amountStr,
 						Currency: "RUB",
 					},
-					VatCode: "4", // НДС не облагается (подходит для спортивных услуг)
+					VatCode:     1,
+					Quantity:    1,
+					Measure:     "piece",
+					PaymentMode: "full_payment",
 				},
 			},
 		},
 	}
 
-	idempotencyKey := uuid.New().String()
-	createdPayment, err := paymentHandler.WithIdempotencyKey(idempotencyKey).CreatePayment(paymentData)
+	jsonData, err := json.Marshal(paymentData)
 	if err != nil {
-		slog.Error("Failed to create YooKassa payment", 
+		return nil, fmt.Errorf("failed to marshal payment data: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", "https://api.yookassa.ru/v3/payments", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	idempotencyKey := uuid.New().String()
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Idempotence-Key", idempotencyKey)
+	
+	auth := base64.StdEncoding.EncodeToString([]byte(p.config.YooKassa.ShopID + ":" + p.config.YooKassa.SecretKey))
+	req.Header.Set("Authorization", "Basic "+auth)
+
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		slog.Error("Failed to send request to YooKassa", 
 			"error", err.Error(),
 			"shop_id", p.config.YooKassa.ShopID,
 			"amount", amountStr,
 			"email", customerEmail,
 		)
-		return nil, fmt.Errorf("failed to create payment in YooKassa: %w", err)
+		return nil, fmt.Errorf("failed to send request to YooKassa: %w", err)
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Проверяем статус ответа
+	if resp.StatusCode != http.StatusOK {
+		slog.Error("YooKassa API returned error", 
+			"status_code", resp.StatusCode,
+			"response_body", string(bodyBytes),
+			"shop_id", p.config.YooKassa.ShopID,
+			"amount", amountStr,
+			"email", customerEmail,
+		)
+		return nil, fmt.Errorf("YooKassa API error (status %d): %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	var paymentResponse YooKassaPaymentResponse
+	if err := json.Unmarshal(bodyBytes, &paymentResponse); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
 	slog.Info("YooKassa payment created successfully", 
-		"payment_id", createdPayment.ID,
-		"status", createdPayment.Status,
+		"payment_id", paymentResponse.ID,
+		"status", paymentResponse.Status,
+		"confirmation_url", paymentResponse.Confirmation.ConfirmationURL,
 	)
 
-	return createdPayment, nil
+	return &paymentResponse, nil
 }
 
 func (p *Payment) calculateFinalPrice(originalPrice int, user *domain.User) int {
