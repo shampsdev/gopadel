@@ -78,6 +78,39 @@ func (u *User) Filter(ctx Context, filter *domain.FilterUser) ([]*domain.User, e
 	return u.userRepo.Filter(ctx, filter)
 }
 
+func (u *User) AdminFilter(ctx context.Context, filter *domain.FilterUser) ([]*domain.User, error) {
+	return u.userRepo.Filter(ctx, filter)
+}
+
+func (u *User) AdminPatchUser(ctx context.Context, userID string, patch *domain.AdminPatchUser) (*domain.User, error) {
+	patchUser := &domain.PatchUser{
+		FirstName:       patch.FirstName,
+		LastName:        patch.LastName,
+		Avatar:          patch.Avatar,
+		Bio:             patch.Bio,
+		Rank:            patch.Rank,
+		City:            patch.City,
+		BirthDate:       patch.BirthDate,
+		PlayingPosition: patch.PlayingPosition,
+		PadelProfiles:   patch.PadelProfiles,
+		IsRegistered:    patch.IsRegistered,
+		LoyaltyID:       patch.LoyaltyID,
+	}
+	
+	err := u.userRepo.Patch(ctx, userID, patchUser)
+	if err != nil {
+		return nil, fmt.Errorf("failed to patch user: %w", err)
+	}
+	
+	user, err := repo.First(u.userRepo.Filter)(ctx, &domain.FilterUser{ID: &userID})
+	if err != nil {
+		return nil, err
+	}
+	
+	u.tgDataCache.Delete(user.TelegramID)
+	return user, nil
+}
+
 func (u *User) GetByTGData(ctx context.Context, tgData *domain.UserTGData) (*domain.User, error) {
 	if u, ok := u.tgDataCache.Load(tgData.TelegramID); ok {
 		//nolint:errcheck// because sure

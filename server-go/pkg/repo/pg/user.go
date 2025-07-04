@@ -194,6 +194,9 @@ func (r *UserRepo) Patch(ctx context.Context, id string, user *domain.PatchUser)
 	if user.IsRegistered != nil {
 		s = s.Set("is_registered", true)
 	}
+	if user.LoyaltyID != nil {
+		s = s.Set("loyalty_id", *user.LoyaltyID)
+	}
 	sql, args, err := s.ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build SQL: %w", err)

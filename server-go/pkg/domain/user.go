@@ -45,6 +45,7 @@ type PatchUser struct {
 	PlayingPosition  *PlayingPosition `json:"playingPosition"`
 	PadelProfiles    *string          `json:"padelProfiles"`
 	IsRegistered     *bool            `json:"isRegistered"`
+	LoyaltyID        *int             `json:"loyaltyId"`
 }
 
 type FilterUser struct {
@@ -52,4 +53,18 @@ type FilterUser struct {
 	TelegramID *int64  `json:"telegramId"`
 	FirstName  *string `json:"firstName"`
 	LastName   *string `json:"lastName"`
+}
+
+type AdminPatchUser struct {
+	FirstName        *string          `json:"firstName"`
+	LastName         *string          `json:"lastName"`
+	Avatar           *string          `json:"avatar"`
+	Bio              *string          `json:"bio"`
+	Rank             *float64         `json:"rank"`
+	City             *string          `json:"city"`
+	BirthDate        *string          `json:"birthDate"`
+	PlayingPosition  *PlayingPosition `json:"playingPosition"`
+	PadelProfiles    *string          `json:"padelProfiles"`
+	IsRegistered     *bool            `json:"isRegistered"`
+	LoyaltyID        *int             `json:"loyaltyId"`
 }

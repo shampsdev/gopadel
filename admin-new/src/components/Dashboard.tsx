@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { ScrollArea } from './ui/scroll-area';
 import { 
   Users, 
   Trophy, 
@@ -13,24 +14,10 @@ import {
   Home
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { UsersPage } from './UsersPage';
 import type { NavItem } from '../types/navigation';
 
 // Страницы-заглушки
-const UsersPage = () => (
-  <div className="space-y-6">
-    <div>
-      <h2 className="text-3xl font-bold text-white mb-2">Пользователи</h2>
-      <p className="text-zinc-400">Управление пользователями системы</p>
-    </div>
-    <Card className="bg-zinc-900 border-zinc-800">
-      <CardContent className="p-8 text-center">
-        <Users className="h-16 w-16 text-blue-400 mx-auto mb-4" />
-        <p className="text-zinc-400">Страница пользователей в разработке</p>
-      </CardContent>
-    </Card>
-  </div>
-);
-
 const TournamentsPage = () => (
   <div className="space-y-6">
     <div>
@@ -225,9 +212,9 @@ export const Dashboard: React.FC = () => {
   const currentNavItem = navItems.find(item => item.path === currentPage) || navItems[0];
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex">
+    <div className="h-screen bg-zinc-950 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col">
+      <div className="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col h-full">
         <div className="p-6 border-b border-zinc-800">
           <h1 className="text-xl font-bold text-white">GoPadel Admin</h1>
         </div>
@@ -273,9 +260,9 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full">
         {/* Header */}
-        <header className="bg-zinc-900 border-b border-zinc-800 px-6 py-4">
+        <header className="bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <currentNavItem.icon className={`h-6 w-6 ${currentNavItem.color.split(' ')[0]}`} />
             <div>
@@ -286,8 +273,10 @@ export const Dashboard: React.FC = () => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6">
-          {renderPage()}
+        <main className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full p-6">
+            {renderPage()}
+          </ScrollArea>
         </main>
       </div>
     </div>

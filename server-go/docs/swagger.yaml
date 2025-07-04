@@ -26,6 +26,31 @@ definitions:
     - new_password
     - old_password
     type: object
+  domain.AdminPatchUser:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      birthDate:
+        type: string
+      city:
+        type: string
+      firstName:
+        type: string
+      isRegistered:
+        type: boolean
+      lastName:
+        type: string
+      loyaltyId:
+        type: integer
+      padelProfiles:
+        type: string
+      playingPosition:
+        $ref: '#/definitions/domain.PlayingPosition'
+      rank:
+        type: number
+    type: object
   domain.AdminToken:
     properties:
       access_token:
@@ -165,6 +190,8 @@ definitions:
         type: boolean
       lastName:
         type: string
+      loyaltyId:
+        type: integer
       padelProfiles:
         type: string
       playingPosition:
@@ -474,6 +501,118 @@ paths:
       summary: Get current admin info
       tags:
       - admin-auth
+  /admin/loyalties:
+    get:
+      description: Get all loyalty levels. Available for any admin.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Loyalty'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all loyalty levels (Admin)
+      tags:
+      - admin-loyalties
+  /admin/users/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update user data. Available only for superuser. Cannot change telegramUsername.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User update data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AdminPatchUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user (Admin)
+      tags:
+      - admin-users
+  /admin/users/filter:
+    post:
+      consumes:
+      - application/json
+      description: Get filtered list of users. Available for any admin.
+      parameters:
+      - description: User filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/domain.FilterUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.User'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Filter users (Admin)
+      tags:
+      - admin-users
   /api/v1/yookassa_webhook:
     post:
       consumes:
