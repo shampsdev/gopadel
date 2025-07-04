@@ -1,4 +1,5 @@
 import type { FilterTournament } from "../types/filter.type";
+import type { PatchTournament } from "../types/patch-tournament.type";
 import type { Tournament } from "../types/tournament.type";
 import type { Waitlist } from "../types/waitlist.type";
 import { api } from "./axios.instance";
@@ -65,4 +66,33 @@ export const createTournament = async (
     },
   });
   return response.data;
+};
+
+export const updateTournament = async (
+  token: string,
+  tournamentId: string,
+  patchTournament: PatchTournament
+): Promise<Tournament | null> => {
+  const response = await api.patch(
+    `/tournaments/${tournamentId}`,
+    patchTournament,
+    {
+      headers: {
+        "X-Api-Token": token,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const deleteTournament = async (
+  token: string,
+  tournamentId: string
+): Promise<boolean> => {
+  const response = await api.delete(`/tournaments/${tournamentId}`, {
+    headers: {
+      "X-Api-Token": token,
+    },
+  });
+  return response.status === 204;
 };
