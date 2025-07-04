@@ -20,6 +20,7 @@ import { TournamentsHistory } from "../pages/profile/my-profile/tournaments-hist
 import { Loyalty } from "../pages/loyalty";
 import { StartDataChecker } from "../components/helpers/startdata-checker";
 import { TournamentWaitlist } from "../pages/tournament/tournament-waitlist";
+import { League } from "../pages/league";
 
 const authRoutes: RouteObject[] = [
   {
@@ -98,7 +99,7 @@ export const routes: RouteObject[] = [
                 path: "players",
                 element: <Players />,
               },
-              { path: "league", element: <div>League</div> },
+              { path: "league", element: <League /> },
               {
                 path: "profile",
                 children: [

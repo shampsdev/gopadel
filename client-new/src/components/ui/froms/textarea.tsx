@@ -8,6 +8,7 @@ export interface TextareaProps {
   onBlur?: () => void;
   placeholder?: string;
   fillNotRequired?: boolean;
+  hasError?: boolean;
 }
 export const Textarea = (props: TextareaProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -36,9 +37,12 @@ export const Textarea = (props: TextareaProps) => {
   return (
     <section>
       <fieldset
-        className={
-          "border-2 border-gray-300 rounded-xl p-3 relative text-gray-400 focus-within:border-[#000] focus-within:text-[#000]"
-        }
+        className={`border-2 rounded-[14px] px-3 relative transition-all 
+          ${
+            props.hasError
+              ? "border-red-500 text-red-500 focus-within:border-red-600 focus-within:text-red-600"
+              : "border-[#EBEDF0] text-[#A4A9B4] focus-within:border-[#000] focus-within:text-[#000]"
+          }`}
       >
         <legend className="px-2 text-[15px] font-semibold transition-all ">
           {props.title}

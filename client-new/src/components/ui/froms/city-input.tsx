@@ -7,6 +7,7 @@ interface CityInputProps {
   onChangeFunction: (value: string) => void;
   maxLength?: number;
   hasError?: boolean;
+  onBlur?: () => void;
 }
 
 export const CityInput = ({
@@ -15,6 +16,7 @@ export const CityInput = ({
   onChangeFunction,
   maxLength,
   hasError = false,
+  onBlur,
 }: CityInputProps) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredCities, setFilteredCities] = useState<string[]>([]);
@@ -84,6 +86,7 @@ export const CityInput = ({
               setShowSuggestions(true);
             }
           }}
+          onBlur={onBlur}
           maxLength={maxLength}
           className="w-full text-black outline-none pb-[12px] py-[3px] px-[16px] bg-transparent"
           placeholder="Введите город"

@@ -5,7 +5,7 @@ import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButt
 import { useRef, useState, useEffect } from "react";
 import Logo from "../../../assets/logo.png";
 import { Textarea } from "../../../components/ui/froms/textarea";
-import { RankInput } from "../../../components/ui/froms/rank-input";
+import { RankSelector } from "../../../components/ui/froms/rank-selector";
 import { Button } from "../../../components/ui/button";
 import { usePatchMe } from "../../../api/hooks/mutations/patch-me";
 import { uploadAvatar } from "../../../api/user";
@@ -35,6 +35,13 @@ export const EditProfile = () => {
   const [profiles, setProfiles] = useState<string | null>(null);
   const [playingPosition, setPlayingPosition] =
     useState<PlayingPosition | null>(null);
+
+  // Состояния для валидации полей
+  const [firstNameError, setFirstNameError] = useState<boolean>(false);
+  const [lastNameError, setLastNameError] = useState<boolean>(false);
+  const [rankError, setRankError] = useState<boolean>(false);
+  const [bioError, setBioError] = useState<boolean>(false);
+  const [cityError, setCityError] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
@@ -74,7 +81,39 @@ export const EditProfile = () => {
     const selectedRank = ranks.find((r) => r.title === rankTitle);
     if (selectedRank) {
       setRank(selectedRank.from);
+      setRankError(false);
     }
+  };
+
+  // Функции валидации
+  const validateFirstName = (value: string) => {
+    const isValid = value.length > 0;
+    setFirstNameError(!isValid);
+    return isValid;
+  };
+
+  const validateLastName = (value: string) => {
+    const isValid = value.length > 0;
+    setLastNameError(!isValid);
+    return isValid;
+  };
+
+  const validateRank = (value: string) => {
+    const isValid = value.length > 0;
+    setRankError(!isValid);
+    return isValid;
+  };
+
+  const validateBio = (value: string) => {
+    const isValid = value.length > 0;
+    setBioError(!isValid);
+    return isValid;
+  };
+
+  const validateCity = (value: string) => {
+    const isValid = value.length > 0;
+    setCityError(!isValid);
+    return isValid;
   };
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -187,27 +226,43 @@ export const EditProfile = () => {
 
       <div className="flex flex-col gap-2">
         <Input
-          onChangeFunction={setFirstName}
+          onChangeFunction={(value) => {
+            setFirstName(value);
+            validateFirstName(value);
+          }}
+          onBlur={() => validateFirstName(firstName ?? "")}
           title={"Имя"}
           value={firstName ?? ""}
           maxLength={100}
+          hasError={firstNameError}
         />
         <Input
-          onChangeFunction={setLastName}
+          onChangeFunction={(value) => {
+            setLastName(value);
+            validateLastName(value);
+          }}
+          onBlur={() => validateLastName(lastName ?? "")}
           title={"Фамилия"}
           value={lastName ?? ""}
           maxLength={100}
+          hasError={lastNameError}
         />
-        <RankInput
+        <RankSelector
           title="Ранг"
           value={rankInput}
           onChangeFunction={handleRankChange}
+          hasError={rankError}
         />
         <Textarea
-          onChangeFunction={setBio}
+          onChangeFunction={(value) => {
+            setBio(value);
+            validateBio(value);
+          }}
+          onBlur={() => validateBio(bio ?? "")}
           title={"О себе"}
           value={bio ?? ""}
           maxLength={255}
+          hasError={bioError}
         />
         <Input
           onChangeFunction={(value) => {
@@ -236,8 +291,13 @@ export const EditProfile = () => {
         <CityInput
           title={"Город"}
           value={city ?? ""}
-          onChangeFunction={setCity}
+          onChangeFunction={(value) => {
+            setCity(value);
+            validateCity(value);
+          }}
+          onBlur={() => validateCity(city ?? "")}
           maxLength={100}
+          hasError={cityError}
         />
         <PositionSelector
           title={"Позиция игры"}
@@ -260,7 +320,14 @@ export const EditProfile = () => {
       firstName?.length &&
       lastName?.length &&
       rankInput.length > 0 &&
-      (!birthDate || validateBirthDate(birthDate)) ? (
+      city?.length &&
+      (!birthDate || validateBirthDate(birthDate)) &&
+      !firstNameError &&
+      !lastNameError &&
+      !rankError &&
+      !bioError &&
+      !cityError &&
+      !birthDateError ? (
         <Button className="mx-auto" onClick={editProfile}>
           Готово
         </Button>

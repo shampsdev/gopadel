@@ -1,4 +1,4 @@
-import videoFile from "@/assets/IMG_8675.MP4?url"
+import videoFile from "@/assets/IMG_8675.MP4?url";
 
 export default function LeaguePage() {
   return (
@@ -20,14 +20,24 @@ export default function LeaguePage() {
           </video>
         </div>
 
-        <a 
-          href="http://russianpadel.ru/" 
+        <a
+          href="http://russianpadel.ru/"
           target="_blank"
-          rel="noopener noreferrer" 
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-4 py-2 mt-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-sm"
         >
           <span>Перейти на сайт лиги</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
             <polyline points="15 3 21 3 21 9"></polyline>
             <line x1="10" y1="14" x2="21" y2="3"></line>
@@ -35,5 +45,5 @@ export default function LeaguePage() {
         </a>
       </div>
     </div>
-  )
+  );
 }

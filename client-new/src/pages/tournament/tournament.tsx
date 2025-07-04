@@ -8,7 +8,6 @@ import { useGetTournamentWaitlist } from "../../api/hooks/useGetTournamentWaitli
 import { TournamentPlayers } from "../../components/widgets/tournament-players";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { TournamentStatusActions } from "../../components/widgets/tournament-status-actions";
-import { isTournamentFinished } from "../../utils/tournament-status-checks";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { twMerge } from "tailwind-merge";
 
