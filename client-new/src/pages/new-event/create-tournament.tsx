@@ -18,7 +18,7 @@ import { useAuthStore } from "../../shared/stores/auth.store";
 
 export const CreateTournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
-  const { mutate: createTournament, isPending } = useCreateTournament();
+  const { mutate: createTournament } = useCreateTournament();
   const { user } = useAuthStore();
   const [title, setTitle] = useState<string | null>(null);
   const [date, setDate] = useState<string | null>(null);
