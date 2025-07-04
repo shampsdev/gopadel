@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Input } from "../../components/ui/froms/input";
+import { Textarea } from "../../components/ui/froms/textarea";
 import {
   formatDateInput,
   validateDateFormat,
@@ -16,6 +17,7 @@ export const CreateTournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
   const [title, setTitle] = useState<string | null>(null);
+  const [description, setDescription] = useState<string>("");
   const [date, setDate] = useState<string | null>(null);
   const [dateError, setDateError] = useState<boolean>(true);
 
@@ -89,6 +91,7 @@ export const CreateTournament = () => {
 
     const tournamentData = {
       title,
+      description,
       startTime: start,
       endTime: end,
       clubName,
@@ -119,6 +122,14 @@ export const CreateTournament = () => {
             value={title ?? ""}
             maxLength={100}
             hasError={!title}
+          />
+          <Textarea
+            onChangeFunction={setDescription}
+            title={"Описание"}
+            value={description}
+            maxLength={500}
+            placeholder={""}
+            hasError={false}
           />
           <Input
             onChangeFunction={(value) => {
