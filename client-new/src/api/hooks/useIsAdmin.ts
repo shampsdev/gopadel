@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { getCourts } from "../courts";
+import { isAdmin } from "../user";
 import { useAuthStore } from "../../shared/stores/auth.store";
 
-export const useGetCourts = () => {
+export const useIsAdmin = () => {
   const { token } = useAuthStore();
   return useQuery({
-    queryKey: ["courts"],
-    queryFn: () => getCourts(token!),
+    queryKey: ["isAdmin"],
+    queryFn: () => isAdmin(token!),
     enabled: !!token,
   });
 };

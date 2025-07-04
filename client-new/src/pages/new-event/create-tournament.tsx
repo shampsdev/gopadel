@@ -18,6 +18,9 @@ import { useAuthStore } from "../../shared/stores/auth.store";
 import { useGetCourts } from "../../api/hooks/useGetCourts";
 import { useCreateTournament } from "../../api/hooks/mutations/tournament/useCreateTournament";
 import { useNavigate } from "react-router";
+import { useIsAdmin } from "../../api/hooks/useIsAdmin";
+import { Preloader } from "../../components/widgets/preloader";
+import AboutImage from "../../assets/about.png";
 
 export const CreateTournament = () => {
   const { user } = useAuthStore();
@@ -41,6 +44,8 @@ export const CreateTournament = () => {
   const [rankInput, setRankInput] = useState<string>("");
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
+
+  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
 
   const { mutateAsync: createTournament, isPending: isCreatingTournament } =
     useCreateTournament();
@@ -126,16 +131,48 @@ export const CreateTournament = () => {
     };
 
     try {
+      console.log(tournamentData);
+      Object.keys(tournamentData).forEach((key) => {
+        console.log(key, tournamentData[key as keyof CreateTournamentType]);
+      });
       const tournament = await createTournament(tournamentData);
-      navigate(`/tournaments/${tournament?.id}`);
+      if (tournament?.id) {
+        navigate(`/tournaments/${tournament?.id}`);
+      } else {
+        alert("Турнир успешно создан");
+        navigate("/");
+      }
     } catch (error) {
       alert("Ошибка при создании турнира");
       console.error(error);
     }
   };
 
+  if (isAdminLoading || courtsLoading) return <Preloader />;
+
+  if (isAdmin) {
+    return (
+      <div className="flex flex-col h-screen w-full">
+        <div className="flex-1 flex flex-col text-center items-center justify-center gap-11">
+          <img src={AboutImage} className="object-cover w-[70%]" />
+          <div className="flex flex-col gap-4">
+            <div className="font-semibold text-[20px]">Функция недоступна</div>
+            <div className="text-[#868D98]">
+              Создание турниров доступно только администраторам
+            </div>
+          </div>
+        </div>
+        <div className="mt-auto pb-10">
+          <Button className="mx-auto" onClick={() => navigate("/")}>
+            Назад
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-[40px] h-[150vh]">
+    <div className="flex flex-col gap-[40px] pb-[100px]">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2 px-[12px]">
           <p className="text-[24px] font-medium">Новый турнир</p>
@@ -236,7 +273,7 @@ export const CreateTournament = () => {
               setCourtId(id);
               setCourtTouched(true);
             }}
-            hasError={courtTouched && !courtId}
+            hasError={!courtId}
             courts={courts ?? []}
           />
           <RankSelector
