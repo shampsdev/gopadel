@@ -1,4 +1,4 @@
-export interface Club {
+export interface Court {
   id: string
   name: string
   address: string
@@ -10,7 +10,7 @@ export interface Tournament {
   start_time: string
   end_time?: string
   price: number
-  club_id: string
+  court_id: string
   tournament_type: string
   rank_min: number
   rank_max: number

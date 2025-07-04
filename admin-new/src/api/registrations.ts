@@ -20,7 +20,7 @@ export interface Tournament {
   rankMax: number;
   maxUsers: number;
   description: string;
-  club: {
+  court: {
     id: string;
     name: string;
     address: string;
