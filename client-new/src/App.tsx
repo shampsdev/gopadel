@@ -1,35 +1,92 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { createBrowserRouter, RouterProvider } from "react-router";
+import "./App.css";
+import { useAuthStore } from "./shared/stores/auth.store";
+import { initDataUser, useRawInitData } from "@telegram-apps/sdk-react";
+import { useEffect } from "react";
+import useTgUserStore from "./shared/stores/tg-user.store";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { routes } from "./routes/routes";
+import { ModalBackground, ModalView } from "./components/widgets/modal-view";
+import { useModalStore } from "./shared/stores/modal.store";
+import { backButton } from "@telegram-apps/sdk-react";
+
+const queryClient = new QueryClient();
+const router = createBrowserRouter(routes);
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { setToken } = useAuthStore();
+  const {
+    setAvatarUrl,
+    setUsername,
+    setFirstName,
+    setLastName,
+    avatarUrl,
+    username,
+    firstName,
+    lastName,
+  } = useTgUserStore();
+  const initData = useRawInitData();
+  const initUserData = initDataUser();
+  const { isModalOpened } = useModalStore();
+
+  // Управление кнопкой "Назад" в зависимости от состояния модального окна
+  useEffect(() => {
+    if (isModalOpened) {
+      backButton.hide();
+    } else {
+      backButton.show();
+    }
+  }, [isModalOpened]);
+
+  useEffect(() => {
+    if (initData) {
+      setToken(initData);
+    }
+  }, [initData, setToken]);
+
+  useEffect(() => {
+    if (initUserData?.photo_url) {
+      if (avatarUrl === undefined) {
+        setAvatarUrl(initUserData.photo_url);
+      }
+    }
+
+    if (initUserData?.username) {
+      if (username === undefined) {
+        setUsername(initUserData.username);
+      }
+    }
+
+    if (initUserData?.first_name) {
+      if (firstName === undefined) {
+        setFirstName(initUserData.first_name);
+      }
+    }
+
+    if (initUserData?.last_name) {
+      if (lastName === undefined) {
+        setLastName(initUserData.last_name);
+      }
+    }
+  }, [
+    initUserData,
+    avatarUrl,
+    username,
+    setAvatarUrl,
+    setUsername,
+    setFirstName,
+    setLastName,
+  ]);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <ModalBackground />
+      {isModalOpened && <ModalView />}
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />;
+      </QueryClientProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

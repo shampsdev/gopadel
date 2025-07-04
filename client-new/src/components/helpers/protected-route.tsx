@@ -1,0 +1,31 @@
+import { Navigate, Outlet } from "react-router";
+import { useAuthStore } from "../../shared/stores/auth.store";
+import { useEffect } from "react";
+import { useGetMe } from "../../api/hooks/useGetMe";
+import { Preloader } from "../widgets/preloader";
+
+export const ProtectedRoute = () => {
+  const { setAuth, setUser } = useAuthStore();
+  const { data: me, isLoading, isError, isFetched } = useGetMe();
+
+  useEffect(() => {
+    if (!isLoading && !isError) {
+      setAuth(true);
+      setUser(me ?? null);
+    }
+  }, [isLoading, isError, setAuth]);
+
+  if (isLoading) {
+    return <Preloader />;
+  }
+
+  if (isError) {
+    return <Navigate to="/about" />;
+  }
+
+  if (!me?.isRegistered && isFetched) {
+    console.log("me", me);
+    return <Navigate to="/registration" />;
+  }
+  return <Outlet />;
+};
