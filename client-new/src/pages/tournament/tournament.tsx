@@ -53,6 +53,27 @@ export const Tournament = () => {
         <h1 className="text-[24px] font-medium">{tournament?.[0]?.name}</h1>
 
         <div className="flex flex-col">
+          {isAdmin?.admin && (
+            <div className="py-5 border-b border-[#DADCE0]">
+              <div
+                onClick={async () => {
+                  navigate(`/tournament/${id}/edit`);
+                }}
+                className="flex flex-row justify-between items-center gap-[18px]"
+              >
+                <div className="flex flex-col items-center justify-center w-[42px] h-[42px] bg-[#AFFF3F] rounded-full">
+                  {Icons.Edit("black", "18", "18")}
+                </div>
+
+                <p className="text-black text-[16px] flex-grow">
+                  Изменить турнир
+                </p>
+
+                {Icons.ArrowRight("#A4A9B4", "24", "24")}
+              </div>
+            </div>
+          )}
+
           <div className="py-5 border-b border-[#DADCE0]">
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-col gap-[2px]  text-[14px] text-[#5D6674] ">
@@ -320,18 +341,6 @@ export const Tournament = () => {
         user={user}
         waitlist={waitlist || []}
       />
-
-      {isAdmin?.admin && (
-        <div className="mb-10 flex flex-row gap-4 justify-center">
-          <Button
-            onClick={async () => {
-              navigate(`/tournament/${id}/edit`);
-            }}
-          >
-            Редактировать
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

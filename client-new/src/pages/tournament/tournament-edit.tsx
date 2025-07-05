@@ -65,7 +65,6 @@ export const TournamentEdit = () => {
       setTitle(tournament.name || "");
       setDescription(tournament.description || "");
 
-      // Форматируем дату и время
       const startDate = new Date(tournament.startTime);
       const endDate = new Date(tournament.endTime);
 
@@ -94,11 +93,8 @@ export const TournamentEdit = () => {
       setType(tournament.tournamentType || "");
       setCourtId(tournament.court?.id || "");
 
-      const min = Math.min(tournament.rankMin, tournament.rankMax);
-      const max = Math.max(tournament.rankMin, tournament.rankMax);
-
       const selectedRank = ranks.find(
-        (r) => Math.abs(r.from - min) < 0.01 && Math.abs(r.to - max) < 0.01
+        (r) => tournament.rankMin >= r.from && tournament.rankMax <= r.to
       );
 
       if (selectedRank) {
@@ -187,8 +183,8 @@ export const TournamentEdit = () => {
       maxUsers: maxUsers,
       name: title,
       price: price,
-      rankMax: ranks.find((r) => r.title === rankInput)?.from ?? 0,
-      rankMin: ranks.find((r) => r.title === rankInput)?.to ?? 0,
+      rankMax: ranks.find((r) => r.title === rankInput)?.to ?? 0,
+      rankMin: ranks.find((r) => r.title === rankInput)?.from ?? 0,
       startTime: start,
       tournamentType: type,
     };
