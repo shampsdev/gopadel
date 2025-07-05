@@ -34,11 +34,8 @@ export const ProtectedRoute = () => {
           joinClub.mutate(parsedData.clubId);
         }
       }
-    } else if (me?.isRegistered && myClubs) {
-      const globalClubExists = myClubs.some((club) => club.id === "global");
-      if (!globalClubExists) {
-        joinClub.mutate("global");
-      }
+    } else if (me?.isRegistered && myClubs && myClubs.length === 0) {
+      joinClub.mutate("global");
     }
   }, [me?.isRegistered, myClubs, initData]);
 
