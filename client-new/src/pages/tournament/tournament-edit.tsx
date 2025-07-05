@@ -106,7 +106,7 @@ export const TournamentEdit = () => {
         setRank(selectedRank.from);
       } else {
         const fallbackRank = ranks.find(
-          (r) => tournament.rankMin >= r.from && tournament.rankMin < r.to
+          (r) => tournament.rankMin >= r.from && tournament.rankMax < r.to
         );
         if (fallbackRank) {
           setRankInput(fallbackRank.title);
