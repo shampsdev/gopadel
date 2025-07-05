@@ -193,7 +193,7 @@ export const Tournament = () => {
                   )}
                   <p className="text-[12px] text-[#868D98]">участие</p>
                 </div>
-                {user.loyalty.discount > 0 && (
+                {user.loyalty.discount > 0 && tournament?.[0].price > 0 && (
                   <div className="text-[14px]  text-[#F34338] line-through">
                     <span className="font-semibold text-[14px] ">
                       {tournament?.[0].price}
