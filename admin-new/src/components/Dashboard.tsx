@@ -13,7 +13,8 @@ import {
   User,
   Home,
   Menu,
-  X
+  X,
+  Building2
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { UsersPage } from './UsersPage';
@@ -21,6 +22,7 @@ import { AdminsPage } from './AdminsPage';
 import { LoyaltyPage } from './LoyaltyPage';
 import { CourtsPage } from './CourtsPage';
 import { RegistrationsPage } from './RegistrationsPage';
+import { ClubsPage } from './ClubsPage';
 import type { NavItem } from '../types/navigation';
 
 // Страницы-заглушки
@@ -131,8 +133,17 @@ export const Dashboard: React.FC = () => {
     }
   ];
 
-  // Добавляем раздел администраторов только для суперпользователей
+  // Добавляем разделы только для суперпользователей
   if (user?.is_superuser) {
+    allNavItems.push({
+    id: 'clubs',
+    title: 'Клубы',
+    description: 'Управление клубами',
+    icon: Building2,
+    color: 'text-emerald-400 hover:border-emerald-400/50',
+    path: '/clubs'
+    });
+    
     allNavItems.push({
     id: 'admins',
     title: 'Администраторы',
@@ -157,6 +168,8 @@ export const Dashboard: React.FC = () => {
         return <RegistrationsPage />;
       case '/loyalty':
         return <LoyaltyPage />;
+      case '/clubs':
+        return user?.is_superuser ? <ClubsPage /> : <HomePage setCurrentPage={setCurrentPage} navItems={navItems} />;
       case '/admins':
         return user?.is_superuser ? <AdminsPage /> : <HomePage setCurrentPage={setCurrentPage} navItems={navItems} />;
       default:

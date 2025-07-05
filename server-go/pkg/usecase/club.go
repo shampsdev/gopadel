@@ -80,4 +80,24 @@ func (uc *Club) GetUserClubs(ctx *Context) ([]*domain.Club, error) {
 	}
 
 	return uc.repo.GetUserClubs(ctx, ctx.User.ID)
+}
+
+// Patch обновляет клуб (админская операция)
+func (uc *Club) Patch(ctx *Context, clubID string, patch *domain.PatchClub) error {
+	return uc.repo.Patch(ctx.Context, clubID, patch)
+}
+
+// Delete удаляет клуб (админская операция)
+func (uc *Club) Delete(ctx *Context, clubID string) error {
+	return uc.repo.Delete(ctx.Context, clubID)
+}
+
+// AdminFilter получает клубы для админов (без проверки аутентификации)
+func (uc *Club) AdminFilter(ctx *Context, filter *domain.FilterClub) ([]*domain.Club, error) {
+	return uc.repo.Filter(ctx.Context, filter)
+}
+
+// AdminCreate создает клуб для админов (без проверки аутентификации)
+func (uc *Club) AdminCreate(ctx *Context, club *domain.CreateClub) error {
+	return uc.repo.Create(ctx.Context, club)
 } 

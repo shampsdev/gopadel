@@ -91,3 +91,22 @@ export interface UserListItem {
   rank: number
   is_registered: boolean
 }
+
+export interface Club {
+  id: string
+  name: string
+  description?: string
+  createdAt: string
+  userCount?: number
+}
+
+export interface CreateClub {
+  id: string
+  name: string
+  description?: string
+}
+
+export interface PatchClub {
+  name?: string
+  description?: string
+}

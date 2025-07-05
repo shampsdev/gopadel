@@ -8,6 +8,7 @@ import (
 	"github.com/shampsdev/go-telegram-template/pkg/config"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_admins"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_auth"
+	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_clubs"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_courts"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_loyalties"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_registrations"
@@ -44,6 +45,7 @@ func setupRouter(ctx context.Context, r *gin.Engine, useCases usecase.Cases, cfg
 	registration.Setup(v1, useCases)
 	webhook.Setup(v1, useCases, cfg)
 	admin_auth.Setup(v1, useCases)
+	admin_clubs.Setup(v1, useCases)
 	admin_users.Setup(v1, useCases)
 	admin_admins.Setup(v1, useCases)
 	admin_loyalties.Setup(v1, useCases)

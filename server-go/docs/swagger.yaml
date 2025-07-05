@@ -146,6 +146,18 @@ definitions:
     - user_id
     - username
     type: object
+  domain.CreateClub:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    required:
+    - id
+    - name
+    type: object
   domain.CreateCourt:
     properties:
       address:
@@ -299,6 +311,13 @@ definitions:
       user_id:
         type: string
       username:
+        type: string
+    type: object
+  domain.PatchClub:
+    properties:
+      description:
+        type: string
+      name:
         type: string
     type: object
   domain.PatchCourt:
@@ -825,6 +844,147 @@ paths:
       summary: Get current admin info
       tags:
       - admin-auth
+  /admin/clubs:
+    get:
+      description: Get all clubs. Available for any admin.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Club'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all clubs (Admin)
+      tags:
+      - admin-clubs
+    post:
+      consumes:
+      - application/json
+      description: Create a new club. Available for superusers only.
+      parameters:
+      - description: Club data
+        in: body
+        name: club
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateClub'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Club'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create club (Admin)
+      tags:
+      - admin-clubs
+  /admin/clubs/{id}:
+    delete:
+      description: Delete club. Available for superusers only.
+      parameters:
+      - description: Club ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete club (Admin)
+      tags:
+      - admin-clubs
+    patch:
+      consumes:
+      - application/json
+      description: Update club data. Available for superusers only.
+      parameters:
+      - description: Club ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Club update data
+        in: body
+        name: club
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PatchClub'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Club'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update club (Admin)
+      tags:
+      - admin-clubs
   /admin/courts:
     get:
       description: Get all courts. Available for any admin.
@@ -1711,7 +1871,7 @@ paths:
       consumes:
       - application/json
       description: Creates new registration or updates existing CANCELED status to
-        PENDING
+        PENDING. For free tournaments, status is set to ACTIVE immediately.
       parameters:
       - description: Tournament ID
         in: path
@@ -1859,7 +2019,8 @@ paths:
       consumes:
       - application/json
       description: Creates payment in YooKassa for existing PENDING registration.
-        Returns existing payment if it's already in success/pending status.
+        Returns existing payment if it's already in success/pending status. For free
+        tournaments (price = 0), payment is not required.
       parameters:
       - description: Tournament ID
         in: path
@@ -1880,7 +2041,7 @@ paths:
           schema:
             $ref: '#/definitions/domain.Payment'
         "400":
-          description: Invalid request data
+          description: Invalid request data or tournament is free
           schema:
             additionalProperties:
               type: string

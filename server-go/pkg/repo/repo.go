@@ -40,6 +40,8 @@ type Club interface {
 	Filter(ctx context.Context, filter *domain.FilterClub) ([]*domain.Club, error)
 	JoinClub(ctx context.Context, clubID, userID string) error
 	GetUserClubs(ctx context.Context, userID string) ([]*domain.Club, error)
+	Patch(ctx context.Context, clubID string, patch *domain.PatchClub) error
+	Delete(ctx context.Context, clubID string) error
 }
 
 type Loyalty interface {
