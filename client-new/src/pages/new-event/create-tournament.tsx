@@ -40,8 +40,12 @@ export const CreateTournament = () => {
   const [type, setType] = useState<string | null>(null);
   const [courtId, setCourtId] = useState<string>("");
   const [clubId, setClubId] = useState<string>("");
-  const [rank, setRank] = useState<number | null>(null);
-  const [rankInput, setRankInput] = useState<string>("");
+  const [rankMin, setRankMin] = useState<number | null>(null);
+  const [rankMax, setRankMax] = useState<number | null>(null);
+  const [rankMinInput, setRankMinInput] = useState<string>("");
+  const [rankMaxInput, setRankMaxInput] = useState<string>("");
+  const [rankMinError, setRankMinError] = useState<boolean>(false);
+  const [rankMaxError, setRankMaxError] = useState<boolean>(false);
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
   const { data: myClubs = [], isLoading: clubsLoading } = useGetMyClubs();
@@ -51,11 +55,33 @@ export const CreateTournament = () => {
   const { mutateAsync: createTournament, isPending: isCreatingTournament } =
     useCreateTournament();
 
-  const handleRankChange = (rankTitle: string) => {
-    setRankInput(rankTitle);
+  const handleRankMinChange = (rankTitle: string) => {
+    setRankMinInput(rankTitle);
     const selectedRank = ranks.find((r) => r.title === rankTitle);
     if (selectedRank) {
-      setRank(selectedRank.from);
+      setRankMin(selectedRank.from);
+      setRankMinError(false);
+      // Проверяем, что максимальный ранг не меньше минимального
+      if (rankMax !== null && selectedRank.from > rankMax) {
+        setRankMaxError(true);
+      } else {
+        setRankMaxError(false);
+      }
+    }
+  };
+
+  const handleRankMaxChange = (rankTitle: string) => {
+    setRankMaxInput(rankTitle);
+    const selectedRank = ranks.find((r) => r.title === rankTitle);
+    if (selectedRank) {
+      setRankMax(selectedRank.from);
+      setRankMaxError(false);
+      // Проверяем, что минимальный ранг не больше максимального
+      if (rankMin !== null && selectedRank.from < rankMin) {
+        setRankMinError(true);
+      } else {
+        setRankMinError(false);
+      }
     }
   };
 
@@ -74,8 +100,11 @@ export const CreateTournament = () => {
       type &&
       courtId &&
       clubId &&
-      rank !== null &&
-      rank >= 0 &&
+      rankMin !== null &&
+      rankMin >= 0 &&
+      rankMax !== null &&
+      rankMax >= 0 &&
+      rankMax >= rankMin &&
       price !== null &&
       price >= 0 &&
       maxUsers !== null &&
@@ -122,8 +151,8 @@ export const CreateTournament = () => {
       name: title ?? "",
       organizatorId: user?.id ?? "",
       price: price ?? 0,
-      rankMax: ranks.find((r) => r.title === rankInput)?.to ?? 0,
-      rankMin: ranks.find((r) => r.title === rankInput)?.from ?? 0,
+      rankMax: ranks.find((r) => r.title === rankMaxInput)?.to ?? 0,
+      rankMin: ranks.find((r) => r.title === rankMinInput)?.from ?? 0,
       startTime: start,
       tournamentType: type ?? "",
     };
@@ -266,10 +295,16 @@ export const CreateTournament = () => {
             courts={courts ?? []}
           />
           <RankSelector
-            title="Ранг"
-            value={rankInput}
-            onChangeFunction={handleRankChange}
-            hasError={rank === null}
+            title="Минимальный ранг"
+            value={rankMinInput}
+            onChangeFunction={handleRankMinChange}
+            hasError={rankMin === null || rankMinError}
+          />
+          <RankSelector
+            title="Максимальный ранг"
+            value={rankMaxInput}
+            onChangeFunction={handleRankMaxChange}
+            hasError={rankMax === null || rankMaxError}
           />
           <Input
             title={"Стоимость участия"}

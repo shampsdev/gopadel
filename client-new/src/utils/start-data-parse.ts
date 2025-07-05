@@ -1,6 +1,6 @@
 export interface StartParamData {
   tournamentId?: string;
-  courtId?: string;
+  clubId?: string;
 }
 
 /**
@@ -18,7 +18,7 @@ export const parseStartParam = (startParam: string): StartParamData => {
 
   // Иначе это ID клуба
   return {
-    courtId: startParam,
+    clubId: startParam,
   };
 };
 

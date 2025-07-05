@@ -26,19 +26,16 @@ export const ProtectedRoute = () => {
     if (me?.isRegistered && myClubs && initData) {
       const parsedData = parseStartParam(initData);
 
-      if (parsedData.courtId) {
+      if (parsedData.clubId) {
         const clubExists = myClubs.some(
-          (club) => club.id === parsedData.courtId
+          (club) => club.id === parsedData.clubId
         );
         if (!clubExists) {
-          joinClub.mutate(parsedData.courtId);
-        }
-      } else {
-        const globalClubExists = myClubs.some((club) => club.id === "global");
-        if (!globalClubExists) {
-          joinClub.mutate("global");
+          joinClub.mutate(parsedData.clubId);
         }
       }
+    } else if (me?.isRegistered && myClubs && myClubs.length === 0) {
+      joinClub.mutate("global");
     }
   }, [me?.isRegistered, myClubs, initData]);
 

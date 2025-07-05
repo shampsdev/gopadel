@@ -61,35 +61,29 @@ export const validateBirthDate = (dateString: string): boolean => {
 
 // Функция для форматирования ввода даты
 export const formatDateInput = (value: string): string => {
-  // Удаляем все символы кроме цифр и точек
-  const cleaned = value.replace(/[^\d.]/g, "");
+  // Удаляем все символы кроме цифр
+  const digits = value.replace(/\D/g, "").slice(0, 8);
 
-  // Ограничиваем количество точек
-  const parts = cleaned.split(".");
-  if (parts.length > 3) return parts.slice(0, 3).join(".");
+  if (digits.length === 0) return "";
 
-  // Ограничиваем длину каждой части
-  const limitedParts = parts.map((part, index) => {
-    if (index === 0) return part.slice(0, 2); // День - максимум 2 цифры
-    if (index === 1) return part.slice(0, 2); // Месяц - максимум 2 цифры
-    if (index === 2) return part.slice(0, 4); // Год - максимум 4 цифры
-    return part;
-  });
+  // Простое форматирование по позициям
+  let formatted = "";
 
-  // Добавляем точки автоматически только если нет точек
-  if (parts.length === 1 && !cleaned.includes(".")) {
-    const day = limitedParts[0].slice(0, 2);
-    const month = limitedParts[0].slice(2, 4);
-    const year = limitedParts[0].slice(4, 8);
+  // День
+  if (digits.length >= 1) formatted += digits[0];
+  if (digits.length >= 2) formatted += digits[1];
 
-    let result = day;
-    if (month) result += "." + month;
-    if (year) result += "." + year;
+  // Точка и месяц
+  if (digits.length >= 3) formatted += "." + digits[2];
+  if (digits.length >= 4) formatted += digits[3];
 
-    return result;
-  }
+  // Точка и год
+  if (digits.length >= 5) formatted += "." + digits[4];
+  if (digits.length >= 6) formatted += digits[5];
+  if (digits.length >= 7) formatted += digits[6];
+  if (digits.length >= 8) formatted += digits[7];
 
-  return limitedParts.join(".");
+  return formatted;
 };
 
 // Функция для преобразования даты в формате дд.мм.гг в ISO формат по МСК
@@ -100,20 +94,16 @@ export const parseDateToISO = (dateString: string): string | null => {
   const fullYear =
     parseInt(year) < 100 ? 2000 + parseInt(year) : parseInt(year);
 
-  // Создаем дату в полночь по московскому времени
-  const date = new Date(fullYear, parseInt(month) - 1, parseInt(day));
-
-  // Получаем смещение московского времени (UTC+3)
-  const moscowOffset = 3 * 60; // 3 часа в минутах
-  const localOffset = date.getTimezoneOffset(); // смещение локального времени в минутах
-
-  // Корректируем время на разницу между локальным и московским
-  const adjustedDate = new Date(
-    date.getTime() + (localOffset + moscowOffset) * 60 * 1000
+  // Создаем дату в полночь по московскому времени (UTC+3)
+  // Пользователь вводит дату в МСК, нужно конвертировать в UTC
+  const moscowDate = new Date(
+    Date.UTC(fullYear, parseInt(month) - 1, parseInt(day), 0, 0, 0, 0)
   );
+  // Вычитаем 3 часа чтобы получить UTC
+  moscowDate.setUTCHours(moscowDate.getUTCHours() - 3);
 
   // Преобразуем в ISO формат
-  return adjustedDate.toISOString();
+  return moscowDate.toISOString();
 };
 
 // Функция для преобразования даты рождения в формате дд.мм.гггг в ISO формат
@@ -122,11 +112,14 @@ export const parseBirthDateToISO = (dateString: string): string | null => {
 
   const [day, month, year] = dateString.split(".");
 
-  // Создаем дату в полночь по UTC (без московского смещения для даты рождения)
-  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  // Для даты рождения создаем дату в полночь по UTC
+  // Дата рождения - это просто дата, без привязки к часовому поясу
+  const birthDate = new Date(
+    Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0, 0)
+  );
 
   // Преобразуем в ISO формат
-  return date.toISOString();
+  return birthDate.toISOString();
 };
 
 // Функция для получения текущей даты в формате дд.мм.гг по МСК
@@ -200,52 +193,45 @@ export const validateTimeFormat = (timeString: string): boolean => {
   if (startMinute < 0 || startMinute > 59 || endMinute < 0 || endMinute > 59)
     return false;
 
-  // Проверяем, что конечное время больше начального
-  const startTime = startHour * 60 + startMinute;
-  const endTime = endHour * 60 + endMinute;
-
-  return endTime > startTime;
+  // Убираем проверку, что конечное время больше начального
+  // Теперь время конца может быть меньше времени начала (переход на следующий день)
+  return true;
 };
 
 // Функция для форматирования ввода времени
 export const formatTimeInput = (value: string): string => {
-  // Удаляем все символы кроме цифр, двоеточий и дефисов
-  const cleaned = value.replace(/[^\d:-]/g, "");
+  // Удаляем все символы кроме цифр
+  const digits = value.replace(/\D/g, "").slice(0, 8);
 
-  // Ограничиваем количество дефисов
-  const parts = cleaned.split("-");
-  if (parts.length > 2) return parts.slice(0, 2).join("-");
+  if (digits.length === 0) return "";
 
-  // Форматируем каждую часть времени с ограничениями
-  const formattedParts = parts.map((part, index) => {
-    // Ограничиваем длину каждой части времени
-    if (index === 0) {
-      // Первая часть времени (начало)
-      if (part.length > 5) part = part.slice(0, 5); // чч:мм - максимум 5 символов
-    } else if (index === 1) {
-      // Вторая часть времени (конец)
-      if (part.length > 5) part = part.slice(0, 5); // чч:мм - максимум 5 символов
+  // Используем регулярные выражения для форматирования
+  const match = digits.match(/^(\d{0,2})(\d{0,2})(\d{0,2})(\d{0,2})$/);
+
+  if (!match) return "";
+
+  const [, hours1, minutes1, hours2, minutes2] = match;
+
+  let result = "";
+
+  // Первая часть времени
+  if (hours1) result += hours1;
+  if (minutes1) {
+    if (hours1.length === 2) result += ":" + minutes1;
+    else result += minutes1;
+  }
+
+  // Вторая часть времени
+  if (hours2 || minutes2) {
+    if (result) result += "-";
+    if (hours2) result += hours2;
+    if (minutes2) {
+      if (hours2 && hours2.length === 2) result += ":" + minutes2;
+      else result += minutes2;
     }
+  }
 
-    // Добавляем двоеточие после часов, если его нет
-    if (part.length > 2 && !part.includes(":")) {
-      const hours = part.slice(0, 2);
-      const minutes = part.slice(2, 4);
-      return hours + ":" + minutes;
-    }
-
-    // Ограничиваем часы и минуты
-    if (part.includes(":")) {
-      const [hours, minutes] = part.split(":");
-      const limitedHours = hours.slice(0, 2);
-      const limitedMinutes = minutes ? minutes.slice(0, 2) : "";
-      return limitedHours + ":" + limitedMinutes;
-    }
-
-    return part;
-  });
-
-  return formattedParts.join("-");
+  return result;
 };
 
 // Функция для создания startTime и endTime из даты и времени по МСК
@@ -265,36 +251,50 @@ export const createStartAndEndTime = (
   const [startHour, startMinute] = startTime.split(":").map(Number);
   const [endHour, endMinute] = endTime.split(":").map(Number);
 
-  // Создаем даты для начала и конца по московскому времени
-  const startDate = new Date(
-    fullYear,
-    parseInt(month) - 1,
-    parseInt(day),
-    startHour,
-    startMinute
+  // Создаем даты в московском времени (UTC+3)
+  // Пользователь вводит время в МСК, нужно конвертировать в UTC
+  const moscowStartDate = new Date(
+    Date.UTC(
+      fullYear,
+      parseInt(month) - 1,
+      parseInt(day),
+      startHour,
+      startMinute,
+      0,
+      0
+    )
   );
-  const endDate = new Date(
-    fullYear,
-    parseInt(month) - 1,
-    parseInt(day),
-    endHour,
-    endMinute
-  );
+  // Вычитаем 3 часа чтобы получить UTC
+  moscowStartDate.setUTCHours(moscowStartDate.getUTCHours() - 3);
 
-  // Получаем смещение московского времени (UTC+3)
-  const moscowOffset = 3 * 60; // 3 часа в минутах
-  const localOffset = startDate.getTimezoneOffset(); // смещение локального времени в минутах
+  const moscowEndDate = new Date(
+    Date.UTC(
+      fullYear,
+      parseInt(month) - 1,
+      parseInt(day),
+      endHour,
+      endMinute,
+      0,
+      0
+    )
+  );
+  // Вычитаем 3 часа чтобы получить UTC
+  moscowEndDate.setUTCHours(moscowEndDate.getUTCHours() - 3);
 
-  // Корректируем время на разницу между локальным и московским
-  const adjustedStartDate = new Date(
-    startDate.getTime() + (localOffset + moscowOffset) * 60 * 1000
-  );
-  const adjustedEndDate = new Date(
-    endDate.getTime() + (localOffset + moscowOffset) * 60 * 1000
-  );
+  const startDate = moscowStartDate;
+  let endDate = moscowEndDate;
+
+  // Если время конца меньше времени начала, добавляем один день
+  const startTimeInMinutes = startHour * 60 + startMinute;
+  const endTimeInMinutes = endHour * 60 + endMinute;
+
+  if (endTimeInMinutes <= startTimeInMinutes) {
+    endDate.setUTCDate(endDate.getUTCDate() + 1);
+  }
 
   return {
-    startTime: adjustedStartDate.toISOString(),
-    endTime: adjustedEndDate.toISOString(),
+    // Возвращаем UTC время, которое соответствует московскому времени
+    startTime: startDate.toISOString(),
+    endTime: endDate.toISOString(),
   };
 };

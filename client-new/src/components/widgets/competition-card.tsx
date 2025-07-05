@@ -63,12 +63,16 @@ export const CompetitionCard = ({
 
         <div className="flex flex-col gap-3 text-[#868D98]">
           <div className="flex flex-row items-center gap-3">
-            {Icons.Calendar()}
+            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+              {Icons.Calendar()}
+            </div>
             <p>{date}</p>
           </div>
 
           <div className="flex flex-row items-center gap-3">
-            {Icons.Location()}
+            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+              {Icons.Location()}
+            </div>
             <div className="flex flex-col ">
               <p>{locationTitle}</p>
               <p>{address}</p>
@@ -76,12 +80,16 @@ export const CompetitionCard = ({
           </div>
 
           <div className="flex flex-row items-center gap-3">
-            {Icons.Cup()}
+            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+              {Icons.Cup()}
+            </div>
             <p>Тип: {type}</p>
           </div>
 
           <div className="flex flex-row items-center gap-3">
-            {Icons.Star()}
+            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+              {Icons.Star()}
+            </div>
             <p>{getRankTitle(rank)}</p>
           </div>
         </div>
@@ -90,27 +98,34 @@ export const CompetitionCard = ({
       <div className="flex flex-row justify-between items-center">
         <div className="flex flex-row gap-[6px] ">
           <div className="flex flex-col">
-            <div
-              className={twMerge(
-                "text-[20px] ",
-                user.loyalty.discount > 0 ? "text-[#77BE14]" : "text-[#5D6674]"
-              )}
-            >
-              <span
+            {cost === 0 && (
+              <div className="text-[20px] text-[#77BE14]">бесплатно</div>
+            )}
+            {cost > 0 && (
+              <div
                 className={twMerge(
-                  "text-black font-semibold text-[20px]",
-                  user.loyalty.discount > 0 && "text-[#77BE14]"
+                  "text-[20px] ",
+                  user.loyalty.discount > 0
+                    ? "text-[#77BE14]"
+                    : "text-[#5D6674]"
                 )}
               >
-                {user.loyalty.discount > 0
-                  ? Math.round(cost * (1 - user.loyalty.discount / 100))
-                  : cost}
-              </span>{" "}
-              ₽
-            </div>
+                <span
+                  className={twMerge(
+                    "text-black font-semibold text-[20px]",
+                    user.loyalty.discount > 0 && "text-[#77BE14]"
+                  )}
+                >
+                  {user.loyalty.discount > 0
+                    ? Math.round(cost * (1 - user.loyalty.discount / 100))
+                    : cost}
+                </span>{" "}
+                ₽
+              </div>
+            )}
             <p className="text-[12px] text-[#868D98]">участие</p>
           </div>
-          {user.loyalty.discount > 0 && (
+          {user.loyalty.discount > 0 && cost > 0 && (
             <div className="text-[14px]  text-[#F34338] line-through">
               <span className="font-semibold text-[14px] ">{cost}</span>{" "}
               <span className="opacity-40">₽</span>

@@ -13,7 +13,6 @@ import { twMerge } from "tailwind-merge";
 import { Preloader } from "../../components/widgets/preloader";
 import { BOT_NAME } from "../../shared/constants/api";
 import { useIsAdmin } from "../../api/hooks/useIsAdmin";
-import { Button } from "../../components/ui/button";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -48,11 +47,32 @@ export const Tournament = () => {
     );
 
   return (
-    <div className="flex flex-col gap-8 pb-[100px]">
+    <div className="flex flex-col gap-8 pb-[200px]">
       <div className="flex flex-col gap-7 px-[12px]">
         <h1 className="text-[24px] font-medium">{tournament?.[0]?.name}</h1>
 
         <div className="flex flex-col">
+          {isAdmin?.admin && (
+            <div className="py-5 border-b border-[#DADCE0]">
+              <div
+                onClick={async () => {
+                  navigate(`/tournament/${id}/edit`);
+                }}
+                className="flex flex-row justify-between items-center gap-[18px]"
+              >
+                <div className="flex flex-col items-center justify-center w-[42px] h-[42px] bg-[#AFFF3F] rounded-full">
+                  {Icons.Edit("black", "18", "18")}
+                </div>
+
+                <p className="text-black text-[16px] flex-grow">
+                  Изменить турнир
+                </p>
+
+                {Icons.ArrowRight("#A4A9B4", "24", "24")}
+              </div>
+            </div>
+          )}
+
           <div className="py-5 border-b border-[#DADCE0]">
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-col gap-[2px]  text-[14px] text-[#5D6674] ">
@@ -143,32 +163,36 @@ export const Tournament = () => {
 
               <div className="flex flex-row gap-[6px] ">
                 <div className="flex flex-col">
-                  <div
-                    className={twMerge(
-                      "text-[20px] ",
-                      user.loyalty.discount > 0
-                        ? "text-[#77BE14]"
-                        : "text-[#5D6674]"
-                    )}
-                  >
-                    <span
+                  {tournament?.[0].price === 0 ? (
+                    <div className="text-[20px] text-[#77BE14]">бесплатно</div>
+                  ) : (
+                    <div
                       className={twMerge(
-                        "text-black font-semibold text-[20px]",
-                        user.loyalty.discount > 0 && "text-[#77BE14]"
+                        "text-[20px] ",
+                        user.loyalty.discount > 0
+                          ? "text-[#77BE14]"
+                          : "text-[#5D6674]"
                       )}
                     >
-                      {user.loyalty.discount > 0
-                        ? Math.round(
-                            tournament?.[0].price *
-                              (1 - user.loyalty.discount / 100)
-                          )
-                        : tournament?.[0].price}
-                    </span>{" "}
-                    ₽
-                  </div>
+                      <span
+                        className={twMerge(
+                          "text-black font-semibold text-[20px]",
+                          user.loyalty.discount > 0 && "text-[#77BE14]"
+                        )}
+                      >
+                        {user.loyalty.discount > 0
+                          ? Math.round(
+                              tournament?.[0].price *
+                                (1 - user.loyalty.discount / 100)
+                            )
+                          : tournament?.[0].price}
+                      </span>{" "}
+                      ₽
+                    </div>
+                  )}
                   <p className="text-[12px] text-[#868D98]">участие</p>
                 </div>
-                {user.loyalty.discount > 0 && (
+                {user.loyalty.discount > 0 && tournament?.[0].price > 0 && (
                   <div className="text-[14px]  text-[#F34338] line-through">
                     <span className="font-semibold text-[14px] ">
                       {tournament?.[0].price}
@@ -320,18 +344,6 @@ export const Tournament = () => {
         user={user}
         waitlist={waitlist || []}
       />
-
-      {isAdmin?.admin && (
-        <div className="mb-10 flex flex-row gap-4 justify-center">
-          <Button
-            onClick={async () => {
-              navigate(`/tournament/${id}/edit`);
-            }}
-          >
-            Редактировать
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
