@@ -66,8 +66,37 @@ func (u *User) GetMe(ctx Context) (*domain.User, error) {
 }
 
 func (u *User) PatchMe(ctx Context, patch *domain.PatchUser) (*domain.User, error) {
-	if patch.BirthDate != nil && *patch.BirthDate == "" {
+	// Валидация обязательных полей
+	if patch.FirstName != nil && strings.TrimSpace(*patch.FirstName) == "" {
+		return nil, fmt.Errorf("first name cannot be empty")
+	}
+	if patch.LastName != nil && strings.TrimSpace(*patch.LastName) == "" {
+		return nil, fmt.Errorf("last name cannot be empty")
+	}
+	if patch.Rank != nil && *patch.Rank < 0 {
+		return nil, fmt.Errorf("rank cannot be negative")
+	}
+	
+	// Преобразование пустых строк в nil для опциональных полей
+	if patch.BirthDate != nil && strings.TrimSpace(*patch.BirthDate) == "" {
 		patch.BirthDate = nil
+	}
+	if patch.City != nil && strings.TrimSpace(*patch.City) == "" {
+		patch.City = nil
+	}
+	if patch.Avatar != nil && strings.TrimSpace(*patch.Avatar) == "" {
+		patch.Avatar = nil
+	}
+	if patch.Bio != nil && strings.TrimSpace(*patch.Bio) == "" {
+		// bio имеет DEFAULT '', поэтому оставляем пустую строку
+		emptyBio := ""
+		patch.Bio = &emptyBio
+	}
+	if patch.PlayingPosition != nil && strings.TrimSpace(string(*patch.PlayingPosition)) == "" {
+		patch.PlayingPosition = nil
+	}
+	if patch.PadelProfiles != nil && strings.TrimSpace(*patch.PadelProfiles) == "" {
+		patch.PadelProfiles = nil
 	}
 	
 	err := u.userRepo.Patch(ctx, ctx.User.ID, patch)
@@ -110,9 +139,34 @@ func (u *User) AdminPatchUser(ctx context.Context, userID string, patch *domain.
 		LoyaltyID:       patch.LoyaltyID,
 	}
 	
-	// Проверяем, если birthDate является пустой строкой, устанавливаем nil
-	if patch.BirthDate != nil && *patch.BirthDate == "" {
+	if patch.FirstName != nil && strings.TrimSpace(*patch.FirstName) == "" {
+		return nil, fmt.Errorf("first name cannot be empty")
+	}
+	if patch.LastName != nil && strings.TrimSpace(*patch.LastName) == "" {
+		return nil, fmt.Errorf("last name cannot be empty")
+	}
+	if patch.Rank != nil && *patch.Rank < 0 {
+		return nil, fmt.Errorf("rank cannot be negative")
+	}
+	
+	if patch.BirthDate != nil && strings.TrimSpace(*patch.BirthDate) == "" {
 		patchUser.BirthDate = nil
+	}
+	if patch.City != nil && strings.TrimSpace(*patch.City) == "" {
+		patchUser.City = nil
+	}
+	if patch.Avatar != nil && strings.TrimSpace(*patch.Avatar) == "" {
+		patchUser.Avatar = nil
+	}
+	if patch.Bio != nil && strings.TrimSpace(*patch.Bio) == "" {
+		emptyBio := ""
+		patchUser.Bio = &emptyBio
+	}
+	if patch.PlayingPosition != nil && strings.TrimSpace(string(*patch.PlayingPosition)) == "" {
+		patchUser.PlayingPosition = nil
+	}
+	if patch.PadelProfiles != nil && strings.TrimSpace(*patch.PadelProfiles) == "" {
+		patchUser.PadelProfiles = nil
 	}
 	
 	err := u.userRepo.Patch(ctx, userID, patchUser)

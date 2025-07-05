@@ -94,11 +94,44 @@ export const UserModal: React.FC<UserModalProps> = ({
 
     setIsLoading(true);
     try {
+      // Валидация обязательных полей
+      if (formData.firstName !== undefined && formData.firstName.trim() === '') {
+        toast.error('Имя не может быть пустым');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (formData.lastName !== undefined && formData.lastName.trim() === '') {
+        toast.error('Фамилия не может быть пустой');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (formData.rank !== undefined && formData.rank < 0) {
+        toast.error('Рейтинг не может быть отрицательным');
+        setIsLoading(false);
+        return;
+      }
+      
       const dataToSend = { ...formData };
       
-      // Если дата рождения пустая строка, не отправляем это поле
       if (dataToSend.birthDate === '') {
         delete dataToSend.birthDate;
+      }
+      if (dataToSend.city === '') {
+        delete dataToSend.city;
+      }
+      if (dataToSend.avatar === '') {
+        delete dataToSend.avatar;
+      }
+      if (dataToSend.bio === '') {
+        delete dataToSend.bio;
+      }
+      if (dataToSend.playingPosition === '') {
+        delete dataToSend.playingPosition;
+      }
+      if (dataToSend.padelProfiles === '') {
+        delete dataToSend.padelProfiles;
       }
       
       const updatedUser = await usersApi.patch(user.id, dataToSend);
