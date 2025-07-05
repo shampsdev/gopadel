@@ -25,7 +25,6 @@ export const TournamentPlayers = ({
   const navigate = useNavigate();
 
   const goToUserProfile = (userId: string) => {
-    console.log("userId", userId);
     navigate(`/profile/${userId}`);
   };
 

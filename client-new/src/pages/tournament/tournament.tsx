@@ -47,7 +47,7 @@ export const Tournament = () => {
     );
 
   return (
-    <div className="flex flex-col gap-8 pb-[100px]">
+    <div className="flex flex-col gap-8 pb-[200px]">
       <div className="flex flex-col gap-7 px-[12px]">
         <h1 className="text-[24px] font-medium">{tournament?.[0]?.name}</h1>
 
@@ -163,29 +163,34 @@ export const Tournament = () => {
 
               <div className="flex flex-row gap-[6px] ">
                 <div className="flex flex-col">
-                  <div
-                    className={twMerge(
-                      "text-[20px] ",
-                      user.loyalty.discount > 0
-                        ? "text-[#77BE14]"
-                        : "text-[#5D6674]"
-                    )}
-                  >
-                    <span
+                  {tournament?.[0].price === 0 && (
+                    <div className="text-[20px] text-[#77BE14]">бесплатно</div>
+                  )}
+                  {tournament?.[0].price > 0 && (
+                    <div
                       className={twMerge(
-                        "text-black font-semibold text-[20px]",
-                        user.loyalty.discount > 0 && "text-[#77BE14]"
+                        "text-[20px] ",
+                        user.loyalty.discount > 0
+                          ? "text-[#77BE14]"
+                          : "text-[#5D6674]"
                       )}
                     >
-                      {user.loyalty.discount > 0
-                        ? Math.round(
-                            tournament?.[0].price *
-                              (1 - user.loyalty.discount / 100)
-                          )
-                        : tournament?.[0].price}
-                    </span>{" "}
-                    ₽
-                  </div>
+                      <span
+                        className={twMerge(
+                          "text-black font-semibold text-[20px]",
+                          user.loyalty.discount > 0 && "text-[#77BE14]"
+                        )}
+                      >
+                        {user.loyalty.discount > 0
+                          ? Math.round(
+                              tournament?.[0].price *
+                                (1 - user.loyalty.discount / 100)
+                            )
+                          : tournament?.[0].price}
+                      </span>{" "}
+                      ₽
+                    </div>
+                  )}
                   <p className="text-[12px] text-[#868D98]">участие</p>
                 </div>
                 {user.loyalty.discount > 0 && (

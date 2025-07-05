@@ -257,7 +257,7 @@ export const TournamentEdit = () => {
   }
 
   return (
-    <div className="flex flex-col gap-[40px] pb-[100px]">
+    <div className="flex flex-col gap-[40px] pb-[200px]">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2 px-[12px]">
           <p className="text-[24px] font-medium">Редактировать турнир</p>
@@ -435,7 +435,7 @@ export const TournamentEdit = () => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 mx-auto">
+      <div className="flex flex-col fixed bottom-[60px]  right-0 left-0 gap-4 w-full">
         <Button
           disabled={isUpdatingTournament}
           onClick={() => {
@@ -443,7 +443,9 @@ export const TournamentEdit = () => {
               handleUpdateTournament();
             }
           }}
-          className={!isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4]" : ""}
+          className={
+            !isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4]" : " mx-auto"
+          }
         >
           Сохранить изменения
         </Button>
