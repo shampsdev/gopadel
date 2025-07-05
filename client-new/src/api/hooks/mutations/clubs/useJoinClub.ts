@@ -10,6 +10,7 @@ export const useJoinClub = () => {
     mutationKey: ["my-clubs"],
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-clubs"] });
+      queryClient.invalidateQueries({ queryKey: ["tournaments"] });
     },
     onError: (error) => {
       console.error(error);
