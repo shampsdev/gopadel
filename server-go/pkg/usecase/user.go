@@ -66,6 +66,10 @@ func (u *User) GetMe(ctx Context) (*domain.User, error) {
 }
 
 func (u *User) PatchMe(ctx Context, patch *domain.PatchUser) (*domain.User, error) {
+	if patch.BirthDate != nil && *patch.BirthDate == "" {
+		patch.BirthDate = nil
+	}
+	
 	err := u.userRepo.Patch(ctx, ctx.User.ID, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch user: %w", err)
@@ -104,6 +108,11 @@ func (u *User) AdminPatchUser(ctx context.Context, userID string, patch *domain.
 		PadelProfiles:   patch.PadelProfiles,
 		IsRegistered:    patch.IsRegistered,
 		LoyaltyID:       patch.LoyaltyID,
+	}
+	
+	// Проверяем, если birthDate является пустой строкой, устанавливаем nil
+	if patch.BirthDate != nil && *patch.BirthDate == "" {
+		patchUser.BirthDate = nil
 	}
 	
 	err := u.userRepo.Patch(ctx, userID, patchUser)

@@ -94,7 +94,14 @@ export const UserModal: React.FC<UserModalProps> = ({
 
     setIsLoading(true);
     try {
-      const updatedUser = await usersApi.patch(user.id, formData);
+      const dataToSend = { ...formData };
+      
+      // Если дата рождения пустая строка, не отправляем это поле
+      if (dataToSend.birthDate === '') {
+        delete dataToSend.birthDate;
+      }
+      
+      const updatedUser = await usersApi.patch(user.id, dataToSend);
       onUserUpdated(updatedUser);
       setIsEditing(false);
       toast.success('Пользователь успешно обновлен');
