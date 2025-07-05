@@ -63,25 +63,42 @@ export const CompetitionCard = ({
 
         <div className="flex flex-col gap-3 text-[#868D98]">
           <div className="flex flex-row items-center gap-3">
-            {Icons.Calendar()}
+            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+              {Icons.Calendar()}
+            </div>
             <p>{date}</p>
           </div>
 
           <div className="flex flex-row items-center gap-3">
-            {Icons.Location()}
+            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+              {Icons.Location()}
+            </div>
             <div className="flex flex-col ">
-              <p>{locationTitle}</p>
+              <p>
+                {locationTitle} Lorem ipsum dolor sit amet consectetur
+                adipisicing elit. Sed enim ipsam facilis iste voluptate ea
+                explicabo quasi, laboriosam exercitationem? Ipsam similique, eos
+                minus voluptatum non molestias velit dolor illo delectus!
+                Suscipit qui veritatis quisquam eos animi ullam enim voluptatem
+                eum nostrum unde dignissimos deserunt blanditiis dicta illo,
+                quas harum cupiditate laborum. Adipisci exercitationem nihil
+                sit, ex quos quam nobis ad?
+              </p>
               <p>{address}</p>
             </div>
           </div>
 
           <div className="flex flex-row items-center gap-3">
-            {Icons.Cup()}
+            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+              {Icons.Cup()}
+            </div>
             <p>Тип: {type}</p>
           </div>
 
           <div className="flex flex-row items-center gap-3">
-            {Icons.Star()}
+            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+              {Icons.Star()}
+            </div>
             <p>{getRankTitle(rank)}</p>
           </div>
         </div>

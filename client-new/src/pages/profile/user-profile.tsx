@@ -18,7 +18,7 @@ export const UserProfile = () => {
 
   if (!user) return <Preloader />;
 
-  if (user[0].id === currentUser?.id) {
+  if (id === currentUser?.id) {
     return <Navigate to="/profile" replace />;
   }
 

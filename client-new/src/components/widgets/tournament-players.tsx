@@ -25,6 +25,7 @@ export const TournamentPlayers = ({
   const navigate = useNavigate();
 
   const goToUserProfile = (userId: string) => {
+    console.log("userId", userId);
     navigate(`/profile/${userId}`);
   };
 
@@ -93,7 +94,10 @@ export const TournamentPlayers = ({
                     registration.status === "PENDING" && "opacity-50",
                     registration.status === "CANCELED_BY_USER" && "opacity-75"
                   )}
-                  onClick={() => goToUserProfile(registration.user.id)}
+                  onClick={() => {
+                    console.log("registration.user.id", registration.user.id);
+                    goToUserProfile(registration.user.id);
+                  }}
                 >
                   {registration.status === "ACTIVE" && (
                     <div className="absolute bg-[#AFFF3F] top-0 right-0 w-[24px] z-10 h-[24px] rounded-full flex items-center justify-center">
