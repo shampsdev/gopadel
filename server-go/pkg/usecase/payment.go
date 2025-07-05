@@ -136,6 +136,15 @@ func (p *Payment) GetPaymentByPaymentID(ctx context.Context, paymentID string) (
 
 // CreateYooKassaPayment создает платеж в YooKassa для регистрации на турнир
 func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, tournamentID string, returnURL string) (*domain.Payment, error) {
+	tournament, err := p.getTournamentByID(ctx, tournamentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tournament: %w", err)
+	}
+
+	if tournament.Price == 0 {
+		return nil, fmt.Errorf("tournament is free, no payment required")
+	}
+
 	registration, err := p.findPendingRegistration(ctx, user.ID, tournamentID)
 	if err != nil {
 		return nil, err
@@ -151,11 +160,6 @@ func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, 
 		if payment.Status == domain.PaymentStatusSucceeded || payment.Status == domain.PaymentStatusPending {
 			return payment, nil
 		}
-	}
-
-	tournament, err := p.getTournamentByID(ctx, tournamentID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get tournament: %w", err)
 	}
 
 	yooPayment, err := p.createYooKassaPayment(tournament, user, returnURL)

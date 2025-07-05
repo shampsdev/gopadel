@@ -15,14 +15,14 @@ type CreatePaymentRequest struct {
 
 // CreatePayment godoc
 // @Summary Create payment for tournament registration
-// @Description Creates payment in YooKassa for existing PENDING registration. Returns existing payment if it's already in success/pending status.
+// @Description Creates payment in YooKassa for existing PENDING registration. Returns existing payment if it's already in success/pending status. For free tournaments (price = 0), payment is not required.
 // @Tags registration
 // @Accept json
 // @Produce json
 // @Param tournament_id path string true "Tournament ID"
 // @Param request body CreatePaymentRequest true "Payment creation request"
 // @Success 200 {object} domain.Payment "Payment created or existing payment returned"
-// @Failure 400 {object} map[string]string "Invalid request data"
+// @Failure 400 {object} map[string]string "Invalid request data or tournament is free"
 // @Failure 401 {object} map[string]string "User not authorized"
 // @Failure 404 {object} map[string]string "No pending registration found"
 // @Failure 500 {object} map[string]string "Internal server error"
@@ -50,6 +50,8 @@ func CreatePayment(paymentCase *usecase.Payment, userCase *usecase.User) gin.Han
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			case err.Error() == "tournament not found":
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			case err.Error() == "tournament is free, no payment required":
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			default:
 				ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to create payment")
 			}

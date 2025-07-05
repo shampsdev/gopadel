@@ -11,7 +11,7 @@ import (
 
 // RegisterForTournament godoc
 // @Summary Register for tournament
-// @Description Creates new registration or updates existing CANCELED status to PENDING
+// @Description Creates new registration or updates existing CANCELED status to PENDING. For free tournaments, status is set to ACTIVE immediately.
 // @Tags registration
 // @Accept json
 // @Produce json

@@ -124,10 +124,16 @@ func (r *Registration) RegisterForTournament(ctx context.Context, user *domain.U
 				return nil, err
 			}
 
-			// CANCELED -> PENDING
-			pendingStatus := domain.RegistrationStatusPending
+			// CANCELED -> PENDING или ACTIVE (для бесплатных турниров)
+			var newStatus domain.RegistrationStatus
+			if tournament.Price == 0 {
+				newStatus = domain.RegistrationStatusActive
+			} else {
+				newStatus = domain.RegistrationStatusPending
+			}
+			
 			patch := &domain.PatchRegistration{
-				Status: &pendingStatus,
+				Status: &newStatus,
 			}
 			
 			err := r.registrationRepo.Patch(ctx, reg.ID, patch)
@@ -144,10 +150,18 @@ func (r *Registration) RegisterForTournament(ctx context.Context, user *domain.U
 	}
 
 	// Создаем новую регистрацию
+	// Для бесплатных турниров (price = 0) сразу устанавливаем статус ACTIVE
+	var status domain.RegistrationStatus
+	if tournament.Price == 0 {
+		status = domain.RegistrationStatusActive
+	} else {
+		status = domain.RegistrationStatusPending
+	}
+
 	createRegistration := &domain.CreateRegistration{
 		UserID:       user.ID,
 		TournamentID: tournamentID,
-		Status:       domain.RegistrationStatusPending,
+		Status:       status,
 	}
 
 	id, err := r.registrationRepo.Create(ctx, createRegistration)
