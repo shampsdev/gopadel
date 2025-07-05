@@ -74,16 +74,7 @@ export const CompetitionCard = ({
               {Icons.Location()}
             </div>
             <div className="flex flex-col ">
-              <p>
-                {locationTitle} Lorem ipsum dolor sit amet consectetur
-                adipisicing elit. Sed enim ipsam facilis iste voluptate ea
-                explicabo quasi, laboriosam exercitationem? Ipsam similique, eos
-                minus voluptatum non molestias velit dolor illo delectus!
-                Suscipit qui veritatis quisquam eos animi ullam enim voluptatem
-                eum nostrum unde dignissimos deserunt blanditiis dicta illo,
-                quas harum cupiditate laborum. Adipisci exercitationem nihil
-                sit, ex quos quam nobis ad?
-              </p>
+              <p>{locationTitle}</p>
               <p>{address}</p>
             </div>
           </div>

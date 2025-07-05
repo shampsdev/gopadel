@@ -200,52 +200,45 @@ export const validateTimeFormat = (timeString: string): boolean => {
   if (startMinute < 0 || startMinute > 59 || endMinute < 0 || endMinute > 59)
     return false;
 
-  // Проверяем, что конечное время больше начального
-  const startTime = startHour * 60 + startMinute;
-  const endTime = endHour * 60 + endMinute;
-
-  return endTime > startTime;
+  // Убираем проверку, что конечное время больше начального
+  // Теперь время конца может быть меньше времени начала (переход на следующий день)
+  return true;
 };
 
 // Функция для форматирования ввода времени
 export const formatTimeInput = (value: string): string => {
-  // Удаляем все символы кроме цифр, двоеточий и дефисов
-  const cleaned = value.replace(/[^\d:-]/g, "");
+  // Удаляем все символы кроме цифр
+  const digits = value.replace(/\D/g, "").slice(0, 8);
 
-  // Ограничиваем количество дефисов
-  const parts = cleaned.split("-");
-  if (parts.length > 2) return parts.slice(0, 2).join("-");
+  if (digits.length === 0) return "";
 
-  // Форматируем каждую часть времени с ограничениями
-  const formattedParts = parts.map((part, index) => {
-    // Ограничиваем длину каждой части времени
-    if (index === 0) {
-      // Первая часть времени (начало)
-      if (part.length > 5) part = part.slice(0, 5); // чч:мм - максимум 5 символов
-    } else if (index === 1) {
-      // Вторая часть времени (конец)
-      if (part.length > 5) part = part.slice(0, 5); // чч:мм - максимум 5 символов
+  // Используем регулярные выражения для форматирования
+  const match = digits.match(/^(\d{0,2})(\d{0,2})(\d{0,2})(\d{0,2})$/);
+
+  if (!match) return "";
+
+  const [, hours1, minutes1, hours2, minutes2] = match;
+
+  let result = "";
+
+  // Первая часть времени
+  if (hours1) result += hours1;
+  if (minutes1) {
+    if (hours1.length === 2) result += ":" + minutes1;
+    else result += minutes1;
+  }
+
+  // Вторая часть времени
+  if (hours2 || minutes2) {
+    if (result) result += "-";
+    if (hours2) result += hours2;
+    if (minutes2) {
+      if (hours2 && hours2.length === 2) result += ":" + minutes2;
+      else result += minutes2;
     }
+  }
 
-    // Добавляем двоеточие после часов, если его нет
-    if (part.length > 2 && !part.includes(":")) {
-      const hours = part.slice(0, 2);
-      const minutes = part.slice(2, 4);
-      return hours + ":" + minutes;
-    }
-
-    // Ограничиваем часы и минуты
-    if (part.includes(":")) {
-      const [hours, minutes] = part.split(":");
-      const limitedHours = hours.slice(0, 2);
-      const limitedMinutes = minutes ? minutes.slice(0, 2) : "";
-      return limitedHours + ":" + limitedMinutes;
-    }
-
-    return part;
-  });
-
-  return formattedParts.join("-");
+  return result;
 };
 
 // Функция для создания startTime и endTime из даты и времени по МСК
@@ -273,13 +266,23 @@ export const createStartAndEndTime = (
     startHour,
     startMinute
   );
-  const endDate = new Date(
+
+  // Создаем дату для конца времени
+  let endDate = new Date(
     fullYear,
     parseInt(month) - 1,
     parseInt(day),
     endHour,
     endMinute
   );
+
+  // Если время конца меньше времени начала, добавляем один день
+  const startTimeInMinutes = startHour * 60 + startMinute;
+  const endTimeInMinutes = endHour * 60 + endMinute;
+
+  if (endTimeInMinutes <= startTimeInMinutes) {
+    endDate.setDate(endDate.getDate() + 1);
+  }
 
   // Получаем смещение московского времени (UTC+3)
   const moscowOffset = 3 * 60; // 3 часа в минутах
