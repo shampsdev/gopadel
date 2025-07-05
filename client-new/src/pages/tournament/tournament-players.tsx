@@ -3,14 +3,17 @@ import { getRankTitle } from "../../utils/rank-title";
 import { useGetTournaments } from "../../api/hooks/useGetTournaments";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Preloader } from "../../components/widgets/preloader";
+import { useGetTournamentWaitlist } from "../../api/hooks/useGetTournamentWaitlist";
 
 export const TournamentPlayers = () => {
   useTelegramBackButton({ showOnMount: true });
   const { id } = useParams();
 
   const { data: tournaments, isLoading } = useGetTournaments({ id: id });
+  const { data: waitlist, isLoading: waitlistLoading } =
+    useGetTournamentWaitlist(id!);
 
-  if (isLoading) return <Preloader />;
+  if (isLoading || waitlistLoading) return <Preloader />;
 
   if (tournaments) {
     return (
@@ -67,11 +70,25 @@ export const TournamentPlayers = () => {
                           </p>
                         </div>
                       </div>
-                      {userRegistration.status === "CANCELED_BY_USER" && (
-                        <div className="w-fit rounded-[30px] px-[10px] py-[6px] bg-[#F34338] bg-opacity-[24%] text-[#F34338] text-[12px] h-full flex flex-col items-start">
-                          отменил(а)
-                        </div>
-                      )}
+                      {userRegistration.status === "CANCELED_BY_USER" &&
+                        !waitlist?.some(
+                          (waitlistItem) =>
+                            waitlistItem.user.id === userRegistration.user.id
+                        ) && (
+                          <div className="w-fit rounded-[30px] px-[10px] py-[6px] bg-[#F34338] bg-opacity-[24%] text-[#F34338] text-[12px] h-full flex flex-col items-start">
+                            отменил(а)
+                          </div>
+                        )}
+                      {userRegistration.status === "CANCELED_BY_USER" &&
+                        waitlist &&
+                        waitlist.some(
+                          (waitlistItem) =>
+                            waitlistItem.user.id === userRegistration.user.id
+                        ) && (
+                          <div className="w-fit bg-[#F8F8FA] text-[#A4A9B4] h-full flex flex-col rounded-[30px] px-[10px] py-[6px] items-start text-[12px]">
+                            в списке ожидания
+                          </div>
+                        )}
                       {userRegistration.status === "PENDING" && (
                         <div className="w-fit bg-[#F8F8FA] text-[#A4A9B4] h-full flex flex-col rounded-[30px] px-[10px] py-[6px] items-start text-[12px]">
                           ожидает оплаты

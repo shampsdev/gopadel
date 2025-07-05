@@ -163,10 +163,9 @@ export const Tournament = () => {
 
               <div className="flex flex-row gap-[6px] ">
                 <div className="flex flex-col">
-                  {tournament?.[0].price === 0 && (
+                  {tournament?.[0].price === 0 ? (
                     <div className="text-[20px] text-[#77BE14]">бесплатно</div>
-                  )}
-                  {tournament?.[0].price > 0 && (
+                  ) : (
                     <div
                       className={twMerge(
                         "text-[20px] ",
