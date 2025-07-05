@@ -157,6 +157,7 @@ export const EditProfile = () => {
         birthDataISO = parseBirthDateToISO(birthDate);
       }
 
+      console.log(birthDataISO);
       await patchMeMutation.mutateAsync({
         avatar: avatarUrl!,
         bio: bio ?? "",
