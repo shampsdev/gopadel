@@ -148,7 +148,9 @@ export const TournamentStatusActions = ({
                     tournamentId: tournament.id,
                     returnUrl: `https://t.me/${BOT_NAME}/app?startapp=tour-${tournament.id}`,
                   });
-                  window.open(payment?.paymentLink, "_blank");
+                  if (payment?.paymentLink) {
+                    openTelegramLink(payment.paymentLink);
+                  }
                 }}
               >
                 Оплатить

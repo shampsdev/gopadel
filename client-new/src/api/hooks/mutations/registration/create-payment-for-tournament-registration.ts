@@ -14,7 +14,11 @@ export const useCreatePaymentForTournamentRegistration = () => {
       tournamentId: string;
       returnUrl: string;
     }) =>
-      createPaymentForTournamentRegistration(token!, tournamentId, returnUrl),
+      createPaymentForTournamentRegistration(
+        token ?? "",
+        tournamentId,
+        returnUrl
+      ),
     onSuccess: (_, { tournamentId }) => {
       queryClient.invalidateQueries({
         queryKey: ["my-registrations"],
