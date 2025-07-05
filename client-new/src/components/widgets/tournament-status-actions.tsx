@@ -149,7 +149,7 @@ export const TournamentStatusActions = ({
                     returnUrl: `https://t.me/${BOT_NAME}/app?startapp=tour-${tournament.id}`,
                   });
                   if (payment?.paymentLink) {
-                    openTelegramLink(payment.paymentLink);
+                    window.open(payment.paymentLink, "_blank");
                   }
                 }}
               >
