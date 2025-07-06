@@ -19,6 +19,26 @@ definitions:
       userTelegramUsername:
         type: string
     type: object
+  domain.AdminFilterTournament:
+    properties:
+      clubId:
+        type: string
+      clubName:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      organizatorFirstName:
+        type: string
+      organizatorId:
+        type: string
+      organizatorTelegramId:
+        description: Дополнительные поля для удобства фильтрации
+        type: integer
+      tournamentType:
+        type: string
+    type: object
   domain.AdminLogin:
     properties:
       password:
@@ -51,6 +71,33 @@ definitions:
     required:
     - new_password
     - old_password
+    type: object
+  domain.AdminPatchTournament:
+    properties:
+      clubId:
+        type: string
+      courtId:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      maxUsers:
+        type: integer
+      name:
+        type: string
+      organizatorId:
+        type: string
+      price:
+        type: integer
+      rankMax:
+        type: number
+      rankMin:
+        type: number
+      startTime:
+        type: string
+      tournamentType:
+        type: string
     type: object
   domain.AdminPatchUser:
     properties:
@@ -198,8 +245,10 @@ definitions:
       price:
         type: integer
       rankMax:
+        minimum: 0
         type: number
       rankMin:
+        minimum: 0
         type: number
       startTime:
         type: string
@@ -211,8 +260,6 @@ definitions:
     - maxUsers
     - name
     - organizatorId
-    - rankMax
-    - rankMin
     - startTime
     - tournamentType
     type: object
@@ -1567,6 +1614,157 @@ paths:
       summary: Get user options (Admin)
       tags:
       - admin-registrations
+  /admin/tournaments:
+    post:
+      consumes:
+      - application/json
+      description: Create a new tournament. Available for any admin.
+      parameters:
+      - description: Tournament data
+        in: body
+        name: tournament
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateTournament'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Tournament'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create tournament (Admin)
+      tags:
+      - admin-tournaments
+  /admin/tournaments/{id}:
+    delete:
+      description: Delete tournament. Available for any admin.
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete tournament (Admin)
+      tags:
+      - admin-tournaments
+    patch:
+      consumes:
+      - application/json
+      description: Update tournament data. Available for any admin.
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Tournament update data
+        in: body
+        name: tournament
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AdminPatchTournament'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Tournament'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update tournament (Admin)
+      tags:
+      - admin-tournaments
+  /admin/tournaments/filter:
+    post:
+      consumes:
+      - application/json
+      description: Get all tournaments with advanced filtering. Available for any
+        admin.
+      parameters:
+      - description: Filter criteria
+        in: body
+        name: filter
+        schema:
+          $ref: '#/definitions/domain.AdminFilterTournament'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Tournament'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all tournaments (Admin)
+      tags:
+      - admin-tournaments
   /admin/users/{id}:
     patch:
       consumes:

@@ -57,6 +57,9 @@ type Tournament interface {
 	Filter(ctx context.Context, filter *domain.FilterTournament) ([]*domain.Tournament, error)
 	GetTournamentsByUserID(ctx context.Context, userID string) ([]*domain.Tournament, error)
 	Delete(ctx context.Context, id string) error
+	AdminFilter(ctx context.Context, filter *domain.AdminFilterTournament) ([]*domain.Tournament, error)
+	AdminPatch(ctx context.Context, id string, tournament *domain.AdminPatchTournament) error
+	AdminDelete(ctx context.Context, id string) error
 }
 
 type Registration interface {

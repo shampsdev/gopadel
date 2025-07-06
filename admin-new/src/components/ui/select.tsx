@@ -15,6 +15,7 @@ interface SelectTriggerProps {
 
 interface SelectValueProps {
   placeholder?: string
+  children?: React.ReactNode
 }
 
 interface SelectContentProps {
@@ -67,8 +68,15 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({ className, childre
   )
 }
 
-export const SelectValue: React.FC<SelectValueProps> = ({ placeholder }) => {
+export const SelectValue: React.FC<SelectValueProps> = ({ placeholder, children }) => {
   const { value } = React.useContext(SelectContext)
+  
+  // Если есть children и value, показываем children
+  if (children && value) {
+    return <span>{children}</span>
+  }
+  
+  // Иначе показываем value или placeholder
   return <span>{value || placeholder}</span>
 }
 

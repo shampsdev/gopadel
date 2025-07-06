@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { 
@@ -23,25 +23,8 @@ import { LoyaltyPage } from './LoyaltyPage';
 import { CourtsPage } from './CourtsPage';
 import { RegistrationsPage } from './RegistrationsPage';
 import { ClubsPage } from './ClubsPage';
+import { TournamentsPage } from './TournamentsPage';
 import type { NavItem } from '../types/navigation';
-
-// Страницы-заглушки
-const TournamentsPage = () => (
-  <div className="space-y-6">
-    <div>
-      <h2 className="text-3xl font-bold text-white mb-2">Турниры</h2>
-      <p className="text-zinc-400">Управление турнирами и соревнованиями</p>
-    </div>
-    <Card className="bg-zinc-900 border-zinc-800">
-      <CardContent className="p-8 text-center">
-        <Trophy className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
-        <p className="text-zinc-400">Страница турниров в разработке</p>
-      </CardContent>
-    </Card>
-  </div>
-);
-
-
 
 const HomePage = ({ setCurrentPage, navItems }: { setCurrentPage: (page: string) => void, navItems: NavItem[] }) => (
   <div className="space-y-8">
