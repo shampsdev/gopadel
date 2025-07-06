@@ -7,7 +7,9 @@ import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
-import { Plus, Edit, Trash2, Save, X, Trophy, Calendar, Users, MapPin, User } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { Plus, Edit, Trash2, Save, X, Trophy, Calendar, MapPin, UserCheck, Clock } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { ru } from 'date-fns/locale/ru';
 import "react-datepicker/dist/react-datepicker.css";
@@ -17,6 +19,8 @@ import { tournamentsApi, type Tournament, type CreateTournament, type AdminPatch
 import { clubsApi, type Club } from '../api/clubs';
 import { courtsApi, type Court } from '../api/courts';
 import { adminsApi } from '../api/admins';
+import { registrationsApi, type RegistrationWithPayments, type RegistrationStatus } from '../api/registrations';
+import { waitlistApi, type WaitlistUser } from '../api/waitlist';
 import type { AdminUser } from '../types/admin';
 import { ratingLevels, getRatingRangeDescription } from '../utils/ratingUtils';
 
@@ -32,6 +36,16 @@ export const TournamentsPage: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isCustomTournamentType, setIsCustomTournamentType] = useState(false);
+  const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
+  const [registrations, setRegistrations] = useState<RegistrationWithPayments[]>([]);
+  const [loadingRegistrations, setLoadingRegistrations] = useState(false);
+  const [waitlist, setWaitlist] = useState<WaitlistUser[]>([]);
+  const [loadingWaitlist, setLoadingWaitlist] = useState(false);
+  const [filters, setFilters] = useState({
+    name: '',
+    clubId: '',
+    organizatorId: '',
+  });
   const [formData, setFormData] = useState({
     name: '',
     startTime: null as Date | null,
@@ -131,6 +145,85 @@ export const TournamentsPage: React.FC = () => {
     }
   };
 
+  const loadRegistrations = async (tournamentId: string) => {
+    setLoadingRegistrations(true);
+    try {
+      const data = await registrationsApi.filter({ tournamentId });
+      setRegistrations(data);
+    } catch (error: unknown) {
+      toast.error('Ошибка при загрузке регистраций');
+      console.error('Error loading registrations:', error);
+    } finally {
+      setLoadingRegistrations(false);
+    }
+  };
+
+  const loadWaitlist = async (tournamentId: string) => {
+    setLoadingWaitlist(true);
+    try {
+      const data = await waitlistApi.getTournamentWaitlist(tournamentId);
+      setWaitlist(data);
+    } catch (error: unknown) {
+      toast.error('Ошибка при загрузке списка ожидания');
+      console.error('Error loading waitlist:', error);
+    } finally {
+      setLoadingWaitlist(false);
+    }
+  };
+
+  const handleStatusChange = async (registrationId: string, newStatus: RegistrationStatus) => {
+    try {
+      await registrationsApi.updateStatus(registrationId, newStatus);
+      toast.success('Статус регистрации обновлен');
+      
+      // Обновляем локальное состояние
+      setRegistrations(prev => 
+        prev.map(reg => 
+          reg.id === registrationId 
+            ? { ...reg, status: newStatus }
+            : reg
+        )
+      );
+    } catch (error: unknown) {
+      toast.error('Ошибка при изменении статуса');
+      console.error('Error updating registration status:', error);
+    }
+  };
+
+  const handleTournamentSelect = (tournament: Tournament) => {
+    setSelectedTournament(tournament);
+    setEditingId(tournament.id);
+    loadRegistrations(tournament.id);
+    loadWaitlist(tournament.id);
+    
+    // Заполняем форму данными турнира
+    setFormData({
+      name: tournament.name,
+      startTime: convertUtcToLocalDate(tournament.startTime),
+      endTime: tournament.endTime ? convertUtcToLocalDate(tournament.endTime) : null,
+      price: tournament.price,
+      rankMin: tournament.rankMin,
+      rankMax: tournament.rankMax,
+      maxUsers: tournament.maxUsers,
+      description: tournament.description || '',
+      courtId: tournament.court?.id || '',
+      clubId: tournament.clubId,
+      tournamentType: tournament.tournamentType,
+      customTournamentType: '',
+      organizatorId: tournament.organizator?.id || '',
+    });
+    
+    // Проверяем, нужно ли показывать поле для кастомного типа
+    const isCustomType = !tournamentTypes.some(t => t.value === tournament.tournamentType);
+    setIsCustomTournamentType(isCustomType);
+    if (isCustomType) {
+      setFormData(prev => ({
+        ...prev,
+        customTournamentType: tournament.tournamentType
+      }));
+    }
+  };
+
   const handleCreate = async () => {
     try {
       const tournamentType = isCustomTournamentType ? formData.customTournamentType : formData.tournamentType;
@@ -156,15 +249,12 @@ export const TournamentsPage: React.FC = () => {
       };
 
       await tournamentsApi.create(createData);
-      toast.success('Турнир успешно создан');
+      toast.success('Турнир создан');
       
-      resetForm();
-      loadTournaments();
+      await loadTournaments();
     } catch (error: unknown) {
-      const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error 
-        : undefined;
-      toast.error(errorMessage || 'Ошибка при создании турнира');
+      toast.error('Ошибка при создании турнира');
+      console.error('Error creating tournament:', error);
     }
   };
 
@@ -177,7 +267,7 @@ export const TournamentsPage: React.FC = () => {
         return;
       }
       
-      const patchData: AdminPatchTournament = {
+      const updateData: AdminPatchTournament = {
         name: formData.name,
         startTime: convertLocalDateToUtc(formData.startTime),
         endTime: formData.endTime ? convertLocalDateToUtc(formData.endTime) : undefined,
@@ -192,65 +282,44 @@ export const TournamentsPage: React.FC = () => {
         organizatorId: formData.organizatorId,
       };
 
-      await tournamentsApi.patch(id, patchData);
-      toast.success('Турнир успешно обновлен');
+      await tournamentsApi.patch(id, updateData);
+      toast.success('Турнир обновлен');
       
-      resetForm();
-      loadTournaments();
+      await loadTournaments();
     } catch (error: unknown) {
-      const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error 
-        : undefined;
-      toast.error(errorMessage || 'Ошибка при обновлении турнира');
+      toast.error('Ошибка при обновлении турнира');
+      console.error('Error updating tournament:', error);
     }
   };
 
   const handleDelete = async (tournament: Tournament) => {
-    if (!confirm(`Вы уверены, что хотите удалить турнир "${tournament.name}"?`)) {
+    if (!window.confirm(`Вы уверены, что хотите удалить турнир "${tournament.name}"?`)) {
       return;
     }
 
     try {
       await tournamentsApi.delete(tournament.id);
-      toast.success('Турнир успешно удален');
-      loadTournaments();
+      toast.success('Турнир удален');
+      await loadTournaments();
+      
+      // Если удаляем текущий редактируемый турнир, сбрасываем форму
+      if (editingId === tournament.id) {
+        resetForm();
+      }
     } catch (error: unknown) {
-      const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error 
-        : undefined;
-      toast.error(errorMessage || 'Ошибка при удалении турнира');
+      toast.error('Ошибка при удалении турнира');
+      console.error('Error deleting tournament:', error);
     }
   };
 
-  const startEdit = (tournament: Tournament) => {
-    setEditingId(tournament.id);
-    setIsCreating(false);
-    
-    // Проверяем, является ли тип турнира кастомным
-    const isCustomType = !tournamentTypes.some(t => t.value === tournament.tournamentType);
-    setIsCustomTournamentType(isCustomType);
-    
-    setFormData({
-      name: tournament.name,
-      startTime: convertUtcToLocalDate(tournament.startTime),
-      endTime: tournament.endTime ? convertUtcToLocalDate(tournament.endTime) : null,
-      price: tournament.price,
-      rankMin: tournament.rankMin,
-      rankMax: tournament.rankMax,
-      maxUsers: tournament.maxUsers,
-      description: tournament.description || '',
-      courtId: tournament.court.id,
-      clubId: tournament.clubId,
-      tournamentType: isCustomType ? 'custom' : tournament.tournamentType,
-      customTournamentType: isCustomType ? tournament.tournamentType : '',
-      organizatorId: tournament.organizator.id,
-    });
-  };
+
 
   const startCreate = () => {
     setIsCreating(true);
     setEditingId(null);
-    setIsCustomTournamentType(false);
+    setSelectedTournament(null);
+    setRegistrations([]);
+    setWaitlist([]);
     setFormData({
       name: '',
       startTime: null,
@@ -262,16 +331,19 @@ export const TournamentsPage: React.FC = () => {
       description: '',
       courtId: '',
       clubId: '',
-      tournamentType: 'americano',
+      tournamentType: 'tournament',
       customTournamentType: '',
       organizatorId: '',
     });
+    setIsCustomTournamentType(false);
   };
 
   const resetForm = () => {
     setIsCreating(false);
     setEditingId(null);
-    setIsCustomTournamentType(false);
+    setSelectedTournament(null);
+    setRegistrations([]);
+    setWaitlist([]);
     setFormData({
       name: '',
       startTime: null,
@@ -283,74 +355,36 @@ export const TournamentsPage: React.FC = () => {
       description: '',
       courtId: '',
       clubId: '',
-      tournamentType: 'americano',
+      tournamentType: 'tournament',
       customTournamentType: '',
       organizatorId: '',
     });
+    setIsCustomTournamentType(false);
   };
 
   const handleInputChange = (field: string, value: string | number | Date | null) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleTournamentTypeChange = (value: string) => {
+    setFormData(prev => ({ ...prev, tournamentType: value }));
     setIsCustomTournamentType(value === 'custom');
-    handleInputChange('tournamentType', value);
-    if (value !== 'custom') {
-      handleInputChange('customTournamentType', '');
-    }
   };
 
   const handleRankChange = (field: 'rankMin' | 'rankMax', levelIndex: number) => {
     const level = ratingLevels[levelIndex];
     if (field === 'rankMin') {
-      handleInputChange('rankMin', level.min);
-      // Если минимальный рейтинг больше максимального, устанавливаем максимальный на верхнюю границу выбранного уровня
-      if (level.min > formData.rankMax) {
-        handleInputChange('rankMax', level.max);
-      }
+      setFormData(prev => ({ ...prev, rankMin: level.min }));
     } else {
-      handleInputChange('rankMax', level.max);
-      // Если максимальный рейтинг меньше минимального, устанавливаем минимальный на нижнюю границу выбранного уровня
-      if (level.max < formData.rankMin) {
-        handleInputChange('rankMin', level.min);
-      }
+      setFormData(prev => ({ ...prev, rankMax: level.max }));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim()) {
-      toast.error('Название турнира обязательно');
-      return;
-    }
-
-    if (!formData.startTime) {
-      toast.error('Время начала обязательно');
-      return;
-    }
-
-    if (!formData.courtId) {
-      toast.error('Корт обязателен');
-      return;
-    }
-
-    if (!formData.clubId) {
-      toast.error('Клуб обязателен');
-      return;
-    }
-
-    if (!formData.organizatorId) {
-      toast.error('Организатор обязателен');
-      return;
-    }
-
-    if (isCustomTournamentType && !formData.customTournamentType.trim()) {
-      toast.error('Введите тип турнира');
+    if (!canEdit) {
+      toast.error('У вас нет прав для выполнения этого действия');
       return;
     }
 
@@ -362,47 +396,59 @@ export const TournamentsPage: React.FC = () => {
   };
 
   const formatDateTime = (dateTime: string) => {
-    // Создаем дату из UTC строки и форматируем в локальном времени
-    const utcDate = new Date(dateTime);
-    
-    return utcDate.toLocaleString('ru-RU', {
+    if (!dateTime) return '';
+    try {
+      const date = new Date(dateTime);
+      return date.toLocaleString('ru-RU', {
       year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
       hour: '2-digit',
-      minute: '2-digit'
+        minute: '2-digit',
+        timeZone: 'Europe/Moscow'
     });
+         } catch {
+       return dateTime;
+     }
   };
 
   const getClubName = (clubId: string) => {
     const club = clubs.find(c => c.id === clubId);
-    return club?.name || clubId;
+    return club ? club.name : clubId;
   };
 
   const getCourtName = (courtId: string) => {
     const court = courts.find(c => c.id === courtId);
-    return court?.name || courtId;
+    return court ? court.name : courtId;
   };
 
-  const getAdminName = (adminId: string) => {
-    const admin = admins.find(a => a.user?.id === adminId);
-    return admin?.user ? `${admin.user.firstName} ${admin.user.lastName}` : adminId;
+  const getAdminName = (userId: string) => {
+    const admin = admins.find(a => a.user_id === userId);
+    return admin ? `${admin.user?.firstName} ${admin.user?.lastName}` : userId;
   };
 
   const getTournamentTypeName = (type: string) => {
-    const predefinedType = tournamentTypes.find(t => t.value === type);
-    return predefinedType?.label || type;
+    const tournamentType = tournamentTypes.find(t => t.value === type);
+    return tournamentType ? tournamentType.label : type;
   };
 
   const getSelectedMinRatingLevel = () => {
     const level = ratingLevels.find(l => l.min === formData.rankMin);
-    return level ? level.label : `${formData.rankMin}`;
+    return level ? `${level.label} (${level.min} - ${level.max})` : `${formData.rankMin}`;
   };
 
   const getSelectedMaxRatingLevel = () => {
     const level = ratingLevels.find(l => l.max === formData.rankMax);
-    return level ? level.label : `${formData.rankMax}`;
+    return level ? `${level.label} (${level.min} - ${level.max})` : `${formData.rankMax}`;
   };
+
+  const filteredTournaments = tournaments.filter(tournament => {
+    const nameMatch = !filters.name || tournament.name.toLowerCase().includes(filters.name.toLowerCase());
+    const clubMatch = !filters.clubId || tournament.clubId === filters.clubId;
+    const organizatorMatch = !filters.organizatorId || tournament.organizator?.id === filters.organizatorId;
+    
+    return nameMatch && clubMatch && organizatorMatch;
+  });
 
   if (loading) {
     return (
@@ -418,11 +464,11 @@ export const TournamentsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
-        {/* Форма создания/редактирования */}
+        {/* Форма создания/редактирования с табами */}
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader className="pb-4">
             <CardTitle className="text-white flex items-center justify-between text-lg">
-              {isCreating ? 'Создать турнир' : editingId ? 'Редактировать турнир' : 'Форма управления'}
+              {isCreating ? 'Создать турнир' : editingId ? `Редактировать: ${selectedTournament?.name}` : 'Форма управления'}
               {(isCreating || editingId) && (
                 <Button
                   variant="outline"
@@ -437,6 +483,18 @@ export const TournamentsPage: React.FC = () => {
           </CardHeader>
           <CardContent className="pt-0">
             {isCreating || editingId ? (
+              <Tabs defaultValue="edit" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="edit">Редактирование</TabsTrigger>
+                  <TabsTrigger value="participants" className={!selectedTournament ? 'opacity-50 pointer-events-none' : ''}>
+                    Участники ({registrations.filter(r => r.status === 'ACTIVE').length}/{registrations.filter(r => r.status === 'ACTIVE' || r.status === 'PENDING').length})
+                  </TabsTrigger>
+                  <TabsTrigger value="waiting" className={!selectedTournament ? 'opacity-50 pointer-events-none' : ''}>
+                    Список ожидания ({waitlist.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="edit" className="space-y-4 mt-4">
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
                   <Label className="text-zinc-300 text-sm font-medium">Название</Label>
@@ -629,8 +687,8 @@ export const TournamentsPage: React.FC = () => {
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
                       {admins.map((admin) => (
-                        <SelectItem key={admin.id} value={admin.user!.id}>
-                          {admin.user!.firstName} {admin.user!.lastName} (@{admin.user!.telegramUsername})
+                            <SelectItem key={admin.id} value={admin.user_id}>
+                              {admin.user?.firstName} {admin.user?.lastName} (@{admin.user?.telegramUsername})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -642,15 +700,17 @@ export const TournamentsPage: React.FC = () => {
                   <Textarea
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 min-h-[60px] mt-1 resize-none"
-                    placeholder="Описание турнира"
+                        className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 mt-1 resize-none"
+                        placeholder="Дополнительная информация о турнире"
+                        rows={3}
                   />
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 pt-2">
+                    <div className="flex gap-2 pt-2">
                   <Button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none"
+                        className="bg-blue-600 hover:bg-blue-700 text-white flex-1"
+                        disabled={!canEdit}
                   >
                     <Save className="h-4 w-4 mr-2" />
                     {isCreating ? 'Создать' : 'Сохранить'}
@@ -659,29 +719,183 @@ export const TournamentsPage: React.FC = () => {
                     type="button"
                     variant="outline"
                     onClick={resetForm}
-                    className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white flex-1 sm:flex-none"
+                        className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white"
                   >
+                        <X className="h-4 w-4 mr-2" />
                     Отмена
                   </Button>
                 </div>
               </form>
+                </TabsContent>
+
+                <TabsContent value="participants" className="space-y-4 mt-4">
+                  <Card className="bg-zinc-800 border-zinc-700">
+                    <CardHeader>
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <UserCheck className="h-5 w-5 text-green-400" />
+                        Участники
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {loadingRegistrations ? (
+                        <div className="text-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                          <p className="text-zinc-400 mt-2">Загрузка регистраций...</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {registrations.length === 0 ? (
+                            <p className="text-zinc-400 text-center py-8">Нет участников</p>
+                          ) : (
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Участник</TableHead>
+                                  <TableHead>Telegram</TableHead>
+                                  <TableHead>Рейтинг</TableHead>
+                                  <TableHead>Статус</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {registrations.map((registration) => (
+                                  <TableRow key={registration.id}>
+                                    <TableCell className="text-white">
+                                      {registration.user?.firstName} {registration.user?.lastName}
+                                    </TableCell>
+                                    <TableCell className="text-zinc-300">
+                                      <a 
+                                        href={`https://t.me/${registration.user?.telegramUsername}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-400 hover:text-blue-300 hover:underline"
+                                      >
+                                        @{registration.user?.telegramUsername}
+                                      </a>
+                                    </TableCell>
+                                    <TableCell className="text-zinc-300">
+                                      {registration.user?.rank || 0}
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex gap-1">
+                                        <Button
+                                          size="sm"
+                                          variant={registration.status === 'ACTIVE' ? 'default' : 'outline'}
+                                          onClick={() => handleStatusChange(registration.id, 'ACTIVE')}
+                                          className={`h-7 px-2 text-xs ${
+                                            registration.status === 'ACTIVE' 
+                                              ? 'bg-green-600 border-green-500 hover:bg-green-700 text-white' 
+                                              : 'bg-zinc-700 border-zinc-600 hover:bg-green-600 hover:border-green-500 text-zinc-300 hover:text-white'
+                                          }`}
+                                        >
+                                          Активен
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant={registration.status === 'PENDING' ? 'default' : 'outline'}
+                                          onClick={() => handleStatusChange(registration.id, 'PENDING')}
+                                          className={`h-7 px-2 text-xs ${
+                                            registration.status === 'PENDING' 
+                                              ? 'bg-yellow-600 border-yellow-500 hover:bg-yellow-700 text-white' 
+                                              : 'bg-zinc-700 border-zinc-600 hover:bg-yellow-600 hover:border-yellow-500 text-zinc-300 hover:text-white'
+                                          }`}
+                                        >
+                                          Ожидание
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant={registration.status === 'CANCELED' ? 'default' : 'outline'}
+                                          onClick={() => handleStatusChange(registration.id, 'CANCELED')}
+                                          className={`h-7 px-2 text-xs ${
+                                            registration.status === 'CANCELED' 
+                                              ? 'bg-red-600 border-red-500 hover:bg-red-700 text-white' 
+                                              : 'bg-zinc-700 border-zinc-600 hover:bg-red-600 hover:border-red-500 text-zinc-300 hover:text-white'
+                                          }`}
+                                        >
+                                          Отменен
+                                        </Button>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="waiting" className="space-y-4 mt-4">
+                  <Card className="bg-zinc-800 border-zinc-700">
+                    <CardHeader>
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-yellow-400" />
+                        Список ожидания
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {loadingWaitlist ? (
+                        <div className="text-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                          <p className="text-zinc-400 mt-2">Загрузка списка ожидания...</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {waitlist.length === 0 ? (
+                            <p className="text-zinc-400 text-center py-8">Список ожидания пуст</p>
+                          ) : (
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Участник</TableHead>
+                                  <TableHead>Telegram</TableHead>
+                                  <TableHead>Рейтинг</TableHead>
+                                  <TableHead>Город</TableHead>
+                                  <TableHead>Дата добавления</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {waitlist.map((waitlistEntry, index) => (
+                                  <TableRow key={index}>
+                                    <TableCell className="text-white">
+                                      {waitlistEntry.user?.firstName} {waitlistEntry.user?.lastName}
+                                    </TableCell>
+                                    <TableCell className="text-zinc-300">
+                                      @{waitlistEntry.user?.telegramUsername}
+                                    </TableCell>
+                                    <TableCell className="text-zinc-300">
+                                      {waitlistEntry.user?.rank || 0}
+                                    </TableCell>
+                                    <TableCell className="text-zinc-300">
+                                      {waitlistEntry.user?.city || '-'}
+                                    </TableCell>
+                                    <TableCell className="text-zinc-300">
+                                      {new Date(waitlistEntry.date).toLocaleDateString('ru-RU')}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             ) : (
-              <div className="text-center py-6 md:py-8">
-                <p className="text-zinc-400 mb-4 text-sm md:text-base">
-                  {canEdit 
-                    ? "Выберите турнир для редактирования или создайте новый"
-                    : "Только администраторы могут управлять турнирами"
-                  }
-                </p>
-                {canEdit && (
+              <div className="text-center py-8">
+                <Trophy className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
+                <p className="text-zinc-400 mb-4">Выберите турнир для редактирования или создайте новый</p>
                   <Button
                     onClick={startCreate}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={!canEdit}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Создать турнир
                   </Button>
-                )}
               </div>
             )}
           </CardContent>
@@ -691,64 +905,117 @@ export const TournamentsPage: React.FC = () => {
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader className="pb-4">
             <CardTitle className="text-white flex items-center justify-between text-lg">
-              Турниры
-              <Badge variant="outline" className="border-zinc-600 text-zinc-300">
-                {tournaments.length}
-              </Badge>
+              <span>Турниры ({filteredTournaments.length})</span>
+              {canEdit && (
+                <Button
+                  size="sm"
+                  onClick={startCreate}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Создать
+                </Button>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            {tournaments.length === 0 ? (
-              <div className="text-center py-6 md:py-8">
-                <p className="text-zinc-400 text-sm md:text-base">Нет турниров</p>
+            {/* Фильтры */}
+            <div className="space-y-3 mb-4 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-zinc-300 text-sm">Поиск по названию</Label>
+                  <Input
+                    value={filters.name}
+                    onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value }))}
+                    className="bg-zinc-700 border-zinc-600 text-white placeholder:text-zinc-500 mt-1"
+                    placeholder="Введите название турнира"
+                  />
+                </div>
+                <div>
+                  <Label className="text-zinc-300 text-sm">Клуб</Label>
+                  <Select value={filters.clubId} onValueChange={(value) => setFilters(prev => ({ ...prev, clubId: value }))}>
+                    <SelectTrigger className="bg-zinc-700 border-zinc-600 text-white mt-1">
+                      <SelectValue placeholder="Все клубы">
+                        {filters.clubId ? getClubName(filters.clubId) : 'Все клубы'}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                      <SelectItem value="">Все клубы</SelectItem>
+                      {clubs.map((club) => (
+                        <SelectItem key={club.id} value={club.id}>
+                          {club.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-zinc-300 text-sm">Организатор</Label>
+                  <Select value={filters.organizatorId} onValueChange={(value) => setFilters(prev => ({ ...prev, organizatorId: value }))}>
+                    <SelectTrigger className="bg-zinc-700 border-zinc-600 text-white mt-1">
+                      <SelectValue placeholder="Все организаторы">
+                        {filters.organizatorId ? getAdminName(filters.organizatorId) : 'Все организаторы'}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                      <SelectItem value="">Все организаторы</SelectItem>
+                      {admins.map((admin) => (
+                        <SelectItem key={admin.id} value={admin.user_id}>
+                          {admin.user?.firstName} {admin.user?.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            
+            {filteredTournaments.length === 0 ? (
+              <div className="text-center py-8">
+                <Calendar className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
+                <p className="text-zinc-400 mb-4">Турниры не найдены</p>
+                {canEdit && (
+                  <Button
+                    onClick={startCreate}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Создать первый турнир
+                  </Button>
+                )}
               </div>
             ) : (
-              <ScrollArea className="h-[300px] md:h-[400px] lg:h-[600px]">
-                <div className="space-y-3 md:space-y-4 pr-3">
-                  {tournaments.map((tournament) => (
+              <ScrollArea className="h-[600px] pr-4">
+                <div className="space-y-3">
+                  {filteredTournaments.map((tournament) => (
                     <div
                       key={tournament.id}
-                      className={`p-3 md:p-4 rounded-lg border transition-colors cursor-pointer ${
+                                             className={`p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
                         editingId === tournament.id
-                          ? 'border-green-600 bg-green-600/10'
-                          : 'border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800'
+                           ? 'bg-green-900/30 border-green-600' 
+                           : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-750 hover:border-zinc-600'
                       }`}
-                      onClick={() => canEdit && startEdit(tournament)}
+                      onClick={() => handleTournamentSelect(tournament)}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
-                            <h3 className="text-white font-medium text-base md:text-lg truncate flex items-center gap-2">
-                              <Trophy className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-medium text-white text-sm md:text-base line-clamp-1">
                               {tournament.name}
                             </h3>
-                            <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs w-fit">
+                            <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
                               {getTournamentTypeName(tournament.tournamentType)}
                             </Badge>
                           </div>
                           
-                          <div className="space-y-1 text-xs md:text-sm text-zinc-400">
-                            <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-1 text-zinc-400 text-xs">
                               <Calendar className="h-3 w-3" />
                               <span>{formatDateTime(tournament.startTime)}</span>
-                              {tournament.endTime && (
-                                <span>- {formatDateTime(tournament.endTime)}</span>
-                              )}
                             </div>
-                            
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 text-zinc-400 text-xs">
                               <MapPin className="h-3 w-3" />
-                              <span>{getCourtName(tournament.court.id)}</span>
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                              <User className="h-3 w-3" />
-                              <span>{tournament.organizator.firstName} {tournament.organizator.lastName}</span>
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                              <Users className="h-3 w-3" />
-                              <span>{tournament.participants?.length || 0}/{tournament.maxUsers} участников</span>
+                              <span>{getCourtName(tournament.court?.id || '')}</span>
                             </div>
                           </div>
 
@@ -776,11 +1043,12 @@ export const TournamentsPage: React.FC = () => {
                               variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                startEdit(tournament);
+                                handleTournamentSelect(tournament);
                               }}
-                              className="bg-zinc-700 border-zinc-600 hover:bg-zinc-600 text-white h-8 w-8 p-0"
+                              className="bg-blue-600 border-blue-500 hover:bg-blue-700 text-white h-8 px-2"
                             >
-                              <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                              <Edit className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                              Редактировать
                             </Button>
                             <Button
                               size="sm"

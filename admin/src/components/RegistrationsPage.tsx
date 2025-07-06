@@ -26,8 +26,8 @@ import {
 import { useToastContext } from '../contexts/ToastContext';
 import { registrationsApi } from '../api/registrations';
 import type { 
-  Registration, 
-  FilterRegistration, 
+  RegistrationWithPayments as Registration, 
+  AdminFilterRegistration as FilterRegistration, 
   TournamentOption, 
   UserOption,
   RegistrationStatus,
@@ -85,8 +85,11 @@ export const RegistrationsPage: React.FC = () => {
     try {
       const tournamentsData = await registrationsApi.getTournamentOptions();
       setTournaments(tournamentsData);
-    } catch (error: any) {
-      showErrorToast(error.response?.data?.error || 'Ошибка при загрузке турниров');
+    } catch (error: unknown) {
+      const errorMessage = error && typeof error === 'object' && 'response' in error 
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error 
+        : undefined;
+      showErrorToast(errorMessage || 'Ошибка при загрузке турниров');
     }
   };
 
@@ -123,7 +126,7 @@ export const RegistrationsPage: React.FC = () => {
       }
       
       if (selectedStatus) {
-        filter.status = selectedStatus;
+        filter.status = selectedStatus as RegistrationStatus;
       }
       
       const data = await registrationsApi.filter(filter);
@@ -491,7 +494,7 @@ export const RegistrationsPage: React.FC = () => {
                         <td className="py-3 px-4">
                           <div className="space-y-2">
                             {registration.payments && registration.payments.length > 0 ? (
-                              registration.payments.map((payment, index) => {
+                              registration.payments?.map((payment: Payment, index: number) => {
                                 const statusConfig = getPaymentStatusConfig(payment.status);
                                 return (
                                   <div key={payment.id}>

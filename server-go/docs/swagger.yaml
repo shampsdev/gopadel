@@ -1852,6 +1852,44 @@ paths:
       summary: Filter users (Admin)
       tags:
       - admin-users
+  /admin/waitlist/tournament/{tournamentId}:
+    get:
+      consumes:
+      - application/json
+      description: Get waitlist users for a specific tournament. Available for any
+        admin. Read-only access.
+      parameters:
+      - description: Tournament ID
+        in: path
+        name: tournamentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.WaitlistUser'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get tournament waitlist (Admin)
+      tags:
+      - admin-waitlist
   /api/v1/yookassa_webhook:
     post:
       consumes:
