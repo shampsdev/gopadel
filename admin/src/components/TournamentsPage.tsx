@@ -487,7 +487,7 @@ export const TournamentsPage: React.FC = () => {
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="edit">Редактирование</TabsTrigger>
                   <TabsTrigger value="participants" className={!selectedTournament ? 'opacity-50 pointer-events-none' : ''}>
-                    Участники ({registrations.filter(r => r.status === 'ACTIVE').length}/{registrations.filter(r => r.status === 'ACTIVE' || r.status === 'PENDING').length})
+                    Участники ({selectedTournament?.maxUsers}/{registrations.filter(r => r.status === 'ACTIVE' || r.status === 'PENDING').length})
                   </TabsTrigger>
                   <TabsTrigger value="waiting" className={!selectedTournament ? 'opacity-50 pointer-events-none' : ''}>
                     Список ожидания ({waitlist.length})
