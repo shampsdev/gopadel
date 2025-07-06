@@ -206,6 +206,227 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/clubs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all clubs. Available for any admin.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-clubs"
+                ],
+                "summary": "Get all clubs (Admin)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Club"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new club. Available for superusers only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-clubs"
+                ],
+                "summary": "Create club (Admin)",
+                "parameters": [
+                    {
+                        "description": "Club data",
+                        "name": "club",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.CreateClub"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Club"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/clubs/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete club. Available for superusers only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-clubs"
+                ],
+                "summary": "Delete club (Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Club ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update club data. Available for superusers only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-clubs"
+                ],
+                "summary": "Update club (Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Club ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Club update data",
+                        "name": "club",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.PatchClub"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Club"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/courts": {
             "get": {
                 "security": [
@@ -1114,6 +1335,242 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/tournaments": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new tournament. Available for any admin.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-tournaments"
+                ],
+                "summary": "Create tournament (Admin)",
+                "parameters": [
+                    {
+                        "description": "Tournament data",
+                        "name": "tournament",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.CreateTournament"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Tournament"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/tournaments/filter": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all tournaments with advanced filtering. Available for any admin.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-tournaments"
+                ],
+                "summary": "Get all tournaments (Admin)",
+                "parameters": [
+                    {
+                        "description": "Filter criteria",
+                        "name": "filter",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/domain.AdminFilterTournament"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Tournament"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/tournaments/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete tournament. Available for any admin.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-tournaments"
+                ],
+                "summary": "Delete tournament (Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tournament ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update tournament data. Available for any admin.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-tournaments"
+                ],
+                "summary": "Update tournament (Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tournament ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Tournament update data",
+                        "name": "tournament",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.AdminPatchTournament"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Tournament"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/users/filter": {
             "post": {
                 "security": [
@@ -1237,6 +1694,64 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/waitlist/tournament/{tournamentId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get waitlist users for a specific tournament. Available for any admin. Read-only access.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-waitlist"
+                ],
+                "summary": "Get tournament waitlist (Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tournament ID",
+                        "name": "tournamentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.WaitlistUser"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/domain.ErrorResponse"
                         }
@@ -1783,7 +2298,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Creates new registration or updates existing CANCELED status to PENDING",
+                "description": "Creates new registration or updates existing CANCELED status to PENDING. For free tournaments, status is set to ACTIVE immediately.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2011,7 +2526,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Creates payment in YooKassa for existing PENDING registration. Returns existing payment if it's already in success/pending status.",
+                "description": "Creates payment in YooKassa for existing PENDING registration. Returns existing payment if it's already in success/pending status. For free tournaments (price = 0), payment is not required.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2048,7 +2563,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request data",
+                        "description": "Invalid request data or tournament is free",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2996,6 +3511,36 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.AdminFilterTournament": {
+            "type": "object",
+            "properties": {
+                "clubId": {
+                    "type": "string"
+                },
+                "clubName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "organizatorFirstName": {
+                    "type": "string"
+                },
+                "organizatorId": {
+                    "type": "string"
+                },
+                "organizatorTelegramId": {
+                    "description": "Дополнительные поля для удобства фильтрации",
+                    "type": "integer"
+                },
+                "tournamentType": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.AdminLogin": {
             "type": "object",
             "required": [
@@ -3042,6 +3587,47 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "old_password": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.AdminPatchTournament": {
+            "type": "object",
+            "properties": {
+                "clubId": {
+                    "type": "string"
+                },
+                "courtId": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "maxUsers": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "organizatorId": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rankMax": {
+                    "type": "number"
+                },
+                "rankMin": {
+                    "type": "number"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "tournamentType": {
                     "type": "string"
                 }
             }
@@ -3188,6 +3774,24 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.CreateClub": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.CreateCourt": {
             "type": "object",
             "required": [
@@ -3228,8 +3832,6 @@ const docTemplate = `{
                 "maxUsers",
                 "name",
                 "organizatorId",
-                "rankMax",
-                "rankMin",
                 "startTime",
                 "tournamentType"
             ],
@@ -3259,10 +3861,12 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "rankMax": {
-                    "type": "number"
+                    "type": "number",
+                    "minimum": 0
                 },
                 "rankMin": {
-                    "type": "number"
+                    "type": "number",
+                    "minimum": 0
                 },
                 "startTime": {
                     "type": "string"
@@ -3416,6 +4020,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.PatchClub": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }

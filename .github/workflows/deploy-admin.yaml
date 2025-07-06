@@ -20,8 +20,8 @@ jobs:
       id-token: write
     secrets: inherit
     with:
-      dockerfile_path: 'admin-new/Dockerfile'  
-      context_path: 'admin-new'
+      dockerfile_path: 'admin/Dockerfile'  
+      context_path: 'admin'
       image_name: 'gopadel-admin'
       environment: ${{ github.event.inputs.environment }}
       secret-service-hash: ${{ github.event.inputs.environment == 'PROD' && 'ADMIN_SERVICE_HASH' || 'ADMIN_SERVICE_HASH_DEV' }}

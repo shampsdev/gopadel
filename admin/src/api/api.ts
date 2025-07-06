@@ -22,3 +22,18 @@ api.interceptors.request.use(
     return Promise.reject(error)
   }
 )
+
+// Add a response interceptor to handle authentication errors
+api.interceptors.response.use(
+  (response) => {
+    return response
+  },
+  (error) => {
+    // Only handle 401 errors for authenticated endpoints, not login
+    if (error.response?.status === 401 && !error.config?.url?.includes('/admin/auth/login')) {
+      localStorage.removeItem("token")
+      window.location.reload()
+    }
+    return Promise.reject(error)
+  }
+)

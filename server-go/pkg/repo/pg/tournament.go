@@ -72,8 +72,6 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 		return nil, fmt.Errorf("failed to build SQL: %w", err)
 	}
 
-
-
 	rows, err := r.db.Query(ctx, sql, args...)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return []*domain.Tournament{}, nil
@@ -405,4 +403,257 @@ func (r *TournamentRepo) Delete(ctx context.Context, id string) error {
 
 	_, err = r.db.Exec(ctx, sql, args...)
 	return err
+}
+
+// AdminFilter получает турниры для админов с расширенной фильтрацией
+func (r *TournamentRepo) AdminFilter(ctx context.Context, filter *domain.AdminFilterTournament) ([]*domain.Tournament, error) {
+	s := r.psql.Select(
+		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
+		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`,
+		`"c"."id"`, `"c"."name"`, `"c"."address"`,
+		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
+		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
+		`COUNT(CASE WHEN "r"."status" IN ('PENDING', 'ACTIVE') THEN 1 END) AS active_registrations`,
+	).
+		From(`"tournaments" AS t`).
+		Join(`"courts" AS c ON "t"."court_id" = "c"."id"`).
+		Join(`"users" AS u ON "t"."organizator_id" = "u"."id"`).
+		LeftJoin(`"registrations" AS r ON "t"."id" = "r"."tournament_id"`).
+		GroupBy(`"t"."id"`, `"c"."id"`, `"u"."id"`)
+
+	if filter.ID != nil {
+		s = s.Where(sq.Eq{`"t"."id"`: *filter.ID})
+	}
+
+	if filter.Name != nil {
+		s = s.Where(sq.ILike{`"t"."name"`: "%" + *filter.Name + "%"})
+	}
+
+	if filter.ClubID != nil {
+		s = s.Where(sq.Eq{`"t"."club_id"`: *filter.ClubID})
+	}
+
+	if filter.OrganizatorID != nil {
+		s = s.Where(sq.Eq{`"t"."organizator_id"`: *filter.OrganizatorID})
+	}
+
+	if filter.TournamentType != nil {
+		s = s.Where(sq.Eq{`"t"."tournament_type"`: *filter.TournamentType})
+	}
+
+	if filter.OrganizatorTelegramID != nil {
+		s = s.Where(sq.Eq{`"u"."telegram_id"`: *filter.OrganizatorTelegramID})
+	}
+
+	if filter.OrganizatorFirstName != nil {
+		s = s.Where(sq.ILike{`"u"."first_name"`: "%" + *filter.OrganizatorFirstName + "%"})
+	}
+
+	if filter.ClubName != nil {
+		s = s.Join(`"clubs" AS cl ON "t"."club_id" = "cl"."id"`).
+			Where(sq.ILike{`"cl"."name"`: "%" + *filter.ClubName + "%"})
+	}
+
+	s = s.OrderBy(`"t"."start_time" DESC`)
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	rows, err := r.db.Query(ctx, sql, args...)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return []*domain.Tournament{}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute SQL: %w", err)
+	}
+	defer rows.Close()
+
+	tournaments := []*domain.Tournament{}
+	for rows.Next() {
+		var tournament domain.Tournament
+		var endTime pgtype.Timestamp
+		var description pgtype.Text
+		var courtID, courtName, courtAddress string
+		var userID string
+		var userTelegramID int64
+		var userTelegramUsername pgtype.Text
+		var userFirstName, userSecondName string
+		var userAvatar pgtype.Text
+		var userBio pgtype.Text
+		var userRank float64
+		var userCity pgtype.Text
+		var userBirthDate pgtype.Date
+		var userPlayingPosition pgtype.Text
+		var userPadelProfiles pgtype.Text
+		var userIsRegistered pgtype.Bool
+		var activeRegistrations int
+
+		err := rows.Scan(
+			&tournament.ID,
+			&tournament.Name,
+			&tournament.StartTime,
+			&endTime,
+			&tournament.Price,
+			&tournament.RankMin,
+			&tournament.RankMax,
+			&tournament.MaxUsers,
+			&description,
+			&tournament.ClubID,
+			&tournament.TournamentType,
+			&courtID,
+			&courtName,
+			&courtAddress,
+			&userID,
+			&userTelegramID,
+			&userTelegramUsername,
+			&userFirstName,
+			&userSecondName,
+			&userAvatar,
+			&userBio,
+			&userRank,
+			&userCity,
+			&userBirthDate,
+			&userPlayingPosition,
+			&userPadelProfiles,
+			&userIsRegistered,
+			&activeRegistrations,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		if endTime.Valid {
+			tournament.EndTime = endTime.Time
+		}
+		if description.Valid {
+			tournament.Description = description.String
+		}
+
+		tournament.Court = domain.Court{
+			ID:      courtID,
+			Name:    courtName,
+			Address: courtAddress,
+		}
+
+		organizator := domain.User{
+			ID: userID,
+			UserTGData: domain.UserTGData{
+				TelegramID: userTelegramID,
+				FirstName:  userFirstName,
+				LastName:   userSecondName,
+			},
+			Rank: userRank,
+		}
+
+		if userTelegramUsername.Valid {
+			organizator.TelegramUsername = userTelegramUsername.String
+		}
+		if userAvatar.Valid {
+			organizator.Avatar = userAvatar.String
+		}
+		if userBio.Valid {
+			organizator.Bio = userBio.String
+		}
+		if userCity.Valid {
+			organizator.City = userCity.String
+		}
+		if userBirthDate.Valid {
+			organizator.BirthDate = userBirthDate.Time.Format("2006-01-02")
+		}
+		if userPlayingPosition.Valid {
+			organizator.PlayingPosition = domain.PlayingPosition(userPlayingPosition.String)
+		}
+		if userPadelProfiles.Valid {
+			organizator.PadelProfiles = userPadelProfiles.String
+		}
+		if userIsRegistered.Valid {
+			organizator.IsRegistered = userIsRegistered.Bool
+		}
+
+		tournament.Organizator = organizator
+		tournaments = append(tournaments, &tournament)
+	}
+
+	return tournaments, nil
+}
+
+// AdminPatch обновляет турнир для админов с расширенными правами
+func (r *TournamentRepo) AdminPatch(ctx context.Context, id string, tournament *domain.AdminPatchTournament) error {
+	s := r.psql.Update(`"tournaments"`).Where(sq.Eq{"id": id})
+	
+	if tournament.Name != nil {
+		s = s.Set("name", *tournament.Name)
+	}
+	if tournament.StartTime != nil {
+		s = s.Set("start_time", *tournament.StartTime)
+	}
+	if tournament.EndTime != nil {
+		s = s.Set("end_time", *tournament.EndTime)
+	}
+	if tournament.Price != nil {
+		s = s.Set("price", *tournament.Price)
+	}
+	if tournament.RankMin != nil {
+		s = s.Set("rank_min", *tournament.RankMin)
+	}
+	if tournament.RankMax != nil {
+		s = s.Set("rank_max", *tournament.RankMax)
+	}
+	if tournament.MaxUsers != nil {
+		s = s.Set("max_users", *tournament.MaxUsers)
+	}
+	if tournament.Description != nil {
+		s = s.Set("description", *tournament.Description)
+	}
+	if tournament.CourtID != nil {
+		s = s.Set("court_id", *tournament.CourtID)
+	}
+	if tournament.ClubID != nil {
+		s = s.Set("club_id", *tournament.ClubID)
+	}
+	if tournament.TournamentType != nil {
+		s = s.Set("tournament_type", *tournament.TournamentType)
+	}
+	if tournament.OrganizatorID != nil {
+		s = s.Set("organizator_id", *tournament.OrganizatorID)
+	}
+	
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update tournament: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("tournament with id %s not found", id)
+	}
+
+	return nil
+}
+
+// AdminDelete удаляет турнир для админов
+func (r *TournamentRepo) AdminDelete(ctx context.Context, id string) error {
+	s := r.psql.Delete(`"tournaments"`).Where(sq.Eq{"id": id})
+	
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to delete tournament: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("tournament with id %s not found", id)
+	}
+
+	return nil
 }

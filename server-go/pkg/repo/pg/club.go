@@ -150,4 +150,55 @@ func (r *ClubRepo) GetUserClubs(ctx context.Context, userID string) ([]*domain.C
 	}
 
 	return clubs, nil
+}
+
+// Patch обновляет клуб
+// Примечание: ID клуба нельзя изменить после создания
+func (r *ClubRepo) Patch(ctx context.Context, clubID string, patch *domain.PatchClub) error {
+	s := r.psql.Update(`"clubs"`).Where(sq.Eq{"id": clubID})
+
+	if patch.Name != nil {
+		s = s.Set("name", *patch.Name)
+	}
+
+	if patch.Description != nil {
+		s = s.Set("description", *patch.Description)
+	}
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update club: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("club with id %s not found", clubID)
+	}
+
+	return nil
+}
+
+// Delete удаляет клуб
+func (r *ClubRepo) Delete(ctx context.Context, clubID string) error {
+	s := r.psql.Delete(`"clubs"`).Where(sq.Eq{"id": clubID})
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to delete club: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("club with id %s not found", clubID)
+	}
+
+	return nil
 } 

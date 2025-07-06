@@ -89,4 +89,15 @@ export function getPlayingPositionText(position: string): string {
     default:
       return position;
   }
+}
+
+/**
+ * Finds the rating level by its value
+ * @param value Rating value
+ * @returns Rating level object or null if not found
+ */
+export function getRatingLevelByValue(value: number) {
+  return ratingLevels.find(level => 
+    value >= level.min && value <= level.max
+  );
 } 

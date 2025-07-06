@@ -159,3 +159,69 @@ func (t *Tournament) GetTournamentParticipants(ctx context.Context, tournamentID
 
 	return participants, nil
 }
+
+// AdminFilter получает турниры для админов с расширенной фильтрацией
+func (t *Tournament) AdminFilter(ctx *Context, filter *domain.AdminFilterTournament) ([]*domain.Tournament, error) {
+	tournaments, err := t.TournamentRepo.AdminFilter(ctx.Context, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	// Добавляем участников для каждого турнира
+	for _, tournament := range tournaments {
+		participants, err := t.GetTournamentParticipants(ctx.Context, tournament.ID)
+		if err != nil {
+			return nil, err
+		}
+		tournament.Participants = participants
+	}
+
+	return tournaments, nil
+}
+
+// AdminCreate создает турнир для админов
+func (t *Tournament) AdminCreate(ctx *Context, tournament *domain.CreateTournament) (*domain.Tournament, error) {
+	id, err := t.TournamentRepo.Create(ctx.Context, tournament)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create tournament: %w", err)
+	}
+	
+	// Получаем созданный турнир
+	filter := &domain.AdminFilterTournament{ID: &id}
+	tournaments, err := t.AdminFilter(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get created tournament: %w", err)
+	}
+	
+	if len(tournaments) == 0 {
+		return nil, fmt.Errorf("created tournament not found")
+	}
+	
+	return tournaments[0], nil
+}
+
+// AdminPatch обновляет турнир для админов
+func (t *Tournament) AdminPatch(ctx *Context, id string, tournament *domain.AdminPatchTournament) (*domain.Tournament, error) {
+	err := t.TournamentRepo.AdminPatch(ctx.Context, id, tournament)
+	if err != nil {
+		return nil, fmt.Errorf("failed to patch tournament: %w", err)
+	}
+	
+	// Получаем обновленный турнир
+	filter := &domain.AdminFilterTournament{ID: &id}
+	tournaments, err := t.AdminFilter(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get updated tournament: %w", err)
+	}
+	
+	if len(tournaments) == 0 {
+		return nil, fmt.Errorf("updated tournament not found")
+	}
+	
+	return tournaments[0], nil
+}
+
+// AdminDelete удаляет турнир для админов
+func (t *Tournament) AdminDelete(ctx *Context, id string) error {
+	return t.TournamentRepo.AdminDelete(ctx.Context, id)
+}
