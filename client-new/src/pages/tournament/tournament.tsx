@@ -138,13 +138,13 @@ export const Tournament = () => {
           <div className="pt-5 pb-5 border-b border-[#DADCE0]">
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-col gap-[2px]">
-                <div className="text-[16px] gap-1 text-[#868D98] flex flex-row items-center">
+                <div className="text-[16px] gap-1 text-[#868D98] flex flex-row items-start">
                   <p>Тип:</p>
                   <p className="text-black">
                     {tournament?.[0].tournamentType.toLowerCase()}
                   </p>
                 </div>
-                <div className="text-[16px] text-[#868D98] gap-1 flex flex-row items-center">
+                <div className="text-[16px] text-[#868D98] gap-1 flex flex-row items-start">
                   <p>Ранг:</p>
                   <p className="text-black">
                     {getRankTitle(tournament?.[0].rankMin || 0) ===
