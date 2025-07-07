@@ -60,7 +60,7 @@ export const Tournament = () => {
                 }}
                 className="flex flex-row justify-between items-center gap-[18px]"
               >
-                <div className="flex flex-col items-center justify-center w-[42px] h-[42px] bg-[#AFFF3F] rounded-full">
+                <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#AFFF3F] rounded-full">
                   {Icons.Edit("black", "18", "18")}
                 </div>
 
@@ -111,8 +111,8 @@ export const Tournament = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col items-center justify-center w-[42px] h-[42px] rounded-full bg-[#F8F8FA]">
-                {Icons.Calendar("black")}
+              <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] rounded-full bg-[#F8F8FA]">
+                {Icons.Calendar("black", "18", "18")}
               </div>
             </div>
           </div>
@@ -120,14 +120,17 @@ export const Tournament = () => {
           <div className="py-5 border-b border-[#DADCE0]">
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-col gap-[2px]">
-                <p className="text-[16px] ">{tournament?.[0].court.name}</p>
+                <p className="text-[16px] ">
+                  {tournament?.[0].court.name} Lorem ipsum dolor sit amet
+                  consectetur adipisicing elit. Quisquam, quos.
+                </p>
                 <p className="text-[14px] text-[#868D98]">
-                  {tournament?.[0].court.address}
+                  {tournament?.[0].court.address} Lorem ipsum dolor sit amet
                 </p>
               </div>
 
-              <div className="w-[42px] h-[42px] bg-[#F8F8FA] rounded-full flex flex-col justify-center items-center">
-                {Icons.Location("black")}
+              <div className="w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#F8F8FA] rounded-full flex flex-col justify-center items-center">
+                {Icons.Location("black", "18", "18")}
               </div>
             </div>
           </div>
@@ -154,16 +157,16 @@ export const Tournament = () => {
                 </div>
               </div>
 
-              <div className="w-[42px] h-[42px] bg-[#F8F8FA] rounded-full flex flex-col justify-center items-center">
-                {Icons.Star("black")}
+              <div className="w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#F8F8FA] rounded-full flex flex-col justify-center items-center">
+                {Icons.Star("black", "18", "18")}
               </div>
             </div>
           </div>
 
           <div className="py-5 ">
             <div className="flex flex-row-reverse justify-between items-center">
-              <div className="flex flex-col items-center justify-center w-[42px] h-[42px] rounded-full bg-[#F8F8FA]">
-                {Icons.CreditCard("black")}
+              <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] rounded-full bg-[#F8F8FA]">
+                {Icons.CreditCard("black", "18", "18")}
               </div>
 
               <div className="flex flex-row gap-[6px] ">
@@ -278,8 +281,8 @@ export const Tournament = () => {
         {waitlist && waitlist.length > 0 && (
           <Link to={`/tournament/${id}/waitlist`}>
             <div className="flex flex-row items-center gap-[18px] py-[17px] px-[16px] rounded-[30px] bg-[#F8F8FA]">
-              <div className="flex w-[42px] h-[42px] justify-center items-center bg-[#AFFF3F] rounded-full">
-                {Icons.Clock("black")}
+              <div className="flex w-[42px] h-[42px] min-w-[42px] min-h-[42px] justify-center items-center bg-[#AFFF3F] rounded-full">
+                {Icons.Clock("black", "18", "18")}
               </div>
               <div className="flex flex-col gap-[2px] flex-grow">
                 <p>Список ожидания</p>
