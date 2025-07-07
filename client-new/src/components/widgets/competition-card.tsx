@@ -62,15 +62,15 @@ export const CompetitionCard = ({
         </div>
 
         <div className="flex flex-col gap-3 text-[#868D98]">
-          <div className="flex flex-row items-center gap-3">
-            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+          <div className="flex flex-row items-start gap-3">
+            <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
               {Icons.Calendar()}
             </div>
             <p>{date}</p>
           </div>
 
-          <div className="flex flex-row items-center gap-3">
-            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+          <div className="flex flex-row items-start gap-3">
+            <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
               {Icons.Location()}
             </div>
             <div className="flex flex-col ">
@@ -79,15 +79,15 @@ export const CompetitionCard = ({
             </div>
           </div>
 
-          <div className="flex flex-row items-center gap-3">
-            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+          <div className="flex flex-row items-start gap-3">
+            <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
               {Icons.Cup()}
             </div>
             <p>Тип: {type}</p>
           </div>
 
-          <div className="flex flex-row items-center gap-3">
-            <div className="flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center">
+          <div className="flex flex-row items-start gap-3">
+            <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
               {Icons.Star()}
             </div>
             <p>{getRankTitle(rank)}</p>
