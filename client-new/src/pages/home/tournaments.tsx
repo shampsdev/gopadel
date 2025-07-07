@@ -75,7 +75,8 @@ export const Tournaments = () => {
             <CompetitionCard
               title={competition.name}
               key={competition.id}
-              rank={competition.rankMin}
+              rankMin={competition.rankMin}
+              rankMax={competition.rankMax}
               organizerName={`${competition.organizator.firstName} ${competition.organizator.lastName}`}
               date={new Date(competition.startTime).toLocaleDateString(
                 "ru-RU",

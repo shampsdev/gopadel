@@ -57,7 +57,8 @@ export const Competitions = () => {
   ): CompetitionCardProps & { id: string; competitionType: string } => {
     return {
       id: tournament.id,
-      rank: tournament.rankMin,
+      rankMin: tournament.rankMin,
+      rankMax: tournament.rankMax,
       organizerName: `${tournament.organizator?.firstName || ""} ${
         tournament.organizator?.lastName || ""
       }`,
@@ -138,7 +139,8 @@ export const Competitions = () => {
               <Link key={competition.id} to={`/tournament/${competition.id}`}>
                 <CompetitionCard
                   title={competition.title}
-                  rank={competition.rank}
+                  rankMin={competition.rankMin}
+                  rankMax={competition.rankMax}
                   organizerName={competition.organizerName}
                   date={competition.date}
                   locationTitle={competition.locationTitle}
@@ -154,7 +156,8 @@ export const Competitions = () => {
               <CompetitionCard
                 key={competition.id}
                 title={competition.title}
-                rank={competition.rank}
+                rankMin={competition.rankMin}
+                rankMax={competition.rankMax}
                 organizerName={competition.organizerName}
                 date={competition.date}
                 locationTitle={competition.locationTitle}

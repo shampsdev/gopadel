@@ -7,7 +7,8 @@ import { Preloader } from "./preloader";
 export interface CompetitionCardProps {
   className?: string;
   title: string;
-  rank: number;
+  rankMin: number;
+  rankMax: number;
   organizerName: string;
   date: string;
   locationTitle: string;
@@ -21,7 +22,8 @@ export interface CompetitionCardProps {
 
 export const CompetitionCard = ({
   className,
-  rank,
+  rankMin,
+  rankMax,
   organizerName,
   date,
   locationTitle,
@@ -90,7 +92,12 @@ export const CompetitionCard = ({
             <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
               {Icons.Star()}
             </div>
-            <p>{getRankTitle(rank)}</p>
+            <p>
+              {" "}
+              {getRankTitle(rankMin) === getRankTitle(rankMax)
+                ? getRankTitle(rankMin)
+                : `${getRankTitle(rankMin)} - ${getRankTitle(rankMax)}`}
+            </p>
           </div>
         </div>
       </div>
