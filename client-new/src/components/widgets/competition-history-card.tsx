@@ -5,7 +5,8 @@ import type { RegistrationStatus } from "../../types/registration-status";
 
 export interface CompetitionHistoryCardProps {
   className?: string;
-  rank: number;
+  rankMin: number;
+  rankMax: number;
   organizerName: string;
   date: string;
   locationTitle: string;
@@ -13,17 +14,20 @@ export interface CompetitionHistoryCardProps {
   type: string;
   playersCapacity: number;
   playersAmount: number;
+  name: string;
   status: RegistrationStatus;
 }
 
 export const CompetitionHistoryCard = ({
   className,
-  rank,
+  rankMin,
+  rankMax,
   organizerName,
   date,
   locationTitle,
   address,
   type,
+  name,
   status,
 }: CompetitionHistoryCardProps) => {
   return (
@@ -36,7 +40,7 @@ export const CompetitionHistoryCard = ({
       <div className="flex flex-col gap-5">
         <div className="flex flex-row justify-between">
           <div className="flex flex-col gap-1 flex-1">
-            <p className="text-[20px]">{getRankTitle(rank ?? 0)}</p>
+            <p className="text-[20px]">{name}</p>
             <div className="flex flex-row flex-wrap items-center gap-1 text-[#868D98]">
               Организатор: <p className="text-[#5D6674]">{organizerName}</p>
             </div>
@@ -50,27 +54,39 @@ export const CompetitionHistoryCard = ({
         </div>
 
         <div className="flex flex-col gap-3 text-[#868D98]">
-          <div className="flex flex-row items-center gap-3">
-            {Icons.Calendar()}
+          <div className="flex flex-row items-start gap-3 ">
+            <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
+              {Icons.Calendar()}
+            </div>
             <p>{date}</p>
           </div>
 
-          <div className="flex flex-row items-center gap-3">
-            {Icons.Location()}
-            <div className="flex flex-col ">
+          <div className="flex flex-row items-start gap-3">
+            <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
+              {Icons.Location()}
+            </div>
+            <div className="flex flex-col justify-start">
               <p>{locationTitle}</p>
               <p>{address}</p>
             </div>
           </div>
 
-          <div className="flex flex-row items-center gap-3">
-            {Icons.Cup()}
+          <div className="flex flex-row items-start gap-3 ">
+            <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
+              {Icons.Cup()}
+            </div>
             <p>Тип: {type}</p>
           </div>
 
-          <div className="flex flex-row items-center gap-3">
-            {Icons.Star()}
-            <p>{getRankTitle(rank)}</p>
+          <div className="flex flex-row items-start gap-3">
+            <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
+              {Icons.Star()}
+            </div>
+            <p>
+              {getRankTitle(rankMin) === getRankTitle(rankMax)
+                ? getRankTitle(rankMin)
+                : `${getRankTitle(rankMin)} - ${getRankTitle(rankMax)}`}
+            </p>
           </div>
         </div>
       </div>

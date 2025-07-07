@@ -1,1 +1,1 @@
-export type PlayingPosition = "left" | "right" | "both";
+export type PlayingPosition = "left" | "right" | "both" | "";

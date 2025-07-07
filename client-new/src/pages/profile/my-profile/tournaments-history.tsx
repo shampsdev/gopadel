@@ -20,7 +20,8 @@ export const TournamentsHistory = () => {
             to={`/tournament/${registration.tournament.id}`}
           >
             <CompetitionHistoryCard
-              rank={registration.tournament.rankMin}
+              rankMin={registration.tournament.rankMin}
+              rankMax={registration.tournament.rankMax}
               organizerName={
                 registration.tournament.organizator.firstName +
                 " " +
@@ -39,6 +40,7 @@ export const TournamentsHistory = () => {
               type={registration.tournament.tournamentType}
               playersCapacity={registration.tournament.playersCapacity}
               playersAmount={registration.tournament.playersAmount}
+              name={registration.tournament.name}
               status={registration.status}
             />
           </Link>

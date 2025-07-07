@@ -21,7 +21,7 @@ export const ModalView = () => {
         </div>
         <div className="flex flex-col gap-[16px]">
           <Button
-            className="bg-[#FF5053] text-white w-full justify-center text-center "
+            className="bg-[#FF5053] text-white w-full justify-center text-center text-[14px] px-[24px]"
             onClick={() => {
               acceptButtonOnClick();
               closeModal();
@@ -30,7 +30,7 @@ export const ModalView = () => {
             {acceptButtonText}
           </Button>
           <Button
-            className="bg-[#F8F8FA] text-black w-full justify-center text-center"
+            className="bg-[#F8F8FA] text-black w-full justify-center text-center text-[14px] px-[24px]"
             onClick={() => {
               declineButtonOnClick();
               closeModal();

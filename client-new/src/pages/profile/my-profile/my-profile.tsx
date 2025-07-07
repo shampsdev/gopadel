@@ -58,6 +58,7 @@ export const MyProfile = () => {
           <div className="flex flex-row justify-between">
             <p className="text-[#868D98] text-[16px]">Квадрат игры</p>
             <p className="text-[16px]">
+              {user?.playingPosition === "" && "Не выбрано"}
               {user?.playingPosition === "left" && "Левый"}
               {user?.playingPosition === "right" && "Правый"}
               {user?.playingPosition === "both" && "В обоих"}
@@ -87,6 +88,8 @@ export const MyProfile = () => {
                   <a
                     key={url}
                     href={formatUrl(url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex no-underline md:underline flex-row items-center bg-[#F8F8FA] rounded-[30px] px-[20px] gap-4 py-[14px]"
                   >
                     <div>{Icons.Link()}</div>

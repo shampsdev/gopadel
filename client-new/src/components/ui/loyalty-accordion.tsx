@@ -35,7 +35,7 @@ const AccordionItem = ({
           </div>
           <div
             className={`transition-transform duration-300 ${
-              isOpen ? "rotate-90" : "rotate-[-90deg]"
+              isOpen ? "rotate-[-90deg]" : "rotate-90"
             }`}
           >
             {Icons.ArrowRight("#A4A9B4")}

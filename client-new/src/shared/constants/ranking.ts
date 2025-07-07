@@ -7,7 +7,7 @@ export const ranks: Rank[] = [
     to: 1.6999999,
   },
   {
-    title: "Upper Beginner",
+    title: "Upper\u00A0Beginner",
     from: 1.7,
     to: 2.6999999,
   },
@@ -17,7 +17,7 @@ export const ranks: Rank[] = [
     to: 3.4999999,
   },
   {
-    title: "Upper Intermediate",
+    title: "Upper\u00A0Intermediate",
     from: 3.5,
     to: 4.4999999,
   },

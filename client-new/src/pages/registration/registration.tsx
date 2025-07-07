@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Logo from "../../assets/logo.png";
 import useTgUserStore from "../../shared/stores/tg-user.store";
 import { Input } from "../../components/ui/froms/input";
@@ -10,6 +10,9 @@ import { usePatchMe } from "../../api/hooks/mutations/patch-me";
 import { uploadAvatar } from "../../api/user";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { ranks } from "../../shared/constants/ranking";
+import { useGetBio } from "../../api/hooks/useGetBio";
+import { stripHtmlTags } from "../../utils/strip-html";
+import { Preloader } from "../../components/widgets/preloader";
 
 export const Registration = () => {
   const {
@@ -19,12 +22,16 @@ export const Registration = () => {
     lastName: tgLastName,
   } = useTgUserStore();
 
+  const { data: bioData, isLoading: isBioLoading } = useGetBio();
+
   const [firstName, setFirstName] = useState<string | null>(
     tgFirstName ?? null
   );
   const [lastName, setLastName] = useState<string | null>(tgLastName ?? null);
   const [rank, setRank] = useState<number | null>(0);
-  const [rankInput, setRankInput] = useState<string>("");
+  const [rankInput, setRankInput] = useState<string>(
+    ranks.find((r) => r.from === rank)?.title ?? ""
+  );
 
   const handleRankChange = (rankTitle: string) => {
     setRankInput(rankTitle);
@@ -33,7 +40,9 @@ export const Registration = () => {
       setRank(selectedRank.from);
     }
   };
-  const [bio, setBio] = useState<string | null>(null);
+  const [bio, setBio] = useState<string | null>(
+    stripHtmlTags(bioData?.bio ?? "") ?? null
+  );
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -91,6 +100,14 @@ export const Registration = () => {
       alert("Уупс, что-то пошло не так");
     }
   };
+
+  useEffect(() => {
+    setBio(stripHtmlTags(bioData?.bio ?? "") ?? null);
+  }, [bioData]);
+
+  if (isBioLoading) {
+    return <Preloader />;
+  }
 
   return (
     <div className="flex flex-col just gap-11 mt-3 pb-[100px]">

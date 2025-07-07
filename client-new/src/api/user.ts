@@ -94,3 +94,12 @@ export const isAdmin = async (token: string): Promise<Admin | null> => {
   });
   return response.data;
 };
+
+export const getBio = async (token: string): Promise<{ bio: string }> => {
+  const response = await api.get<{ bio: string }>("/users/me/bio", {
+    headers: {
+      "X-Api-Token": token,
+    },
+  });
+  return response.data;
+};
