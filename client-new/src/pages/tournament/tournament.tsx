@@ -120,12 +120,9 @@ export const Tournament = () => {
           <div className="py-5 border-b border-[#DADCE0]">
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-col gap-[2px]">
-                <p className="text-[16px] ">
-                  {tournament?.[0].court.name} Lorem ipsum dolor sit amet
-                  consectetur adipisicing elit. Quisquam, quos.
-                </p>
+                <p className="text-[16px] ">{tournament?.[0].court.name}</p>
                 <p className="text-[14px] text-[#868D98]">
-                  {tournament?.[0].court.address} Lorem ipsum dolor sit amet
+                  {tournament?.[0].court.address}
                 </p>
               </div>
 
