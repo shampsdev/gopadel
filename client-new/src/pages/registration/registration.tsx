@@ -10,6 +10,7 @@ import { usePatchMe } from "../../api/hooks/mutations/patch-me";
 import { uploadAvatar } from "../../api/user";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { ranks } from "../../shared/constants/ranking";
+import { useGetBio } from "../../api/hooks/useGetBio";
 
 export const Registration = () => {
   const {
@@ -18,6 +19,8 @@ export const Registration = () => {
     firstName: tgFirstName,
     lastName: tgLastName,
   } = useTgUserStore();
+
+  const { data: bioData } = useGetBio();
 
   const [firstName, setFirstName] = useState<string | null>(
     tgFirstName ?? null
@@ -33,7 +36,7 @@ export const Registration = () => {
       setRank(selectedRank.from);
     }
   };
-  const [bio, setBio] = useState<string | null>(null);
+  const [bio, setBio] = useState<string | null>(bioData?.bio ?? null);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
