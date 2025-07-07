@@ -144,7 +144,12 @@ export const Tournament = () => {
                 <div className="text-[16px] text-[#868D98] gap-1 flex flex-row items-center">
                   <p>Ранг:</p>
                   <p className="text-black">
-                    {getRankTitle(tournament?.[0].rankMin || 0)}
+                    {getRankTitle(tournament?.[0].rankMin || 0) ===
+                    getRankTitle(tournament?.[0].rankMax || 0)
+                      ? getRankTitle(tournament?.[0].rankMin || 0)
+                      : `${getRankTitle(
+                          tournament?.[0].rankMin || 0
+                        )} - ${getRankTitle(tournament?.[0].rankMax || 0)}`}
                   </p>
                 </div>
               </div>

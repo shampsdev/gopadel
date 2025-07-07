@@ -58,6 +58,7 @@ export const MyProfile = () => {
           <div className="flex flex-row justify-between">
             <p className="text-[#868D98] text-[16px]">Квадрат игры</p>
             <p className="text-[16px]">
+              {user?.playingPosition === "" && "Не выбрано"}
               {user?.playingPosition === "left" && "Левый"}
               {user?.playingPosition === "right" && "Правый"}
               {user?.playingPosition === "both" && "В обоих"}
