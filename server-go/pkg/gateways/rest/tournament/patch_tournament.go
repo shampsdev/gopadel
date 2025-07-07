@@ -30,7 +30,7 @@ func PatchTournament(tournamentCase *usecase.Tournament) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := middlewares.MustGetUser(c)
 		// Проверяем, что пользователь является Telegram админом
-		_ = middlewares.MustGetTelegramAdmin(c)
+		admin := middlewares.MustGetTelegramAdmin(c)
 
 		tournamentID := c.Param("tournament_id")
 		if tournamentID == "" {
@@ -38,11 +38,14 @@ func PatchTournament(tournamentCase *usecase.Tournament) gin.HandlerFunc {
 			return
 		}
 
-		// Проверяем, что турнир принадлежит данному админу
-		err := tournamentCase.CheckOwnership(c.Request.Context(), tournamentID, user.ID)
-		if err != nil {
-			c.JSON(http.StatusForbidden, gin.H{"error": "you can only update your own tournaments"})
-			return
+		// Суперпользователи могут редактировать любые турниры
+		// Обычные админы - только свои
+		if !admin.IsSuperUser {
+			err := tournamentCase.CheckOwnership(c.Request.Context(), tournamentID, user.ID)
+			if err != nil {
+				c.JSON(http.StatusForbidden, gin.H{"error": "you can only update your own tournaments"})
+				return
+			}
 		}
 
 		var patchTournament domain.PatchTournament

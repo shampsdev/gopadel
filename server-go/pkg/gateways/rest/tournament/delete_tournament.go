@@ -28,7 +28,7 @@ func DeleteTournament(tournamentCase *usecase.Tournament) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := middlewares.MustGetUser(c)
 		// Проверяем, что пользователь является Telegram админом
-		_ = middlewares.MustGetTelegramAdmin(c)
+		admin := middlewares.MustGetTelegramAdmin(c)
 
 		tournamentID := c.Param("tournament_id")
 		if tournamentID == "" {
@@ -36,14 +36,17 @@ func DeleteTournament(tournamentCase *usecase.Tournament) gin.HandlerFunc {
 			return
 		}
 
-		// Проверяем, что турнир принадлежит данному админу
-		err := tournamentCase.CheckOwnership(c.Request.Context(), tournamentID, user.ID)
-		if err != nil {
-			c.JSON(http.StatusForbidden, gin.H{"error": "you can only delete your own tournaments"})
-			return
+		// Суперпользователи могут удалять любые турниры
+		// Обычные админы - только свои
+		if !admin.IsSuperUser {
+			err := tournamentCase.CheckOwnership(c.Request.Context(), tournamentID, user.ID)
+			if err != nil {
+				c.JSON(http.StatusForbidden, gin.H{"error": "you can only delete your own tournaments"})
+				return
+			}
 		}
 
-		err = tournamentCase.Delete(c.Request.Context(), tournamentID)
+		err := tournamentCase.Delete(c.Request.Context(), tournamentID)
 		if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to delete tournament") {
 			return
 		}
