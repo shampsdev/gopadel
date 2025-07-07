@@ -9,7 +9,7 @@ import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Plus, Edit, Trash2, Save, X, Trophy, Calendar, MapPin, UserCheck, Clock } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Trophy, Calendar, MapPin, UserCheck, Clock, Users } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { ru } from 'date-fns/locale/ru';
 import "react-datepicker/dist/react-datepicker.css";
@@ -27,7 +27,11 @@ import { ratingLevels, getRatingRangeDescription } from '../utils/ratingUtils';
 // Регистрируем русскую локаль для DatePicker
 registerLocale('ru', ru);
 
-export const TournamentsPage: React.FC = () => {
+interface TournamentsPageProps {
+  onNavigateToRegistrations?: (tournamentId: string, tournamentName: string) => void;
+}
+
+export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRegistrations }) => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [courts, setCourts] = useState<Court[]>([]);
@@ -1036,33 +1040,49 @@ export const TournamentsPage: React.FC = () => {
                           </div>
                         </div>
                         
-                        {canEdit && (
-                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 flex-shrink-0">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleTournamentSelect(tournament);
-                              }}
-                              className="bg-blue-600 border-blue-500 hover:bg-blue-700 text-white h-8 px-2"
-                            >
-                              <Edit className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                              Редактировать
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(tournament);
-                              }}
-                              className="bg-red-600 border-red-500 hover:bg-red-700 text-white h-8 w-8 p-0"
-                            >
-                              <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                            </Button>
-                          </div>
-                        )}
+                        <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 flex-shrink-0">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onNavigateToRegistrations) {
+                                onNavigateToRegistrations(tournament.id, tournament.name);
+                              }
+                            }}
+                            className="bg-purple-600 border-purple-500 hover:bg-purple-700 text-white h-8 px-2"
+                          >
+                            <Users className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                            Регистрации
+                          </Button>
+                          {canEdit && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleTournamentSelect(tournament);
+                                }}
+                                className="bg-blue-600 border-blue-500 hover:bg-blue-700 text-white h-8 px-2"
+                              >
+                                <Edit className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                                Редактировать
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(tournament);
+                                }}
+                                className="bg-red-600 border-red-500 hover:bg-red-700 text-white h-8 w-8 p-0"
+                              >
+                                <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

@@ -26,7 +26,12 @@ import { ClubsPage } from './ClubsPage';
 import { TournamentsPage } from './TournamentsPage';
 import type { NavItem } from '../types/navigation';
 
-const HomePage = ({ setCurrentPage, navItems }: { setCurrentPage: (page: string) => void, navItems: NavItem[] }) => (
+interface NavigationParams {
+  tournamentId?: string;
+  tournamentName?: string;
+}
+
+const HomePage = ({ setCurrentPage, navItems }: { setCurrentPage: (page: string, params?: NavigationParams) => void, navItems: NavItem[] }) => (
   <div className="space-y-8">
     <div>
       <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Панель управления</h2>
@@ -62,6 +67,7 @@ const HomePage = ({ setCurrentPage, navItems }: { setCurrentPage: (page: string)
 export const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const [currentPage, setCurrentPage] = useState('/');
+  const [navigationParams, setNavigationParams] = useState<NavigationParams>({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Определение навигационных элементов с учетом прав пользователя
@@ -144,11 +150,11 @@ export const Dashboard: React.FC = () => {
       case '/users':
         return <UsersPage />;
       case '/tournaments':
-        return <TournamentsPage />;
+        return <TournamentsPage onNavigateToRegistrations={handleNavigateToRegistrations} />;
       case '/courts':
         return <CourtsPage />;
       case '/registrations':
-        return <RegistrationsPage />;
+        return <RegistrationsPage tournamentId={navigationParams.tournamentId} tournamentName={navigationParams.tournamentName} />;
       case '/loyalty':
         return <LoyaltyPage />;
       case '/clubs':
@@ -165,6 +171,12 @@ export const Dashboard: React.FC = () => {
   const handlePageChange = (path: string) => {
     setCurrentPage(path);
     setSidebarOpen(false); // Закрываем sidebar на мобильных после выбора
+  };
+
+  const handleNavigateToRegistrations = (tournamentId: string, tournamentName: string) => {
+    setNavigationParams({ tournamentId, tournamentName });
+    setCurrentPage('/registrations');
+    setSidebarOpen(false);
   };
 
   return (

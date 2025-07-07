@@ -102,6 +102,8 @@ export interface AdminFilterRegistration {
 export interface TournamentOption {
   id: string;
   name: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface UserOption {

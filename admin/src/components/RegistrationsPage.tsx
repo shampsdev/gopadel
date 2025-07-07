@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { ScrollArea } from './ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -21,10 +20,12 @@ import {
   AlertCircle,
   Edit,
   Save,
-  X
+  X,
+  Eye
 } from 'lucide-react';
 import { useToastContext } from '../contexts/ToastContext';
 import { registrationsApi } from '../api/registrations';
+import { PaymentModal } from './PaymentModal';
 import type { 
   RegistrationWithPayments as Registration, 
   AdminFilterRegistration as FilterRegistration, 
@@ -35,6 +36,11 @@ import type {
 } from '../api/registrations';
 
 const REGISTRATIONS_PER_PAGE = 10;
+
+interface RegistrationsPageProps {
+  tournamentId?: string;
+  tournamentName?: string;
+}
 
 const statusOptions: { value: RegistrationStatus; label: string; color: string; bgColor: string }[] = [
   { value: 'PENDING', label: 'Ожидание', color: 'text-yellow-300', bgColor: 'bg-yellow-900/30' },
@@ -50,7 +56,7 @@ const paymentStatusOptions: { value: Payment['status']; label: string; icon: Rea
   { value: 'canceled', label: 'Отменен', icon: <XCircle className="h-3 w-3" />, color: 'text-red-300 bg-red-900/20' },
 ];
 
-export const RegistrationsPage: React.FC = () => {
+export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ tournamentId: initialTournamentId }) => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(false);
   const [tournaments, setTournaments] = useState<TournamentOption[]>([]);
@@ -61,8 +67,12 @@ export const RegistrationsPage: React.FC = () => {
   const [editingStatus, setEditingStatus] = useState<string | null>(null);
   const [newStatus, setNewStatus] = useState<RegistrationStatus>('PENDING');
   
+  // Состояние для модалки платежа
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  
   // Фильтры
-  const [selectedTournament, setSelectedTournament] = useState<string>('');
+  const [selectedTournament, setSelectedTournament] = useState<string>(initialTournamentId || '');
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   
@@ -102,7 +112,7 @@ export const RegistrationsPage: React.FC = () => {
     try {
       const usersData = await registrationsApi.searchUsers({ telegramUsername: searchTerm });
       setUsers(usersData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Ошибка поиска пользователей:', error);
       setUsers([]);
     }
@@ -132,8 +142,11 @@ export const RegistrationsPage: React.FC = () => {
       const data = await registrationsApi.filter(filter);
       setRegistrations(data);
       setCurrentPage(1);
-    } catch (error: any) {
-      showErrorToast(error.response?.data?.error || 'Ошибка при загрузке регистраций');
+    } catch (error: unknown) {
+      const errorMessage = error && typeof error === 'object' && 'response' in error 
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error 
+        : undefined;
+      showErrorToast(errorMessage || 'Ошибка при загрузке регистраций');
       console.error('Error loading registrations:', error);
     } finally {
       setLoading(false);
@@ -191,8 +204,11 @@ export const RegistrationsPage: React.FC = () => {
       
       setEditingStatus(null);
       showSuccessToast('Статус регистрации успешно обновлен');
-    } catch (error: any) {
-      showErrorToast(error.response?.data?.error || 'Ошибка при обновлении статуса');
+    } catch (error: unknown) {
+      const errorMessage = error && typeof error === 'object' && 'response' in error 
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error 
+        : undefined;
+      showErrorToast(errorMessage || 'Ошибка при обновлении статуса');
     }
   };
 
@@ -251,8 +267,25 @@ export const RegistrationsPage: React.FC = () => {
     };
   }, []);
 
+  const openPaymentModal = (payment: Payment) => {
+    setSelectedPayment(payment);
+    setIsPaymentModalOpen(true);
+  };
+
+  const closePaymentModal = () => {
+    setSelectedPayment(null);
+    setIsPaymentModalOpen(false);
+  };
+
   return (
     <div className="space-y-6 h-full flex flex-col">
+      {/* Модалка для информации о платеже */}
+      <PaymentModal
+        payment={selectedPayment}
+        isOpen={isPaymentModalOpen}
+        onClose={closePaymentModal}
+      />
+      
       {/* Поиск и фильтры */}
       <Card className="bg-zinc-900 border-zinc-800 flex-shrink-0">
         <CardHeader>
@@ -268,7 +301,9 @@ export const RegistrationsPage: React.FC = () => {
               <Label className="text-zinc-300 text-sm font-medium mb-2 block">Турнир</Label>
               <Select value={selectedTournament} onValueChange={handleTournamentChange}>
                 <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
-                  <SelectValue placeholder="Выберите турнир" />
+                  <SelectValue placeholder="Выберите турнир">
+                    {selectedTournament ? tournaments.find(t => t.id === selectedTournament)?.name || 'Выберите турнир' : 'Выберите турнир'}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
                   {tournaments.map((tournament) => (
@@ -504,14 +539,28 @@ export const RegistrationsPage: React.FC = () => {
                                         <span>{statusConfig.label}</span>
                                       </div>
                                       <span className="text-white text-sm font-medium">{payment.amount}₽</span>
-                                      <Button
-                                        onClick={() => openPaymentLink(payment.paymentLink)}
-                                        size="sm"
-                                        variant="outline"
-                                        className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white h-6 px-2"
-                                      >
-                                        <ExternalLink className="h-3 w-3" />
-                                      </Button>
+                                      <div className="flex items-center space-x-1">
+                                        <Button
+                                          onClick={() => openPaymentModal(payment)}
+                                          size="sm"
+                                          variant="outline"
+                                          className="bg-blue-800 border-blue-700 hover:bg-blue-700 text-white h-6 px-2"
+                                          title="Подробнее о платеже"
+                                        >
+                                          <Eye className="h-3 w-3" />
+                                        </Button>
+                                        {payment.paymentLink && (
+                                          <Button
+                                            onClick={() => openPaymentLink(payment.paymentLink)}
+                                            size="sm"
+                                            variant="outline"
+                                            className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white h-6 px-2"
+                                            title="Открыть ссылку для оплаты"
+                                          >
+                                            <ExternalLink className="h-3 w-3" />
+                                          </Button>
+                                        )}
+                                      </div>
                                     </div>
                                     {index < registration.payments!.length - 1 && (
                                       <hr className="border-zinc-700 my-1" />
