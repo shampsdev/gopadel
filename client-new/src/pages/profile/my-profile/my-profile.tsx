@@ -87,6 +87,8 @@ export const MyProfile = () => {
                   <a
                     key={url}
                     href={formatUrl(url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex no-underline md:underline flex-row items-center bg-[#F8F8FA] rounded-[30px] px-[20px] gap-4 py-[14px]"
                   >
                     <div>{Icons.Link()}</div>

@@ -11,6 +11,7 @@ import { uploadAvatar } from "../../api/user";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { ranks } from "../../shared/constants/ranking";
 import { useGetBio } from "../../api/hooks/useGetBio";
+import { stripHtmlTags } from "../../utils/strip-html";
 
 export const Registration = () => {
   const {
@@ -36,7 +37,9 @@ export const Registration = () => {
       setRank(selectedRank.from);
     }
   };
-  const [bio, setBio] = useState<string | null>(bioData?.bio ?? null);
+  const [bio, setBio] = useState<string | null>(
+    stripHtmlTags(bioData?.bio ?? "") ?? null
+  );
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
