@@ -31,7 +31,7 @@ import (
 
 func setupRouter(ctx context.Context, r *gin.Engine, useCases usecase.Cases, cfg *config.Config) {
 	r.HandleMethodNotAllowed = true
-	r.Use(middlewares.AllowOrigin())
+	r.Use(middlewares.AllowOrigin(cfg))
 	r.Use(middlewares.Logger(ctx))
 
 	v1 := r.Group("/api/v1")

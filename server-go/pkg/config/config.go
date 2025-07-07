@@ -45,7 +45,10 @@ type Config struct {
 		SecretKey            string        `envconfig:"JWT_SECRET_KEY"`
 		AccessTokenExpireHours int         `envconfig:"JWT_ACCESS_TOKEN_EXPIRE_HOURS" default:"24"`
 	}
-
+	CORS struct {
+		AllowedOrigins []string `envconfig:"CORS_ALLOWED_ORIGINS" default:"http://localhost:3000,https://miniapp.gopadel.group"`
+		AllowCredentials bool   `envconfig:"CORS_ALLOW_CREDENTIALS" default:"true"`
+	}
 	S3 S3Config
 }
 
