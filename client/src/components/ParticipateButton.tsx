@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import GreenButton from "@/components/ui/GreenButton"
 import { registerForTournament, cancelRegistrationBeforePayment, createPaymentForTournament } from "@/api/api"
-import { backButton } from "@telegram-apps/sdk-react"
+import { backButton, openTelegramLink } from "@telegram-apps/sdk-react"
 import { Registration, RegistrationStatus } from "@/types/registration"
 
 type ParticipateButtonProps = {
@@ -49,7 +49,7 @@ export default function ParticipateButton({
         setCurrentRegistration(updatedRegistration)
         // Open payment link if available
         if (updatedRegistration.payment?.payment_link) {
-          window.open(updatedRegistration.payment.payment_link, '_blank')
+          openTelegramLink(updatedRegistration.payment.payment_link)
         }
         callback?.()
       } else {
@@ -64,8 +64,8 @@ export default function ParticipateButton({
 
   const handlePayClick = () => {
     if (currentRegistration?.payment?.payment_link) {
-      // Open payment link in new tab
-      window.open(currentRegistration.payment.payment_link, '_blank')
+      // Open payment link using Telegram SDK
+      openTelegramLink(currentRegistration.payment.payment_link)
     }
   }
 
