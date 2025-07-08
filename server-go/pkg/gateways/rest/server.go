@@ -26,6 +26,18 @@ func NewServer(ctx context.Context, cfg *config.Config, useCases usecase.Cases) 
 	r := gin.New()
 	r.Use(gin.Recovery())
 
+	// Настраиваем доверенные прокси для получения реального IP клиента
+	// Указываем сети Docker и Traefik
+	err := r.SetTrustedProxies([]string{
+		"10.0.0.0/8",     // Docker внутренние сети
+		"172.16.0.0/12",  // Docker bridge сети
+		"192.168.0.0/16", // Локальные сети
+		"127.0.0.1",      // Localhost
+	})
+	if err != nil {
+		panic(fmt.Sprintf("Failed to set trusted proxies: %v", err))
+	}
+
 	m := ginmetrics.GetMonitor()
 	m.SetMetricPath("/metrics")
 	m.Use(r)

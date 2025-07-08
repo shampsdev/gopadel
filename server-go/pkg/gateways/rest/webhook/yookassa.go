@@ -121,6 +121,11 @@ func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *useca
 
 		// Проверяем подпись YooKassa (временно делаем более лояльной)
 		signature := c.GetHeader("X-YooMoney-Signature")
+		if signature == "" {
+			// Проверяем альтернативный заголовок
+			signature = c.GetHeader("Signature")
+		}
+		
 		if signature != "" {
 			if !validateYooKassaSignature(body, signature, cfg.YooKassa.SecretKey) {
 				log.Warn("Invalid YooKassa signature", 
