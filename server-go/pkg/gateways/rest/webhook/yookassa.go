@@ -104,6 +104,9 @@ func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *useca
 			slog.String("user_agent", c.GetHeader("User-Agent")),
 			slog.String("signature", c.GetHeader("X-YooMoney-Signature")),
 			slog.Any("all_headers", headers),
+			slog.String("x_forwarded_for", c.GetHeader("X-Forwarded-For")),
+			slog.String("x_real_ip", c.GetHeader("X-Real-IP")),
+			slog.String("remote_addr", c.Request.RemoteAddr),
 		)
 
 		// Читаем тело запроса для проверки подписи

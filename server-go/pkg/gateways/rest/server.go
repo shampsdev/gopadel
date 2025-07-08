@@ -30,7 +30,7 @@ func NewServer(ctx context.Context, cfg *config.Config, useCases usecase.Cases) 
 	// Указываем сети Docker и Traefik
 	err := r.SetTrustedProxies([]string{
 		"10.0.0.0/8",     // Docker внутренние сети
-		"172.16.0.0/12",  // Docker bridge сети
+		"172.16.0.0/12",  // Docker bridge сети  
 		"192.168.0.0/16", // Локальные сети
 		"127.0.0.1",      // Localhost
 	})
