@@ -23,6 +23,7 @@ import { useCancelRegistrationBeforePayment } from "../../api/hooks/mutations/re
 import { useModalStore } from "../../shared/stores/modal.store";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { BOT_NAME } from "../../shared/constants/api";
+import { openPaymentLink } from "../../utils/ios-link-helper";
 
 interface TournamentStatusActionsProps {
   tournament: Tournament;
@@ -143,14 +144,18 @@ export const TournamentStatusActions = ({
                 Не участвую
               </Button>
               <Button
-                onClick={async () => {
-                  const payment = await createPaymentForTournamentRegistration({
+                onClick={() => {
+                  // Создаем промис для создания платежа
+                  createPaymentForTournamentRegistration({
                     tournamentId: tournament.id,
                     returnUrl: `https://t.me/${BOT_NAME}/app?startapp=tour-${tournament.id}`,
+                  }).then((payment) => {
+                    if (payment?.paymentLink) {
+                      openPaymentLink(payment.paymentLink);
+                    }
+                  }).catch((error) => {
+                    console.error('Payment creation failed:', error);
                   });
-                  if (payment?.paymentLink) {
-                    openTelegramLink(payment.paymentLink);
-                  }
                 }}
               >
                 Оплатить
@@ -241,14 +246,18 @@ export const TournamentStatusActions = ({
               Не участвую
             </Button>
             <Button
-              onClick={async () => {
-                const payment = await createPaymentForTournamentRegistration({
+              onClick={() => {
+                // Создаем промис для создания платежа
+                createPaymentForTournamentRegistration({
                   tournamentId: tournament.id,
                   returnUrl: `https://t.me/${BOT_NAME}/app?startapp=tour-${tournament.id}`,
+                }).then((payment) => {
+                  if (payment?.paymentLink) {
+                    openPaymentLink(payment.paymentLink);
+                  }
+                }).catch((error) => {
+                  console.error('Payment creation failed:', error);
                 });
-                if (payment?.paymentLink) {
-                  window.open(payment.paymentLink, "_blank");
-                }
               }}
             >
               Оплатить
