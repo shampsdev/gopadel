@@ -93,10 +93,17 @@ func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *useca
 		// Добавляем детальное логирование для диагностики
 		log := slogx.FromCtx(c.Request.Context())
 		
+		// Логируем все заголовки запроса
+		headers := make(map[string]string)
+		for key, values := range c.Request.Header {
+			headers[key] = strings.Join(values, ", ")
+		}
+		
 		log.Info("YooKassa webhook received",
 			slog.String("client_ip", c.ClientIP()),
 			slog.String("user_agent", c.GetHeader("User-Agent")),
 			slog.String("signature", c.GetHeader("X-YooMoney-Signature")),
+			slog.Any("all_headers", headers),
 		)
 
 		// Читаем тело запроса для проверки подписи
