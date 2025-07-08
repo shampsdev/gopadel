@@ -150,6 +150,7 @@ func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *useca
 		if !isYooKassaIP(clientIP) {
 			log.Warn("Request from non-YooKassa IP", slog.String("client_ip", clientIP))
 			// В тестовом режиме продолжаем выполнение с предупреждением
+			// TODO: Включить строгую проверку IP для продакшн режима
 			// c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden: Invalid source IP"})
 			// return
 		} else {
@@ -188,7 +189,13 @@ func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *useca
 			slog.String("payment_id", paymentID),
 			slog.String("yookassa_status", string(yooPayment.Status)),
 			slog.String("webhook_status", event.Object.Status),
+			slog.Bool("is_test", yooPayment.Test),
 		)
+
+		// Если это тестовый платеж, логируем это отдельно
+		if yooPayment.Test {
+			log.Info("Processing test payment - IP validation is relaxed")
+		}
 
 		if string(yooPayment.Status) != event.Object.Status {
 			log.Error("Status mismatch between YooKassa and webhook",
