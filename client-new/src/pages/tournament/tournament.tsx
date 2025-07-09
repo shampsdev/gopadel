@@ -53,24 +53,45 @@ export const Tournament = () => {
 
         <div className="flex flex-col">
           {isAdmin?.admin && (
-            <div className="py-5 border-b border-[#DADCE0]">
-              <div
-                onClick={async () => {
-                  navigate(`/tournament/${id}/edit`);
-                }}
-                className="flex flex-row justify-between items-center gap-[18px]"
-              >
-                <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#AFFF3F] rounded-full">
-                  {Icons.Edit("black", "18", "18")}
+            <>
+              <div className="py-5 border-b border-[#DADCE0]">
+                <div
+                  onClick={async () => {
+                    navigate(`/tournament/${id}/edit`);
+                  }}
+                  className="flex flex-row justify-between items-center gap-[18px]"
+                >
+                  <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#AFFF3F] rounded-full">
+                    {Icons.Edit("black", "18", "18")}
+                  </div>
+
+                  <p className="text-black text-[16px] flex-grow">
+                    Изменить турнир
+                  </p>
+
+                  {Icons.ArrowRight("#A4A9B4", "24", "24")}
                 </div>
-
-                <p className="text-black text-[16px] flex-grow">
-                  Изменить турнир
-                </p>
-
-                {Icons.ArrowRight("#A4A9B4", "24", "24")}
               </div>
-            </div>
+
+              <div className="py-5 border-b border-[#DADCE0]">
+                <div
+                  onClick={async () => {
+                    navigate(`/tournament/${id}/edit/prizes`);
+                  }}
+                  className="flex flex-row justify-between items-center gap-[18px]"
+                >
+                  <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#041124] rounded-full">
+                    {Icons.Stack()}
+                  </div>
+
+                  <p className="text-black text-[16px] flex-grow">
+                    Добавить результаты
+                  </p>
+
+                  {Icons.ArrowRight("#A4A9B4", "24", "24")}
+                </div>
+              </div>
+            </>
           )}
 
           <div className="py-5 border-b border-[#DADCE0]">

@@ -71,7 +71,7 @@ export const TournamentStatusActions = ({
       if (isUserRegisteredAndPaymentProceeded(tournament, user)) {
         return (
           <div className="flex flex-col text-center gap-[18px]">
-            <div className="mb-10 fixed bottom-6 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
+            <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
               <Button
                 className="bg-[#FF5053] text-white"
                 onClick={async () => {
@@ -107,7 +107,7 @@ export const TournamentStatusActions = ({
                   @Alievskey
                 </span>
               </div>
-              <div className="mb-10 fixed bottom-6 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
+              <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
                 <Button
                   onClick={async () => {
                     await reactivateCancelledRegistration(tournament.id);
@@ -125,7 +125,7 @@ export const TournamentStatusActions = ({
         return (
           <div className="flex flex-col text-center gap-[18px]">
             <div>Вы зарегистрированы</div>
-            <div className="mb-10 fixed bottom-6 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
+            <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
               <Button
                 className="bg-[#FF5053] text-white"
                 onClick={async () => {
@@ -169,7 +169,7 @@ export const TournamentStatusActions = ({
     if (!isUserRegistered(tournament, user)) {
       if (isRankAllowed(tournament, user)) {
         return (
-          <div className="mb-10 fixed bottom-6 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
+          <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
             <Button
               onClick={async () => {
                 await registerToTournament(tournament.id);
@@ -198,7 +198,7 @@ export const TournamentStatusActions = ({
     if (isUserRegisteredAndPaymentProceeded(tournament, user)) {
       return (
         <div className="flex flex-col text-center gap-[18px]">
-          <div className="mb-10 fixed bottom-6 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
+          <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
             <Button
               className="bg-[#FF5053] text-white"
               onClick={async () => {
@@ -225,7 +225,7 @@ export const TournamentStatusActions = ({
       return (
         <div className="flex flex-col text-center gap-[18px]">
           <div>Вы зарегистрированы</div>
-          <div className="mb-10 fixed bottom-6 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
+          <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
             <Button
               className="bg-[#FF5053] text-white"
               onClick={async () => {
@@ -268,7 +268,7 @@ export const TournamentStatusActions = ({
         return (
           <div className="flex flex-col text-center gap-[18px]">
             <div>Вы в&nbsp;листе ожидания</div>
-            <div className="mb-10 fixed bottom-6  right-0 left-0 flex flex-row gap-4 justify-center">
+            <div className="mb-10 fixed bottom-8  right-0 left-0 flex flex-row gap-4 justify-center">
               <Button
                 className="bg-[#FF5053] text-white"
                 onClick={async () => {
@@ -287,7 +287,7 @@ export const TournamentStatusActions = ({
             <div>
               Сейчас мест нет, но вы можете записаться в&nbsp;лист ожидания
             </div>
-            <div className="mb-10 fixed bottom-6 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
+            <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
               <Button
                 onClick={async () => {
                   await addUserToWaitlist(tournament.id);

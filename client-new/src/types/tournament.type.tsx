@@ -1,5 +1,6 @@
 import type { Court } from "./court.type";
 import type { Registration } from "./registration.type";
+import type { TournamentResult } from "./tournament-result.type";
 import type { User } from "./user.type";
 
 export interface Tournament {
@@ -19,4 +20,7 @@ export interface Tournament {
   rankMin: number;
   startTime: string;
   tournamentType: string;
+  data?: {
+    result: TournamentResult;
+  };
 }
