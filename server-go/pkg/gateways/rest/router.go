@@ -24,12 +24,13 @@ import (
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/tournament"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/user"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/webhook"
+	"github.com/shampsdev/go-telegram-template/pkg/notifications"
 	"github.com/shampsdev/go-telegram-template/pkg/usecase"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func setupRouter(ctx context.Context, r *gin.Engine, useCases usecase.Cases, cfg *config.Config) {
+func setupRouter(ctx context.Context, r *gin.Engine, useCases usecase.Cases, cfg *config.Config, notificationService *notifications.NotificationService) {
 	r.HandleMethodNotAllowed = true
 	r.Use(middlewares.AllowOrigin())
 	r.Use(middlewares.Logger(ctx))
@@ -45,7 +46,7 @@ func setupRouter(ctx context.Context, r *gin.Engine, useCases usecase.Cases, cfg
 	tournament.Setup(v1, useCases)
 	loyalty.Setup(v1, useCases)
 	registration.Setup(v1, useCases)
-	webhook.Setup(v1, useCases, cfg)
+	webhook.Setup(v1, useCases, cfg, notificationService)
 	admin_auth.Setup(v1, useCases)
 	admin_clubs.Setup(v1, useCases)
 	admin_users.Setup(v1, useCases)

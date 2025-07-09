@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/lmittmann/tint"
+	"github.com/nats-io/nats.go"
 	"github.com/shampsdev/go-telegram-template/pkg/utils/slogx"
 )
 
@@ -44,6 +45,12 @@ type Config struct {
 	JWT struct {
 		SecretKey            string        `envconfig:"JWT_SECRET_KEY"`
 		AccessTokenExpireHours int         `envconfig:"JWT_ACCESS_TOKEN_EXPIRE_HOURS" default:"24"`
+	}
+
+	NATS struct {
+		URL   string `envconfig:"NATS_URL"`
+		Port  uint16 `envconfig:"NATS_PORT" default:"4222"`
+		Token string `envconfig:"NATS_TOKEN" default:""`
 	}
 
 	S3 S3Config
@@ -117,4 +124,33 @@ func (c *Config) Logger() *slog.Logger {
 	}
 
 	panic(fmt.Sprintf("unknown log handler: %s", c.Log.Handler))
+}
+
+func (c *Config) NatsURL() string {
+	url := fmt.Sprintf("nats://%s:%d", c.NATS.URL, c.NATS.Port)
+	if c.NATS.URL == "" {
+		url = nats.DefaultURL
+	}
+	return url
+}
+
+func (c *Config) NatsOptions() []nats.Option {
+	opts := []nats.Option{}
+	if c.NATS.Token != "" {
+		opts = append(opts, nats.Token(c.NATS.Token))
+	}
+	return opts
+}
+
+func (c *Config) ConnectNATS() (*nats.Conn, error) {
+	natsURL := c.NatsURL()
+	opts := c.NatsOptions()
+	
+	nc, err := nats.Connect(natsURL, opts...)
+	if err != nil {
+		return nil, err
+	}
+	
+	slog.Info("Connected to NATS server", "url", natsURL)
+	return nc, nil
 }

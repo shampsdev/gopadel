@@ -5,6 +5,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shampsdev/go-telegram-template/pkg/config"
+	"github.com/shampsdev/go-telegram-template/pkg/notifications"
 	"github.com/shampsdev/go-telegram-template/pkg/repo/pg"
 	"github.com/shampsdev/go-telegram-template/pkg/repo/s3"
 )
@@ -38,6 +39,18 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 		panic(err)
 	}
 
+	// Инициализация NATS клиента и сервиса уведомлений
+	var notificationService *notifications.NotificationService
+	natsConn, err := cfg.ConnectNATS()
+	if err != nil {
+		// Логируем ошибку, но не прерываем запуск приложения
+		cfg.Logger().Error("Failed to connect to NATS", "error", err)
+		notificationService = nil
+	} else {
+		natsClient := notifications.NewNATSClient(natsConn, "tasks.active", cfg.Logger())
+		notificationService = notifications.NewNotificationService(natsClient)
+	}
+
 	userCase := NewUser(ctx, userRepo, storage)
 	adminUserCase := NewAdminUser(ctx, adminUserRepo, cfg)
 	imageCase := NewImage(ctx, storage)
@@ -45,8 +58,8 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	clubCase := NewClub(ctx, clubRepo)
 	tournamentCase := NewTournament(ctx, tournamentRepo, registrationRepo)
 	loyaltyCase := NewLoyalty(ctx, loyaltyRepo)
-	registrationCase := NewRegistration(ctx, registrationRepo, tournamentRepo, paymentRepo)
-	paymentCase := NewPayment(ctx, paymentRepo, registrationRepo, tournamentRepo, cfg)
+	registrationCase := NewRegistration(ctx, registrationRepo, tournamentRepo, paymentRepo, notificationService)
+	paymentCase := NewPayment(ctx, paymentRepo, registrationRepo, tournamentRepo, cfg, notificationService)
 	waitlistCase := NewWaitlist(ctx, waitlistRepo, tournamentCase)
 
 	return Cases{

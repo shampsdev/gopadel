@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shampsdev/go-telegram-template/pkg/config"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest"
+	"github.com/shampsdev/go-telegram-template/pkg/notifications"
 	"github.com/shampsdev/go-telegram-template/pkg/usecase"
 	"github.com/shampsdev/go-telegram-template/pkg/utils/slogx"
 )
@@ -44,7 +45,19 @@ func main() {
 	}
 	defer pool.Close()
 
-	s := rest.NewServer(ctx, cfg, usecase.Setup(ctx, cfg, pool))
+	cases := usecase.Setup(ctx, cfg, pool)
+	
+	var notificationService *notifications.NotificationService
+	natsConn, err := cfg.ConnectNATS()
+	if err != nil {
+		log.Error("Failed to connect to NATS", "error", err)
+		notificationService = nil
+	} else {
+		natsClient := notifications.NewNATSClient(natsConn, "tasks.active", cfg.Logger())
+		notificationService = notifications.NewNotificationService(natsClient)
+	}
+
+	s := rest.NewServer(ctx, cfg, cases, notificationService)
 	if err := s.Run(ctx); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slogx.WithErr(log, err).Error("error during server shutdown")
 	}

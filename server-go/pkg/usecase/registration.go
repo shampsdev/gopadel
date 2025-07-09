@@ -6,20 +6,23 @@ import (
 	"time"
 
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
+	"github.com/shampsdev/go-telegram-template/pkg/notifications"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
 )
 
 type Registration struct {
-	registrationRepo repo.Registration
-	tournamentRepo   repo.Tournament
-	paymentRepo      repo.Payment
+	registrationRepo    repo.Registration
+	tournamentRepo      repo.Tournament
+	paymentRepo         repo.Payment
+	notificationService *notifications.NotificationService
 }
 
-func NewRegistration(ctx context.Context, registrationRepo repo.Registration, tournamentRepo repo.Tournament, paymentRepo repo.Payment) *Registration {
+func NewRegistration(ctx context.Context, registrationRepo repo.Registration, tournamentRepo repo.Tournament, paymentRepo repo.Payment, notificationService *notifications.NotificationService) *Registration {
 	return &Registration{
-		registrationRepo: registrationRepo,
-		tournamentRepo:   tournamentRepo,
-		paymentRepo:      paymentRepo,
+		registrationRepo:    registrationRepo,
+		tournamentRepo:      tournamentRepo,
+		paymentRepo:         paymentRepo,
+		notificationService: notificationService,
 	}
 }
 
@@ -169,6 +172,19 @@ func (r *Registration) RegisterForTournament(ctx context.Context, user *domain.U
 		return nil, fmt.Errorf("failed to create registration: %w", err)
 	}
 
+	// Отправляем уведомление об успешной регистрации
+	if r.notificationService != nil {
+		err = r.notificationService.SendTournamentRegistrationSuccess(
+			user.TelegramID,
+			tournamentID,
+			tournament.Name,
+		)
+		if err != nil {
+			// Логируем ошибку, но не прерываем процесс регистрации
+			fmt.Printf("Failed to send registration success notification: %v\n", err)
+		}
+	}
+
 	return r.getRegistrationByID(ctx, id)
 }
 
@@ -202,6 +218,18 @@ func (r *Registration) CancelBeforePayment(ctx context.Context, user *domain.Use
 		return nil, fmt.Errorf("failed to cancel registration: %w", err)
 	}
 
+	// Отправляем уведомление об отмене регистрации
+	if r.notificationService != nil {
+		err = r.notificationService.SendTournamentRegistrationCanceled(
+			user.TelegramID,
+			tournamentID,
+			tournament.Name,
+		)
+		if err != nil {
+			fmt.Printf("Failed to send registration canceled notification: %v\n", err)
+		}
+	}
+
 	return r.getRegistrationByID(ctx, registration.ID)
 }
 
@@ -233,6 +261,18 @@ func (r *Registration) CancelAfterPayment(ctx context.Context, user *domain.User
 	err = r.registrationRepo.Patch(ctx, registration.ID, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to cancel registration: %w", err)
+	}
+
+	// Отправляем уведомление об отмене регистрации
+	if r.notificationService != nil {
+		err = r.notificationService.SendTournamentRegistrationCanceled(
+			user.TelegramID,
+			tournamentID,
+			tournament.Name,
+		)
+		if err != nil {
+			fmt.Printf("Failed to send registration canceled notification: %v\n", err)
+		}
 	}
 
 	return r.getRegistrationByID(ctx, registration.ID)

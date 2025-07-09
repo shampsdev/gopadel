@@ -10,6 +10,7 @@ import (
 	"github.com/penglongli/gin-metrics/ginmetrics"
 	"github.com/shampsdev/go-telegram-template/pkg/config"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/middlewares"
+	"github.com/shampsdev/go-telegram-template/pkg/notifications"
 	"github.com/shampsdev/go-telegram-template/pkg/usecase"
 	"github.com/tj/go-spin"
 	"golang.org/x/sync/errgroup"
@@ -22,7 +23,7 @@ type Server struct {
 	Router     *gin.Engine
 }
 
-func NewServer(ctx context.Context, cfg *config.Config, useCases usecase.Cases) *Server {
+func NewServer(ctx context.Context, cfg *config.Config, useCases usecase.Cases, notificationService *notifications.NotificationService) *Server {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
@@ -39,7 +40,7 @@ func NewServer(ctx context.Context, cfg *config.Config, useCases usecase.Cases) 
 	}
 
 	middlewares.BotToken = cfg.TG.BotToken
-	setupRouter(ctx, s.Router, useCases, cfg)
+	setupRouter(ctx, s.Router, useCases, cfg, notificationService)
 
 	return s
 }
