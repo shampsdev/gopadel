@@ -14,8 +14,8 @@ export function AboutSecond() {
           Играем в компании талантливых, продвинутых и интересных людей
         </div>
       </div>
-      <Link to="../policy">
-        <Button className="mb-10 mx-auto">Зарегистрироваться</Button>{" "}
+      <Link to="../policy" className="mx-auto">
+        <Button className="mb-10">Зарегистрироваться</Button>{" "}
       </Link>
     </div>
   );

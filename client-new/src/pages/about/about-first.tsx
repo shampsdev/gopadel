@@ -11,7 +11,7 @@ export function AboutFirst() {
           турниров и игр в падел
         </div>
       </div>
-      <div className="mt-auto pb-10">
+      <div className="mt-auto mx-auto pb-10">
         <Link to="second">
           <Button className="mx-auto">Дальше</Button>
         </Link>
