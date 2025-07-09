@@ -29,6 +29,6 @@ export const ranks: Rank[] = [
   {
     title: "Pro",
     from: 6,
-    to: 6.9999999,
+    to: 7,
   },
 ] as const;
