@@ -1,3 +1,4 @@
+import { postEvent } from "@telegram-apps/sdk-react";
 import { useCancelRegistrationAfterPayment } from "../../api/hooks/mutations/registration/cancel-registration-after-payment";
 import { useCreatePaymentForTournamentRegistration } from "../../api/hooks/mutations/registration/create-payment-for-tournament-registration";
 import { useReactivateCancelledRegistration } from "../../api/hooks/mutations/registration/reactivate-cancelled-registration";
@@ -149,7 +150,9 @@ export const TournamentStatusActions = ({
                     returnUrl: `https://t.me/${BOT_NAME}/app?startapp=tour-${tournament.id}`,
                   });
                   if (payment?.paymentLink) {
-                    window.open(payment.paymentLink, "_blank");
+                    postEvent("web_app_open_link", {
+                      url: payment.paymentLink,
+                    });
                   }
                 }}
               >
@@ -247,7 +250,9 @@ export const TournamentStatusActions = ({
                   returnUrl: `https://t.me/${BOT_NAME}/app?startapp=tour-${tournament.id}`,
                 });
                 if (payment?.paymentLink) {
-                  window.open(payment.paymentLink, "_blank");
+                  postEvent("web_app_open_link", {
+                    url: payment.paymentLink,
+                  });
                 }
               }}
             >

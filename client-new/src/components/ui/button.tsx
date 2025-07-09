@@ -13,7 +13,7 @@ export const Button = ({
   disabled = false,
 }: ButtonProps) => {
   return (
-    <div
+    <button
       className={twMerge(
         "text-[17px] w-fit bg-[#AFFF3F] text-black py-[18px] px-[30px] rounded-[30px] transition-colors",
         disabled && "bg-gray-400 cursor-not-allowed",
@@ -22,6 +22,6 @@ export const Button = ({
       onClick={disabled ? undefined : onClick}
     >
       {children}
-    </div>
+    </button>
   );
 };
