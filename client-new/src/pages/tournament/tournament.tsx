@@ -13,6 +13,8 @@ import { twMerge } from "tailwind-merge";
 import { Preloader } from "../../components/widgets/preloader";
 import { BOT_NAME } from "../../shared/constants/api";
 import { useIsAdmin } from "../../api/hooks/useIsAdmin";
+import { Prize } from "../../components/widgets/prize";
+import { isTournamentFinished } from "../../utils/tournament-status-checks";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -46,12 +48,35 @@ export const Tournament = () => {
       </div>
     );
 
+  const getPrizeVariant = () => {
+    if (
+      tournament?.[0].data?.result.leaderboard.find(
+        (place) => place.userId === user?.id
+      )?.place === 1
+    )
+      return "first";
+    if (
+      tournament?.[0].data?.result.leaderboard.find(
+        (place) => place.userId === user?.id
+      )?.place === 2
+    )
+      return "second";
+    if (
+      tournament?.[0].data?.result.leaderboard.find(
+        (place) => place.userId === user?.id
+      )?.place === 3
+    )
+      return "third";
+    if (isTournamentFinished(tournament?.[0])) return "default";
+    return "not-finished";
+  };
   return (
     <div className="flex flex-col gap-8 pb-[200px]">
       <div className="flex flex-col gap-7 px-[12px]">
         <h1 className="text-[24px] font-medium">{tournament?.[0]?.name}</h1>
 
         <div className="flex flex-col">
+          <Prize variant={getPrizeVariant()} />
           {isAdmin?.admin && (
             <>
               <div className="py-5 border-b border-[#DADCE0]">
