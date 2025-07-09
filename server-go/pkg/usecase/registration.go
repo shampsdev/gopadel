@@ -363,6 +363,7 @@ func (r *Registration) GetUserRegistrationsWithTournament(ctx context.Context, u
 			Court:          tournament.Court,
 			TournamentType: tournament.TournamentType,
 			Organizator:    tournament.Organizator,
+			Data:           tournament.Data,
 		}
 
 		regWithTournament.Tournament = &tournamentForReg

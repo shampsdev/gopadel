@@ -590,6 +590,8 @@ definitions:
     properties:
       court:
         $ref: '#/definitions/domain.Court'
+      data:
+        type: object
       description:
         type: string
       endTime:
