@@ -1,5 +1,11 @@
 -- Rollback: Rename telegram_username back to username and last_name back to second_name
 -- This migration preserves all existing data
+ALTER TABLE users ALTER COLUMN loyalty_id DROP DEFAULT;
+ALTER TABLE users ALTER COLUMN rank DROP DEFAULT;
+ALTER TABLE users ALTER COLUMN is_registered DROP DEFAULT;
+
+ALTER TABLE users DROP CONSTRAINT ck_users_rank;
+
 
 -- Rename telegram_username column back to username
 ALTER TABLE users RENAME COLUMN telegram_username TO username;
