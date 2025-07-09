@@ -18,14 +18,20 @@ export const TournamentPrizes = () => {
   const navigate = useNavigate();
 
   // Состояние для отслеживания призовых мест
-  const [firstPrizeUserId, setFirstPrizeUserId] = useState<string | null>(null);
-  const [secondPrizeUserId, setSecondPrizeUserId] = useState<string | null>(
-    null
-  );
-  const [thirdPrizeUserId, setThirdPrizeUserId] = useState<string | null>(null);
-
   const { data: tournaments, isLoading } = useGetTournaments({ id: id });
   const { mutateAsync: patchTournament, isPending } = usePatchTournament(id!);
+
+  // Инициализируем призовые места из данных турнира
+  const existingResults = tournaments?.[0]?.data?.result?.leaderboard;
+  const [firstPrizeUserId, setFirstPrizeUserId] = useState<string | null>(
+    existingResults?.find((p) => p.place === 1)?.userId || null
+  );
+  const [secondPrizeUserId, setSecondPrizeUserId] = useState<string | null>(
+    existingResults?.find((p) => p.place === 2)?.userId || null
+  );
+  const [thirdPrizeUserId, setThirdPrizeUserId] = useState<string | null>(
+    existingResults?.find((p) => p.place === 3)?.userId || null
+  );
 
   // Функция для получения призового места пользователя
   const getUserPrize = (userId: string): Prize | null => {
@@ -103,6 +109,19 @@ export const TournamentPrizes = () => {
     }
   };
 
+  // Проверяем есть ли изменения относительно данных с сервера
+  const originalFirstPrize =
+    existingResults?.find((p) => p.place === 1)?.userId || null;
+  const originalSecondPrize =
+    existingResults?.find((p) => p.place === 2)?.userId || null;
+  const originalThirdPrize =
+    existingResults?.find((p) => p.place === 3)?.userId || null;
+
+  const hasChanges =
+    firstPrizeUserId !== originalFirstPrize ||
+    secondPrizeUserId !== originalSecondPrize ||
+    thirdPrizeUserId !== originalThirdPrize;
+
   if (isLoading) return <Preloader />;
 
   if (tournaments) {
@@ -123,7 +142,7 @@ export const TournamentPrizes = () => {
     });
 
     return (
-      <div className="flex flex-col gap-9 pb-[100px]">
+      <div className="flex flex-col gap-9 pb-[100px] min-h-screen">
         <div className="flex flex-col gap-4">
           <p className="text-[24px] font-medium">Результаты турнира</p>
           <div className="flex flex-col gap-[6px] text-[#5D6674] text-[16px] font-medium">
@@ -181,8 +200,10 @@ export const TournamentPrizes = () => {
         <div className="flex flex-col fixed bottom-[80px]  right-0 left-0 gap-4 w-full">
           <Button
             onClick={handleSaveResults}
-            disabled={isPending}
-            className={" mx-auto"}
+            disabled={isPending || !hasChanges}
+            className={
+              !hasChanges ? "bg-[#F8F8FA] text-[#A4A9B4] mx-auto" : " mx-auto"
+            }
           >
             {isPending ? "Сохранение..." : "Сохранить изменения"}
           </Button>
