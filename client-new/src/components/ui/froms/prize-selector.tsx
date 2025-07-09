@@ -59,7 +59,7 @@ export const PrizeSelector = ({
         <legend className="px-2 text-[12px] font-semibold transition-all duration-100">
           {title}
         </legend>
-        <div className="flex justify-between items-center px-[12px] py-[10px] ">
+        <div className="flex justify-between items-center px-[12px] py-[10px] text-[14px]">
           <span className={selectedOption ? "text-black" : "text-[#868D98]"}>
             {selectedOption ? selectedOption.label : "-"}
           </span>
