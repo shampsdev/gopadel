@@ -34,6 +34,9 @@ export const ProtectedRoute = () => {
           joinClub.mutate(parsedData.clubId);
         }
       }
+      if (parsedData.tournamentId && myClubs.length === 0) {
+        joinClub.mutate("global");
+      }
     } else if (me?.isRegistered && myClubs && myClubs.length === 0) {
       joinClub.mutate("global");
     }
