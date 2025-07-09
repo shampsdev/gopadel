@@ -3600,6 +3600,9 @@ const docTemplate = `{
                 "courtId": {
                     "type": "string"
                 },
+                "data": {
+                    "type": "object"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -3842,6 +3845,9 @@ const docTemplate = `{
                 "courtId": {
                     "type": "string"
                 },
+                "data": {
+                    "type": "object"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -4071,6 +4077,9 @@ const docTemplate = `{
                 },
                 "courtId": {
                     "type": "string"
+                },
+                "data": {
+                    "type": "object"
                 },
                 "description": {
                     "type": "string"
@@ -4306,6 +4315,9 @@ const docTemplate = `{
                 },
                 "court": {
                     "$ref": "#/definitions/domain.Court"
+                },
+                "data": {
+                    "type": "object"
                 },
                 "description": {
                     "type": "string"

@@ -3592,6 +3592,9 @@
                 "courtId": {
                     "type": "string"
                 },
+                "data": {
+                    "type": "object"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -3834,6 +3837,9 @@
                 "courtId": {
                     "type": "string"
                 },
+                "data": {
+                    "type": "object"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -4063,6 +4069,9 @@
                 },
                 "courtId": {
                     "type": "string"
+                },
+                "data": {
+                    "type": "object"
                 },
                 "description": {
                     "type": "string"
@@ -4298,6 +4307,9 @@
                 },
                 "court": {
                     "$ref": "#/definitions/domain.Court"
+                },
+                "data": {
+                    "type": "object"
                 },
                 "description": {
                     "type": "string"

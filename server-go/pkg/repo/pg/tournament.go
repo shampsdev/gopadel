@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -27,7 +28,7 @@ func NewTournamentRepo(db *pgxpool.Pool) *TournamentRepo {
 func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTournament) ([]*domain.Tournament, error) {
 	s := r.psql.Select(
 		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`,
+		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`, `"t"."data"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
@@ -86,6 +87,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 		var tournament domain.Tournament
 		var endTime pgtype.Timestamp
 		var description pgtype.Text
+		var data []byte
 		var courtID, courtName, courtAddress string
 		var userID string
 		var userTelegramID int64
@@ -113,6 +115,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 			&description,
 			&tournament.ClubID,
 			&tournament.TournamentType,
+			&data,
 			&courtID,
 			&courtName,
 			&courtAddress,
@@ -140,6 +143,11 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 		}
 		if description.Valid {
 			tournament.Description = description.String
+		}
+		
+		// Обработка JSONB поля data
+		if data != nil {
+			tournament.Data = json.RawMessage(data)
 		}
 
 		tournament.Court = domain.Court{
@@ -193,7 +201,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID string) ([]*domain.Tournament, error) {
 	s := r.psql.Select(
 		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`,
+		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`, `"t"."data"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"org"."id"`, `"org"."telegram_id"`, `"org"."telegram_username"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 		`"org"."bio"`, `"org"."rank"`, `"org"."city"`, `"org"."birth_date"`, `"org"."playing_position"`, `"org"."padel_profiles"`, `"org"."is_registered"`,
@@ -226,6 +234,7 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 		var tournament domain.Tournament
 		var endTime pgtype.Timestamp
 		var description pgtype.Text
+		var data []byte
 		var courtID, courtName, courtAddress string
 		var orgID string
 		var orgTelegramID int64
@@ -252,6 +261,7 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 			&description,
 			&tournament.ClubID,
 			&tournament.TournamentType,
+			&data,
 			&courtID,
 			&courtName,
 			&courtAddress,
@@ -278,6 +288,11 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 		}
 		if description.Valid {
 			tournament.Description = description.String
+		}
+		
+		// Обработка JSONB поля data
+		if data != nil {
+			tournament.Data = json.RawMessage(data)
 		}
 
 		tournament.Court = domain.Court{
@@ -329,12 +344,19 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 }
 
 func (r *TournamentRepo) Create(ctx context.Context, tournament *domain.CreateTournament) (string, error) {
+	var dataBytes []byte
+	var err error
+	
+	if len(tournament.Data) > 0 {
+		dataBytes = []byte(tournament.Data)
+	}
+	
 	s := r.psql.Insert(`"tournaments"`).
 		Columns("name", "start_time", "end_time", "price", "rank_min", "rank_max", 
-				"max_users", "description", "court_id", "club_id", "tournament_type", "organizator_id").
+				"max_users", "description", "court_id", "club_id", "tournament_type", "organizator_id", "data").
 		Values(tournament.Name, tournament.StartTime, tournament.EndTime, tournament.Price,
 			   tournament.RankMin, tournament.RankMax, tournament.MaxUsers, tournament.Description,
-			   tournament.CourtID, tournament.ClubID, tournament.TournamentType, tournament.OrganizatorID).
+			   tournament.CourtID, tournament.ClubID, tournament.TournamentType, tournament.OrganizatorID, dataBytes).
 		Suffix("RETURNING id")
 
 	sql, args, err := s.ToSql()
@@ -383,6 +405,9 @@ func (r *TournamentRepo) Patch(ctx context.Context, id string, tournament *domai
 	if tournament.TournamentType != nil {
 		s = s.Set("tournament_type", *tournament.TournamentType)
 	}
+	if len(tournament.Data) > 0 {
+		s = s.Set("data", []byte(tournament.Data))
+	}
 	
 	sql, args, err := s.ToSql()
 	if err != nil {
@@ -409,7 +434,7 @@ func (r *TournamentRepo) Delete(ctx context.Context, id string) error {
 func (r *TournamentRepo) AdminFilter(ctx context.Context, filter *domain.AdminFilterTournament) ([]*domain.Tournament, error) {
 	s := r.psql.Select(
 		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`,
+		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`, `"t"."data"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
@@ -475,6 +500,7 @@ func (r *TournamentRepo) AdminFilter(ctx context.Context, filter *domain.AdminFi
 		var tournament domain.Tournament
 		var endTime pgtype.Timestamp
 		var description pgtype.Text
+		var data []byte
 		var courtID, courtName, courtAddress string
 		var userID string
 		var userTelegramID int64
@@ -502,6 +528,7 @@ func (r *TournamentRepo) AdminFilter(ctx context.Context, filter *domain.AdminFi
 			&description,
 			&tournament.ClubID,
 			&tournament.TournamentType,
+			&data,
 			&courtID,
 			&courtName,
 			&courtAddress,
@@ -529,6 +556,11 @@ func (r *TournamentRepo) AdminFilter(ctx context.Context, filter *domain.AdminFi
 		}
 		if description.Valid {
 			tournament.Description = description.String
+		}
+		
+		// Обработка JSONB поля data
+		if data != nil {
+			tournament.Data = json.RawMessage(data)
 		}
 
 		tournament.Court = domain.Court{
@@ -618,6 +650,9 @@ func (r *TournamentRepo) AdminPatch(ctx context.Context, id string, tournament *
 	}
 	if tournament.OrganizatorID != nil {
 		s = s.Set("organizator_id", *tournament.OrganizatorID)
+	}
+	if len(tournament.Data) > 0 {
+		s = s.Set("data", []byte(tournament.Data))
 	}
 	
 	sql, args, err := s.ToSql()
