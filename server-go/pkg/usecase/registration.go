@@ -171,19 +171,20 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, regist
 						}
 					}
 
-					autoDelete := tournament.StartTime.Add(-12 * time.Hour)
-					if autoDelete.After(time.Now()) {
-						err = r.notificationService.SendTournamentAutoDeleteUnpaid(
-							updatedRegistration.User.TelegramID,
-							tournament.ID,
-							tournament.Name,
-							registrationID,
-							autoDelete,
-						)
-						if err != nil {
-							fmt.Printf("Failed to schedule auto delete: %v\n", err)
-						}
-					}
+					// Автоматическое удаление отключено
+					// autoDelete := tournament.StartTime.Add(-12 * time.Hour)
+					// if autoDelete.After(time.Now()) {
+					// 	err = r.notificationService.SendTournamentAutoDeleteUnpaid(
+					// 		updatedRegistration.User.TelegramID,
+					// 		tournament.ID,
+					// 		tournament.Name,
+					// 		registrationID,
+					// 		autoDelete,
+					// 	)
+					// 	if err != nil {
+					// 		fmt.Printf("Failed to schedule auto delete: %v\n", err)
+					// 	}
+					// }
 				}
 			}
 		}
@@ -264,6 +265,81 @@ func (r *Registration) RegisterForTournament(ctx context.Context, user *domain.U
 			if err != nil {
 				return nil, fmt.Errorf("failed to update registration status: %w", err)
 			}
+
+			// Отправляем уведомление об успешной регистрации
+			if r.notificationService != nil {
+				err = r.notificationService.SendTournamentRegistrationSuccess(
+					user.TelegramID,
+					tournamentID,
+					tournament.Name,
+					tournament.Price == 0,
+				)
+				if err != nil {
+					fmt.Printf("Failed to send registration success notification: %v\n", err)
+				}
+
+				// Планируем напоминания в зависимости от статуса
+				if tournament.StartTime.After(time.Now()) {
+					switch newStatus {
+					case domain.RegistrationStatusActive:
+						reminder48h := tournament.StartTime.Add(-48 * time.Hour)
+						if reminder48h.After(time.Now()) {
+							err = r.notificationService.SendTournamentFreeReminder48Hours(
+								user.TelegramID,
+								tournamentID,
+								tournament.Name,
+								reminder48h,
+							)
+							if err != nil {
+								fmt.Printf("Failed to schedule 48h free reminder: %v\n", err)
+							}
+						}
+					case domain.RegistrationStatusPending:
+						reminder48h := tournament.StartTime.Add(-48 * time.Hour)
+						if reminder48h.After(time.Now()) {
+							err = r.notificationService.SendTournamentReminder48Hours(
+								user.TelegramID,
+								tournamentID,
+								tournament.Name,
+								false,
+								reminder48h,
+							)
+							if err != nil {
+								fmt.Printf("Failed to schedule 48h payment reminder: %v\n", err)
+							}
+						}
+
+						reminder24h := tournament.StartTime.Add(-24 * time.Hour)
+						if reminder24h.After(time.Now()) {
+							err = r.notificationService.SendTournamentReminder24Hours(
+								user.TelegramID,
+								tournamentID,
+								tournament.Name,
+								false,
+								reminder24h,
+							)
+							if err != nil {
+								fmt.Printf("Failed to schedule 24h payment reminder: %v\n", err)
+							}
+						}
+
+						// Автоматическое удаление отключено
+						// autoDelete := tournament.StartTime.Add(-12 * time.Hour)
+						// if autoDelete.After(time.Now()) {
+						// 	err = r.notificationService.SendTournamentAutoDeleteUnpaid(
+						// 		user.TelegramID,
+						// 		tournamentID,
+						// 		tournament.Name,
+						// 		reg.ID,
+						// 		autoDelete,
+						// 	)
+						// 	if err != nil {
+						// 		fmt.Printf("Failed to schedule auto delete: %v\n", err)
+						// 	}
+						// }
+					}
+				}
+			}
 			
 			return r.getRegistrationByID(ctx, reg.ID)
 		}
@@ -303,6 +379,71 @@ func (r *Registration) RegisterForTournament(ctx context.Context, user *domain.U
 		)
 		if err != nil {
 			fmt.Printf("Failed to send registration success notification: %v\n", err)
+		}
+
+		// Планируем напоминания в зависимости от статуса
+		if tournament.StartTime.After(time.Now()) {
+			if status == domain.RegistrationStatusActive {
+				// Для бесплатных турниров - напоминания о турнире
+				// Напоминание за 48 часов
+				reminder48h := tournament.StartTime.Add(-48 * time.Hour)
+				if reminder48h.After(time.Now()) {
+					err = r.notificationService.SendTournamentFreeReminder48Hours(
+						user.TelegramID,
+						tournamentID,
+						tournament.Name,
+						reminder48h,
+					)
+					if err != nil {
+						fmt.Printf("Failed to schedule 48h free reminder: %v\n", err)
+					}
+				}
+			} else if status == domain.RegistrationStatusPending {
+				// Для платных турниров - напоминания об оплате
+				// Напоминание за 48 часов
+				reminder48h := tournament.StartTime.Add(-48 * time.Hour)
+				if reminder48h.After(time.Now()) {
+					err = r.notificationService.SendTournamentReminder48Hours(
+						user.TelegramID,
+						tournamentID,
+						tournament.Name,
+						false,
+						reminder48h,
+					)
+					if err != nil {
+						fmt.Printf("Failed to schedule 48h payment reminder: %v\n", err)
+					}
+				}
+
+				reminder24h := tournament.StartTime.Add(-24 * time.Hour)
+				if reminder24h.After(time.Now()) {
+					err = r.notificationService.SendTournamentReminder24Hours(
+						user.TelegramID,
+						tournamentID,
+						tournament.Name,
+						false,
+						reminder24h,
+					)
+					if err != nil {
+						fmt.Printf("Failed to schedule 24h payment reminder: %v\n", err)
+					}
+				}
+
+				// Автоматическое удаление отключено
+				// autoDelete := tournament.StartTime.Add(-12 * time.Hour)
+				// if autoDelete.After(time.Now()) {
+				// 	err = r.notificationService.SendTournamentAutoDeleteUnpaid(
+				// 		user.TelegramID,
+				// 		tournamentID,
+				// 		tournament.Name,
+				// 		id,
+				// 		autoDelete,
+				// 	)
+				// 	if err != nil {
+				// 		fmt.Printf("Failed to schedule auto delete: %v\n", err)
+				// 	}
+				// }
+			}
 		}
 	}
 
