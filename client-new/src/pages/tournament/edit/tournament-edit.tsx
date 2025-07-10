@@ -1,29 +1,29 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
-import { Input } from "../../components/ui/froms/input";
-import { Textarea } from "../../components/ui/froms/textarea";
-import { CourtSelector } from "../../components/ui/froms/court-selector";
+import { useDeleteTournament } from "../../../api/hooks/mutations/tournament/useDeleteTournament";
+import { usePatchTournament } from "../../../api/hooks/mutations/tournament/usePatchTournament";
+import { useGetCourts } from "../../../api/hooks/useGetCourts";
+import { useGetTournaments } from "../../../api/hooks/useGetTournaments";
+import { useIsAdmin } from "../../../api/hooks/useIsAdmin";
+import { Icons } from "../../../assets/icons";
+import { Button } from "../../../components/ui/button";
+import { CourtSelector } from "../../../components/ui/froms/court-selector";
+import { Input } from "../../../components/ui/froms/input";
+import { RankSelector } from "../../../components/ui/froms/rank-selector";
+import { Textarea } from "../../../components/ui/froms/textarea";
+import { Preloader } from "../../../components/widgets/preloader";
+import { ranks } from "../../../shared/constants/ranking";
+import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
+import { useModalStore } from "../../../shared/stores/modal.store";
+import type { PatchTournament } from "../../../types/patch-tournament";
 import {
-  formatDateInput,
   validateDateFormat,
-  formatTimeInput,
   validateTimeFormat,
   createStartAndEndTime,
-} from "../../utils/date-format";
-import { Button } from "../../components/ui/button";
-import { RankSelector } from "../../components/ui/froms/rank-selector";
-import { ranks } from "../../shared/constants/ranking";
-import type { PatchTournament } from "../../types/patch-tournament";
-import { useGetCourts } from "../../api/hooks/useGetCourts";
-import { usePatchTournament } from "../../api/hooks/mutations/tournament/usePatchTournament";
-import { useDeleteTournament } from "../../api/hooks/mutations/tournament/useDeleteTournament";
-import { useIsAdmin } from "../../api/hooks/useIsAdmin";
-import { Preloader } from "../../components/widgets/preloader";
-import AboutImage from "../../assets/about.png";
-import { useGetTournaments } from "../../api/hooks/useGetTournaments";
-import { Icons } from "../../assets/icons";
-import { useModalStore } from "../../shared/stores/modal.store";
+  formatDateInput,
+  formatTimeInput,
+} from "../../../utils/date-format";
+import AboutImage from "../../../assets/about.png";
 
 export const TournamentEdit = () => {
   const { id } = useParams();
@@ -97,7 +97,6 @@ export const TournamentEdit = () => {
       setType(tournament.tournamentType || "");
       setCourtId(tournament.court?.id || "");
 
-      // Находим ранги для минимального и максимального значения
       const minRank = ranks.find(
         (r) => tournament.rankMin >= r.from && tournament.rankMin <= r.to
       );
@@ -128,7 +127,6 @@ export const TournamentEdit = () => {
     if (selectedRank) {
       setRankMin(selectedRank.from);
       setRankMinError(false);
-      // Проверяем, что максимальный ранг не меньше минимального
       if (rankMax !== null && selectedRank.from > rankMax) {
         setRankMaxError(true);
       } else {
@@ -471,7 +469,7 @@ export const TournamentEdit = () => {
         </div>
       </div>
 
-      <div className="flex flex-col fixed bottom-[60px]  right-0 left-0 gap-4 w-full">
+      <div className="flex flex-col fixed bottom-[80px]  right-0 left-0 gap-4 w-full">
         <Button
           disabled={isUpdatingTournament}
           onClick={() => {
