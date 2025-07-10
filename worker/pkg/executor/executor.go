@@ -44,10 +44,10 @@ func (e *TaskExecutor) ExecuteTask(ctx context.Context, task *domain.Task) error
 	slog.Info("executing task", "task_id", task.ID, "task_type", task.TaskType)
 	
 	// ВРЕМЕННО: Пропускаем выполнение всех задач, кроме успешной регистрации
-	if task.TaskType != domain.TaskTypeTournamentRegistrationSuccess {
-		slog.Info("skipping task execution (disabled for development)", "task_id", task.ID, "task_type", task.TaskType)
-		return nil
-	}
+	// if task.TaskType != domain.TaskTypeTournamentRegistrationSuccess {
+	// 	slog.Info("skipping task execution (disabled for development)", "task_id", task.ID, "task_type", task.TaskType)
+	// 	return nil
+	// }
 	
 	var taskData map[string]interface{}
 	if err := json.Unmarshal(task.Data, &taskData); err != nil {

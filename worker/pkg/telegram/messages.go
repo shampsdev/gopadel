@@ -7,7 +7,7 @@ import (
 )
 
 func GenerateTournamentURL(config *config.Config, tournamentID string) string {
-	return fmt.Sprintf("%s?startapp=t-%s", config.TelegramWebAppURL(), tournamentID)
+	return fmt.Sprintf("%s?startapp=tour-%s", config.TelegramWebAppURL(), tournamentID)
 }
 
 func GetMessageForTaskType(taskType domain.TaskType, data map[string]interface{}, config *config.Config) *domain.MessageText {
