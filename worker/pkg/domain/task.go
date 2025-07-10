@@ -28,9 +28,9 @@ const (
 
 const (
 	TaskTypeTournamentRegistrationSuccess      TaskType = "tournament.registration.success"
-	TaskTypeTournamentPaymentReminder1         TaskType = "tournament.payment.reminder.1"
-	TaskTypeTournamentPaymentReminder2         TaskType = "tournament.payment.reminder.2"
-	TaskTypeTournamentPaymentReminder3         TaskType = "tournament.payment.reminder.3"
+	TaskTypeTournamentReminder48Hours          TaskType = "tournament.reminder.48hours"
+	TaskTypeTournamentReminder24Hours          TaskType = "tournament.reminder.24hours"
+	TaskTypeTournamentFreeReminder48Hours      TaskType = "tournament.free.reminder.48hours"
 	TaskTypeTournamentPaymentSuccess           TaskType = "tournament.payment.success"
 	TaskTypeTournamentLoyaltyChanged           TaskType = "tournament.loyalty.changed"
 	TaskTypeTournamentRegistrationCanceled     TaskType = "tournament.registration.canceled"

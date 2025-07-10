@@ -6,20 +6,23 @@ import (
 	"time"
 
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
+	"github.com/shampsdev/go-telegram-template/pkg/notifications"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
 )
 
 type Registration struct {
-	registrationRepo repo.Registration
-	tournamentRepo   repo.Tournament
-	paymentRepo      repo.Payment
+	registrationRepo    repo.Registration
+	tournamentRepo      repo.Tournament
+	paymentRepo         repo.Payment
+	notificationService *notifications.NotificationService
 }
 
-func NewRegistration(ctx context.Context, registrationRepo repo.Registration, tournamentRepo repo.Tournament, paymentRepo repo.Payment) *Registration {
+func NewRegistration(ctx context.Context, registrationRepo repo.Registration, tournamentRepo repo.Tournament, paymentRepo repo.Payment, notificationService *notifications.NotificationService) *Registration {
 	return &Registration{
-		registrationRepo: registrationRepo,
-		tournamentRepo:   tournamentRepo,
-		paymentRepo:      paymentRepo,
+		registrationRepo:    registrationRepo,
+		tournamentRepo:      tournamentRepo,
+		paymentRepo:         paymentRepo,
+		notificationService: notificationService,
 	}
 }
 
@@ -43,29 +46,150 @@ func (r *Registration) AdminFilter(ctx context.Context, adminFilter *domain.Admi
 }
 
 func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, registrationID string, status domain.RegistrationStatus) (*domain.RegistrationWithPayments, error) {
-	patch := &domain.PatchRegistration{
-		Status: &status,
-	}
-	
-	err := r.registrationRepo.Patch(ctx, registrationID, patch)
-	if err != nil {
-		return nil, fmt.Errorf("failed to update registration status: %w", err)
-	}
-
+	// Сначала получаем текущее состояние регистрации
 	filter := &domain.AdminFilterRegistration{
 		ID: &registrationID,
 	}
 	
-	registrations, err := r.AdminFilter(ctx, filter)
+	currentRegistrations, err := r.AdminFilter(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get current registration: %w", err)
+	}
+
+	if len(currentRegistrations) == 0 {
+		return nil, fmt.Errorf("registration not found")
+	}
+
+	currentRegistration := currentRegistrations[0]
+	oldStatus := currentRegistration.Status
+
+	// Обновляем статус
+	patch := &domain.PatchRegistration{
+		Status: &status,
+	}
+	
+	err = r.registrationRepo.Patch(ctx, registrationID, patch)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update registration status: %w", err)
+	}
+
+	// Получаем обновленную регистрацию
+	updatedRegistrations, err := r.AdminFilter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get updated registration: %w", err)
 	}
 
-	if len(registrations) == 0 {
+	if len(updatedRegistrations) == 0 {
 		return nil, fmt.Errorf("updated registration not found")
 	}
 
-	return registrations[0], nil
+	updatedRegistration := updatedRegistrations[0]
+
+	// Обрабатываем смену статуса с CANCELED на ACTIVE/PENDING
+	if oldStatus == domain.RegistrationStatusCanceled && 
+	   (status == domain.RegistrationStatusActive || status == domain.RegistrationStatusPending) {
+		
+		if r.notificationService != nil {
+			err = r.notificationService.SendTournamentTasksCancel(
+				updatedRegistration.User.TelegramID,
+				updatedRegistration.Tournament.ID,
+			)
+			if err != nil {
+				fmt.Printf("Failed to cancel related tasks: %v\n", err)
+			}
+
+			switch status {
+			case domain.RegistrationStatusActive:
+				// Если статус стал ACTIVE - отправляем уведомление об успешной оплате
+				err = r.notificationService.SendTournamentPaymentSuccess(
+					updatedRegistration.User.TelegramID,
+					updatedRegistration.Tournament.ID,
+					updatedRegistration.Tournament.Name,
+				)
+				if err != nil {
+					fmt.Printf("Failed to send payment success notification: %v\n", err)
+				}
+
+				tournament := updatedRegistration.Tournament
+				if tournament.StartTime.After(time.Now()) {
+					reminder48h := tournament.StartTime.Add(-48 * time.Hour)
+					if reminder48h.After(time.Now()) {
+						err = r.notificationService.SendTournamentReminder48Hours(
+							updatedRegistration.User.TelegramID,
+							tournament.ID,
+							tournament.Name,
+							true,
+							reminder48h,
+						)
+						if err != nil {
+							fmt.Printf("Failed to schedule 48h reminder: %v\n", err)
+						}
+					}
+
+					reminder24h := tournament.StartTime.Add(-24 * time.Hour)
+					if reminder24h.After(time.Now()) {
+						err = r.notificationService.SendTournamentReminder24Hours(
+							updatedRegistration.User.TelegramID,
+							tournament.ID,
+							tournament.Name,
+							true,
+							reminder24h,
+						)
+						if err != nil {
+							fmt.Printf("Failed to schedule 24h reminder: %v\n", err)
+						}
+					}
+				}
+			case domain.RegistrationStatusPending:
+				tournament := updatedRegistration.Tournament
+				if tournament.StartTime.After(time.Now()) {
+					reminder48h := tournament.StartTime.Add(-48 * time.Hour)
+					if reminder48h.After(time.Now()) {
+						err = r.notificationService.SendTournamentReminder48Hours(
+							updatedRegistration.User.TelegramID,
+							tournament.ID,
+							tournament.Name,
+							false,
+							reminder48h,
+						)
+						if err != nil {
+							fmt.Printf("Failed to schedule 48h payment reminder: %v\n", err)
+						}
+					}
+
+					reminder24h := tournament.StartTime.Add(-24 * time.Hour)
+					if reminder24h.After(time.Now()) {
+						err = r.notificationService.SendTournamentReminder24Hours(
+							updatedRegistration.User.TelegramID,
+							tournament.ID,
+							tournament.Name,
+							false,
+							reminder24h,
+						)
+						if err != nil {
+							fmt.Printf("Failed to schedule 24h payment reminder: %v\n", err)
+						}
+					}
+
+					autoDelete := tournament.StartTime.Add(-12 * time.Hour)
+					if autoDelete.After(time.Now()) {
+						err = r.notificationService.SendTournamentAutoDeleteUnpaid(
+							updatedRegistration.User.TelegramID,
+							tournament.ID,
+							tournament.Name,
+							registrationID,
+							autoDelete,
+						)
+						if err != nil {
+							fmt.Printf("Failed to schedule auto delete: %v\n", err)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return updatedRegistration, nil
 }
 
 func (r *Registration) GetRegistrationWithPayments(ctx context.Context, registrationID string) (*domain.RegistrationWithPayments, error) {
@@ -169,6 +293,19 @@ func (r *Registration) RegisterForTournament(ctx context.Context, user *domain.U
 		return nil, fmt.Errorf("failed to create registration: %w", err)
 	}
 
+	// Отправляем уведомление об успешной регистрации
+	if r.notificationService != nil {
+		err = r.notificationService.SendTournamentRegistrationSuccess(
+			user.TelegramID,
+			tournamentID,
+			tournament.Name,
+		)
+		if err != nil {
+			// Логируем ошибку, но не прерываем процесс регистрации
+			fmt.Printf("Failed to send registration success notification: %v\n", err)
+		}
+	}
+
 	return r.getRegistrationByID(ctx, id)
 }
 
@@ -202,6 +339,18 @@ func (r *Registration) CancelBeforePayment(ctx context.Context, user *domain.Use
 		return nil, fmt.Errorf("failed to cancel registration: %w", err)
 	}
 
+	// Отправляем уведомление об отмене регистрации
+	if r.notificationService != nil {
+		err = r.notificationService.SendTournamentRegistrationCanceled(
+			user.TelegramID,
+			tournamentID,
+			tournament.Name,
+		)
+		if err != nil {
+			fmt.Printf("Failed to send registration canceled notification: %v\n", err)
+		}
+	}
+
 	return r.getRegistrationByID(ctx, registration.ID)
 }
 
@@ -233,6 +382,18 @@ func (r *Registration) CancelAfterPayment(ctx context.Context, user *domain.User
 	err = r.registrationRepo.Patch(ctx, registration.ID, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to cancel registration: %w", err)
+	}
+
+	// Отправляем уведомление об отмене регистрации
+	if r.notificationService != nil {
+		err = r.notificationService.SendTournamentRegistrationCanceled(
+			user.TelegramID,
+			tournamentID,
+			tournament.Name,
+		)
+		if err != nil {
+			fmt.Printf("Failed to send registration canceled notification: %v\n", err)
+		}
 	}
 
 	return r.getRegistrationByID(ctx, registration.ID)
@@ -363,6 +524,7 @@ func (r *Registration) GetUserRegistrationsWithTournament(ctx context.Context, u
 			Court:          tournament.Court,
 			TournamentType: tournament.TournamentType,
 			Organizator:    tournament.Organizator,
+			Data:           tournament.Data,
 		}
 
 		regWithTournament.Tournament = &tournamentForReg

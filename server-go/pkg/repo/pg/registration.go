@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -45,7 +46,7 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 		`"reg"."id"`, `"reg"."user_id"`, `"reg"."tournament_id"`, `"reg"."date"`, `"reg"."status"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
-		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`, `"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`,
+		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`, `"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`, `"t"."data"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"org"."id"`, `"org"."telegram_id"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 	).
@@ -104,6 +105,7 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 
 		var tournamentEndTime pgtype.Timestamp
 		var tournamentDescription pgtype.Text
+		var tournamentData []byte
 
 		var organizatorAvatar pgtype.Text
 
@@ -136,6 +138,7 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 			&tournament.MaxUsers,
 			&tournamentDescription,
 			&tournament.TournamentType,
+			&tournamentData,
 			&court.ID,
 			&court.Name,
 			&court.Address,
@@ -184,6 +187,10 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 		}
 		if tournamentDescription.Valid {
 			tournament.Description = tournamentDescription.String
+		}
+		// Обработка JSONB поля data
+		if tournamentData != nil {
+			tournament.Data = json.RawMessage(tournamentData)
 		}
 
 		// Fill nullable organizator fields
@@ -237,7 +244,7 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
 		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`,
+		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`, `"t"."data"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"org"."id"`, `"org"."telegram_id"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 	).
@@ -312,6 +319,7 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 
 		var tournamentEndTime pgtype.Timestamp
 		var tournamentDescription pgtype.Text
+		var tournamentData []byte
 
 		var organizatorAvatar pgtype.Text
 
@@ -344,6 +352,7 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 			&tournament.MaxUsers,
 			&tournamentDescription,
 			&tournament.TournamentType,
+			&tournamentData,
 			&court.ID,
 			&court.Name,
 			&court.Address,
@@ -392,6 +401,10 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 		}
 		if tournamentDescription.Valid {
 			tournament.Description = tournamentDescription.String
+		}
+		// Обработка JSONB поля data
+		if tournamentData != nil {
+			tournament.Data = json.RawMessage(tournamentData)
 		}
 
 		// Fill nullable organizator fields

@@ -15,17 +15,18 @@ import (
 	"github.com/google/uuid"
 	"github.com/shampsdev/go-telegram-template/pkg/config"
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
+	"github.com/shampsdev/go-telegram-template/pkg/notifications"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
 )
 
 type Payment struct {
-	paymentRepo      repo.Payment
-	registrationRepo repo.Registration
-	tournamentRepo   repo.Tournament
-	config           *config.Config
+	paymentRepo         repo.Payment
+	registrationRepo    repo.Registration
+	tournamentRepo      repo.Tournament
+	config              *config.Config
+	notificationService *notifications.NotificationService
 }
 
-// YooKassa API structures
 type YooKassaAmount struct {
 	Value    string `json:"value"`
 	Currency string `json:"currency"`
@@ -73,12 +74,13 @@ type YooKassaConfirmationResp struct {
 	ConfirmationURL string `json:"confirmation_url"`
 }
 
-func NewPayment(ctx context.Context, paymentRepo repo.Payment, registrationRepo repo.Registration, tournamentRepo repo.Tournament, cfg *config.Config) *Payment {
+func NewPayment(ctx context.Context, paymentRepo repo.Payment, registrationRepo repo.Registration, tournamentRepo repo.Tournament, cfg *config.Config, notificationService *notifications.NotificationService) *Payment {
 	return &Payment{
-		paymentRepo:      paymentRepo,
-		registrationRepo: registrationRepo,
-		tournamentRepo:   tournamentRepo,
-		config:           cfg,
+		paymentRepo:         paymentRepo,
+		registrationRepo:    registrationRepo,
+		tournamentRepo:      tournamentRepo,
+		config:              cfg,
+		notificationService: notificationService,
 	}
 }
 
@@ -155,7 +157,7 @@ func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, 
 		return nil, fmt.Errorf("failed to get existing payments: %w", err)
 	}
 
-	// Если есть платеж в статусе success/pending, возвращаем его
+	// если есть пендинг или успешный, то его
 	for _, payment := range existingPayments {
 		if payment.Status == domain.PaymentStatusSucceeded || payment.Status == domain.PaymentStatusPending {
 			return payment, nil
@@ -169,7 +171,7 @@ func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, 
 
 	finalPrice := p.calculateFinalPrice(tournament.Price, user)
 	
-	// Сохраняем платеж в базе данных
+	// сохраняем в бд
 	createPayment := &domain.CreatePayment{
 		PaymentID:         yooPayment.ID,
 		Amount:            finalPrice,
@@ -335,7 +337,6 @@ func (p *Payment) calculateFinalPrice(originalPrice int, user *domain.User) int 
 	return int(finalPrice + 0.5)
 }
 
-// isValidEmail проверяет корректность email адреса
 func (p *Payment) isValidEmail(email string) bool {
 	if email == "" {
 		return false
@@ -347,17 +348,13 @@ func (p *Payment) isValidEmail(email string) bool {
 
 // generateCustomerEmail создает email для клиента в зависимости от доступных данных
 func (p *Payment) generateCustomerEmail(user *domain.User) string {
-	// В production среде YooKassa может быть более строгой к email
-	// Генерируем более уникальный email на основе данных пользователя
 	if user.TelegramUsername != "" {
-		// Создаем email на основе Telegram username
 		email := fmt.Sprintf("%s@telegram.gopadel.com", user.TelegramUsername)
 		if p.isValidEmail(email) {
 			return email
 		}
 	}
 	
-	// Если username недоступен, используем ID
 	if user.ID != "" {
 		email := fmt.Sprintf("user%s@gopadel.com", user.ID)
 		if p.isValidEmail(email) {
@@ -365,6 +362,5 @@ func (p *Payment) generateCustomerEmail(user *domain.User) string {
 		}
 	}
 	
-	// Fallback email
 	return "tournament@gopadel.com"
 }

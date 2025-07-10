@@ -20,5 +20,16 @@ services:
     depends_on:
       - database
 
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: --config /etc/nats/nats-server.conf
+    env_file:
+      - .env
+    volumes:
+      - ./nats-server.conf:/etc/nats/nats-server.conf
+
 volumes:
   gopadel-server:

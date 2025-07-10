@@ -31,8 +31,8 @@ type Config struct {
 		Token string `envconfig:"NATS_TOKEN" default:""`
 	}
 	TG struct {
-		BotToken   string `envconfig:"TG_API_TOKEN"`
-		WebAppName string `envconfig:"WEBAPP_URL"`
+		BotToken      string `envconfig:"TG_BOT_TOKEN"`
+		WebAppName    string `envconfig:"WEBAPP_NAME"`
 		TgBotUsername string `envconfig:"TG_BOT_USERNAME"`
 	}
 	Log struct {

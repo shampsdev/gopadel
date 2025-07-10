@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type RegistrationStatus string
 
@@ -44,18 +47,19 @@ type RegistrationWithPayments struct {
 
 // без юзеров
 type TournamentForRegistration struct {
-	ID             string    `json:"id"`
-	Name           string    `json:"name"`
-	StartTime      time.Time `json:"startTime"`
-	EndTime        time.Time `json:"endTime"`
-	Price          int       `json:"price"`
-	RankMin        float64   `json:"rankMin"`
-	RankMax        float64   `json:"rankMax"`
-	MaxUsers       int       `json:"maxUsers"`
-	Description    string    `json:"description"`
-	Court          Court     `json:"court"`
-	TournamentType string    `json:"tournamentType"`
-	Organizator    User      `json:"organizator"`
+	ID             string          `json:"id"`
+	Name           string          `json:"name"`
+	StartTime      time.Time       `json:"startTime"`
+	EndTime        time.Time       `json:"endTime"`
+	Price          int             `json:"price"`
+	RankMin        float64         `json:"rankMin"`
+	RankMax        float64         `json:"rankMax"`
+	MaxUsers       int             `json:"maxUsers"`
+	Description    string          `json:"description"`
+	Court          Court           `json:"court"`
+	TournamentType string          `json:"tournamentType"`
+	Organizator    User            `json:"organizator"`
+	Data           json.RawMessage `json:"data,omitempty" swaggertype:"object"`
 }
 
 type CreateRegistration struct {

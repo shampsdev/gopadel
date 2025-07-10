@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type Tournament struct {
 	ID             string          `json:"id"`
@@ -17,35 +20,38 @@ type Tournament struct {
 	TournamentType string          `json:"tournamentType"`
 	Organizator    User            `json:"organizator"`
 	Participants   []*Registration `json:"participants"`
+	Data           json.RawMessage `json:"data,omitempty" swaggertype:"object"`
 }
 
 type CreateTournament struct {
-	Name           string    `json:"name" binding:"required"`
-	StartTime      time.Time `json:"startTime" binding:"required"`
-	EndTime        time.Time `json:"endTime"`
-	Price          int       `json:"price"`
-	RankMin        float64   `json:"rankMin" binding:"min=0"`
-	RankMax        float64   `json:"rankMax" binding:"min=0"`
-	MaxUsers       int       `json:"maxUsers" binding:"required"`
-	Description    string    `json:"description"`
-	CourtID        string    `json:"courtId" binding:"required"`
-	ClubID         string    `json:"clubId" binding:"required"`
-	TournamentType string    `json:"tournamentType" binding:"required"`
-	OrganizatorID  string    `json:"organizatorId" binding:"required"`
+	Name           string      `json:"name" binding:"required"`
+	StartTime      time.Time   `json:"startTime" binding:"required"`
+	EndTime        time.Time   `json:"endTime"`
+	Price          int         `json:"price"`
+	RankMin        float64     `json:"rankMin" binding:"min=0"`
+	RankMax        float64     `json:"rankMax" binding:"min=0"`
+	MaxUsers       int         `json:"maxUsers" binding:"required"`
+	Description    string      `json:"description"`
+	CourtID        string      `json:"courtId" binding:"required"`
+	ClubID         string      `json:"clubId" binding:"required"`
+	TournamentType string      `json:"tournamentType" binding:"required"`
+	OrganizatorID  string      `json:"organizatorId" binding:"required"`
+	Data           json.RawMessage `json:"data,omitempty" swaggertype:"object"`
 }
 
 type PatchTournament struct {
-	Name           *string    `json:"name,omitempty"`
-	StartTime      *time.Time `json:"startTime,omitempty"`
-	EndTime        *time.Time `json:"endTime,omitempty"`
-	Price          *int       `json:"price,omitempty"`
-	RankMin        *float64   `json:"rankMin,omitempty"`
-	RankMax        *float64   `json:"rankMax,omitempty"`
-	MaxUsers       *int       `json:"maxUsers,omitempty"`
-	Description    *string    `json:"description,omitempty"`
-	CourtID        *string    `json:"courtId,omitempty"`
-	ClubID         *string    `json:"clubId,omitempty"`
-	TournamentType *string    `json:"tournamentType,omitempty"`
+	Name           *string     `json:"name,omitempty"`
+	StartTime      *time.Time  `json:"startTime,omitempty"`
+	EndTime        *time.Time  `json:"endTime,omitempty"`
+	Price          *int        `json:"price,omitempty"`
+	RankMin        *float64    `json:"rankMin,omitempty"`
+	RankMax        *float64    `json:"rankMax,omitempty"`
+	MaxUsers       *int        `json:"maxUsers,omitempty"`
+	Description    *string     `json:"description,omitempty"`
+	CourtID        *string     `json:"courtId,omitempty"`
+	ClubID         *string     `json:"clubId,omitempty"`
+	TournamentType *string     `json:"tournamentType,omitempty"`
+	Data           json.RawMessage `json:"data,omitempty" swaggertype:"object"`
 }
 
 type FilterTournament struct {
@@ -59,18 +65,19 @@ type FilterTournament struct {
 
 // AdminPatchTournament структура для админского обновления турнира
 type AdminPatchTournament struct {
-	Name           *string    `json:"name,omitempty"`
-	StartTime      *time.Time `json:"startTime,omitempty"`
-	EndTime        *time.Time `json:"endTime,omitempty"`
-	Price          *int       `json:"price,omitempty"`
-	RankMin        *float64   `json:"rankMin,omitempty"`
-	RankMax        *float64   `json:"rankMax,omitempty"`
-	MaxUsers       *int       `json:"maxUsers,omitempty"`
-	Description    *string    `json:"description,omitempty"`
-	CourtID        *string    `json:"courtId,omitempty"`
-	ClubID         *string    `json:"clubId,omitempty"`
-	TournamentType *string    `json:"tournamentType,omitempty"`
-	OrganizatorID  *string    `json:"organizatorId,omitempty"`
+	Name           *string     `json:"name,omitempty"`
+	StartTime      *time.Time  `json:"startTime,omitempty"`
+	EndTime        *time.Time  `json:"endTime,omitempty"`
+	Price          *int        `json:"price,omitempty"`
+	RankMin        *float64    `json:"rankMin,omitempty"`
+	RankMax        *float64    `json:"rankMax,omitempty"`
+	MaxUsers       *int        `json:"maxUsers,omitempty"`
+	Description    *string     `json:"description,omitempty"`
+	CourtID        *string     `json:"courtId,omitempty"`
+	ClubID         *string     `json:"clubId,omitempty"`
+	TournamentType *string     `json:"tournamentType,omitempty"`
+	OrganizatorID  *string     `json:"organizatorId,omitempty"`
+	Data           json.RawMessage `json:"data,omitempty" swaggertype:"object"`
 }
 
 // AdminFilterTournament структура для админской фильтрации турниров
