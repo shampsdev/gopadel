@@ -11,11 +11,12 @@ type TournamentRegistrationData struct {
 	TournamentName string `json:"tournament_name"`
 }
 
-// TournamentPaymentReminderData данные для напоминания об оплате
-type TournamentPaymentReminderData struct {
+// TournamentReminderData данные для напоминания о турнире
+type TournamentReminderData struct {
 	UserTelegramID int64  `json:"user_telegram_id"`
 	TournamentID   string `json:"tournament_id"`
 	TournamentName string `json:"tournament_name"`
+	IsPaid         bool   `json:"is_paid"`
 }
 
 // TournamentPaymentSuccessData данные для уведомления об успешной оплате
@@ -76,27 +77,40 @@ func (s *NotificationService) SendTournamentRegistrationSuccess(userTelegramID i
 	return s.natsClient.SendImmediateNotification(nil, TaskTypeTournamentRegistrationSuccess, data)
 }
 
-// SendTournamentPaymentReminder отправляет напоминание об оплате
-func (s *NotificationService) SendTournamentPaymentReminder(userTelegramID int64, tournamentID, tournamentName string, reminderNumber int, scheduleAt time.Time) error {
-	data := TournamentPaymentReminderData{
+// SendTournamentReminder48Hours отправляет напоминание за 48 часов до турнира
+func (s *NotificationService) SendTournamentReminder48Hours(userTelegramID int64, tournamentID, tournamentName string, isPaid bool, scheduleAt time.Time) error {
+	data := TournamentReminderData{
 		UserTelegramID: userTelegramID,
 		TournamentID:   tournamentID,
 		TournamentName: tournamentName,
+		IsPaid:         isPaid,
 	}
 
-	var taskType TaskType
-	switch reminderNumber {
-	case 1:
-		taskType = TaskTypeTournamentPaymentReminder1
-	case 2:
-		taskType = TaskTypeTournamentPaymentReminder2
-	case 3:
-		taskType = TaskTypeTournamentPaymentReminder3
-	default:
-		taskType = TaskTypeTournamentPaymentReminder1
+	return s.natsClient.SendScheduledNotification(nil, TaskTypeTournamentReminder48Hours, scheduleAt, data)
+}
+
+// SendTournamentReminder24Hours отправляет напоминание за 24 часа до турнира
+func (s *NotificationService) SendTournamentReminder24Hours(userTelegramID int64, tournamentID, tournamentName string, isPaid bool, scheduleAt time.Time) error {
+	data := TournamentReminderData{
+		UserTelegramID: userTelegramID,
+		TournamentID:   tournamentID,
+		TournamentName: tournamentName,
+		IsPaid:         isPaid,
 	}
 
-	return s.natsClient.SendScheduledNotification(nil, taskType, scheduleAt, data)
+	return s.natsClient.SendScheduledNotification(nil, TaskTypeTournamentReminder24Hours, scheduleAt, data)
+}
+
+// SendTournamentFreeReminder48Hours отправляет напоминание за 48 часов для бесплатного турнира
+func (s *NotificationService) SendTournamentFreeReminder48Hours(userTelegramID int64, tournamentID, tournamentName string, scheduleAt time.Time) error {
+	data := TournamentReminderData{
+		UserTelegramID: userTelegramID,
+		TournamentID:   tournamentID,
+		TournamentName: tournamentName,
+		IsPaid:         true,
+	}
+
+	return s.natsClient.SendScheduledNotification(nil, TaskTypeTournamentFreeReminder48Hours, scheduleAt, data)
 }
 
 // SendTournamentPaymentSuccess отправляет уведомление об успешной оплате

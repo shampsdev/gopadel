@@ -95,9 +95,9 @@ func (e *TaskExecutor) executeTournamentTasksCancel(ctx context.Context, data ma
 	}
 
 	taskTypesToCancel := []domain.TaskType{
-		domain.TaskTypeTournamentPaymentReminder1,
-		domain.TaskTypeTournamentPaymentReminder2,
-		domain.TaskTypeTournamentPaymentReminder3,
+		domain.TaskTypeTournamentReminder48Hours,
+		domain.TaskTypeTournamentReminder24Hours,
+		domain.TaskTypeTournamentFreeReminder48Hours,
 		domain.TaskTypeTournamentRegistrationAutoDeleteUnpaid,
 	}
 
