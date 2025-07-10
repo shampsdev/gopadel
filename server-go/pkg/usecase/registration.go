@@ -299,9 +299,9 @@ func (r *Registration) RegisterForTournament(ctx context.Context, user *domain.U
 			user.TelegramID,
 			tournamentID,
 			tournament.Name,
+			tournament.Price == 0,
 		)
 		if err != nil {
-			// Логируем ошибку, но не прерываем процесс регистрации
 			fmt.Printf("Failed to send registration success notification: %v\n", err)
 		}
 	}

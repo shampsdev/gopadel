@@ -19,12 +19,23 @@ func GetMessageForTaskType(taskType domain.TaskType, data map[string]interface{}
 
 	switch taskType {
 	case domain.TaskTypeTournamentRegistrationSuccess:
-		return &domain.MessageText{
-			Text: fmt.Sprintf(
-				"🎉 Поздравляем! Вы успешно зарегистрированы на турнир '%s'!\n\n✅ Ваше место забронировано\n💡 Не забудьте оплатить участие в течение 24 часов\n\nДо встречи на корте! 🏓\n\n%s",
-				data["tournament_name"],
-				tournamentURL,
-			),
+		isFree, _ := data["is_free"].(bool)
+		if isFree {
+			return &domain.MessageText{
+				Text: fmt.Sprintf(
+					"🎉 Поздравляем! Вы успешно зарегистрированы на бесплатный турнир '%s'!\n\n✅ Ваше место забронировано\n🆓 Участие абсолютно бесплатное\n📅 Не забудьте прийти вовремя\n\nДо встречи на корте! 🏓\n\n%s",
+					data["tournament_name"],
+					tournamentURL,
+				),
+			}
+		} else {
+			return &domain.MessageText{
+				Text: fmt.Sprintf(
+					"🎉 Поздравляем! Вы успешно зарегистрированы на турнир '%s'!\n\n✅ Ваше место забронировано\n💡 Не забудьте оплатить участие в течение 24 часов\n\nДо встречи на корте! 🏓\n\n%s",
+					data["tournament_name"],
+					tournamentURL,
+				),
+			}
 		}
 	
 	case domain.TaskTypeTournamentReminder48Hours:

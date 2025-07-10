@@ -9,6 +9,7 @@ type TournamentRegistrationData struct {
 	UserTelegramID int64  `json:"user_telegram_id"`
 	TournamentID   string `json:"tournament_id"`
 	TournamentName string `json:"tournament_name"`
+	IsFree         bool   `json:"is_free"`
 }
 
 // TournamentReminderData данные для напоминания о турнире
@@ -67,11 +68,12 @@ func NewNotificationService(natsClient *NATSClient) *NotificationService {
 }
 
 // SendTournamentRegistrationSuccess отправляет уведомление об успешной регистрации
-func (s *NotificationService) SendTournamentRegistrationSuccess(userTelegramID int64, tournamentID, tournamentName string) error {
+func (s *NotificationService) SendTournamentRegistrationSuccess(userTelegramID int64, tournamentID, tournamentName string, isFree bool) error {
 	data := TournamentRegistrationData{
 		UserTelegramID: userTelegramID,
 		TournamentID:   tournamentID,
 		TournamentName: tournamentName,
+		IsFree:         isFree,
 	}
 
 	return s.natsClient.SendImmediateNotification(nil, TaskTypeTournamentRegistrationSuccess, data)
