@@ -46,126 +46,132 @@ export const TournamentLeaderboard = () => {
                 switch (place.place) {
                   case 1:
                     return (
-                      <div
+                      <Link
                         key={`place-${place.place}-${place.userId}`}
-                        className="flex flex-row items-center gap-[21px] bg-[#FFF8EC] rounded-[30px] pl-[16px] pr-[20px] py-[12px]"
+                        to={`/profile/${place.userId}`}
                       >
-                        <div className="relative">
-                          <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
-                            <img
-                              className="object-cover w-full h-full"
-                              src={userRegistration?.user.avatar}
-                              alt="avatar"
-                            />
-                          </div>
-                          <div className="absolute bottom-[-5px] right-[-4px] w-[24px] h-[24px]">
-                            <img
-                              src={GoldMedal}
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex flex-row gap-[21px] flex-1 flex-grow ">
-                          <div className="flex flex-row flex-grow flex-1 ">
-                            <div className="flex flex-col gap-[2px]">
-                              <p className="text-[14px]">
-                                {userRegistration?.user.firstName}{" "}
-                                {userRegistration?.user.lastName}
-                              </p>
-                              <p className="text-[#868D98] text-[14px]">
-                                {getRankTitle(userRegistration?.user.rank)}
-                              </p>
+                        <div className="flex flex-row items-center gap-[21px] bg-[#FFF8EC] rounded-[30px] pl-[16px] pr-[20px] py-[12px]">
+                          <div className="relative">
+                            <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
+                              <img
+                                className="object-cover w-full h-full"
+                                src={userRegistration?.user.avatar}
+                                alt="avatar"
+                              />
+                            </div>
+                            <div className="absolute bottom-[-5px] right-[-4px] w-[24px] h-[24px]">
+                              <img
+                                src={GoldMedal}
+                                className="object-cover w-full h-full"
+                              />
                             </div>
                           </div>
-                        </div>
 
-                        <div className="bg-[#FDB440] rounded-[30px] py-[6px] px-[10px] text-white text-[14px] font-medium">
-                          1 место
+                          <div className="flex flex-row gap-[21px] flex-1 flex-grow ">
+                            <div className="flex flex-row flex-grow flex-1 ">
+                              <div className="flex flex-col gap-[2px]">
+                                <p className="text-[14px]">
+                                  {userRegistration?.user.firstName}{" "}
+                                  {userRegistration?.user.lastName}
+                                </p>
+                                <p className="text-[#868D98] text-[14px]">
+                                  {getRankTitle(userRegistration?.user.rank)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-[#FDB440] rounded-[30px] py-[6px] px-[10px] text-white text-[14px] font-medium">
+                            1 место
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     );
                   case 2:
                     return (
-                      <div
+                      <Link
                         key={`place-${place.place}-${place.userId}`}
-                        className="flex flex-row items-center gap-[21px] bg-[#F2F7FC] rounded-[30px] pl-[16px] pr-[20px] py-[12px]"
+                        to={`/profile/${place.userId}`}
                       >
-                        <div className="relative">
-                          <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
-                            <img
-                              className="object-cover w-full h-full"
-                              src={userRegistration?.user.avatar}
-                              alt="avatar"
-                            />
-                          </div>
-                          <div className="absolute bottom-[-5px] right-[-4px] w-[24px] h-[24px]">
-                            <img
-                              src={SilverMedal}
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex flex-row gap-[21px] flex-1 flex-grow ">
-                          <div className="flex flex-row flex-grow flex-1 ">
-                            <div className="flex flex-col gap-[2px]">
-                              <p className="text-[14px]">
-                                {userRegistration?.user.firstName}{" "}
-                                {userRegistration?.user.lastName}
-                              </p>
-                              <p className="text-[#868D98] text-[14px]">
-                                {getRankTitle(userRegistration?.user.rank)}
-                              </p>
+                        <div className="flex flex-row items-center gap-[21px] bg-[#F2F7FC] rounded-[30px] pl-[16px] pr-[20px] py-[12px]">
+                          <div className="relative">
+                            <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
+                              <img
+                                className="object-cover w-full h-full"
+                                src={userRegistration?.user.avatar}
+                                alt="avatar"
+                              />
+                            </div>
+                            <div className="absolute bottom-[-5px] right-[-4px] w-[24px] h-[24px]">
+                              <img
+                                src={SilverMedal}
+                                className="object-cover w-full h-full"
+                              />
                             </div>
                           </div>
-                        </div>
 
-                        <div className="bg-[#7CADE0] rounded-[30px] py-[6px] px-[10px] text-white text-[14px] font-medium">
-                          2 место
+                          <div className="flex flex-row gap-[21px] flex-1 flex-grow ">
+                            <div className="flex flex-row flex-grow flex-1 ">
+                              <div className="flex flex-col gap-[2px]">
+                                <p className="text-[14px]">
+                                  {userRegistration?.user.firstName}{" "}
+                                  {userRegistration?.user.lastName}
+                                </p>
+                                <p className="text-[#868D98] text-[14px]">
+                                  {getRankTitle(userRegistration?.user.rank)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-[#7CADE0] rounded-[30px] py-[6px] px-[10px] text-white text-[14px] font-medium">
+                            2 место
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     );
                   case 3:
                     return (
-                      <div
+                      <Link
                         key={`place-${place.place}-${place.userId}`}
-                        className="flex flex-row items-center gap-[21px] bg-[#FFF0F1] rounded-[30px] pl-[16px] pr-[20px] py-[12px]"
+                        to={`/profile/${place.userId}`}
                       >
-                        <div className="relative">
-                          <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
-                            <img
-                              className="object-cover w-full h-full"
-                              src={userRegistration?.user.avatar}
-                              alt="avatar"
-                            />
-                          </div>
-                          <div className="absolute bottom-[-5px] right-[-4px] w-[24px] h-[24px]">
-                            <img
-                              src={BronzeMedal}
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex flex-row gap-[21px] flex-1 flex-grow ">
-                          <div className="flex flex-row flex-grow flex-1 ">
-                            <div className="flex flex-col gap-[2px]">
-                              <p className="text-[14px]">
-                                {userRegistration?.user.firstName}{" "}
-                                {userRegistration?.user.lastName}
-                              </p>
-                              <p className="text-[#868D98] text-[14px]">
-                                {getRankTitle(userRegistration?.user.rank)}
-                              </p>
+                        <div className="flex flex-row items-center gap-[21px] bg-[#FFF0F1] rounded-[30px] pl-[16px] pr-[20px] py-[12px]">
+                          <div className="relative">
+                            <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
+                              <img
+                                className="object-cover w-full h-full"
+                                src={userRegistration?.user.avatar}
+                                alt="avatar"
+                              />
+                            </div>
+                            <div className="absolute bottom-[-5px] right-[-4px] w-[24px] h-[24px]">
+                              <img
+                                src={BronzeMedal}
+                                className="object-cover w-full h-full"
+                              />
                             </div>
                           </div>
-                        </div>
 
-                        <div className="bg-[#FF646F] rounded-[30px] py-[6px] px-[10px] text-white text-[14px] font-medium">
-                          3 место
+                          <div className="flex flex-row gap-[21px] flex-1 flex-grow ">
+                            <div className="flex flex-row flex-grow flex-1 ">
+                              <div className="flex flex-col gap-[2px]">
+                                <p className="text-[14px]">
+                                  {userRegistration?.user.firstName}{" "}
+                                  {userRegistration?.user.lastName}
+                                </p>
+                                <p className="text-[#868D98] text-[14px]">
+                                  {getRankTitle(userRegistration?.user.rank)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-[#FF646F] rounded-[30px] py-[6px] px-[10px] text-white text-[14px] font-medium">
+                            3 место
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     );
                 }
               });
@@ -180,49 +186,53 @@ export const TournamentLeaderboard = () => {
               )
               .map((userRegistration) => {
                 return (
-                  <div
+                  <Link
                     key={`place-${userRegistration.id}`}
-                    className={twMerge(
-                      "flex flex-row items-center gap-[21px] bg-white rounded-[30px] pl-[16px] pr-[20px] py-[12px]",
-                      userRegistration.userId === user?.id
-                        ? "bg-[#F8F8FA]"
-                        : "bg-white"
-                    )}
+                    to={`/profile/${userRegistration.userId}`}
                   >
-                    <div className="relative">
-                      <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
-                        <img
-                          className="object-cover w-full h-full"
-                          src={userRegistration?.user.avatar}
-                          alt="avatar"
-                        />
-                      </div>
-                      <div className="absolute bottom-[-5px] right-[-4px] w-[24px] h-[24px]">
-                        <img
-                          src={GoldMedal}
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex flex-row gap-[21px] flex-1 flex-grow ">
-                      <div className="flex flex-row flex-grow flex-1 ">
-                        <div className="flex flex-col gap-[2px]">
-                          <p className="text-[14px]">
-                            {userRegistration?.user.firstName}{" "}
-                            {userRegistration?.user.lastName}
-                          </p>
-                          <p className="text-[#868D98] text-[14px]">
-                            {getRankTitle(userRegistration?.user.rank)}
-                          </p>
+                    <div
+                      className={twMerge(
+                        "flex flex-row items-center gap-[21px] bg-white rounded-[30px] pl-[16px] pr-[20px] py-[12px]",
+                        userRegistration.userId === user?.id
+                          ? "bg-[#F8F8FA]"
+                          : "bg-white"
+                      )}
+                    >
+                      <div className="relative">
+                        <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
+                          <img
+                            className="object-cover w-full h-full"
+                            src={userRegistration?.user.avatar}
+                            alt="avatar"
+                          />
+                        </div>
+                        <div className="absolute bottom-[-5px] right-[-4px] w-[24px] h-[24px]">
+                          <img
+                            src={GoldMedal}
+                            className="object-cover w-full h-full"
+                          />
                         </div>
                       </div>
-                    </div>
 
-                    <div className="bg-[#EBEDF0] rounded-[30px] py-[6px] px-[10px] text-[#868D98] text-[12px] ">
-                      участник
+                      <div className="flex flex-row gap-[21px] flex-1 flex-grow ">
+                        <div className="flex flex-row flex-grow flex-1 ">
+                          <div className="flex flex-col gap-[2px]">
+                            <p className="text-[14px]">
+                              {userRegistration?.user.firstName}{" "}
+                              {userRegistration?.user.lastName}
+                            </p>
+                            <p className="text-[#868D98] text-[14px]">
+                              {getRankTitle(userRegistration?.user.rank)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-[#EBEDF0] rounded-[30px] py-[6px] px-[10px] text-[#868D98] text-[12px] ">
+                        участник
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
           </div>
