@@ -14,7 +14,8 @@ import { Preloader } from "../../components/widgets/preloader";
 import { BOT_NAME } from "../../shared/constants/api";
 import { useIsAdmin } from "../../api/hooks/useIsAdmin";
 import { Prize } from "../../components/widgets/prize";
-import { isTournamentFinished } from "../../utils/tournament-status-checks";
+import { getPrizeString } from "../../utils/get-prize-string";
+import { checkOrganizerRight } from "../../utils/check-organizer-right";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -48,36 +49,25 @@ export const Tournament = () => {
       </div>
     );
 
-  const getPrizeVariant = () => {
-    if (
-      tournament?.[0].data?.result.leaderboard.find(
-        (place) => place.userId === user?.id
-      )?.place === 1
-    )
-      return "first";
-    if (
-      tournament?.[0].data?.result.leaderboard.find(
-        (place) => place.userId === user?.id
-      )?.place === 2
-    )
-      return "second";
-    if (
-      tournament?.[0].data?.result.leaderboard.find(
-        (place) => place.userId === user?.id
-      )?.place === 3
-    )
-      return "third";
-    if (isTournamentFinished(tournament?.[0])) return "default";
-    return "not-finished";
-  };
   return (
     <div className="flex flex-col gap-8 pb-[200px]">
       <div className="flex flex-col gap-7 px-[12px]">
         <h1 className="text-[24px] font-medium">{tournament?.[0]?.name}</h1>
 
         <div className="flex flex-col">
-          <Prize variant={getPrizeVariant()} />
-          {isAdmin?.admin && (
+          {!checkOrganizerRight(
+            isAdmin?.admin || false,
+            user?.id,
+            tournament?.[0]
+          ) &&
+            !tournament?.[0].isFinished && <Prize variant="not-finished" />}
+
+          {(checkOrganizerRight(
+            isAdmin?.admin || false,
+            user?.id,
+            tournament?.[0]
+          ) ||
+            tournament?.[0].isFinished) && (
             <>
               <div className="py-5 border-b border-[#DADCE0]">
                 <div
@@ -101,7 +91,7 @@ export const Tournament = () => {
               <div className="py-5 border-b border-[#DADCE0]">
                 <div
                   onClick={async () => {
-                    navigate(`/tournament/${id}/edit/prizes`);
+                    navigate(`/tournament/${id}/edit/leaderboard`);
                   }}
                   className="flex flex-row justify-between items-center gap-[18px]"
                 >
@@ -109,9 +99,21 @@ export const Tournament = () => {
                     {Icons.Stack()}
                   </div>
 
-                  <p className="text-black text-[16px] flex-grow">
-                    Добавить результаты
-                  </p>
+                  <div className="text-black text-[16px] flex-grow flex flex-col gap-[2px]">
+                    <p>Результаты турнира</p>
+                    <div className="text-[#868D98] text-[12px]">
+                      Ваш результат:{" "}
+                      <span className="text-black">
+                        {!tournament?.[0].isFinished && "-"}
+                        {tournament?.[0].isFinished &&
+                          getPrizeString(
+                            tournament?.[0].data?.result.leaderboard.find(
+                              (place) => place.userId === user?.id
+                            )?.place
+                          )}
+                      </span>
+                    </div>
+                  </div>
 
                   {Icons.ArrowRight("#A4A9B4", "24", "24")}
                 </div>

@@ -8,6 +8,7 @@ export interface Tournament {
   playersCapacity: number;
   playersAmount: number;
   court: Court;
+  isFinished: boolean;
   description: string;
   endTime: string;
   id: string;
