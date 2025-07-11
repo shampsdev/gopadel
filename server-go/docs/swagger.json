@@ -3601,6 +3601,9 @@
                 "endTime": {
                     "type": "string"
                 },
+                "isFinished": {
+                    "type": "boolean"
+                },
                 "maxUsers": {
                     "type": "integer"
                 },
@@ -4320,6 +4323,9 @@
                 "id": {
                     "type": "string"
                 },
+                "isFinished": {
+                    "type": "boolean"
+                },
                 "maxUsers": {
                     "type": "integer"
                 },
@@ -4369,6 +4375,9 @@
                 },
                 "id": {
                     "type": "string"
+                },
+                "isFinished": {
+                    "type": "boolean"
                 },
                 "maxUsers": {
                     "type": "integer"

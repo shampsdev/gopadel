@@ -383,7 +383,8 @@ func (r *Registration) RegisterForTournament(ctx context.Context, user *domain.U
 
 		// Планируем напоминания в зависимости от статуса
 		if tournament.StartTime.After(time.Now()) {
-			if status == domain.RegistrationStatusActive {
+			switch status {
+			case domain.RegistrationStatusActive:
 				// Для бесплатных турниров - напоминания о турнире
 				// Напоминание за 48 часов
 				reminder48h := tournament.StartTime.Add(-48 * time.Hour)
@@ -398,7 +399,7 @@ func (r *Registration) RegisterForTournament(ctx context.Context, user *domain.U
 						fmt.Printf("Failed to schedule 48h free reminder: %v\n", err)
 					}
 				}
-			} else if status == domain.RegistrationStatusPending {
+			case domain.RegistrationStatusPending:
 				// Для платных турниров - напоминания об оплате
 				// Напоминание за 48 часов
 				reminder48h := tournament.StartTime.Add(-48 * time.Hour)
@@ -666,6 +667,7 @@ func (r *Registration) GetUserRegistrationsWithTournament(ctx context.Context, u
 			TournamentType: tournament.TournamentType,
 			Organizator:    tournament.Organizator,
 			Data:           tournament.Data,
+			IsFinished:     tournament.IsFinished,
 		}
 
 		regWithTournament.Tournament = &tournamentForReg

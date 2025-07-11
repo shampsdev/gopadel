@@ -46,7 +46,7 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 		`"reg"."id"`, `"reg"."user_id"`, `"reg"."tournament_id"`, `"reg"."date"`, `"reg"."status"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
-		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`, `"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`, `"t"."data"`,
+		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`, `"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`, `"t"."data"`, `"t"."is_finished"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"org"."id"`, `"org"."telegram_id"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 	).
@@ -139,6 +139,7 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 			&tournamentDescription,
 			&tournament.TournamentType,
 			&tournamentData,
+			&tournament.IsFinished,
 			&court.ID,
 			&court.Name,
 			&court.Address,
@@ -244,7 +245,7 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
 		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`, `"t"."data"`,
+		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`, `"t"."data"`, `"t"."is_finished"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"org"."id"`, `"org"."telegram_id"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 	).
@@ -353,6 +354,7 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 			&tournamentDescription,
 			&tournament.TournamentType,
 			&tournamentData,
+			&tournament.IsFinished,
 			&court.ID,
 			&court.Name,
 			&court.Address,

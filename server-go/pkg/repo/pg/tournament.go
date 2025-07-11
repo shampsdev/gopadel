@@ -28,7 +28,7 @@ func NewTournamentRepo(db *pgxpool.Pool) *TournamentRepo {
 func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTournament) ([]*domain.Tournament, error) {
 	s := r.psql.Select(
 		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`, `"t"."data"`,
+		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`, `"t"."data"`, `"t"."is_finished"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
@@ -116,6 +116,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 			&tournament.ClubID,
 			&tournament.TournamentType,
 			&data,
+			&tournament.IsFinished,
 			&courtID,
 			&courtName,
 			&courtAddress,
@@ -201,7 +202,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID string) ([]*domain.Tournament, error) {
 	s := r.psql.Select(
 		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`, `"t"."data"`,
+		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`, `"t"."data"`, `"t"."is_finished"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"org"."id"`, `"org"."telegram_id"`, `"org"."telegram_username"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 		`"org"."bio"`, `"org"."rank"`, `"org"."city"`, `"org"."birth_date"`, `"org"."playing_position"`, `"org"."padel_profiles"`, `"org"."is_registered"`,
@@ -262,6 +263,7 @@ func (r *TournamentRepo) GetTournamentsByUserID(ctx context.Context, userID stri
 			&tournament.ClubID,
 			&tournament.TournamentType,
 			&data,
+			&tournament.IsFinished,
 			&courtID,
 			&courtName,
 			&courtAddress,
@@ -434,7 +436,7 @@ func (r *TournamentRepo) Delete(ctx context.Context, id string) error {
 func (r *TournamentRepo) AdminFilter(ctx context.Context, filter *domain.AdminFilterTournament) ([]*domain.Tournament, error) {
 	s := r.psql.Select(
 		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`, `"t"."data"`,
+		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."club_id"`, `"t"."tournament_type"`, `"t"."data"`, `"t"."is_finished"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
@@ -529,6 +531,7 @@ func (r *TournamentRepo) AdminFilter(ctx context.Context, filter *domain.AdminFi
 			&tournament.ClubID,
 			&tournament.TournamentType,
 			&data,
+			&tournament.IsFinished,
 			&courtID,
 			&courtName,
 			&courtAddress,
@@ -653,6 +656,9 @@ func (r *TournamentRepo) AdminPatch(ctx context.Context, id string, tournament *
 	}
 	if len(tournament.Data) > 0 {
 		s = s.Set("data", []byte(tournament.Data))
+	}
+	if tournament.IsFinished != nil {
+		s = s.Set("is_finished", *tournament.IsFinished)
 	}
 	
 	sql, args, err := s.ToSql()

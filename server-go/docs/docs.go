@@ -3609,6 +3609,9 @@ const docTemplate = `{
                 "endTime": {
                     "type": "string"
                 },
+                "isFinished": {
+                    "type": "boolean"
+                },
                 "maxUsers": {
                     "type": "integer"
                 },
@@ -4328,6 +4331,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "isFinished": {
+                    "type": "boolean"
+                },
                 "maxUsers": {
                     "type": "integer"
                 },
@@ -4377,6 +4383,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "isFinished": {
+                    "type": "boolean"
                 },
                 "maxUsers": {
                     "type": "integer"

@@ -42,9 +42,34 @@ func (t *Tournament) Create(ctx context.Context, tournament *domain.CreateTourna
 }
 
 func (t *Tournament) Patch(ctx context.Context, id string, tournament *domain.PatchTournament) (*domain.Tournament, error) {
-	err := t.TournamentRepo.Patch(ctx, id, tournament)
-	if err != nil {
-		return nil, fmt.Errorf("failed to patch tournament: %w", err)
+	// Если обновляется поле Data (результаты турнира), то автоматически устанавливаем is_finished = true
+	if len(tournament.Data) > 0 {
+		// Создаем AdminPatchTournament для обновления is_finished
+		adminPatch := &domain.AdminPatchTournament{
+			Name:           tournament.Name,
+			StartTime:      tournament.StartTime,
+			EndTime:        tournament.EndTime,
+			Price:          tournament.Price,
+			RankMin:        tournament.RankMin,
+			RankMax:        tournament.RankMax,
+			MaxUsers:       tournament.MaxUsers,
+			Description:    tournament.Description,
+			CourtID:        tournament.CourtID,
+			ClubID:         tournament.ClubID,
+			TournamentType: tournament.TournamentType,
+			Data:           tournament.Data,
+			IsFinished:     &[]bool{true}[0], // Устанавливаем is_finished = true
+		}
+		
+		err := t.TournamentRepo.AdminPatch(ctx, id, adminPatch)
+		if err != nil {
+			return nil, fmt.Errorf("failed to patch tournament: %w", err)
+		}
+	} else {
+		err := t.TournamentRepo.Patch(ctx, id, tournament)
+		if err != nil {
+			return nil, fmt.Errorf("failed to patch tournament: %w", err)
+		}
 	}
 	
 	filter := &domain.FilterTournament{ID: id}

@@ -21,6 +21,7 @@ type Tournament struct {
 	Organizator    User            `json:"organizator"`
 	Participants   []*Registration `json:"participants"`
 	Data           json.RawMessage `json:"data,omitempty" swaggertype:"object"`
+	IsFinished     bool            `json:"isFinished"`
 }
 
 type CreateTournament struct {
@@ -78,6 +79,7 @@ type AdminPatchTournament struct {
 	TournamentType *string     `json:"tournamentType,omitempty"`
 	OrganizatorID  *string     `json:"organizatorId,omitempty"`
 	Data           json.RawMessage `json:"data,omitempty" swaggertype:"object"`
+	IsFinished     *bool       `json:"isFinished,omitempty"`
 }
 
 // AdminFilterTournament структура для админской фильтрации турниров

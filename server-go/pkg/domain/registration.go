@@ -60,6 +60,7 @@ type TournamentForRegistration struct {
 	TournamentType string          `json:"tournamentType"`
 	Organizator    User            `json:"organizator"`
 	Data           json.RawMessage `json:"data,omitempty" swaggertype:"object"`
+	IsFinished     bool            `json:"isFinished"`
 }
 
 type CreateRegistration struct {

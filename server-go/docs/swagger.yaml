@@ -84,6 +84,8 @@ definitions:
         type: string
       endTime:
         type: string
+      isFinished:
+        type: boolean
       maxUsers:
         type: integer
       name:
@@ -565,6 +567,8 @@ definitions:
         type: string
       id:
         type: string
+      isFinished:
+        type: boolean
       maxUsers:
         type: integer
       name:
@@ -598,6 +602,8 @@ definitions:
         type: string
       id:
         type: string
+      isFinished:
+        type: boolean
       maxUsers:
         type: integer
       name:
