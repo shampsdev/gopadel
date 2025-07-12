@@ -491,6 +491,15 @@ func (r *Registration) CancelBeforePayment(ctx context.Context, user *domain.Use
 		if err != nil {
 			fmt.Printf("Failed to send registration canceled notification: %v\n", err)
 		}
+
+		// Отменяем все связанные задачи уведомлений
+		err = r.notificationService.SendTournamentTasksCancel(
+			user.TelegramID,
+			tournamentID,
+		)
+		if err != nil {
+			fmt.Printf("Failed to cancel related tasks: %v\n", err)
+		}
 	}
 
 	return r.getRegistrationByID(ctx, registration.ID)
@@ -536,6 +545,15 @@ func (r *Registration) CancelAfterPayment(ctx context.Context, user *domain.User
 		if err != nil {
 			fmt.Printf("Failed to send registration canceled notification: %v\n", err)
 		}
+
+		// Отменяем все связанные задачи уведомлений
+		err = r.notificationService.SendTournamentTasksCancel(
+			user.TelegramID,
+			tournamentID,
+		)
+		if err != nil {
+			fmt.Printf("Failed to cancel related tasks: %v\n", err)
+		}
 	}
 
 	return r.getRegistrationByID(ctx, registration.ID)
@@ -577,6 +595,37 @@ func (r *Registration) ReactivateRegistration(ctx context.Context, user *domain.
 	err = r.registrationRepo.Patch(ctx, registration.ID, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to reactivate registration: %w", err)
+	}
+
+	// Планируем новые уведомления для восстановленной регистрации
+	if r.notificationService != nil && tournament.StartTime.After(time.Now()) {
+		reminder48h := tournament.StartTime.Add(-48 * time.Hour)
+		if reminder48h.After(time.Now()) {
+			err = r.notificationService.SendTournamentReminder48Hours(
+				user.TelegramID,
+				tournament.ID,
+				tournament.Name,
+				true,
+				reminder48h,
+			)
+			if err != nil {
+				fmt.Printf("Failed to schedule 48h reminder: %v\n", err)
+			}
+		}
+
+		reminder24h := tournament.StartTime.Add(-24 * time.Hour)
+		if reminder24h.After(time.Now()) {
+			err = r.notificationService.SendTournamentReminder24Hours(
+				user.TelegramID,
+				tournament.ID,
+				tournament.Name,
+				true,
+				reminder24h,
+			)
+			if err != nil {
+				fmt.Printf("Failed to schedule 24h reminder: %v\n", err)
+			}
+		}
 	}
 
 	return r.getRegistrationByID(ctx, registration.ID)
