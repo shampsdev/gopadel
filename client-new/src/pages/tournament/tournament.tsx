@@ -62,64 +62,64 @@ export const Tournament = () => {
           ) &&
             !tournament?.[0].isFinished && <Prize variant="not-finished" />}
 
-          {(checkOrganizerRight(
+          {checkOrganizerRight(
             isAdmin?.admin || false,
             user?.id,
             tournament?.[0]
-          ) ||
-            tournament?.[0].isFinished) && (
-            <>
-              <div className="py-5 border-b border-[#DADCE0]">
-                <div
-                  onClick={async () => {
-                    navigate(`/tournament/${id}/edit`);
-                  }}
-                  className="flex flex-row justify-between items-center gap-[18px]"
-                >
-                  <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#AFFF3F] rounded-full">
-                    {Icons.Edit("black", "18", "18")}
-                  </div>
-
-                  <p className="text-black text-[16px] flex-grow">
-                    Изменить турнир
-                  </p>
-
-                  {Icons.ArrowRight("#A4A9B4", "24", "24")}
-                </div>
-              </div>
-
-              <div className="py-5 border-b border-[#DADCE0]">
-                <div
-                  onClick={async () => {
-                    navigate(`/tournament/${id}/edit/leaderboard`);
-                  }}
-                  className="flex flex-row justify-between items-center gap-[18px]"
-                >
-                  <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#041124] rounded-full">
-                    {Icons.Stack()}
-                  </div>
-
-                  <div className="text-black text-[16px] flex-grow flex flex-col gap-[2px]">
-                    <p>Результаты турнира</p>
-                    <div className="text-[#868D98] text-[12px]">
-                      Ваш результат:{" "}
-                      <span className="text-black">
-                        {!tournament?.[0].isFinished && "-"}
-                        {tournament?.[0].isFinished &&
-                          getPrizeString(
-                            tournament?.[0].data?.result.leaderboard.find(
-                              (place) => place.userId === user?.id
-                            )?.place
-                          )}
-                      </span>
+          ) &&
+            tournament?.[0].isFinished && (
+              <>
+                <div className="py-5 border-b border-[#DADCE0]">
+                  <div
+                    onClick={async () => {
+                      navigate(`/tournament/${id}/edit`);
+                    }}
+                    className="flex flex-row justify-between items-center gap-[18px]"
+                  >
+                    <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#AFFF3F] rounded-full">
+                      {Icons.Edit("black", "18", "18")}
                     </div>
-                  </div>
 
-                  {Icons.ArrowRight("#A4A9B4", "24", "24")}
+                    <p className="text-black text-[16px] flex-grow">
+                      Изменить турнир
+                    </p>
+
+                    {Icons.ArrowRight("#A4A9B4", "24", "24")}
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
+
+                <div className="py-5 border-b border-[#DADCE0]">
+                  <div
+                    onClick={async () => {
+                      navigate(`/tournament/${id}/leaderboard`);
+                    }}
+                    className="flex flex-row justify-between items-center gap-[18px]"
+                  >
+                    <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#041124] rounded-full">
+                      {Icons.Stack()}
+                    </div>
+
+                    <div className="text-black text-[16px] flex-grow flex flex-col gap-[2px]">
+                      <p>Результаты турнира</p>
+                      <div className="text-[#868D98] text-[12px]">
+                        Ваш результат:{" "}
+                        <span className="text-black">
+                          {!tournament?.[0].isFinished && "-"}
+                          {tournament?.[0].isFinished &&
+                            getPrizeString(
+                              tournament?.[0].data?.result.leaderboard.find(
+                                (place) => place.userId === user?.id
+                              )?.place
+                            )}
+                        </span>
+                      </div>
+                    </div>
+
+                    {Icons.ArrowRight("#A4A9B4", "24", "24")}
+                  </div>
+                </div>
+              </>
+            )}
 
           <div className="py-5 border-b border-[#DADCE0]">
             <div className="flex flex-row justify-between items-center">

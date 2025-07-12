@@ -6,7 +6,6 @@ import type { Prize } from "../../types/prize.type";
 import GoldMedal from "../../assets/gold-medal.png";
 import SilverMedal from "../../assets/silver-medal.png";
 import BronzeMedal from "../../assets/bronze-medal.png";
-import { useEffect } from "react";
 export interface CompetitionHistoryCardProps {
   className?: string;
   rankMin: number;
@@ -20,7 +19,6 @@ export interface CompetitionHistoryCardProps {
   status: RegistrationStatus;
   isFinished: boolean;
   place: Prize | null;
-  playersAmount: number;
 }
 
 export const CompetitionHistoryCard = ({
@@ -36,11 +34,7 @@ export const CompetitionHistoryCard = ({
   status,
   isFinished,
   place,
-  playersAmount,
 }: CompetitionHistoryCardProps) => {
-  useEffect(() => {
-    console.log(playersAmount);
-  }, [playersAmount]);
   return (
     <div
       className={twMerge(
@@ -117,7 +111,6 @@ export const CompetitionHistoryCard = ({
         {status === "ACTIVE" && isFinished && place === 1 && (
           <div className="flex flex-row items-center gap-[12px]">
             <div className="flex flex-row items-center gap-[6px]">
-              <p className="text-[20px] text-[#FDB440]">1/{playersAmount}</p>
               <div className="w-[24px] h-[24px]">
                 <img src={GoldMedal} alt="gold medal" />
               </div>
@@ -130,7 +123,6 @@ export const CompetitionHistoryCard = ({
         {status === "ACTIVE" && isFinished && place === 2 && (
           <div className="flex flex-row items-center gap-[12px]">
             <div className="flex flex-row items-center gap-[6px]">
-              <p className="text-[20px] text-[#7CADE0]">2/{playersAmount}</p>
               <div className="w-[24px] h-[24px]">
                 <img src={SilverMedal} alt="silver medal" />
               </div>
@@ -143,7 +135,6 @@ export const CompetitionHistoryCard = ({
         {status === "ACTIVE" && isFinished && place === 3 && (
           <div className="flex flex-row items-center gap-[12px]">
             <div className="flex flex-row items-center gap-[6px]">
-              <p className="text-[20px] text-[#FF646F]">3/{playersAmount}</p>
               <div className="w-[24px] h-[24px]">
                 <img src={BronzeMedal} alt="bronze medal" />
               </div>

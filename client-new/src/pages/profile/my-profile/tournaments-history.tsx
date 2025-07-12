@@ -41,11 +41,6 @@ export const TournamentsHistory = () => {
               locationTitle={registration.tournament.court.name}
               address={registration.tournament.court.address}
               type={registration.tournament.tournamentType}
-              playersAmount={
-                registration.tournament.participants.filter(
-                  (participant) => participant.status === "ACTIVE"
-                ).length
-              }
               name={registration.tournament.name}
               status={registration.status}
               isFinished={registration.tournament.isFinished}
