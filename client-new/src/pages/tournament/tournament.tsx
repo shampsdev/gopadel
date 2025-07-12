@@ -105,10 +105,10 @@ export const Tournament = () => {
                 <div className="text-[#868D98] text-[12px]">
                   Ваш результат:{" "}
                   <span className="text-black">
-                    {!tournament?.[0].isFinished &&
+                    {(!tournament?.[0].isFinished ||
                       !tournament?.[0].participants.find(
                         (participant) => participant.userId === user?.id
-                      ) &&
+                      )) &&
                       "-"}
                     {tournament?.[0].isFinished &&
                       tournament?.[0].participants.find(
