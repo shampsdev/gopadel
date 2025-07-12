@@ -2,10 +2,13 @@ import { Link } from "react-router";
 import { useGetMyRegistrations } from "../../../api/hooks/useGetMyRegistrations";
 import { CompetitionHistoryCard } from "../../../components/widgets/competition-history-card";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
+import { Preloader } from "../../../components/widgets/preloader";
 
 export const TournamentsHistory = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
-  const { data: registrations } = useGetMyRegistrations();
+  const { data: registrations, isLoading } = useGetMyRegistrations();
+
+  if (isLoading) return <Preloader />;
 
   return (
     <div className="flex flex-col gap-9 pb-[100px]">
@@ -38,10 +41,14 @@ export const TournamentsHistory = () => {
               locationTitle={registration.tournament.court.name}
               address={registration.tournament.court.address}
               type={registration.tournament.tournamentType}
-              playersCapacity={registration.tournament.playersCapacity}
-              playersAmount={registration.tournament.playersAmount}
               name={registration.tournament.name}
               status={registration.status}
+              isFinished={registration.tournament.isFinished}
+              place={
+                registration.tournament.data?.result.leaderboard.find(
+                  (place) => place.userId === registration.userId
+                )?.place || null
+              }
             />
           </Link>
         ))}

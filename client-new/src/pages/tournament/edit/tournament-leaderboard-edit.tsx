@@ -12,16 +12,14 @@ import type { TournamentResult } from "../../../types/tournament-result.type";
 import type { PlayerPlace } from "../../../types/player-place.type";
 import { useNavigate } from "react-router";
 
-export const TournamentPrizes = () => {
+export const TournamentLeaderboardEdit = () => {
   useTelegramBackButton({ showOnMount: true });
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Состояние для отслеживания призовых мест
   const { data: tournaments, isLoading } = useGetTournaments({ id: id });
   const { mutateAsync: patchTournament, isPending } = usePatchTournament(id!);
 
-  // Инициализируем призовые места из данных турнира
   const existingResults = tournaments?.[0]?.data?.result?.leaderboard;
   const [firstPrizeUserId, setFirstPrizeUserId] = useState<string | null>(
     existingResults?.find((p) => p.place === 1)?.userId || null
@@ -33,7 +31,6 @@ export const TournamentPrizes = () => {
     existingResults?.find((p) => p.place === 3)?.userId || null
   );
 
-  // Функция для получения призового места пользователя
   const getUserPrize = (userId: string): Prize | null => {
     if (userId === firstPrizeUserId) return 1;
     if (userId === secondPrizeUserId) return 2;
@@ -41,7 +38,6 @@ export const TournamentPrizes = () => {
     return null;
   };
 
-  // Функция для установки призового места
   const setPrizeForUser = (userId: string, prize: Prize) => {
     // Сначала убираем пользователя с других мест
     if (firstPrizeUserId === userId) setFirstPrizeUserId(null);

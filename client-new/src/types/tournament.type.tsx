@@ -6,8 +6,8 @@ import type { User } from "./user.type";
 export interface Tournament {
   date: string;
   playersCapacity: number;
-  playersAmount: number;
   court: Court;
+  isFinished: boolean;
   description: string;
   endTime: string;
   id: string;
