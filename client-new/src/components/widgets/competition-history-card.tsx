@@ -2,7 +2,11 @@ import { twMerge } from "tailwind-merge";
 import { Icons } from "../../assets/icons";
 import { getRankTitle } from "../../utils/rank-title";
 import type { RegistrationStatus } from "../../types/registration-status";
-
+import type { Prize } from "../../types/prize.type";
+import GoldMedal from "../../assets/gold-medal.png";
+import SilverMedal from "../../assets/silver-medal.png";
+import BronzeMedal from "../../assets/bronze-medal.png";
+import { useEffect } from "react";
 export interface CompetitionHistoryCardProps {
   className?: string;
   rankMin: number;
@@ -12,10 +16,11 @@ export interface CompetitionHistoryCardProps {
   locationTitle: string;
   address: string;
   type: string;
-  playersCapacity: number;
-  playersAmount: number;
   name: string;
   status: RegistrationStatus;
+  isFinished: boolean;
+  place: Prize | null;
+  playersAmount: number;
 }
 
 export const CompetitionHistoryCard = ({
@@ -29,7 +34,13 @@ export const CompetitionHistoryCard = ({
   type,
   name,
   status,
+  isFinished,
+  place,
+  playersAmount,
 }: CompetitionHistoryCardProps) => {
+  useEffect(() => {
+    console.log(playersAmount);
+  }, [playersAmount]);
   return (
     <div
       className={twMerge(
@@ -100,8 +111,52 @@ export const CompetitionHistoryCard = ({
           <p className="text-[#F34338]">Участие отменено</p>
         )}
         {status === "PENDING" && <p>Ожидает подтверждения</p>}
-        {status === "ACTIVE" && (
+        {status === "ACTIVE" && !isFinished && (
           <p className="text-[#77BE14]">Участие подтверждено</p>
+        )}
+        {status === "ACTIVE" && isFinished && place === 1 && (
+          <div className="flex flex-row items-center gap-[12px]">
+            <div className="flex flex-row items-center gap-[6px]">
+              <p className="text-[20px] text-[#FDB440]">1/{playersAmount}</p>
+              <div className="w-[24px] h-[24px]">
+                <img src={GoldMedal} alt="gold medal" />
+              </div>
+            </div>
+            <p className="text-[#FDB440] bg-[#FFF8EC] text-[14px] rounded-[10px] px-[10px] py-[6px]">
+              Победитель
+            </p>
+          </div>
+        )}
+        {status === "ACTIVE" && isFinished && place === 2 && (
+          <div className="flex flex-row items-center gap-[12px]">
+            <div className="flex flex-row items-center gap-[6px]">
+              <p className="text-[20px] text-[#7CADE0]">2/{playersAmount}</p>
+              <div className="w-[24px] h-[24px]">
+                <img src={SilverMedal} alt="silver medal" />
+              </div>
+            </div>
+            <p className="text-[#7CADE0] bg-[#F2F7FC] text-[14px] rounded-[10px] px-[10px] py-[6px]">
+              Призёр
+            </p>
+          </div>
+        )}
+        {status === "ACTIVE" && isFinished && place === 3 && (
+          <div className="flex flex-row items-center gap-[12px]">
+            <div className="flex flex-row items-center gap-[6px]">
+              <p className="text-[20px] text-[#FF646F]">3/{playersAmount}</p>
+              <div className="w-[24px] h-[24px]">
+                <img src={BronzeMedal} alt="bronze medal" />
+              </div>
+            </div>
+            <p className="text-[#7CADE0] bg-[#F2F7FC] text-[14px] rounded-[10px] px-[10px] py-[6px]">
+              Призёр
+            </p>
+          </div>
+        )}
+        {status === "ACTIVE" && isFinished && !place && (
+          <p className="text-[#868D98] bg-[#F8F8FA] rounded-[10px] px-[10px] py-[6px] text-[14px]">
+            участник
+          </p>
         )}
       </div>
     </div>
