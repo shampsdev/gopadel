@@ -53,7 +53,7 @@ func (r *TournamentRepo) Filter(ctx context.Context, filter *domain.FilterTourna
 	}
 
 	if filter.NotEnded == nil || *filter.NotEnded {
-		s = s.Where(`(("t"."end_time" IS NOT NULL AND "t"."end_time" > NOW()) OR ("t"."end_time" IS NULL AND "t"."start_time" + INTERVAL '1 hour' > NOW()))`)
+		s = s.Where(`("t"."is_finished" = false OR "t"."end_time" AT TIME ZONE 'UTC' > NOW() AT TIME ZONE 'UTC')`)
 	}
 
 	if filter.NotFull != nil && *filter.NotFull {
