@@ -2,7 +2,6 @@ package pg
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -25,54 +24,52 @@ func NewRegistrationRepo(db *pgxpool.Pool) *RegistrationRepo {
 	}
 }
 
-func (r *RegistrationRepo) Create(ctx context.Context, registration *domain.CreateRegistration) (string, error) {
+func (r *RegistrationRepo) Create(ctx context.Context, registration *domain.CreateRegistration) error {
 	s := r.psql.Insert(`"registrations"`).
-		Columns("user_id", "tournament_id", "status").
-		Values(registration.UserID, registration.TournamentID, registration.Status).
-		Suffix("RETURNING id")
+		Columns("user_id", "event_id", "status").
+		Values(registration.UserID, registration.EventID, registration.Status)
 
 	sql, args, err := s.ToSql()
 	if err != nil {
-		return "", fmt.Errorf("failed to build SQL: %w", err)
+		return fmt.Errorf("failed to build SQL: %w", err)
 	}
 
-	var id string
-	err = r.db.QueryRow(ctx, sql, args...).Scan(&id)
-	return id, err
+	_, err = r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to create registration: %w", err)
+	}
+
+	return nil
 }
 
 func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegistration) ([]*domain.Registration, error) {
 	s := r.psql.Select(
-		`"reg"."id"`, `"reg"."user_id"`, `"reg"."tournament_id"`, `"reg"."date"`, `"reg"."status"`,
+		`"reg"."user_id"`, `"reg"."event_id"`, `"reg"."status"`, `"reg"."created_at"`, `"reg"."updated_at"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
-		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`, `"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`, `"t"."data"`, `"t"."is_finished"`,
+		`"e"."id"`, `"e"."name"`, `"e"."description"`, `"e"."start_time"`, `"e"."end_time"`, `"e"."rank_min"`, `"e"."rank_max"`, `"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
-		`"org"."id"`, `"org"."telegram_id"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
+		`"org"."id"`, `"org"."telegram_id"`, `"org"."telegram_username"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 	).
 		From(`"registrations" AS reg`).
 		Join(`"users" AS u ON "reg"."user_id" = "u"."id"`).
-		Join(`"tournaments" AS t ON "reg"."tournament_id" = "t"."id"`).
-		LeftJoin(`"courts" AS c ON "t"."court_id" = "c"."id"`).
-		Join(`"users" AS org ON "t"."organizator_id" = "org"."id"`)
-
-	if filter.ID != nil {
-		s = s.Where(sq.Eq{`"reg"."id"`: *filter.ID})
-	}
+		Join(`"event" AS e ON "reg"."event_id" = "e"."id"`).
+		LeftJoin(`"courts" AS c ON "e"."court_id" = "c"."id"`).
+		Join(`"users" AS org ON "e"."organizer_id" = "org"."id"`)
 
 	if filter.UserID != nil {
 		s = s.Where(sq.Eq{`"reg"."user_id"`: *filter.UserID})
 	}
 
-	if filter.TournamentID != nil {
-		s = s.Where(sq.Eq{`"reg"."tournament_id"`: *filter.TournamentID})
+	if filter.EventID != nil {
+		s = s.Where(sq.Eq{`"reg"."event_id"`: *filter.EventID})
 	}
 
 	if filter.Status != nil {
 		s = s.Where(sq.Eq{`"reg"."status"`: *filter.Status})
 	}
 
-	s = s.OrderBy(`"reg"."date" DESC`)
+	s = s.OrderBy(`"reg"."created_at" DESC`)
 
 	sql, args, err := s.ToSql()
 	if err != nil {
@@ -90,185 +87,100 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 
 	registrations := []*domain.Registration{}
 	for rows.Next() {
-		var registration domain.Registration
-		var user domain.User
-		var tournament domain.Tournament
-		var court domain.Court
-		var organizator domain.User
-
-		// Nullable fields
-		var userTelegramUsername, userAvatar, userBio, userCity, userPadelProfiles pgtype.Text
-		var userBirthDate pgtype.Date
-		var userPlayingPosition pgtype.Text
-		var userRank pgtype.Float8
-		var userIsRegistered pgtype.Bool
-
-		var tournamentEndTime pgtype.Timestamp
-		var tournamentDescription pgtype.Text
-		var tournamentData []byte
-
-		var organizatorAvatar pgtype.Text
-
-		err := rows.Scan(
-			&registration.ID,
-			&registration.UserID,
-			&registration.TournamentID,
-			&registration.Date,
-			&registration.Status,
-			&user.ID,
-			&user.TelegramID,
-			&userTelegramUsername,
-			&user.FirstName,
-			&user.LastName,
-			&userAvatar,
-			&userBio,
-			&userRank,
-			&userCity,
-			&userBirthDate,
-			&userPlayingPosition,
-			&userPadelProfiles,
-			&userIsRegistered,
-			&tournament.ID,
-			&tournament.Name,
-			&tournament.StartTime,
-			&tournamentEndTime,
-			&tournament.Price,
-			&tournament.RankMin,
-			&tournament.RankMax,
-			&tournament.MaxUsers,
-			&tournamentDescription,
-			&tournament.TournamentType,
-			&tournamentData,
-			&tournament.IsFinished,
-			&court.ID,
-			&court.Name,
-			&court.Address,
-			&organizator.ID,
-			&organizator.TelegramID,
-			&organizator.FirstName,
-			&organizator.LastName,
-			&organizatorAvatar,
-		)
+		registration, err := r.scanRegistration(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
+			return nil, err
 		}
+		registrations = append(registrations, registration)
+	}
 
-		// Fill nullable user fields
-		if userTelegramUsername.Valid {
-			user.TelegramUsername = userTelegramUsername.String
-		}
-		if userAvatar.Valid {
-			user.Avatar = userAvatar.String
-		}
-		if userBio.Valid {
-			user.Bio = userBio.String
-		}
-		if userRank.Valid {
-			user.Rank = userRank.Float64
-		}
-		if userCity.Valid {
-			user.City = userCity.String
-		}
-		if userBirthDate.Valid {
-			user.BirthDate = userBirthDate.Time.Format("2006-01-02")
-		}
-		if userPlayingPosition.Valid {
-			user.PlayingPosition = domain.PlayingPosition(userPlayingPosition.String)
-		}
-		if userPadelProfiles.Valid {
-			user.PadelProfiles = userPadelProfiles.String
-		}
-		if userIsRegistered.Valid {
-			user.IsRegistered = userIsRegistered.Bool
-		}
-
-		// Fill nullable tournament fields
-		if tournamentEndTime.Valid {
-			tournament.EndTime = tournamentEndTime.Time
-		}
-		if tournamentDescription.Valid {
-			tournament.Description = tournamentDescription.String
-		}
-		// Обработка JSONB поля data
-		if tournamentData != nil {
-			tournament.Data = json.RawMessage(tournamentData)
-		}
-
-		// Fill nullable organizator fields
-		if organizatorAvatar.Valid {
-			organizator.Avatar = organizatorAvatar.String
-		}
-
-		// Set related entities
-		tournament.Court = court
-		tournament.Organizator = organizator
-		registration.User = &user
-		registrations = append(registrations, &registration)
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
 	}
 
 	return registrations, nil
 }
 
-func (r *RegistrationRepo) Patch(ctx context.Context, id string, registration *domain.PatchRegistration) error {
-	s := r.psql.Update(`"registrations"`).Where(sq.Eq{"id": id})
+func (r *RegistrationRepo) Patch(ctx context.Context, userID, eventID string, registration *domain.PatchRegistration) error {
+	s := r.psql.Update(`"registrations"`).
+		Where(sq.Eq{"user_id": userID, "event_id": eventID})
+
+	hasUpdates := false
 
 	if registration.Status != nil {
 		s = s.Set("status", *registration.Status)
+		hasUpdates = true
 	}
+
+	if !hasUpdates {
+		return fmt.Errorf("no fields to update")
+	}
+
+	s = s.Set("updated_at", "NOW()")
 
 	sql, args, err := s.ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build SQL: %w", err)
 	}
 
-	_, err = r.db.Exec(ctx, sql, args...)
-	return err
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update registration: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("registration with user_id=%s and event_id=%s not found", userID, eventID)
+	}
+
+	return nil
 }
 
-func (r *RegistrationRepo) Delete(ctx context.Context, id string) error {
+func (r *RegistrationRepo) Delete(ctx context.Context, userID, eventID string) error {
 	s := r.psql.Delete(`"registrations"`).
-		Where(sq.Eq{"id": id})
+		Where(sq.Eq{"user_id": userID, "event_id": eventID})
 
 	sql, args, err := s.ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build SQL: %w", err)
 	}
 
-	_, err = r.db.Exec(ctx, sql, args...)
-	return err
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to delete registration: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("registration with user_id=%s and event_id=%s not found", userID, eventID)
+	}
+
+	return nil
 }
 
-// AdminFilter - фильтрация регистраций для админки с поддержкой поиска по telegram username
 func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.AdminFilterRegistration) ([]*domain.RegistrationWithPayments, error) {
 	s := r.psql.Select(
-		`"r"."id"`, `"r"."user_id"`, `"r"."tournament_id"`, `"r"."date"`, `"r"."status"`,
+		`"reg"."user_id"`, `"reg"."event_id"`, `"reg"."status"`, `"reg"."created_at"`, `"reg"."updated_at"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
-		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`, `"t"."data"`, `"t"."is_finished"`,
+		`"e"."id"`, `"e"."name"`, `"e"."description"`, `"e"."start_time"`, `"e"."end_time"`, `"e"."rank_min"`, `"e"."rank_max"`, `"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
-		`"org"."id"`, `"org"."telegram_id"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
+		`"org"."id"`, `"org"."telegram_id"`, `"org"."telegram_username"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 	).
-		From(`"registrations" AS r`).
-		LeftJoin(`"users" AS u ON "r"."user_id" = "u"."id"`).
-		LeftJoin(`"tournaments" AS t ON "r"."tournament_id" = "t"."id"`).
-		LeftJoin(`"courts" AS c ON "t"."court_id" = "c"."id"`).
-		LeftJoin(`"users" AS org ON "t"."organizator_id" = "org"."id"`)
-
-	if filter.ID != nil {
-		s = s.Where(sq.Eq{`"r"."id"`: *filter.ID})
-	}
+		From(`"registrations" AS reg`).
+		Join(`"users" AS u ON "reg"."user_id" = "u"."id"`).
+		Join(`"event" AS e ON "reg"."event_id" = "e"."id"`).
+		LeftJoin(`"courts" AS c ON "e"."court_id" = "c"."id"`).
+		Join(`"users" AS org ON "e"."organizer_id" = "org"."id"`)
 
 	if filter.UserID != nil {
-		s = s.Where(sq.Eq{`"r"."user_id"`: *filter.UserID})
+		s = s.Where(sq.Eq{`"reg"."user_id"`: *filter.UserID})
 	}
 
-	if filter.TournamentID != nil {
-		s = s.Where(sq.Eq{`"r"."tournament_id"`: *filter.TournamentID})
+	if filter.EventID != nil {
+		s = s.Where(sq.Eq{`"reg"."event_id"`: *filter.EventID})
 	}
 
 	if filter.Status != nil {
-		s = s.Where(sq.Eq{`"r"."status"`: *filter.Status})
+		s = s.Where(sq.Eq{`"reg"."status"`: *filter.Status})
 	}
 
 	if filter.UserTelegramID != nil {
@@ -283,11 +195,11 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 		s = s.Where(sq.ILike{`"u"."first_name"`: "%" + *filter.UserFirstName + "%"})
 	}
 
-	if filter.TournamentName != nil {
-		s = s.Where(sq.ILike{`"t"."name"`: "%" + *filter.TournamentName + "%"})
+	if filter.EventName != nil {
+		s = s.Where(sq.ILike{`"e"."name"`: "%" + *filter.EventName + "%"})
 	}
 
-	s = s.OrderBy(`"r"."date" DESC`)
+	s = s.OrderBy(`"reg"."created_at" DESC`)
 
 	sql, args, err := s.ToSql()
 	if err != nil {
@@ -305,122 +217,154 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 
 	registrations := []*domain.RegistrationWithPayments{}
 	for rows.Next() {
-		var registration domain.RegistrationWithPayments
-		var user domain.User
-		var tournament domain.TournamentForRegistration
-		var court domain.Court
-		var organizator domain.User
-
-		// Nullable fields
-		var userTelegramUsername, userAvatar, userBio, userCity, userPadelProfiles pgtype.Text
-		var userBirthDate pgtype.Date
-		var userPlayingPosition pgtype.Text
-		var userRank pgtype.Float8
-		var userIsRegistered pgtype.Bool
-
-		var tournamentEndTime pgtype.Timestamp
-		var tournamentDescription pgtype.Text
-		var tournamentData []byte
-
-		var organizatorAvatar pgtype.Text
-
-		err := rows.Scan(
-			&registration.ID,
-			&registration.UserID,
-			&registration.TournamentID,
-			&registration.Date,
-			&registration.Status,
-			&user.ID,
-			&user.TelegramID,
-			&userTelegramUsername,
-			&user.FirstName,
-			&user.LastName,
-			&userAvatar,
-			&userBio,
-			&userRank,
-			&userCity,
-			&userBirthDate,
-			&userPlayingPosition,
-			&userPadelProfiles,
-			&userIsRegistered,
-			&tournament.ID,
-			&tournament.Name,
-			&tournament.StartTime,
-			&tournamentEndTime,
-			&tournament.Price,
-			&tournament.RankMin,
-			&tournament.RankMax,
-			&tournament.MaxUsers,
-			&tournamentDescription,
-			&tournament.TournamentType,
-			&tournamentData,
-			&tournament.IsFinished,
-			&court.ID,
-			&court.Name,
-			&court.Address,
-			&organizator.ID,
-			&organizator.TelegramID,
-			&organizator.FirstName,
-			&organizator.LastName,
-			&organizatorAvatar,
-		)
+		reg, err := r.scanRegistration(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
+			return nil, err
 		}
 
-		// Fill nullable user fields
-		if userTelegramUsername.Valid {
-			user.TelegramUsername = userTelegramUsername.String
-		}
-		if userAvatar.Valid {
-			user.Avatar = userAvatar.String
-		}
-		if userBio.Valid {
-			user.Bio = userBio.String
-		}
-		if userRank.Valid {
-			user.Rank = userRank.Float64
-		}
-		if userCity.Valid {
-			user.City = userCity.String
-		}
-		if userBirthDate.Valid {
-			user.BirthDate = userBirthDate.Time.Format("2006-01-02")
-		}
-		if userPlayingPosition.Valid {
-			user.PlayingPosition = domain.PlayingPosition(userPlayingPosition.String)
-		}
-		if userPadelProfiles.Valid {
-			user.PadelProfiles = userPadelProfiles.String
-		}
-		if userIsRegistered.Valid {
-			user.IsRegistered = userIsRegistered.Bool
+		// Получаем платежи для данной регистрации
+		payments, err := r.getPaymentsForRegistration(ctx, reg.UserID, reg.EventID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get payments: %w", err)
 		}
 
-		// Fill nullable tournament fields
-		if tournamentEndTime.Valid {
-			tournament.EndTime = tournamentEndTime.Time
-		}
-		if tournamentDescription.Valid {
-			tournament.Description = tournamentDescription.String
-		}
-		// Обработка JSONB поля data
-		if tournamentData != nil {
-			tournament.Data = json.RawMessage(tournamentData)
-		}
-
-		// Fill nullable organizator fields
-		if organizatorAvatar.Valid {
-			organizator.Avatar = organizatorAvatar.String
+		regWithPayments := &domain.RegistrationWithPayments{
+			UserID:    reg.UserID,
+			EventID:   reg.EventID,
+			Status:    reg.Status,
+			CreatedAt: reg.CreatedAt,
+			UpdatedAt: reg.UpdatedAt,
+			User:      reg.User,
+			Event:     reg.Event,
+			Payments:  payments,
 		}
 
-		// Set related entities
-		tournament.Court = court
-		tournament.Organizator = organizator
-		registration.User = &user
-		registration.Tournament = &tournament
-		registrations = append(registrations, &registration)
+		registrations = append(registrations, regWithPayments)
 	}
 
 	return registrations, nil
+}
+
+// getPaymentsForRegistration получает платежи для конкретной регистрации
+func (r *RegistrationRepo) getPaymentsForRegistration(ctx context.Context, userID, eventID string) ([]*domain.Payment, error) {
+	s := r.psql.Select(
+		`"p"."id"`, `"p"."payment_id"`, `"p"."date"`, `"p"."amount"`, `"p"."status"`, `"p"."payment_link"`, `"p"."confirmation_token"`, `"p"."user_id"`, `"p"."event_id"`,
+	).From(`"payments" AS p`).
+		Where(sq.Eq{"p.user_id": userID, "p.event_id": eventID})
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	rows, err := r.db.Query(ctx, sql, args...)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return []*domain.Payment{}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute SQL: %w", err)
+	}
+	defer rows.Close()
+
+	payments := []*domain.Payment{}
+	for rows.Next() {
+		var payment domain.Payment
+
+		err := rows.Scan(
+			&payment.ID, &payment.PaymentID, &payment.Date, &payment.Amount, &payment.Status,
+			&payment.PaymentLink, &payment.ConfirmationToken, &payment.UserID, &payment.EventID,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan payment row: %w", err)
+		}
+
+		payments = append(payments, &payment)
+	}
+
+	return payments, nil
+}
+
+// scanRegistration сканирует строку результата в структуру Registration
+func (r *RegistrationRepo) scanRegistration(rows pgx.Rows) (*domain.Registration, error) {
+	var registration domain.Registration
+	var user domain.User
+	var event domain.EventForRegistration
+	var court domain.Court
+	var organizer domain.User
+
+	// Nullable fields для user
+	var userTelegramUsername, userAvatar, userBio, userCity, userPadelProfiles pgtype.Text
+	var userBirthDate pgtype.Date
+	var userPlayingPosition pgtype.Text
+	var userRank pgtype.Float8
+	var userIsRegistered pgtype.Bool
+
+	// Nullable fields для event
+	var eventDescription, eventClubID pgtype.Text
+	var orgTelegramUsername, orgAvatar pgtype.Text
+
+	err := rows.Scan(
+		&registration.UserID, &registration.EventID, &registration.Status, &registration.CreatedAt, &registration.UpdatedAt,
+		&user.ID, &user.TelegramID, &userTelegramUsername, &user.FirstName, &user.LastName, &userAvatar,
+		&userBio, &userRank, &userCity, &userBirthDate, &userPlayingPosition, &userPadelProfiles, &userIsRegistered,
+		&event.ID, &event.Name, &eventDescription, &event.StartTime, &event.EndTime, &event.RankMin, &event.RankMax, &event.Price, &event.MaxUsers, &event.Status, &event.Type, &eventClubID,
+		&court.ID, &court.Name, &court.Address,
+		&organizer.ID, &organizer.TelegramID, &orgTelegramUsername, &organizer.FirstName, &organizer.LastName, &orgAvatar,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan row: %w", err)
+	}
+
+	// Обработка nullable полей для user
+	if userTelegramUsername.Valid {
+		user.TelegramUsername = userTelegramUsername.String
+	}
+	if userAvatar.Valid {
+		user.Avatar = userAvatar.String
+	}
+	if userBio.Valid {
+		user.Bio = userBio.String
+	}
+	if userRank.Valid {
+		user.Rank = userRank.Float64
+	}
+	if userCity.Valid {
+		user.City = userCity.String
+	}
+	if userBirthDate.Valid {
+		user.BirthDate = userBirthDate.Time.Format("2006-01-02")
+	}
+	if userPlayingPosition.Valid {
+		user.PlayingPosition = domain.PlayingPosition(userPlayingPosition.String)
+	}
+	if userPadelProfiles.Valid {
+		user.PadelProfiles = userPadelProfiles.String
+	}
+	if userIsRegistered.Valid {
+		user.IsRegistered = userIsRegistered.Bool
+	}
+
+	// Обработка nullable полей для event
+	if eventDescription.Valid {
+		event.Description = &eventDescription.String
+	}
+	if eventClubID.Valid {
+		event.ClubID = &eventClubID.String
+	}
+
+	// Обработка nullable полей для organizer
+	if orgTelegramUsername.Valid {
+		organizer.TelegramUsername = orgTelegramUsername.String
+	}
+	if orgAvatar.Valid {
+		organizer.Avatar = orgAvatar.String
+	}
+
+	event.Court = court
+	event.Organizer = organizer
+
+	registration.User = &user
+	registration.Event = &event
+
+	return &registration, nil
 } 

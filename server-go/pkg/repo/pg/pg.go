@@ -7,7 +7,7 @@ var (
 	_ repo.User         = &UserRepo{}
 	_ repo.AdminUser    = &AdminUserRepo{}
 	_ repo.Court        = &CourtRepo{}
-	_ repo.Tournament   = &TournamentRepo{}
+	_ repo.Event        = &EventRepo{}
 	_ repo.Loyalty      = &LoyaltyRepo{}
 	_ repo.Registration = &RegistrationRepo{}
 	_ repo.Payment      = &PaymentRepo{}

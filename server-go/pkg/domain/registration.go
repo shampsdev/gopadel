@@ -35,8 +35,7 @@ type RegistrationWithEvent struct {
 	Event     *EventForRegistration `json:"event,omitempty"`
 }
 
-// Для обратной совместимости
-type RegistrationWithTournament = RegistrationWithEvent
+
 
 // RegistrationWithPayments для админки - регистрация с платежами
 type RegistrationWithPayments struct {
@@ -50,7 +49,7 @@ type RegistrationWithPayments struct {
 	Payments  []*Payment            `json:"payments,omitempty"`
 }
 
-type TournamentForRegistration = EventForRegistration
+
 
 type CreateRegistration struct {
 	UserID  string             `json:"userId" binding:"required"`

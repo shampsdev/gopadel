@@ -80,38 +80,38 @@ func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *useca
 
 		if paymentStatus == domain.PaymentStatusSucceeded && payment.Registration != nil {
 			if payment.Registration.Status == domain.RegistrationStatusPending {
-				err = registrationUseCase.UpdateRegistrationStatus(c.Request.Context(), payment.Registration.ID, domain.RegistrationStatusActive)
-				if err != nil {
-					if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to update registration status") {
-						return
-					}
-				}
+				// err = registrationUseCase.UpdateRegistrationStatus(c.Request.Context(), payment.Registration.ID, domain.RegistrationStatusActive)
+				// if err != nil {
+				// 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to update registration status") {
+				// 		return
+				// 	}
+				// }
 				
 				// Уведа об успешной оплате
-				if notificationService != nil {
-					tournament, err := tournamentUseCase.GetTournamentByID(c.Request.Context(), payment.Registration.TournamentID)
-					if err == nil && payment.Registration.User != nil {
-						err = notificationService.SendTournamentPaymentSuccess(
-							payment.Registration.User.TelegramID,
-							tournament.ID,
-							tournament.Name,
-						)
-						if err != nil {
-							cfg.Logger().Error("Failed to send payment success notification", "error", err)
-						}
-					}
-				}
+				// if notificationService != nil {
+				// 	tournament, err := tournamentUseCase.GetTournamentByID(c.Request.Context(), payment.Registration.TournamentID)
+				// 	if err == nil && payment.Registration.User != nil {
+				// 		err = notificationService.SendTournamentPaymentSuccess(
+				// 			payment.Registration.User.TelegramID,
+				// 			tournament.ID,
+				// 			tournament.Name,
+				// 		)
+				// 		if err != nil {
+				// 			cfg.Logger().Error("Failed to send payment success notification", "error", err)
+				// 		}
+				// 	}
+				// }
 				
 				// Отмена запланированных
-				if notificationService != nil && payment.Registration.User != nil {
-					err = notificationService.SendTournamentTasksCancel(
-						payment.Registration.User.TelegramID,
-						payment.Registration.TournamentID,
-					)
-					if err != nil {
-						cfg.Logger().Error("Failed to send tasks cancel notification", "error", err)
-					}
-				}
+				// if notificationService != nil && payment.Registration.User != nil {
+				// 	err = notificationService.SendTournamentTasksCancel(
+				// 		payment.Registration.User.TelegramID,
+				// 		payment.Registration.TournamentID,
+				// 	)
+				// 	if err != nil {
+				// 		cfg.Logger().Error("Failed to send tasks cancel notification", "error", err)
+				// 	}
+				// }
 			}
 		} else if paymentStatus == domain.PaymentStatusCanceled && payment.Registration != nil {
 			// При отмененном платеже регистрация остается в статусе PENDING,

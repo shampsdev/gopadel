@@ -11,17 +11,15 @@ import (
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_clubs"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_courts"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_loyalties"
-	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_registrations"
-	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_tournaments"
+
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_users"
-	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/admin_waitlist"
+
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/club"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/courts"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/image"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/loyalty"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/middlewares"
-	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/registration"
-	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/tournament"
+
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/user"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/webhook"
 	"github.com/shampsdev/go-telegram-template/pkg/notifications"
@@ -43,9 +41,8 @@ func setupRouter(ctx context.Context, r *gin.Engine, useCases usecase.Cases, cfg
 	courts.Setup(v1, useCases)
 	club.Setup(v1, useCases)
 	image.Setup(v1, useCases)
-	tournament.Setup(v1, useCases)
+
 	loyalty.Setup(v1, useCases)
-	registration.Setup(v1, useCases)
 	webhook.Setup(v1, useCases, cfg, notificationService)
 	admin_auth.Setup(v1, useCases)
 	admin_clubs.Setup(v1, useCases)
@@ -53,7 +50,4 @@ func setupRouter(ctx context.Context, r *gin.Engine, useCases usecase.Cases, cfg
 	admin_admins.Setup(v1, useCases)
 	admin_loyalties.Setup(v1, useCases)
 	admin_courts.Setup(v1, useCases)
-	admin_registrations.Setup(v1, useCases)
-	admin_tournaments.Setup(v1, useCases)
-	admin_waitlist.Setup(v1, useCases)
 }
