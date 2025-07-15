@@ -19,7 +19,8 @@ type Payment struct {
 	Status            PaymentStatus `json:"status"`
 	PaymentLink       string        `json:"paymentLink"`
 	ConfirmationToken string        `json:"confirmationToken"`
-	RegistrationID    *string       `json:"registrationId,omitempty"`
+	UserID            string        `json:"userId"`
+	EventID           string        `json:"eventId"`
 	Registration      *Registration `json:"registration,omitempty"`
 }
 
@@ -29,7 +30,8 @@ type CreatePayment struct {
 	Status            PaymentStatus `json:"status" binding:"required"`
 	PaymentLink       string        `json:"paymentLink" binding:"required"`
 	ConfirmationToken string        `json:"confirmationToken"`
-	RegistrationID    *string       `json:"registrationId,omitempty"`
+	UserID            string        `json:"userId" binding:"required"`
+	EventID           string        `json:"eventId" binding:"required"`
 }
 
 type PatchPayment struct {
@@ -39,8 +41,9 @@ type PatchPayment struct {
 }
 
 type FilterPayment struct {
-	ID             *string        `json:"id,omitempty"`
-	PaymentID      *string        `json:"paymentId,omitempty"`
-	Status         *PaymentStatus `json:"status,omitempty"`
-	RegistrationID *string        `json:"registrationId,omitempty"`
+	ID        *string        `json:"id,omitempty"`
+	PaymentID *string        `json:"paymentId,omitempty"`
+	Status    *PaymentStatus `json:"status,omitempty"`
+	UserID    *string        `json:"userId,omitempty"`
+	EventID   *string        `json:"eventId,omitempty"`
 } 
