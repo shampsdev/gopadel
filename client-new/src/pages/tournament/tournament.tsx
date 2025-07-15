@@ -16,6 +16,7 @@ import { useIsAdmin } from "../../api/hooks/useIsAdmin";
 import { Prize } from "../../components/widgets/prize";
 import { getPrizeString } from "../../utils/get-prize-string";
 import { checkOrganizerRight } from "../../utils/check-organizer-right";
+import { LinksWrapper } from "../../components/helpers/links-wrapper";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -267,7 +268,7 @@ export const Tournament = () => {
             <div className="flex flex-col pt-[20px] gap-[8px]">
               <div className="text-[16px] font-medium">Описание турнира</div>
               <div className="text-[14px] text-[#5D6674]">
-                {tournament?.[0].description}
+                <LinksWrapper text={tournament?.[0].description} />
               </div>
             </div>
           )}
