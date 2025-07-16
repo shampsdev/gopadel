@@ -1640,6 +1640,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/events/{event_id}": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Update existing event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Event ID",
+                        "name": "event_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Event update data",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.PatchEvent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated event",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Event"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/events/{event_id}/waitlist": {
             "get": {
                 "security": [
@@ -2323,7 +2383,6 @@ const docTemplate = `{
                 "endTime",
                 "maxUsers",
                 "name",
-                "organizerId",
                 "startTime",
                 "type"
             ],
@@ -2708,6 +2767,47 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "domain.PatchEvent": {
+            "type": "object",
+            "properties": {
+                "clubId": {
+                    "type": "string"
+                },
+                "courtId": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "maxUsers": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rankMax": {
+                    "type": "number"
+                },
+                "rankMin": {
+                    "type": "number"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/domain.EventStatus"
+                },
+                "type": {
+                    "$ref": "#/definitions/domain.EventType"
                 }
             }
         },

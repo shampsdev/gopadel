@@ -23,6 +23,7 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases) {
 	middlewares.SetupAuth(g, cases.User)
 
 	g.POST("", handler.createEvent)                           // создание события (игры - всем, турниры - админам)
+	g.PATCH("/:event_id", handler.updateEvent)                   // обновление события
 	g.POST("/filter", handler.filterEvents)                       // фильтрация событий
 	g.GET("/:event_id/waitlist", handler.getWaitlist)            // получить список ожидания
 	g.POST("/:event_id/waitlist", handler.addToWaitlist)         // добавить себя в список ожидания

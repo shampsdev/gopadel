@@ -65,7 +65,7 @@ func (w *Waitlist) AddToWaitlist(ctx context.Context, userID, eventID string) (*
 	if err != nil {
 		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return nil, fmt.Errorf("event not found")
 	}
@@ -121,7 +121,7 @@ func (w *Waitlist) RemoveFromWaitlist(ctx context.Context, userID, eventID strin
 	if err != nil {
 		return fmt.Errorf("failed to get event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return fmt.Errorf("event not found")
 	}

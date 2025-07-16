@@ -110,7 +110,7 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return nil, fmt.Errorf("event not found")
 	}
@@ -163,8 +163,8 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 			}
 
 			return r.getRegistrationByID(ctx, reg.UserID, reg.EventID)
-		}
-	}
+							}
+						}
 
 	// Проверяем доступные слоты
 	if err := r.validateAvailableSlots(ctx, eventID); err != nil {
@@ -189,7 +189,7 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 	}
 
 	return r.getRegistrationByID(ctx, user.ID, eventID)
-}
+		}
 
 // CancelEventRegistration - отмена регистрации на событие
 func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain.User, eventID string) (*domain.Registration, error) {
@@ -199,11 +199,11 @@ func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain
 	if err != nil {
 		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return nil, fmt.Errorf("event not found")
 	}
-	
+
 	event := events[0]
 
 	registration, err := r.findActiveRegistration(ctx, user.ID, eventID)
@@ -255,9 +255,9 @@ func (r *Registration) ReactivateRegistration(ctx context.Context, user *domain.
 	// Получаем событие напрямую через репозиторий
 	eventFilter := &domain.FilterEvent{ID: &eventID}
 	events, err := r.cases.Event.Filter(ctx, eventFilter)
-	if err != nil {
+		if err != nil {
 		return nil, fmt.Errorf("failed to get event: %w", err)
-	}
+		}
 	
 	if len(events) == 0 {
 		return nil, fmt.Errorf("event not found")
@@ -304,9 +304,9 @@ func (r *Registration) ActivateRegistration(ctx context.Context, user *domain.Us
 	// Получаем событие напрямую через репозиторий
 	eventFilter := &domain.FilterEvent{ID: &eventID}
 	events, err := r.cases.Event.Filter(ctx, eventFilter)
-	if err != nil {
+			if err != nil {
 		return nil, fmt.Errorf("failed to get event: %w", err)
-	}
+			}
 	
 	if len(events) == 0 {
 		return nil, fmt.Errorf("event not found")
@@ -378,7 +378,7 @@ func (r *Registration) GetUserRegistrationsWithEvent(ctx context.Context, userID
 		if err != nil || len(events) == 0 {
 			continue
 		}
-		
+
 		event := events[0]
 
 		eventForReg := domain.EventForRegistration{

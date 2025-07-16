@@ -143,7 +143,7 @@ func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
-	
+
 	if event == nil {
 		return nil, fmt.Errorf("event not found")
 	}
@@ -191,7 +191,7 @@ func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, 
 
 func (p *Payment) findPendingRegistration(ctx context.Context, userID, eventID string) (*domain.Registration, error) {
 	return p.cases.Registration.FindPendingRegistration(ctx, userID, eventID)
-}
+	}
 
 func (p *Payment) createYooKassaPayment(event *domain.Event, user *domain.User, returnURL string) (*YooKassaPaymentResponse, error) {
 	finalPrice := p.calculateFinalPrice(event.Price, user)

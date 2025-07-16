@@ -92,7 +92,7 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 			return nil, err
 		}
 		registrations = append(registrations, registration)
-	}
+		}
 
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("error iterating rows: %w", err)
@@ -287,70 +287,70 @@ func (r *RegistrationRepo) getPaymentsForRegistration(ctx context.Context, userI
 // scanRegistration сканирует строку результата в структуру Registration
 func (r *RegistrationRepo) scanRegistration(rows pgx.Rows) (*domain.Registration, error) {
 	var registration domain.Registration
-	var user domain.User
+		var user domain.User
 	var event domain.EventForRegistration
-	var court domain.Court
+		var court domain.Court
 	var organizer domain.User
 
 	// Nullable fields для user
-	var userTelegramUsername, userAvatar, userBio, userCity, userPadelProfiles pgtype.Text
-	var userBirthDate pgtype.Date
-	var userPlayingPosition pgtype.Text
-	var userRank pgtype.Float8
-	var userIsRegistered pgtype.Bool
+		var userTelegramUsername, userAvatar, userBio, userCity, userPadelProfiles pgtype.Text
+		var userBirthDate pgtype.Date
+		var userPlayingPosition pgtype.Text
+		var userRank pgtype.Float8
+		var userIsRegistered pgtype.Bool
 
 	// Nullable fields для event
 	var eventDescription, eventClubID pgtype.Text
 	var orgTelegramUsername, orgAvatar pgtype.Text
 
-	err := rows.Scan(
+		err := rows.Scan(
 		&registration.UserID, &registration.EventID, &registration.Status, &registration.CreatedAt, &registration.UpdatedAt,
 		&user.ID, &user.TelegramID, &userTelegramUsername, &user.FirstName, &user.LastName, &userAvatar,
 		&userBio, &userRank, &userCity, &userBirthDate, &userPlayingPosition, &userPadelProfiles, &userIsRegistered,
 		&event.ID, &event.Name, &eventDescription, &event.StartTime, &event.EndTime, &event.RankMin, &event.RankMax, &event.Price, &event.MaxUsers, &event.Status, &event.Type, &eventClubID,
 		&court.ID, &court.Name, &court.Address,
 		&organizer.ID, &organizer.TelegramID, &orgTelegramUsername, &organizer.FirstName, &organizer.LastName, &orgAvatar,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to scan row: %w", err)
-	}
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
 
 	// Обработка nullable полей для user
-	if userTelegramUsername.Valid {
-		user.TelegramUsername = userTelegramUsername.String
-	}
-	if userAvatar.Valid {
-		user.Avatar = userAvatar.String
-	}
-	if userBio.Valid {
-		user.Bio = userBio.String
-	}
-	if userRank.Valid {
-		user.Rank = userRank.Float64
-	}
-	if userCity.Valid {
-		user.City = userCity.String
-	}
-	if userBirthDate.Valid {
-		user.BirthDate = userBirthDate.Time.Format("2006-01-02")
-	}
-	if userPlayingPosition.Valid {
-		user.PlayingPosition = domain.PlayingPosition(userPlayingPosition.String)
-	}
-	if userPadelProfiles.Valid {
-		user.PadelProfiles = userPadelProfiles.String
-	}
-	if userIsRegistered.Valid {
-		user.IsRegistered = userIsRegistered.Bool
-	}
+		if userTelegramUsername.Valid {
+			user.TelegramUsername = userTelegramUsername.String
+		}
+		if userAvatar.Valid {
+			user.Avatar = userAvatar.String
+		}
+		if userBio.Valid {
+			user.Bio = userBio.String
+		}
+		if userRank.Valid {
+			user.Rank = userRank.Float64
+		}
+		if userCity.Valid {
+			user.City = userCity.String
+		}
+		if userBirthDate.Valid {
+			user.BirthDate = userBirthDate.Time.Format("2006-01-02")
+		}
+		if userPlayingPosition.Valid {
+			user.PlayingPosition = domain.PlayingPosition(userPlayingPosition.String)
+		}
+		if userPadelProfiles.Valid {
+			user.PadelProfiles = userPadelProfiles.String
+		}
+		if userIsRegistered.Valid {
+			user.IsRegistered = userIsRegistered.Bool
+		}
 
 	// Обработка nullable полей для event
 	if eventDescription.Valid {
 		event.Description = &eventDescription.String
-	}
+		}
 	if eventClubID.Valid {
 		event.ClubID = &eventClubID.String
-	}
+		}
 
 	// Обработка nullable полей для organizer
 	if orgTelegramUsername.Valid {
@@ -358,12 +358,12 @@ func (r *RegistrationRepo) scanRegistration(rows pgx.Rows) (*domain.Registration
 	}
 	if orgAvatar.Valid {
 		organizer.Avatar = orgAvatar.String
-	}
+		}
 
 	event.Court = court
 	event.Organizer = organizer
 
-	registration.User = &user
+		registration.User = &user
 	registration.Event = &event
 
 	return &registration, nil

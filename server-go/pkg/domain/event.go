@@ -52,7 +52,7 @@ type CreateEvent struct {
 	MaxUsers    int       `json:"maxUsers" binding:"required,min=2"`
 	Type        EventType `json:"type" binding:"required"`
 	CourtID     string    `json:"courtId" binding:"required"`
-	OrganizerID string    `json:"organizerId" binding:"required"`
+	OrganizerID string    `json:"organizerId,omitempty"`
 	ClubID      *string   `json:"clubId,omitempty"`
 }
 
