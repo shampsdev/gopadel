@@ -243,3 +243,28 @@ func (e *Event) HandleRegistrationCancellation(ctx context.Context, registration
 	strategy := e.GetRegistrationStrategy(event.Type)
 	return strategy.HandleCancellation(ctx, registration, event, hasPaid)
 } 
+
+// CreateEventWithPermissionCheck создает событие с проверкой прав доступа по типу
+func (e *Event) CreateEventWithPermissionCheck(ctx context.Context, createEvent *domain.CreateEvent, user *domain.User) (*domain.Event, error) {
+	createEvent.OrganizerID = user.ID
+	
+	// Проверяем права доступа в зависимости от типа события
+	switch createEvent.Type {
+		case domain.EventTypeGame:
+			return e.Create(ctx, createEvent)
+		
+		case domain.EventTypeTournament:
+			adminCtx := NewContext(ctx, user)
+			return e.AdminCreate(&adminCtx, createEvent)
+		
+		case domain.EventTypeTraining:
+			strategy := GetEventStrategy(createEvent.Type)
+			if err := strategy.ValidateRegistration(ctx, user, &domain.Event{Type: createEvent.Type}); err != nil {
+				return nil, err
+			}
+			return e.Create(ctx, createEvent)
+			
+		default:
+			return nil, fmt.Errorf("invalid event type: %s", createEvent.Type)
+	}
+} 

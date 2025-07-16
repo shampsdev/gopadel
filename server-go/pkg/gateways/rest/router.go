@@ -16,6 +16,7 @@ import (
 
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/club"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/courts"
+	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/event"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/image"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/loyalty"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/middlewares"
@@ -41,6 +42,7 @@ func setupRouter(ctx context.Context, r *gin.Engine, useCases usecase.Cases, cfg
 	courts.Setup(v1, useCases)
 	club.Setup(v1, useCases)
 	image.Setup(v1, useCases)
+	event.Setup(v1, useCases) // Добавляем event эндпоинты
 
 	loyalty.Setup(v1, useCases)
 	webhook.Setup(v1, useCases, cfg, notificationService)

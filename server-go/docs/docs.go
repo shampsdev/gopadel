@@ -1009,568 +1009,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/registrations/filter": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get filtered list of registrations with payments and tournament info. Available for any admin.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin-registrations"
-                ],
-                "summary": "Filter registrations (Admin)",
-                "parameters": [
-                    {
-                        "description": "Registration filter",
-                        "name": "filter",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.AdminFilterRegistration"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.RegistrationWithPayments"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/registrations/tournaments": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get list of tournaments for filtering. Available for any admin.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin-registrations"
-                ],
-                "summary": "Get tournament options (Admin)",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "id": {
-                                        "type": "string"
-                                    },
-                                    "name": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/registrations/users": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get list of users for filtering by telegram username only. Available for any admin.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin-registrations"
-                ],
-                "summary": "Get user options (Admin)",
-                "parameters": [
-                    {
-                        "description": "User filter (telegram username only)",
-                        "name": "filter",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "telegramUsername": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "firstName": {
-                                        "type": "string"
-                                    },
-                                    "id": {
-                                        "type": "string"
-                                    },
-                                    "lastName": {
-                                        "type": "string"
-                                    },
-                                    "telegramUsername": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/registrations/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get registration with payments and tournament info. Available for any admin.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin-registrations"
-                ],
-                "summary": "Get registration (Admin)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Registration ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.RegistrationWithPayments"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/registrations/{id}/status": {
-            "patch": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Update registration status. Available only for superuser.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin-registrations"
-                ],
-                "summary": "Update registration status (Admin)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Registration ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Status update data",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "status": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.RegistrationWithPayments"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/tournaments": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Create a new tournament. Available for any admin.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin-tournaments"
-                ],
-                "summary": "Create tournament (Admin)",
-                "parameters": [
-                    {
-                        "description": "Tournament data",
-                        "name": "tournament",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.CreateTournament"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Tournament"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/tournaments/filter": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get all tournaments with advanced filtering. Available for any admin.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin-tournaments"
-                ],
-                "summary": "Get all tournaments (Admin)",
-                "parameters": [
-                    {
-                        "description": "Filter criteria",
-                        "name": "filter",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/domain.AdminFilterTournament"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Tournament"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/tournaments/{id}": {
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Delete tournament. Available for any admin.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin-tournaments"
-                ],
-                "summary": "Delete tournament (Admin)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.MessageResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Update tournament data. Available for any admin.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin-tournaments"
-                ],
-                "summary": "Update tournament (Admin)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Tournament update data",
-                        "name": "tournament",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.AdminPatchTournament"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Tournament"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/admin/users/filter": {
             "post": {
                 "security": [
@@ -1694,64 +1132,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/waitlist/tournament/{tournamentId}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get waitlist users for a specific tournament. Available for any admin. Read-only access.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin-waitlist"
-                ],
-                "summary": "Get tournament waitlist (Admin)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournamentId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.WaitlistUser"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/domain.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/domain.ErrorResponse"
                         }
@@ -2161,6 +1541,242 @@ const docTemplate = `{
                 }
             }
         },
+        "/events": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Create new event",
+                "parameters": [
+                    {
+                        "description": "Event data",
+                        "name": "event",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.CreateEvent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created event",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Event"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/events/filter": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Filter events",
+                "parameters": [
+                    {
+                        "description": "Filter parameters",
+                        "name": "filter",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/domain.FilterEvent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of events",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Event"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/events/{event_id}/waitlist": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Get event waitlist",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Event ID",
+                        "name": "event_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of waitlist users",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.WaitlistUser"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Add current user to event waitlist",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Event ID",
+                        "name": "event_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Waitlist entry created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Waitlist"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Remove current user from event waitlist",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Event ID",
+                        "name": "event_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated waitlist after removal",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.WaitlistUser"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/images/upload/avatar": {
             "post": {
                 "security": [
@@ -2238,964 +1854,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/registrations/my": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Returns all registrations for the current user with tournament information",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "registration"
-                ],
-                "summary": "Get my registrations",
-                "responses": {
-                    "200": {
-                        "description": "List of registrations with tournament details",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.RegistrationWithTournament"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "User not authorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/registrations/{tournament_id}": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Creates new registration or updates existing CANCELED status to PENDING. For free tournaments, status is set to ACTIVE immediately.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "registration"
-                ],
-                "summary": "Register for tournament",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournament_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Registration created or updated",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Registration"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "User not authorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Tournament not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict (already registered or tournament full)",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/registrations/{tournament_id}/cancel": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Cancels registration with PENDING status (before payment)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "registration"
-                ],
-                "summary": "Cancel registration before payment",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournament_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Registration canceled",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Registration"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "User not authorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Registration not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/registrations/{tournament_id}/cancel-paid": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Cancels registration with ACTIVE status (after payment)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "registration"
-                ],
-                "summary": "Cancel registration after payment",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournament_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Registration canceled",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Registration"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "User not authorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Registration not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/registrations/{tournament_id}/payment": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Creates payment in YooKassa for existing PENDING registration. Returns existing payment if it's already in success/pending status. For free tournaments (price = 0), payment is not required.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "registration"
-                ],
-                "summary": "Create payment for tournament registration",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournament_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Payment creation request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/registration.CreatePaymentRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Payment created or existing payment returned",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Payment"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data or tournament is free",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "User not authorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No pending registration found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/registrations/{tournament_id}/reactivate": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Reactivates registration from CANCELED_BY_USER status to ACTIVE",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "registration"
-                ],
-                "summary": "Reactivate canceled registration",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournament_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Registration reactivated",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Registration"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "User not authorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Registration not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Tournament is full",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/tournaments": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Creates a new tournament. Requires telegram admin rights.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tournaments"
-                ],
-                "summary": "Create tournament",
-                "parameters": [
-                    {
-                        "description": "Tournament data",
-                        "name": "tournament",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.CreateTournament"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created tournament",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Tournament"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "User not authorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Telegram admin rights required",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/tournaments/filter": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tournaments"
-                ],
-                "summary": "Filter tournaments",
-                "parameters": [
-                    {
-                        "description": "Tournament filter",
-                        "name": "filter",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.FilterTournament"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of tournaments",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Tournament"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/tournaments/{tournament_id}": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Deletes a tournament. Only the tournament organizer can delete their tournament.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tournaments"
-                ],
-                "summary": "Delete tournament",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournament_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Tournament deleted successfully"
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "User not authorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Not tournament organizer or admin rights required",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Tournament not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Updates tournament data. Only the tournament organizer can update their tournament.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tournaments"
-                ],
-                "summary": "Update tournament",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournament_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Tournament update data",
-                        "name": "tournament",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.PatchTournament"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Updated tournament",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Tournament"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request data",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "User not authorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Not tournament organizer or admin rights required",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Tournament not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/tournaments/{tournament_id}/waitlist": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get list of users in tournament waitlist",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tournaments"
-                ],
-                "summary": "Get tournament waitlist",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournament_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Tournament waitlist users",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.WaitlistUser"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid tournament ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Tournament not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Add authenticated user to tournament waitlist. Checks that tournament has not ended.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tournaments"
-                ],
-                "summary": "Add user to tournament waitlist",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournament_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Tournament waitlist users after adding",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.WaitlistUser"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid tournament ID or tournament has ended",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "User not authorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Tournament not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "User already in waitlist",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Remove authenticated user from tournament waitlist",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tournaments"
-                ],
-                "summary": "Remove user from tournament waitlist",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tournament ID",
-                        "name": "tournament_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Tournament waitlist users after removal",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.WaitlistUser"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid tournament ID",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "User not authorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Tournament not found or user not in waitlist",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
                     }
                 }
             }
@@ -3430,117 +2088,9 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/users/{user_id}/tournaments": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get tournaments by user ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of tournaments where user participated",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Tournament"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
         }
     },
     "definitions": {
-        "domain.AdminFilterRegistration": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/domain.RegistrationStatus"
-                },
-                "tournamentId": {
-                    "type": "string"
-                },
-                "tournamentName": {
-                    "type": "string"
-                },
-                "userFirstName": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                },
-                "userTelegramId": {
-                    "description": "Дополнительные поля для удобства фильтрации",
-                    "type": "integer"
-                },
-                "userTelegramUsername": {
-                    "type": "string"
-                }
-            }
-        },
-        "domain.AdminFilterTournament": {
-            "type": "object",
-            "properties": {
-                "clubId": {
-                    "type": "string"
-                },
-                "clubName": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "organizatorFirstName": {
-                    "type": "string"
-                },
-                "organizatorId": {
-                    "type": "string"
-                },
-                "organizatorTelegramId": {
-                    "description": "Дополнительные поля для удобства фильтрации",
-                    "type": "integer"
-                },
-                "tournamentType": {
-                    "type": "string"
-                }
-            }
-        },
         "domain.AdminLogin": {
             "type": "object",
             "required": [
@@ -3587,53 +2137,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "old_password": {
-                    "type": "string"
-                }
-            }
-        },
-        "domain.AdminPatchTournament": {
-            "type": "object",
-            "properties": {
-                "clubId": {
-                    "type": "string"
-                },
-                "courtId": {
-                    "type": "string"
-                },
-                "data": {
-                    "type": "object"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "endTime": {
-                    "type": "string"
-                },
-                "isFinished": {
-                    "type": "boolean"
-                },
-                "maxUsers": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "organizatorId": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "integer"
-                },
-                "rankMax": {
-                    "type": "number"
-                },
-                "rankMin": {
-                    "type": "number"
-                },
-                "startTime": {
-                    "type": "string"
-                },
-                "tournamentType": {
                     "type": "string"
                 }
             }
@@ -3813,6 +2316,60 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.CreateEvent": {
+            "type": "object",
+            "required": [
+                "courtId",
+                "endTime",
+                "maxUsers",
+                "name",
+                "organizerId",
+                "startTime",
+                "type"
+            ],
+            "properties": {
+                "clubId": {
+                    "type": "string"
+                },
+                "courtId": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "maxUsers": {
+                    "type": "integer",
+                    "minimum": 2
+                },
+                "name": {
+                    "type": "string"
+                },
+                "organizerId": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "rankMax": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "rankMin": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/domain.EventType"
+                }
+            }
+        },
         "domain.CreateLoyalty": {
             "type": "object",
             "properties": {
@@ -3830,31 +2387,33 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.CreateTournament": {
+        "domain.ErrorResponse": {
             "type": "object",
-            "required": [
-                "clubId",
-                "courtId",
-                "maxUsers",
-                "name",
-                "organizatorId",
-                "startTime",
-                "tournamentType"
-            ],
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Event": {
+            "type": "object",
             "properties": {
                 "clubId": {
                     "type": "string"
                 },
-                "courtId": {
-                    "type": "string"
+                "court": {
+                    "$ref": "#/definitions/domain.Court"
                 },
-                "data": {
-                    "type": "object"
+                "createdAt": {
+                    "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
                 "endTime": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "maxUsers": {
@@ -3863,35 +2422,123 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "organizatorId": {
-                    "type": "string"
+                "organizer": {
+                    "$ref": "#/definitions/domain.User"
+                },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.Registration"
+                    }
                 },
                 "price": {
                     "type": "integer"
                 },
                 "rankMax": {
-                    "type": "number",
-                    "minimum": 0
+                    "type": "number"
                 },
                 "rankMin": {
-                    "type": "number",
-                    "minimum": 0
+                    "type": "number"
                 },
                 "startTime": {
                     "type": "string"
                 },
-                "tournamentType": {
+                "status": {
+                    "$ref": "#/definitions/domain.EventStatus"
+                },
+                "type": {
+                    "$ref": "#/definitions/domain.EventType"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
         },
-        "domain.ErrorResponse": {
+        "domain.EventForRegistration": {
             "type": "object",
             "properties": {
-                "error": {
+                "clubId": {
                     "type": "string"
+                },
+                "court": {
+                    "$ref": "#/definitions/domain.Court"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "maxUsers": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "organizer": {
+                    "$ref": "#/definitions/domain.User"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "rankMax": {
+                    "type": "number"
+                },
+                "rankMin": {
+                    "type": "number"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/domain.EventStatus"
+                },
+                "type": {
+                    "$ref": "#/definitions/domain.EventType"
                 }
             }
+        },
+        "domain.EventStatus": {
+            "type": "string",
+            "enum": [
+                "registration",
+                "full",
+                "completed",
+                "cancelled"
+            ],
+            "x-enum-comments": {
+                "EventStatusCancelled": "Событие отменено",
+                "EventStatusCompleted": "Событие завершено",
+                "EventStatusFull": "Набор закрыт (все места заняты)",
+                "EventStatusRegistration": "Регистрация открыта"
+            },
+            "x-enum-varnames": [
+                "EventStatusRegistration",
+                "EventStatusFull",
+                "EventStatusCompleted",
+                "EventStatusCancelled"
+            ]
+        },
+        "domain.EventType": {
+            "type": "string",
+            "enum": [
+                "game",
+                "tournament",
+                "training"
+            ],
+            "x-enum-comments": {
+                "EventTypeGame": "Обычная игра",
+                "EventTypeTournament": "Турнир",
+                "EventTypeTraining": "Тренировка"
+            },
+            "x-enum-varnames": [
+                "EventTypeGame",
+                "EventTypeTournament",
+                "EventTypeTraining"
+            ]
         },
         "domain.FilterAdminUser": {
             "type": "object",
@@ -3930,11 +2577,14 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.FilterTournament": {
+        "domain.FilterEvent": {
             "type": "object",
             "properties": {
+                "clubId": {
+                    "type": "string"
+                },
                 "filterByUserClubs": {
-                    "description": "user ID to filter by user's clubs",
+                    "description": "user ID для фильтрации по клубам пользователя",
                     "type": "string"
                 },
                 "id": {
@@ -3943,16 +2593,22 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "notEnded": {
-                    "description": "default true",
+                "notCompleted": {
+                    "description": "true если событие не завершено",
                     "type": "boolean"
                 },
                 "notFull": {
-                    "description": "true if tournament is not full",
+                    "description": "true если событие не заполнено",
                     "type": "boolean"
                 },
-                "organizatorId": {
+                "organizerId": {
                     "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/domain.EventStatus"
+                },
+                "type": {
+                    "$ref": "#/definitions/domain.EventType"
                 }
             }
         },
@@ -4072,47 +2728,6 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.PatchTournament": {
-            "type": "object",
-            "properties": {
-                "clubId": {
-                    "type": "string"
-                },
-                "courtId": {
-                    "type": "string"
-                },
-                "data": {
-                    "type": "object"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "endTime": {
-                    "type": "string"
-                },
-                "maxUsers": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "integer"
-                },
-                "rankMax": {
-                    "type": "number"
-                },
-                "rankMin": {
-                    "type": "number"
-                },
-                "startTime": {
-                    "type": "string"
-                },
-                "tournamentType": {
-                    "type": "string"
-                }
-            }
-        },
         "domain.PatchUser": {
             "type": "object",
             "properties": {
@@ -4154,53 +2769,6 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.Payment": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "integer"
-                },
-                "confirmationToken": {
-                    "type": "string"
-                },
-                "date": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "paymentId": {
-                    "type": "string"
-                },
-                "paymentLink": {
-                    "type": "string"
-                },
-                "registration": {
-                    "$ref": "#/definitions/domain.Registration"
-                },
-                "registrationId": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/domain.PaymentStatus"
-                }
-            }
-        },
-        "domain.PaymentStatus": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "waiting_for_capture",
-                "succeeded",
-                "canceled"
-            ],
-            "x-enum-varnames": [
-                "PaymentStatusPending",
-                "PaymentStatusWaitingForCapture",
-                "PaymentStatusSucceeded",
-                "PaymentStatusCanceled"
-            ]
-        },
         "domain.PlayingPosition": {
             "type": "string",
             "enum": [
@@ -4217,16 +2785,19 @@ const docTemplate = `{
         "domain.Registration": {
             "type": "object",
             "properties": {
-                "date": {
+                "createdAt": {
                     "type": "string"
                 },
-                "id": {
+                "event": {
+                    "$ref": "#/definitions/domain.EventForRegistration"
+                },
+                "eventId": {
                     "type": "string"
                 },
                 "status": {
                     "$ref": "#/definitions/domain.RegistrationStatus"
                 },
-                "tournamentId": {
+                "updatedAt": {
                     "type": "string"
                 },
                 "user": {
@@ -4241,177 +2812,18 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "PENDING",
-                "ACTIVE",
-                "CANCELED",
-                "CANCELED_BY_USER"
+                "CONFIRMED",
+                "CANCELLED_BEFORE_PAYMENT",
+                "CANCELLED_AFTER_PAYMENT",
+                "REFUNDED"
             ],
             "x-enum-varnames": [
                 "RegistrationStatusPending",
-                "RegistrationStatusActive",
-                "RegistrationStatusCanceled",
-                "RegistrationStatusCanceledByUser"
+                "RegistrationStatusConfirmed",
+                "RegistrationStatusCancelledBeforePayment",
+                "RegistrationStatusCancelledAfterPayment",
+                "RegistrationStatusRefunded"
             ]
-        },
-        "domain.RegistrationWithPayments": {
-            "type": "object",
-            "properties": {
-                "date": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "payments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/domain.Payment"
-                    }
-                },
-                "status": {
-                    "$ref": "#/definitions/domain.RegistrationStatus"
-                },
-                "tournament": {
-                    "$ref": "#/definitions/domain.TournamentForRegistration"
-                },
-                "tournamentId": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/domain.User"
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
-        "domain.RegistrationWithTournament": {
-            "type": "object",
-            "properties": {
-                "date": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/domain.RegistrationStatus"
-                },
-                "tournament": {
-                    "$ref": "#/definitions/domain.TournamentForRegistration"
-                },
-                "tournamentId": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/domain.User"
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
-        "domain.Tournament": {
-            "type": "object",
-            "properties": {
-                "clubId": {
-                    "type": "string"
-                },
-                "court": {
-                    "$ref": "#/definitions/domain.Court"
-                },
-                "data": {
-                    "type": "object"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "endTime": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "isFinished": {
-                    "type": "boolean"
-                },
-                "maxUsers": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "organizator": {
-                    "$ref": "#/definitions/domain.User"
-                },
-                "participants": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/domain.Registration"
-                    }
-                },
-                "price": {
-                    "type": "integer"
-                },
-                "rankMax": {
-                    "type": "number"
-                },
-                "rankMin": {
-                    "type": "number"
-                },
-                "startTime": {
-                    "type": "string"
-                },
-                "tournamentType": {
-                    "type": "string"
-                }
-            }
-        },
-        "domain.TournamentForRegistration": {
-            "type": "object",
-            "properties": {
-                "court": {
-                    "$ref": "#/definitions/domain.Court"
-                },
-                "data": {
-                    "type": "object"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "endTime": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "isFinished": {
-                    "type": "boolean"
-                },
-                "maxUsers": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "organizator": {
-                    "$ref": "#/definitions/domain.User"
-                },
-                "price": {
-                    "type": "integer"
-                },
-                "rankMax": {
-                    "type": "number"
-                },
-                "rankMin": {
-                    "type": "number"
-                },
-                "startTime": {
-                    "type": "string"
-                },
-                "tournamentType": {
-                    "type": "string"
-                }
-            }
         },
         "domain.User": {
             "type": "object",
@@ -4460,6 +2872,26 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.Waitlist": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "eventId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "user": {
+                    "$ref": "#/definitions/domain.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.WaitlistUser": {
             "type": "object",
             "properties": {
@@ -4477,17 +2909,6 @@ const docTemplate = `{
                 "url": {
                     "type": "string",
                     "example": "https://example.com/image.jpg"
-                }
-            }
-        },
-        "registration.CreatePaymentRequest": {
-            "type": "object",
-            "required": [
-                "returnUrl"
-            ],
-            "properties": {
-                "returnUrl": {
-                    "type": "string"
                 }
             }
         },
