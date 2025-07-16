@@ -15,16 +15,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/shampsdev/go-telegram-template/pkg/config"
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
-	"github.com/shampsdev/go-telegram-template/pkg/notifications"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
 )
 
 type Payment struct {
-	paymentRepo         repo.Payment
-	registrationRepo    repo.Registration
-	tournamentRepo      repo.Tournament
-	config              *config.Config
-	notificationService *notifications.NotificationService
+	paymentRepo repo.Payment
+	config      *config.Config
+	cases       *Cases
 }
 
 type YooKassaAmount struct {
@@ -74,13 +71,11 @@ type YooKassaConfirmationResp struct {
 	ConfirmationURL string `json:"confirmation_url"`
 }
 
-func NewPayment(ctx context.Context, paymentRepo repo.Payment, registrationRepo repo.Registration, tournamentRepo repo.Tournament, cfg *config.Config, notificationService *notifications.NotificationService) *Payment {
+func NewPayment(ctx context.Context, paymentRepo repo.Payment, cfg *config.Config, cases *Cases) *Payment {
 	return &Payment{
-		paymentRepo:         paymentRepo,
-		registrationRepo:    registrationRepo,
-		tournamentRepo:      tournamentRepo,
-		config:              cfg,
-		notificationService: notificationService,
+		paymentRepo: paymentRepo,
+		config:      cfg,
+		cases:       cases,
 	}
 }
 
@@ -111,12 +106,18 @@ func (p *Payment) UpdatePaymentStatus(ctx context.Context, paymentID string, sta
 	return p.paymentRepo.Patch(ctx, paymentID, patch)
 }
 
-func (p *Payment) GetPaymentsByRegistration(ctx context.Context, registrationID string) ([]*domain.Payment, error) {
+func (p *Payment) GetPaymentsByRegistration(ctx context.Context, userID, eventID string) ([]*domain.Payment, error) {
 	filter := &domain.FilterPayment{
-		RegistrationID: &registrationID,
+		UserID:  &userID,
+		EventID: &eventID,
 	}
 
 	return p.paymentRepo.Filter(ctx, filter)
+}
+
+// GetPaymentsByUserAndEvent получает платежи пользователя по событию
+func (p *Payment) GetPaymentsByUserAndEvent(ctx context.Context, userID, eventID string) ([]*domain.Payment, error) {
+	return p.GetPaymentsByRegistration(ctx, userID, eventID)
 }
 
 func (p *Payment) GetPaymentByPaymentID(ctx context.Context, paymentID string) (*domain.Payment, error) {
@@ -136,23 +137,27 @@ func (p *Payment) GetPaymentByPaymentID(ctx context.Context, paymentID string) (
 	return payments[0], nil
 }
 
-// CreateYooKassaPayment создает платеж в YooKassa для регистрации на турнир
-func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, tournamentID string, returnURL string) (*domain.Payment, error) {
-	tournament, err := p.getTournamentByID(ctx, tournamentID)
+// CreateYooKassaPayment создает платеж в YooKassa для регистрации на событие
+func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, eventID string, returnURL string) (*domain.Payment, error) {
+	event, err := p.cases.Event.GetEventByID(ctx, eventID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get tournament: %w", err)
+		return nil, fmt.Errorf("failed to get event: %w", err)
+	}
+	
+	if event == nil {
+		return nil, fmt.Errorf("event not found")
 	}
 
-	if tournament.Price == 0 {
-		return nil, fmt.Errorf("tournament is free, no payment required")
+	if event.Price == 0 {
+		return nil, fmt.Errorf("event is free, no payment required")
 	}
 
-	registration, err := p.findPendingRegistration(ctx, user.ID, tournamentID)
+	registration, err := p.cases.Registration.FindPendingRegistration(ctx, user.ID, eventID)
 	if err != nil {
 		return nil, err
 	}
 
-	existingPayments, err := p.GetPaymentsByRegistration(ctx, registration.ID)
+	existingPayments, err := p.GetPaymentsByRegistration(ctx, registration.UserID, registration.EventID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get existing payments: %w", err)
 	}
@@ -164,62 +169,32 @@ func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, 
 		}
 	}
 
-	yooPayment, err := p.createYooKassaPayment(tournament, user, returnURL)
+	yooPayment, err := p.createYooKassaPayment(event, user, returnURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create YooKassa payment: %w", err)
 	}
 
-	finalPrice := p.calculateFinalPrice(tournament.Price, user)
+	finalPrice := p.calculateFinalPrice(event.Price, user)
 	
-	// сохраняем в бд
 	createPayment := &domain.CreatePayment{
 		PaymentID:         yooPayment.ID,
 		Amount:            finalPrice,
 		Status:            domain.PaymentStatus(yooPayment.Status),
 		PaymentLink:       yooPayment.Confirmation.ConfirmationURL,
 		ConfirmationToken: "",
-		RegistrationID:    &registration.ID,
+		UserID:            user.ID,
+		EventID:           eventID,
 	}
 
 	return p.CreatePayment(ctx, createPayment)
 }
 
-func (p *Payment) findPendingRegistration(ctx context.Context, userID, tournamentID string) (*domain.Registration, error) {
-	pendingStatus := domain.RegistrationStatusPending
-	filter := &domain.FilterRegistration{
-		UserID:       &userID,
-		TournamentID: &tournamentID,
-		Status:       &pendingStatus,
-	}
-
-	registrations, err := p.registrationRepo.Filter(ctx, filter)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find registration: %w", err)
-	}
-
-	if len(registrations) == 0 {
-		return nil, fmt.Errorf("no pending registration found for this tournament")
-	}
-
-	return registrations[0], nil
+func (p *Payment) findPendingRegistration(ctx context.Context, userID, eventID string) (*domain.Registration, error) {
+	return p.cases.Registration.FindPendingRegistration(ctx, userID, eventID)
 }
 
-func (p *Payment) getTournamentByID(ctx context.Context, tournamentID string) (*domain.Tournament, error) {
-	filter := &domain.FilterTournament{ID: tournamentID}
-	tournaments, err := p.tournamentRepo.Filter(ctx, filter)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get tournament: %w", err)
-	}
-
-	if len(tournaments) == 0 {
-		return nil, fmt.Errorf("tournament not found")
-	}
-
-	return tournaments[0], nil
-}
-
-func (p *Payment) createYooKassaPayment(tournament *domain.Tournament, user *domain.User, returnURL string) (*YooKassaPaymentResponse, error) {
-	finalPrice := p.calculateFinalPrice(tournament.Price, user)
+func (p *Payment) createYooKassaPayment(event *domain.Event, user *domain.User, returnURL string) (*YooKassaPaymentResponse, error) {
+	finalPrice := p.calculateFinalPrice(event.Price, user)
 	
 	if finalPrice <= 0 {
 		return nil, fmt.Errorf("invalid payment amount: %d", finalPrice)
@@ -239,7 +214,7 @@ func (p *Payment) createYooKassaPayment(tournament *domain.Tournament, user *dom
 			ReturnURL: returnURL,
 		},
 		Capture:     true,
-		Description: fmt.Sprintf("Оплата турнира `%s`", tournament.Name),
+		Description: fmt.Sprintf("Оплата события `%s`", event.Name),
 		Receipt: YooKassaReceipt{
 			Customer: YooKassaCustomer{
 				Email: customerEmail,

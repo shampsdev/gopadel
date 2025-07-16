@@ -10,40 +10,40 @@ import (
 )
 
 type Waitlist struct {
-	ctx           context.Context
-	WaitlistRepo  repo.Waitlist
-	TournamentCase *Tournament
+	ctx          context.Context
+	waitlistRepo repo.Waitlist
+	cases        *Cases
 }
 
-func NewWaitlist(ctx context.Context, WaitlistRepo repo.Waitlist, TournamentCase *Tournament) *Waitlist {
+func NewWaitlist(ctx context.Context, waitlistRepo repo.Waitlist, cases *Cases) *Waitlist {
 	return &Waitlist{
-		ctx:           ctx,
-		WaitlistRepo:  WaitlistRepo,
-		TournamentCase: TournamentCase,
+		ctx:          ctx,
+		waitlistRepo: waitlistRepo,
+		cases:        cases,
 	}
 }
 
 func (w *Waitlist) Filter(ctx context.Context, filter *domain.FilterWaitlist) ([]*domain.Waitlist, error) {
-	return w.WaitlistRepo.Filter(ctx, filter)
+	return w.waitlistRepo.Filter(ctx, filter)
 }
 
 func (w *Waitlist) Create(ctx context.Context, waitlist *domain.CreateWaitlist) (int, error) {
-	return w.WaitlistRepo.Create(ctx, waitlist)
+	return w.waitlistRepo.Create(ctx, waitlist)
 }
 
 func (w *Waitlist) Delete(ctx context.Context, id int) error {
-	return w.WaitlistRepo.Delete(ctx, id)
+	return w.waitlistRepo.Delete(ctx, id)
 }
 
-func (w *Waitlist) GetTournamentWaitlist(ctx context.Context, tournamentID string) ([]*domain.Waitlist, error) {
+func (w *Waitlist) GetEventWaitlist(ctx context.Context, eventID string) ([]*domain.Waitlist, error) {
 	filter := &domain.FilterWaitlist{
-		TournamentID: &tournamentID,
+		EventID: &eventID,
 	}
-	return w.WaitlistRepo.Filter(ctx, filter)
+	return w.waitlistRepo.Filter(ctx, filter)
 }
 
-func (w *Waitlist) GetTournamentWaitlistUsers(ctx context.Context, tournamentID string) ([]*domain.WaitlistUser, error) {
-	waitlists, err := w.GetTournamentWaitlist(ctx, tournamentID)
+func (w *Waitlist) GetEventWaitlistUsers(ctx context.Context, eventID string) ([]*domain.WaitlistUser, error) {
+	waitlists, err := w.GetEventWaitlist(ctx, eventID)
 	if err != nil {
 		return nil, err
 	}
@@ -59,44 +59,51 @@ func (w *Waitlist) GetTournamentWaitlistUsers(ctx context.Context, tournamentID 
 	return waitlistUsers, nil
 }
 
-func (w *Waitlist) AddToWaitlist(ctx context.Context, userID, tournamentID string) (*domain.Waitlist, error) {
-	tournament, err := w.TournamentCase.GetTournamentByID(ctx, tournamentID)
+func (w *Waitlist) AddToWaitlist(ctx context.Context, userID, eventID string) (*domain.Waitlist, error) {
+	filter := &domain.FilterEvent{ID: &eventID}
+	events, err := w.cases.Event.Filter(ctx, filter)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
+	
+	if len(events) == 0 {
+		return nil, fmt.Errorf("event not found")
+	}
+	
+	event := events[0]
 
-	if !tournament.EndTime.IsZero() && tournament.EndTime.Before(time.Now()) {
-		return nil, fmt.Errorf("tournament has already ended")
+	if !event.EndTime.IsZero() && event.EndTime.Before(time.Now()) {
+		return nil, fmt.Errorf("event has already ended")
 	}
 
 	existingFilter := &domain.FilterWaitlist{
-		UserID:       &userID,
-		TournamentID: &tournamentID,
+		UserID:  &userID,
+		EventID: &eventID,
 	}
-	existing, err := w.WaitlistRepo.Filter(ctx, existingFilter)
+	existing, err := w.waitlistRepo.Filter(ctx, existingFilter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check existing waitlist: %w", err)
 	}
 	
 	if len(existing) > 0 {
-		return nil, fmt.Errorf("user is already in the waitlist for this tournament")
+		return nil, fmt.Errorf("user is already in the waitlist for this event")
 	}
 
 	createWaitlist := &domain.CreateWaitlist{
-		UserID:       userID,
-		TournamentID: tournamentID,
+		UserID:  userID,
+		EventID: eventID,
 	}
 	
-	waitlistID, err := w.WaitlistRepo.Create(ctx, createWaitlist)
+	waitlistID, err := w.waitlistRepo.Create(ctx, createWaitlist)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add to waitlist: %w", err)
 	}
 
-	filter := &domain.FilterWaitlist{
+	waitlistFilter := &domain.FilterWaitlist{
 		ID: &waitlistID,
 	}
 	
-	waitlists, err := w.WaitlistRepo.Filter(ctx, filter)
+	waitlists, err := w.waitlistRepo.Filter(ctx, waitlistFilter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get created waitlist entry: %w", err)
 	}
@@ -108,27 +115,32 @@ func (w *Waitlist) AddToWaitlist(ctx context.Context, userID, tournamentID strin
 	return waitlists[0], nil
 }
 
-func (w *Waitlist) RemoveFromWaitlist(ctx context.Context, userID, tournamentID string) error {
-	_, err := w.TournamentCase.GetTournamentByID(ctx, tournamentID)
+func (w *Waitlist) RemoveFromWaitlist(ctx context.Context, userID, eventID string) error {
+	filter := &domain.FilterEvent{ID: &eventID}
+	events, err := w.cases.Event.Filter(ctx, filter)
 	if err != nil {
-		return err
-	}
-
-	filter := &domain.FilterWaitlist{
-		UserID:       &userID,
-		TournamentID: &tournamentID,
+		return fmt.Errorf("failed to get event: %w", err)
 	}
 	
-	waitlists, err := w.WaitlistRepo.Filter(ctx, filter)
+	if len(events) == 0 {
+		return fmt.Errorf("event not found")
+	}
+
+	waitlistFilter := &domain.FilterWaitlist{
+		UserID:  &userID,
+		EventID: &eventID,
+	}
+	
+	waitlists, err := w.waitlistRepo.Filter(ctx, waitlistFilter)
 	if err != nil {
 		return fmt.Errorf("failed to find waitlist entry: %w", err)
 	}
 	
 	if len(waitlists) == 0 {
-		return fmt.Errorf("user is not in the waitlist for this tournament")
+		return fmt.Errorf("user is not in the waitlist for this event")
 	}
 
-	err = w.WaitlistRepo.Delete(ctx, waitlists[0].ID)
+	err = w.waitlistRepo.Delete(ctx, waitlists[0].ID)
 	if err != nil {
 		return fmt.Errorf("failed to remove from waitlist: %w", err)
 	}

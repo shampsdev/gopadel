@@ -35,7 +35,7 @@ type WebhookEvent struct {
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/yookassa_webhook [post]
-func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *usecase.Registration, tournamentUseCase *usecase.Tournament, notificationService *notifications.NotificationService, cfg *config.Config) gin.HandlerFunc {
+func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *usecase.Registration, eventUseCase *usecase.Event, notificationService *notifications.NotificationService, cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var event WebhookEvent
 		if err := c.ShouldBindJSON(&event); err != nil {
@@ -89,12 +89,12 @@ func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *useca
 				
 				// Уведа об успешной оплате
 				// if notificationService != nil {
-				// 	tournament, err := tournamentUseCase.GetTournamentByID(c.Request.Context(), payment.Registration.TournamentID)
+				// 	event, err := eventUseCase.GetEventByID(c.Request.Context(), payment.Registration.EventID)
 				// 	if err == nil && payment.Registration.User != nil {
 				// 		err = notificationService.SendTournamentPaymentSuccess(
 				// 			payment.Registration.User.TelegramID,
-				// 			tournament.ID,
-				// 			tournament.Name,
+				// 			event.ID,
+				// 			event.Name,
 				// 		)
 				// 		if err != nil {
 				// 			cfg.Logger().Error("Failed to send payment success notification", "error", err)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
@@ -15,28 +16,52 @@ import (
 type EventRepo struct {
 	db   *pgxpool.Pool
 	psql sq.StatementBuilderType
+	rand *rand.Rand
+}
+
+var letterRunes = []rune("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func (r *EventRepo) generateID(eventType domain.EventType) string {
+	var prefix string
+	switch eventType {
+	case domain.EventTypeGame:
+		prefix = "game-"
+	case domain.EventTypeTournament:
+		prefix = "tour-"
+	case domain.EventTypeTraining:
+		prefix = "train-"
+	default:
+		prefix = "event-"
+	}
+
+	b := make([]rune, 10)
+	for i := range b {
+		b[i] = letterRunes[r.rand.Intn(len(letterRunes))]
+	}
+	return prefix + string(b)
 }
 
 func NewEventRepo(db *pgxpool.Pool) *EventRepo {
 	return &EventRepo{
 		db:   db,
 		psql: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
+		rand: rand.New(rand.NewSource(rand.Int63())),
 	}
 }
 
 func (r *EventRepo) Create(ctx context.Context, event *domain.CreateEvent) (string, error) {
+	id := r.generateID(event.Type)
+	
 	s := r.psql.Insert(`"event"`).
-		Columns("name", "description", "start_time", "end_time", "rank_min", "rank_max", "price", "max_users", "type", "court_id", "organizer_id", "club_id").
-		Values(event.Name, event.Description, event.StartTime, event.EndTime, event.RankMin, event.RankMax, event.Price, event.MaxUsers, event.Type, event.CourtID, event.OrganizerID, event.ClubID).
-		Suffix("RETURNING id")
+		Columns("id", "name", "description", "start_time", "end_time", "rank_min", "rank_max", "price", "max_users", "type", "court_id", "organizer_id", "club_id").
+		Values(id, event.Name, event.Description, event.StartTime, event.EndTime, event.RankMin, event.RankMax, event.Price, event.MaxUsers, event.Type, event.CourtID, event.OrganizerID, event.ClubID)
 
 	sql, args, err := s.ToSql()
 	if err != nil {
 		return "", fmt.Errorf("failed to build SQL: %w", err)
 	}
 
-	var id string
-	err = r.db.QueryRow(ctx, sql, args...).Scan(&id)
+	_, err = r.db.Exec(ctx, sql, args...)
 	if err != nil {
 		return "", fmt.Errorf("failed to create event: %w", err)
 	}
