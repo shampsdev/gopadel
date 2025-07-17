@@ -51,9 +51,13 @@ func (h *Handler) deleteEvent(c *gin.Context) {
 		return
 	}
 
-	// Проверяем права доступа
-	if !h.canDeleteEvent(c, domainUser, event) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient permissions to delete this event"})
+	// Получаем админского пользователя, если он есть
+	adminUser, _ := h.cases.AdminUser.GetByUserID(c, domainUser.ID)
+	
+	// Проверяем права на удаление через стратегию
+	strategy := h.cases.Event.GetStrategy(event.Type)
+	if err := strategy.CanDelete(domainUser, adminUser, event); err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -65,36 +69,3 @@ func (h *Handler) deleteEvent(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
-
-// canDeleteEvent проверяет, может ли пользователь удалить событие
-// Правила:
-// - Суперюзер может удалять любые события
-// - Администратор может удалять свои турниры и любые игры  
-// - Пользователи могут удалять только свои игры
-func (h *Handler) canDeleteEvent(c *gin.Context, user *domain.User, event *domain.Event) bool {
-	// Проверяем, является ли пользователь администратором
-	adminUser, err := h.cases.AdminUser.GetByUserID(c, user.ID)
-	if err == nil {
-		// Пользователь является администратором
-		
-		// Если суперюзер - может удалять все
-		if adminUser.IsSuperUser {
-			return true
-		}
-		
-		// Обычный администратор может удалять свои турниры
-		if event.Type == domain.EventTypeTournament && event.Organizer.ID == user.ID {
-			return true
-		}
-		
-		// И любые игры
-		if event.Type == domain.EventTypeGame {
-			return true
-		}
-		
-		return false
-	}
-
-	// Обычные пользователи могут удалять только свои игры
-	return event.Type == domain.EventTypeGame && event.Organizer.ID == user.ID
-} 

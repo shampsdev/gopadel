@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/ginerr"
-	"github.com/shampsdev/go-telegram-template/pkg/repo"
+	"github.com/shampsdev/go-telegram-template/pkg/usecase"
 )
 
 // CreateEvent godoc
@@ -42,19 +42,29 @@ func (h *Handler) createEvent(c *gin.Context) {
 		return
 	}
 
-	if createEvent.Type == domain.EventTypeTournament {
-		_, err := h.cases.AdminUser.GetByUserID(c, domainUser.ID)
-		if err != nil {
-			if err == repo.ErrNotFound {
-				c.JSON(http.StatusForbidden, gin.H{"error": "only admins can create tournaments"})
-				return
-			}
-			ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to check admin status")
-			return
-		}
+	// Получаем админского пользователя, если он есть
+	adminUser, _ := h.cases.AdminUser.GetByUserID(c, domainUser.ID)
+	
+	// Проверяем права на создание через стратегию
+	strategy := h.cases.Event.GetStrategy(createEvent.Type)
+	if err := strategy.CanCreate(domainUser, adminUser); err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
 	}
 
-	event, err := h.cases.Event.CreateEventWithPermissionCheck(c, &createEvent, domainUser)
+	// Устанавливаем организатора
+	createEvent.OrganizerID = domainUser.ID
+	
+	// Создаем событие (используем AdminCreate для турниров если пользователь админ)
+	var event *domain.Event
+	var err error
+	
+	if createEvent.Type == domain.EventTypeTournament && adminUser != nil {
+		ctx := usecase.NewContext(c, domainUser)
+		event, err = h.cases.Event.AdminCreate(&ctx, &createEvent)
+	} else {
+		event, err = h.cases.Event.Create(c, &createEvent)
+	}
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to create event") {
 		return
 	}

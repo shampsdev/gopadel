@@ -96,6 +96,11 @@ func (e *Event) Delete(ctx context.Context, id string) error {
 	return e.eventRepo.Delete(ctx, id)
 }
 
+// GetStrategy возвращает стратегию для события определенного типа
+func (e *Event) GetStrategy(eventType domain.EventType) EventStrategy {
+	return GetEventStrategy(eventType)
+}
+
 // Получает событие по ID
 func (e *Event) GetEventByID(ctx context.Context, eventID string) (*domain.Event, error) {
 	filter := &domain.FilterEvent{
@@ -222,7 +227,7 @@ func (e *Event) AdminDelete(ctx *Context, id string) error {
 }
 
 // Получает стратегию для типа события
-func (e *Event) GetRegistrationStrategy(eventType domain.EventType) EventRegistrationStrategy {
+func (e *Event) GetRegistrationStrategy(eventType domain.EventType) EventStrategy {
 	return GetEventStrategy(eventType)
 }
 
