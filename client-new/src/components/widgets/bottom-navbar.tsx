@@ -13,11 +13,15 @@ export default function BottomNavbar() {
     <div className="fixed pb-[20px] bottom-0 z-30 left-0 right-0 py-[7px] bg-white flex justify-around items-center">
       <Link to="/">
         <div className="flex flex-col items-center justify-center w-[60px]">
-          {Icons.House(isActive("/") ? "#000" : "#A4A9B4")}
+          {Icons.House(
+            isActive("/") || isActive("/tournaments") ? "#000" : "#A4A9B4"
+          )}
           <p
             className={twMerge(
               "text-[12px] font-medium",
-              isActive("/") ? "text-black" : "text-[#868D98]"
+              isActive("/") || isActive("/tournaments")
+                ? "text-black"
+                : "text-[#868D98]"
             )}
           >
             Главная
