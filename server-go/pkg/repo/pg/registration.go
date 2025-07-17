@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -47,7 +48,7 @@ func (r *RegistrationRepo) Filter(ctx context.Context, filter *domain.FilterRegi
 		`"reg"."user_id"`, `"reg"."event_id"`, `"reg"."status"`, `"reg"."created_at"`, `"reg"."updated_at"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
-		`"e"."id"`, `"e"."name"`, `"e"."description"`, `"e"."start_time"`, `"e"."end_time"`, `"e"."rank_min"`, `"e"."rank_max"`, `"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`,
+		`"e"."id"`, `"e"."name"`, `"e"."description"`, `"e"."start_time"`, `"e"."end_time"`, `"e"."rank_min"`, `"e"."rank_max"`, `"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`, `"e"."data"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"org"."id"`, `"org"."telegram_id"`, `"org"."telegram_username"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 	).
@@ -161,7 +162,7 @@ func (r *RegistrationRepo) AdminFilter(ctx context.Context, filter *domain.Admin
 		`"reg"."user_id"`, `"reg"."event_id"`, `"reg"."status"`, `"reg"."created_at"`, `"reg"."updated_at"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
-		`"e"."id"`, `"e"."name"`, `"e"."description"`, `"e"."start_time"`, `"e"."end_time"`, `"e"."rank_min"`, `"e"."rank_max"`, `"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`,
+		`"e"."id"`, `"e"."name"`, `"e"."description"`, `"e"."start_time"`, `"e"."end_time"`, `"e"."rank_min"`, `"e"."rank_max"`, `"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`, `"e"."data"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"org"."id"`, `"org"."telegram_id"`, `"org"."telegram_username"`, `"org"."first_name"`, `"org"."last_name"`, `"org"."avatar"`,
 	).
@@ -301,13 +302,14 @@ func (r *RegistrationRepo) scanRegistration(rows pgx.Rows) (*domain.Registration
 
 	// Nullable fields для event
 	var eventDescription, eventClubID pgtype.Text
+	var eventData []byte
 	var orgTelegramUsername, orgAvatar pgtype.Text
 
 		err := rows.Scan(
 		&registration.UserID, &registration.EventID, &registration.Status, &registration.CreatedAt, &registration.UpdatedAt,
 		&user.ID, &user.TelegramID, &userTelegramUsername, &user.FirstName, &user.LastName, &userAvatar,
 		&userBio, &userRank, &userCity, &userBirthDate, &userPlayingPosition, &userPadelProfiles, &userIsRegistered,
-		&event.ID, &event.Name, &eventDescription, &event.StartTime, &event.EndTime, &event.RankMin, &event.RankMax, &event.Price, &event.MaxUsers, &event.Status, &event.Type, &eventClubID,
+		&event.ID, &event.Name, &eventDescription, &event.StartTime, &event.EndTime, &event.RankMin, &event.RankMax, &event.Price, &event.MaxUsers, &event.Status, &event.Type, &eventClubID, &eventData,
 		&court.ID, &court.Name, &court.Address,
 		&organizer.ID, &organizer.TelegramID, &orgTelegramUsername, &organizer.FirstName, &organizer.LastName, &orgAvatar,
 		)
@@ -351,6 +353,10 @@ func (r *RegistrationRepo) scanRegistration(rows pgx.Rows) (*domain.Registration
 	if eventClubID.Valid {
 		event.ClubID = &eventClubID.String
 		}
+
+	if len(eventData) > 0 {
+		event.Data = json.RawMessage(eventData)
+	}
 
 	// Обработка nullable полей для organizer
 	if orgTelegramUsername.Valid {

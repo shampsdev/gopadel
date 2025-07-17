@@ -29,19 +29,19 @@ type BaseEventStrategy struct{}
 
 func (b *BaseEventStrategy) ValidateRegistration(ctx context.Context, user *domain.User, event *domain.Event) error {
 	if user.Rank < event.RankMin || user.Rank > event.RankMax {
-		return errors.New("пользователь не подходит по рангу для этого события")
+		return errors.New("user rank does not fit this event")
 	}
 	
 	if event.Status == domain.EventStatusCompleted {
-		return errors.New("событие уже завершено")
+		return errors.New("event is already completed")
 	}
 	
 	if event.Status == domain.EventStatusCancelled {
-		return errors.New("событие отменено")
+		return errors.New("event is cancelled")
 	}
 	
 	if event.Status == domain.EventStatusFull {
-		return errors.New("все места на событие заняты")
+		return errors.New("all spots for this event are taken")
 	}
 	
 	return nil
@@ -150,7 +150,7 @@ func (tr *TrainingEventStrategy) ValidateRegistration(ctx context.Context, user 
 		return err
 	}
 	
-	return errors.New("функционал регистрации на тренировки пока не готов")
+	return errors.New("training registration functionality is not ready yet")
 }
 
 func (tr *TrainingEventStrategy) DetermineRegistrationStatus(ctx context.Context, event *domain.Event) domain.RegistrationStatus {

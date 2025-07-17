@@ -154,6 +154,8 @@ definitions:
         type: string
       courtId:
         type: string
+      data:
+        type: object
       description:
         type: string
       endTime:
@@ -210,6 +212,8 @@ definitions:
         $ref: '#/definitions/domain.Court'
       createdAt:
         type: string
+      data:
+        type: object
       description:
         type: string
       endTime:
@@ -247,6 +251,8 @@ definitions:
         type: string
       court:
         $ref: '#/definitions/domain.Court'
+      data:
+        type: object
       description:
         type: string
       endTime:
@@ -421,6 +427,8 @@ definitions:
         type: string
       courtId:
         type: string
+      data:
+        type: object
       description:
         type: string
       endTime:

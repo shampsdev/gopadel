@@ -138,11 +138,11 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 	for _, reg := range existingRegistrations {
 		switch reg.Status {
 		case domain.RegistrationStatusPending:
-			return nil, fmt.Errorf("пользователь уже имеет ожидающую регистрацию на это событие")
+			return nil, fmt.Errorf("user already has a pending registration for this event")
 		case domain.RegistrationStatusConfirmed:
-			return nil, fmt.Errorf("пользователь уже зарегистрирован на это событие")
+			return nil, fmt.Errorf("user is already registered for this event")
 		case domain.RegistrationStatusCancelledAfterPayment:
-			return nil, fmt.Errorf("пользователь отменил регистрацию после оплаты. Используйте эндпоинт реактивации")
+			return nil, fmt.Errorf("user cancelled registration after payment. Use reactivation endpoint")
 		case domain.RegistrationStatusCancelledBeforePayment, domain.RegistrationStatusRefunded:
 			// Можем восстановить регистрацию
 			if err := r.validateAvailableSlots(ctx, eventID); err != nil {
@@ -214,7 +214,7 @@ func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain
 	if registration.Status == domain.RegistrationStatusCancelledBeforePayment || 
 	   registration.Status == domain.RegistrationStatusCancelledAfterPayment ||
 	   registration.Status == domain.RegistrationStatusRefunded {
-		return nil, fmt.Errorf("регистрация уже отменена")
+		return nil, fmt.Errorf("registration is already cancelled")
 	}
 
 	// Проверяем, есть ли оплата
@@ -279,7 +279,7 @@ func (r *Registration) ReactivateRegistration(ctx context.Context, user *domain.
 	}
 
 	if registration.Status != domain.RegistrationStatusCancelledAfterPayment {
-		return nil, fmt.Errorf("можно реактивировать только регистрации, отмененные после оплаты")
+		return nil, fmt.Errorf("can only reactivate registrations cancelled after payment")
 	}
 
 	if err := r.validateAvailableSlots(ctx, eventID); err != nil {
@@ -325,7 +325,7 @@ func (r *Registration) ActivateRegistration(ctx context.Context, user *domain.Us
 	}
 
 	if registration.Status != domain.RegistrationStatusPending {
-		return nil, fmt.Errorf("можно активировать только ожидающие регистрации")
+		return nil, fmt.Errorf("can only activate pending registrations")
 	}
 
 	confirmedStatus := domain.RegistrationStatusConfirmed
@@ -455,17 +455,17 @@ func (r *Registration) getRegistrationByID(ctx context.Context, userID, eventID 
 func (r *Registration) validateEventNotEnded(event *domain.Event) error {
 	now := time.Now()
 	if !event.EndTime.IsZero() && event.EndTime.Before(now) {
-		return fmt.Errorf("событие уже закончилось")
+		return fmt.Errorf("event has already ended")
 	}
 	if event.EndTime.IsZero() && event.StartTime.Add(24*time.Hour).Before(now) {
-		return fmt.Errorf("событие уже закончилось")
+		return fmt.Errorf("event has already ended")
 	}
 	return nil
 }
 
 func (r *Registration) validateUserRank(user *domain.User, event *domain.Event) error {
 	if user.Rank < event.RankMin || user.Rank > event.RankMax {
-		return fmt.Errorf("ранг пользователя %.1f не подходит для диапазона события %.1f-%.1f", 
+		return fmt.Errorf("user rank %.1f does not fit event range %.1f-%.1f", 
 			user.Rank, event.RankMin, event.RankMax)
 	}
 	return nil
@@ -501,7 +501,7 @@ func (r *Registration) validateAvailableSlots(ctx context.Context, eventID strin
 	}
 
 	if activeCount >= event.MaxUsers {
-		return fmt.Errorf("событие заполнено (максимум %d пользователей)", event.MaxUsers)
+		return fmt.Errorf("event is full (maximum %d users)", event.MaxUsers)
 	}
 
 	return nil

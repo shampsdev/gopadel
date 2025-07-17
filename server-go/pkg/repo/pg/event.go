@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -53,8 +54,8 @@ func (r *EventRepo) Create(ctx context.Context, event *domain.CreateEvent) (stri
 	id := r.generateID(event.Type)
 	
 	s := r.psql.Insert(`"event"`).
-		Columns("id", "name", "description", "start_time", "end_time", "rank_min", "rank_max", "price", "max_users", "type", "court_id", "organizer_id", "club_id").
-		Values(id, event.Name, event.Description, event.StartTime, event.EndTime, event.RankMin, event.RankMax, event.Price, event.MaxUsers, event.Type, event.CourtID, event.OrganizerID, event.ClubID)
+		Columns("id", "name", "description", "start_time", "end_time", "rank_min", "rank_max", "price", "max_users", "type", "court_id", "organizer_id", "club_id", "data").
+		Values(id, event.Name, event.Description, event.StartTime, event.EndTime, event.RankMin, event.RankMax, event.Price, event.MaxUsers, event.Type, event.CourtID, event.OrganizerID, event.ClubID, event.Data)
 
 	sql, args, err := s.ToSql()
 	if err != nil {
@@ -72,7 +73,7 @@ func (r *EventRepo) Create(ctx context.Context, event *domain.CreateEvent) (stri
 func (r *EventRepo) Filter(ctx context.Context, filter *domain.FilterEvent) ([]*domain.Event, error) {
 	s := r.psql.Select(
 		`"e"."id"`, `"e"."name"`, `"e"."description"`, `"e"."start_time"`, `"e"."end_time"`, `"e"."rank_min"`, `"e"."rank_max"`,
-		`"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`, `"e"."created_at"`, `"e"."updated_at"`,
+		`"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`, `"e"."data"`, `"e"."created_at"`, `"e"."updated_at"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
@@ -157,7 +158,7 @@ func (r *EventRepo) Filter(ctx context.Context, filter *domain.FilterEvent) ([]*
 func (r *EventRepo) GetEventsByUserID(ctx context.Context, userID string) ([]*domain.Event, error) {
 	s := r.psql.Select(
 		`"e"."id"`, `"e"."name"`, `"e"."description"`, `"e"."start_time"`, `"e"."end_time"`, `"e"."rank_min"`, `"e"."rank_max"`,
-		`"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`, `"e"."created_at"`, `"e"."updated_at"`,
+		`"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`, `"e"."data"`, `"e"."created_at"`, `"e"."updated_at"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
@@ -263,6 +264,11 @@ func (r *EventRepo) Patch(ctx context.Context, id string, event *domain.PatchEve
 		hasUpdates = true
 	}
 
+	if event.Data != nil {
+		s = s.Set("data", event.Data)
+		hasUpdates = true
+	}
+
 	if !hasUpdates {
 		return fmt.Errorf("no fields to update")
 	}
@@ -311,7 +317,7 @@ func (r *EventRepo) Delete(ctx context.Context, id string) error {
 func (r *EventRepo) AdminFilter(ctx context.Context, filter *domain.AdminFilterEvent) ([]*domain.Event, error) {
 	s := r.psql.Select(
 		`"e"."id"`, `"e"."name"`, `"e"."description"`, `"e"."start_time"`, `"e"."end_time"`, `"e"."rank_min"`, `"e"."rank_max"`,
-		`"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`, `"e"."created_at"`, `"e"."updated_at"`,
+		`"e"."price"`, `"e"."max_users"`, `"e"."status"`, `"e"."type"`, `"e"."club_id"`, `"e"."data"`, `"e"."created_at"`, `"e"."updated_at"`,
 		`"c"."id"`, `"c"."name"`, `"c"."address"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
@@ -458,6 +464,11 @@ func (r *EventRepo) AdminPatch(ctx context.Context, id string, event *domain.Adm
 		hasUpdates = true
 	}
 
+	if event.Data != nil {
+		s = s.Set("data", event.Data)
+		hasUpdates = true
+	}
+
 	if !hasUpdates {
 		return fmt.Errorf("no fields to update")
 	}
@@ -493,6 +504,7 @@ func (r *EventRepo) scanEvent(rows pgx.Rows) (*domain.Event, error) {
 
 	var description pgtype.Text
 	var clubID pgtype.Text
+	var data []byte
 	var telegramUsername, avatar, bio, city, padelProfiles pgtype.Text
 	var birthDate pgtype.Date
 	var playingPosition pgtype.Text
@@ -502,7 +514,7 @@ func (r *EventRepo) scanEvent(rows pgx.Rows) (*domain.Event, error) {
 
 	err := rows.Scan(
 		&event.ID, &event.Name, &description, &event.StartTime, &event.EndTime, &event.RankMin, &event.RankMax,
-		&event.Price, &event.MaxUsers, &event.Status, &event.Type, &clubID, &event.CreatedAt, &event.UpdatedAt,
+		&event.Price, &event.MaxUsers, &event.Status, &event.Type, &clubID, &data, &event.CreatedAt, &event.UpdatedAt,
 		&court.ID, &court.Name, &court.Address,
 		&organizer.ID, &organizer.TelegramID, &telegramUsername, &organizer.FirstName, &organizer.LastName, &avatar,
 		&bio, &rank, &city, &birthDate, &playingPosition, &padelProfiles, &isRegistered,
@@ -519,6 +531,10 @@ func (r *EventRepo) scanEvent(rows pgx.Rows) (*domain.Event, error) {
 
 	if clubID.Valid {
 		event.ClubID = &clubID.String
+	}
+
+	if len(data) > 0 {
+		event.Data = json.RawMessage(data)
 	}
 
 	if telegramUsername.Valid {
