@@ -130,3 +130,4 @@ type EventForRegistration struct {
 	Organizer   User        `json:"organizer"`
 	ClubID      *string     `json:"clubId,omitempty"`
 }
+ 

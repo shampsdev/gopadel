@@ -11,10 +11,6 @@ import (
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 )
 
-const (
-	baseURL = "http://localhost:8000/api/v1"
-)
-
 // TestCreateGameAsUser тестирует создание игры обычным пользователем (должна создаться)
 func TestCreateGameAsUser(t *testing.T) {
 	userToken := getUserToken()

@@ -9,6 +9,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const (
+	baseURL = "http://localhost:8000/api/v1"
+)
+
 var (
 	envOnce sync.Once
 )

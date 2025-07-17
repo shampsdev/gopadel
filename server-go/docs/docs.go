@@ -1641,6 +1641,44 @@ const docTemplate = `{
             }
         },
         "/events/{event_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаляет событие с проверкой прав доступа",
+                "tags": [
+                    "events"
+                ],
+                "summary": "Удалить событие",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID события",
+                        "name": "event_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Событие успешно удалено"
+                    },
+                    "400": {
+                        "description": "Некорректный запрос"
+                    },
+                    "403": {
+                        "description": "Недостаточно прав"
+                    },
+                    "404": {
+                        "description": "Событие не найдено"
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера"
+                    }
+                }
+            },
             "patch": {
                 "security": [
                     {

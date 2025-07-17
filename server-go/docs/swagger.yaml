@@ -1607,6 +1607,30 @@ paths:
       tags:
       - events
   /events/{event_id}:
+    delete:
+      description: Удаляет событие с проверкой прав доступа
+      parameters:
+      - description: ID события
+        in: path
+        name: event_id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Событие успешно удалено
+        "400":
+          description: Некорректный запрос
+        "403":
+          description: Недостаточно прав
+        "404":
+          description: Событие не найдено
+        "500":
+          description: Внутренняя ошибка сервера
+      security:
+      - BearerAuth: []
+      summary: Удалить событие
+      tags:
+      - events
     patch:
       consumes:
       - application/json

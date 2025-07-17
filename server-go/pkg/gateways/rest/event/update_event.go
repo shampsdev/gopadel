@@ -50,7 +50,6 @@ func (h *Handler) updateEvent(c *gin.Context) {
 		return
 	}
 
-	// Получаем событие для проверки прав
 	event, err := h.cases.Event.GetEventByID(c, eventID)
 	if err != nil {
 		if err == repo.ErrNotFound {
@@ -61,9 +60,7 @@ func (h *Handler) updateEvent(c *gin.Context) {
 		return
 	}
 
-	// Проверяем права на обновление
 	if event.Organizer.ID != domainUser.ID {
-		// Если не организатор, проверяем является ли админом
 		_, err := h.cases.AdminUser.GetByUserID(c, domainUser.ID)
 		if err != nil {
 			if err == repo.ErrNotFound {
@@ -75,7 +72,6 @@ func (h *Handler) updateEvent(c *gin.Context) {
 		}
 	}
 
-	// Обновляем событие
 	updatedEvent, err := h.cases.Event.Patch(c, eventID, &patchEvent)
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to update event") {
 		return
