@@ -31,6 +31,7 @@ type Config struct {
 	TG struct {
 		BotToken   string `envconfig:"TG_BOT_TOKEN"`
 		WebAppName string `envconfig:"WEBAPP_NAME"`
+		BotUsername string `envconfig:"TG_BOT_USERNAME" default:"gopadel_bot"`
 	}
 	Storage struct {
 		ImagesPath string `envconfig:"STORAGE_IMAGES_PATH" default:"images"`

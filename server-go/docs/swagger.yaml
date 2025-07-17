@@ -578,6 +578,13 @@ definitions:
         example: https://example.com/image.jpg
         type: string
     type: object
+  registration.PaymentResponse:
+    properties:
+      payment_id:
+        type: string
+      payment_url:
+        type: string
+    type: object
   webhook.WebhookEvent:
     properties:
       event:
@@ -1608,27 +1615,27 @@ paths:
       - events
   /events/{event_id}:
     delete:
-      description: Удаляет событие с проверкой прав доступа
+      description: Deletes an event with access rights verification
       parameters:
-      - description: ID события
+      - description: Event ID
         in: path
         name: event_id
         required: true
         type: string
       responses:
         "204":
-          description: Событие успешно удалено
+          description: Event successfully deleted
         "400":
-          description: Некорректный запрос
+          description: Bad request
         "403":
-          description: Недостаточно прав
+          description: Insufficient permissions
         "404":
-          description: Событие не найдено
+          description: Event not found
         "500":
-          description: Внутренняя ошибка сервера
+          description: Internal server error
       security:
       - BearerAuth: []
-      summary: Удалить событие
+      summary: Delete event
       tags:
       - events
     patch:
@@ -1834,6 +1841,151 @@ paths:
       summary: Get all loyalty programs
       tags:
       - loyalties
+  /registrations/{event_id}:
+    post:
+      description: Creates a new registration for an event with PENDING status
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      responses:
+        "201":
+          description: Created registration
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - user already registered or validation failed
+        "404":
+          description: Event not found
+        "500":
+          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Create event registration
+      tags:
+      - registrations
+  /registrations/{event_id}/cancel:
+    post:
+      description: Cancels a registration with PENDING status (before payment)
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Cancelled registration
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - no pending registration or cannot cancel
+        "404":
+          description: Event not found
+        "500":
+          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Cancel event registration before payment
+      tags:
+      - registrations
+  /registrations/{event_id}/cancel-paid:
+    post:
+      description: Cancels a confirmed registration (after payment)
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Cancelled registration
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - no confirmed registration or cannot cancel
+        "404":
+          description: Event not found
+        "500":
+          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Cancel paid event registration
+      tags:
+      - registrations
+  /registrations/{event_id}/payment:
+    post:
+      description: Creates a payment for event registration and returns payment URL
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      responses:
+        "201":
+          description: Payment URL and ID
+          schema:
+            $ref: '#/definitions/registration.PaymentResponse'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - no pending registration found
+        "404":
+          description: Event not found
+        "500":
+          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Create payment for registration
+      tags:
+      - registrations
+  /registrations/{event_id}/reactivate:
+    post:
+      description: Reactivates a cancelled registration if event has available slots
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Reactivated registration
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - no cancelled registration or cannot reactivate
+        "404":
+          description: Event not found
+        "500":
+          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Reactivate cancelled registration
+      tags:
+      - registrations
   /users/filter:
     post:
       consumes:

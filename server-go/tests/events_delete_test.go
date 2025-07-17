@@ -187,13 +187,3 @@ func deleteEventWithToken(t *testing.T, token string, eventID string) *http.Resp
 
 	return resp
 }
-
-// deleteEvent - helper function for resource cleanup
-func deleteEvent(eventID string, token string) {
-	url := fmt.Sprintf("%s/events/%s", baseURL, eventID)
-	req, _ := http.NewRequest("DELETE", url, nil)
-	req.Header.Set("X-API-Token", token)
-	
-	client := &http.Client{Timeout: 10 * time.Second}
-	client.Do(req) // Ignore errors in cleanup
-} 
