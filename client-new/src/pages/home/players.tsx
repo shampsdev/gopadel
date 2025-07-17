@@ -30,13 +30,13 @@ export const Players = () => {
   if (isLoading) return <Preloader />;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 overflow-x-hidden">
       <SearchBar
         value={searchQuery}
         inputHandler={setSearchQuery}
         placeholder={"Поиск игрока"}
       />
-      <div className="flex flex-col gap-4 pb-[100px]">
+      <div className="flex flex-col gap-4 pb-[100px] overflow-x-hidden">
         {filteredUsers?.map((player) => (
           <Link key={player.id} to={`/profile/${player.id}`}>
             <PlayerCard
