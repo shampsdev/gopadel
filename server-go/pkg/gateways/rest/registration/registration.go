@@ -30,4 +30,8 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases, cfg *config.Config) {
 	g.POST("/:event_id/cancel", handler.cancelRegistration)             // отмена до оплаты (CANCELLED_BEFORE_PAYMENT)
 	g.POST("/:event_id/cancel-paid", handler.cancelPaidRegistration)    // отмена после оплаты (CANCELLED_AFTER_PAYMENT)
 	g.POST("/:event_id/reactivate", handler.reactivateRegistration)     // повторная активация
+	
+	// Новые эндпоинты для организаторов игр
+	g.PUT("/:event_id/:user_id/approve", handler.approveRegistration)   // одобрить заявку (PENDING -> CONFIRMED)
+	g.PUT("/:event_id/:user_id/reject", handler.rejectRegistration)     // отклонить заявку (PENDING -> CANCELLED)
 } 

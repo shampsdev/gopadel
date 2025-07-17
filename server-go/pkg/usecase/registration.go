@@ -117,11 +117,8 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 	
 	event := events[0]
 
-	// Валидация с использованием стратегии
-	// if err := r.eventCase.ValidateEventRegistration(ctx, user, event); err != nil {
-	// 	return nil, err
-	// }
-	_ = event // Используем переменную
+	// Получаем стратегию для данного типа события
+	strategy := GetEventStrategy(event.Type)
 
 	// Проверяем существующие регистрации
 	registrationFilter := &domain.FilterRegistration{
@@ -136,60 +133,85 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 
 	// Если есть регистрация, обрабатываем её
 	for _, reg := range existingRegistrations {
-		switch reg.Status {
-		case domain.RegistrationStatusPending:
-			return nil, fmt.Errorf("user already has a pending registration for this event")
-		case domain.RegistrationStatusConfirmed:
-			return nil, fmt.Errorf("user is already registered for this event")
-		case domain.RegistrationStatusCancelledAfterPayment:
-			return nil, fmt.Errorf("user cancelled registration after payment. Use reactivation endpoint")
-		case domain.RegistrationStatusCancelledBeforePayment, domain.RegistrationStatusRefunded:
-			// Можем восстановить регистрацию
-			if err := r.validateAvailableSlots(ctx, eventID); err != nil {
-				return nil, err
+		// Для игр проверяем возможность повторной подачи заявки
+		if event.Type == domain.EventTypeGame {
+			gameStrategy := strategy.(*GameStrategy)
+			if !gameStrategy.CanReapply(reg) {
+				switch reg.Status {
+				case domain.RegistrationStatusPending:
+					return nil, fmt.Errorf("user already has a pending registration for this event")
+				case domain.RegistrationStatusConfirmed:
+					return nil, fmt.Errorf("user is already registered for this event")
+				default:
+					return nil, fmt.Errorf("user cannot reapply for this event")
+				}
 			}
-
-			// Определяем новый статус с использованием стратегии
-			// newStatus := r.eventCase.DetermineRegistrationStatus(ctx, event)
-			newStatus := domain.RegistrationStatusConfirmed // Assuming a default status for reactivation
-			
-			patch := &domain.PatchRegistration{
-				Status: &newStatus,
-			}
-			
-			err := r.registrationRepo.Patch(ctx, reg.UserID, reg.EventID, patch)
+			// Если можно подать заявку повторно, удаляем старую регистрацию
+			err = r.registrationRepo.Delete(ctx, user.ID, eventID)
 			if err != nil {
-				return nil, fmt.Errorf("failed to update registration status: %w", err)
+				return nil, fmt.Errorf("failed to remove old registration: %w", err)
 			}
+			break // Выходим из цикла
+		} else {
+			// Старая логика для турниров и тренировок
+			switch reg.Status {
+			case domain.RegistrationStatusPending:
+				return nil, fmt.Errorf("user already has a pending registration for this event")
+			case domain.RegistrationStatusConfirmed:
+				return nil, fmt.Errorf("user is already registered for this event")
+			case domain.RegistrationStatusCancelledAfterPayment:
+				return nil, fmt.Errorf("user cancelled registration after payment. Use reactivation endpoint")
+			case domain.RegistrationStatusCancelledBeforePayment, domain.RegistrationStatusRefunded:
+				// Можем восстановить регистрацию
+				if err := r.validateAvailableSlots(ctx, eventID); err != nil {
+					return nil, err
+				}
 
-			return r.getRegistrationByID(ctx, reg.UserID, reg.EventID)
-							}
-						}
+				// Определяем новый статус с использованием стратегии
+				newStatus := strategy.DetermineRegistrationStatus(ctx, event)
+				
+				patch := &domain.PatchRegistration{
+					Status: &newStatus,
+				}
+				
+				err := r.registrationRepo.Patch(ctx, reg.UserID, reg.EventID, patch)
+				if err != nil {
+					return nil, fmt.Errorf("failed to update registration status: %w", err)
+				}
+
+				return r.getRegistrationByID(ctx, reg.UserID, reg.EventID)
+			}
+		}
+	}
+
+	// Валидируем регистрацию через стратегию
+	if err := strategy.ValidateRegistration(ctx, user, event); err != nil {
+		return nil, err
+	}
 
 	// Проверяем доступные слоты
 	if err := r.validateAvailableSlots(ctx, eventID); err != nil {
 		return nil, err
 	}
 
-	// Определяем статус регистрации с использованием стратегии
-	// status := r.eventCase.DetermineRegistrationStatus(ctx, event)
-	status := domain.RegistrationStatusPending // Default status
-	_ = event // Используем переменную
+	// Определяем статус регистрации через стратегию
+	status := strategy.DetermineRegistrationStatus(ctx, event)
 
-	// Создаем новую регистрацию
-	createRegistration := &domain.CreateRegistration{
+	// Создаем регистрацию
+	createReg := &domain.CreateRegistration{
 		UserID:  user.ID,
 		EventID: eventID,
 		Status:  status,
 	}
 
-	err = r.registrationRepo.Create(ctx, createRegistration)
+	err = r.registrationRepo.Create(ctx, createReg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create registration: %w", err)
 	}
 
+	// Возвращаем созданную регистрацию
 	return r.getRegistrationByID(ctx, user.ID, eventID)
-		}
+}
 
 // CancelEventRegistration - отмена регистрации на событие
 func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain.User, eventID string) (*domain.Registration, error) {
@@ -233,10 +255,8 @@ func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain
 	}
 
 	// Определяем новый статус с использованием стратегии
-	// newStatus := r.eventCase.HandleRegistrationCancellation(ctx, registration, event, hasPaid)
-	newStatus := domain.RegistrationStatusCancelledAfterPayment // Default status
-	_ = event  // Используем переменную
-	_ = hasPaid // Используем переменную
+	strategy := GetEventStrategy(event.Type)
+	newStatus := strategy.HandleCancellation(ctx, registration, event, hasPaid)
 
 	patch := &domain.PatchRegistration{
 		Status: &newStatus,

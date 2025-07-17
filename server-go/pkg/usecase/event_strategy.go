@@ -173,15 +173,121 @@ func (tr *TrainingEventStrategy) CanDelete(user *domain.User, adminUser *domain.
 	return errors.New("training deletion functionality is not available yet")
 }
 
+// GameStrategy - стратегия для игр
+type GameStrategy struct {
+	BaseEventStrategy
+}
+
+func (s *GameStrategy) DetermineRegistrationStatus(ctx context.Context, event *domain.Event) domain.RegistrationStatus {
+	// Для игр всегда статус PENDING (ожидает решения организатора)
+	return domain.RegistrationStatusPending
+}
+
+func (s *GameStrategy) HandleCancellation(ctx context.Context, registration *domain.Registration, event *domain.Event, hasPaid bool) domain.RegistrationStatus {
+	// Для игр используем новую логику
+	return s.GetCancelStatus(registration)
+}
+
+func (s *GameStrategy) CanCreate(user *domain.User, adminUser *domain.AdminUser) error {
+	// Любой аутентифицированный пользователь может создавать игры
+	if user == nil {
+		return errors.New("user authentication required")
+	}
+	return nil
+}
+
+func (s *GameStrategy) CanDelete(user *domain.User, adminUser *domain.AdminUser, event *domain.Event) error {
+	if user == nil {
+		return errors.New("user authentication required")
+	}
+	
+	// Суперюзер может удалять любые игры
+	if adminUser != nil && adminUser.IsSuperUser {
+		return nil
+	}
+	
+	// Администратор может удалять любые игры
+	if adminUser != nil {
+		return nil
+	}
+	
+	// Обычный пользователь может удалять только свои игры
+	if event.Organizer.ID == user.ID {
+		return nil
+	}
+	
+	return errors.New("insufficient permissions to delete this game")
+}
+
+func (s *GameStrategy) CanRegister(user *domain.User, event *domain.Event) error {
+	return s.ValidateRegistration(context.Background(), user, event)
+}
+
+func (s *GameStrategy) CanCancel(user *domain.User, event *domain.Event, registration *domain.Registration) error {
+	// Участник может отменить заявку в любом статусе кроме уже отмененных
+	if registration.Status == domain.RegistrationStatusCancelled || 
+		registration.Status == domain.RegistrationStatusLeft ||
+		registration.Status == domain.RegistrationStatusCancelledBeforePayment ||
+		registration.Status == domain.RegistrationStatusCancelledAfterPayment ||
+		registration.Status == domain.RegistrationStatusRefunded {
+		return errors.New("registration is already cancelled")
+	}
+	return nil
+}
+
+func (s *GameStrategy) GetCancelStatus(registration *domain.Registration) domain.RegistrationStatus {
+	// Если заявка еще на рассмотрении - статус CANCELLED
+	if registration.Status == domain.RegistrationStatusPending {
+		return domain.RegistrationStatusCancelled
+	}
+	// Если уже подтвержден - статус LEFT
+	if registration.Status == domain.RegistrationStatusConfirmed {
+		return domain.RegistrationStatusLeft
+	}
+	return registration.Status
+}
+
+func (s *GameStrategy) CanReapply(registration *domain.Registration) bool {
+	// Можно подать новую заявку если статус CANCELLED или LEFT
+	return registration.Status == domain.RegistrationStatusCancelled || 
+		registration.Status == domain.RegistrationStatusLeft
+}
+
+func (s *GameStrategy) CanApprove(organizer *domain.User, event *domain.Event, registration *domain.Registration) error {
+	if organizer.ID != event.Organizer.ID {
+		return errors.New("only event organizer can approve registrations")
+	}
+	
+	if registration.Status != domain.RegistrationStatusPending {
+		return errors.New("can only approve pending registrations")
+	}
+	
+	return nil
+}
+
+func (s *GameStrategy) CanReject(organizer *domain.User, event *domain.Event, registration *domain.Registration) error {
+	// Только организатор может отклонять заявки
+	if organizer.ID != event.Organizer.ID {
+		return errors.New("only event organizer can reject registrations")
+	}
+	
+	// Можно отклонять только заявки со статусом PENDING
+	if registration.Status != domain.RegistrationStatusPending {
+		return errors.New("can only reject pending registrations")
+	}
+	
+	return nil
+}
+
 func GetEventStrategy(eventType domain.EventType) EventStrategy {
 	switch eventType {
 	case domain.EventTypeGame:
-		return &GameEventStrategy{}
+		return &GameStrategy{}
 	case domain.EventTypeTournament:
 		return &TournamentEventStrategy{}
 	case domain.EventTypeTraining:
 		return &TrainingEventStrategy{}
 	default:
-		return &TournamentEventStrategy{}
+		return &TournamentEventStrategy{} // По умолчанию используем турнирную стратегию
 	}
 } 

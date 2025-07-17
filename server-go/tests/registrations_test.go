@@ -271,26 +271,6 @@ func createRegistration(t *testing.T, token string, eventID string) *domain.Regi
 	return &registration
 }
 
-func cancelRegistration(t *testing.T, token string, eventID string) *http.Response {
-	url := fmt.Sprintf("%s/registrations/%s/cancel", baseURL, eventID)
-	
-	req, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		t.Fatalf("Error creating POST request: %v", err)
-	}
-	
-	req.Header.Set("X-API-Token", token)
-	req.Header.Set("Content-Type", "application/json")
-	
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Fatalf("Error executing POST request: %v", err)
-	}
-	
-	return resp
-}
-
 func cancelPaidRegistration(t *testing.T, token string, eventID string) *http.Response {
 	url := fmt.Sprintf("%s/registrations/%s/cancel-paid", baseURL, eventID)
 	

@@ -2186,6 +2186,112 @@ const docTemplate = `{
                 }
             }
         },
+        "/registrations/{event_id}/{user_id}/approve": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Approve a pending registration (organizer only)",
+                "tags": [
+                    "registrations"
+                ],
+                "summary": "Approve registration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Event ID",
+                        "name": "event_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Approved registration",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Registration"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - only organizer can approve"
+                    },
+                    "404": {
+                        "description": "Registration not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/registrations/{event_id}/{user_id}/reject": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Reject a pending registration (organizer only)",
+                "tags": [
+                    "registrations"
+                ],
+                "summary": "Reject registration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Event ID",
+                        "name": "event_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rejected registration",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Registration"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - only organizer can reject"
+                    },
+                    "404": {
+                        "description": "Registration not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/users/filter": {
             "post": {
                 "security": [
@@ -3195,14 +3301,27 @@ const docTemplate = `{
                 "CONFIRMED",
                 "CANCELLED_BEFORE_PAYMENT",
                 "CANCELLED_AFTER_PAYMENT",
-                "REFUNDED"
+                "REFUNDED",
+                "CANCELLED",
+                "LEFT"
             ],
+            "x-enum-comments": {
+                "RegistrationStatusCancelled": "заявка отклонена (оргом) или отменена (участником) до подтверждения",
+                "RegistrationStatusCancelledAfterPayment": "не используется в играх (можно удалить, если не нужен)",
+                "RegistrationStatusCancelledBeforePayment": "не используется в играх (можно удалить, если не нужен)",
+                "RegistrationStatusConfirmed": "участник принят в игру",
+                "RegistrationStatusLeft": "участник вышел после подтверждения",
+                "RegistrationStatusPending": "заявка отправлена, ожидает подтверждения",
+                "RegistrationStatusRefunded": "не используется в играх (можно удалить)"
+            },
             "x-enum-varnames": [
                 "RegistrationStatusPending",
                 "RegistrationStatusConfirmed",
                 "RegistrationStatusCancelledBeforePayment",
                 "RegistrationStatusCancelledAfterPayment",
-                "RegistrationStatusRefunded"
+                "RegistrationStatusRefunded",
+                "RegistrationStatusCancelled",
+                "RegistrationStatusLeft"
             ]
         },
         "domain.User": {

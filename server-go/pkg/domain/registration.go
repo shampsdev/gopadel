@@ -7,11 +7,13 @@ import (
 type RegistrationStatus string
 
 const (
-	RegistrationStatusPending                RegistrationStatus = "PENDING"
-	RegistrationStatusConfirmed              RegistrationStatus = "CONFIRMED"
-	RegistrationStatusCancelledBeforePayment RegistrationStatus = "CANCELLED_BEFORE_PAYMENT"
-	RegistrationStatusCancelledAfterPayment  RegistrationStatus = "CANCELLED_AFTER_PAYMENT"
-	RegistrationStatusRefunded               RegistrationStatus = "REFUNDED"
+	RegistrationStatusPending                RegistrationStatus = "PENDING"                  // заявка отправлена, ожидает подтверждения
+	RegistrationStatusConfirmed              RegistrationStatus = "CONFIRMED"                // участник принят в игру
+	RegistrationStatusCancelledBeforePayment RegistrationStatus = "CANCELLED_BEFORE_PAYMENT" // не используется в играх (можно удалить, если не нужен)
+	RegistrationStatusCancelledAfterPayment  RegistrationStatus = "CANCELLED_AFTER_PAYMENT"  // не используется в играх (можно удалить, если не нужен)
+	RegistrationStatusRefunded               RegistrationStatus = "REFUNDED"                 // не используется в играх (можно удалить)
+	RegistrationStatusCancelled              RegistrationStatus = "CANCELLED"                // заявка отклонена (оргом) или отменена (участником) до подтверждения
+	RegistrationStatusLeft                   RegistrationStatus = "LEFT"                     // участник вышел после подтверждения
 )
 
 type Registration struct {
@@ -35,8 +37,6 @@ type RegistrationWithEvent struct {
 	Event     *EventForRegistration `json:"event,omitempty"`
 }
 
-
-
 // RegistrationWithPayments для админки - регистрация с платежами
 type RegistrationWithPayments struct {
 	UserID    string                `json:"userId"`
@@ -48,8 +48,6 @@ type RegistrationWithPayments struct {
 	Event     *EventForRegistration `json:"event,omitempty"`
 	Payments  []*Payment            `json:"payments,omitempty"`
 }
-
-
 
 type CreateRegistration struct {
 	UserID  string             `json:"userId" binding:"required"`
