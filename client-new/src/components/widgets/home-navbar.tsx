@@ -45,12 +45,12 @@ export const HomeNavbar = () => {
   const navigate = useNavigate();
 
   const categories = [
-    {
-      title: "Все",
-      icon: Icons.Ball(),
-      activeIcon: Icons.Ball("#000"),
-      link: "../",
-    },
+    // {
+    //   title: "Все",
+    //   icon: Icons.Ball(),
+    //   activeIcon: Icons.Ball("#000"),
+    //   link: "../",
+    // },
     {
       title: "Турниры",
       icon: Icons.Medal(),

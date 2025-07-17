@@ -11,11 +11,6 @@ import { motion } from "framer-motion";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
 import { Preloader } from "../../components/widgets/preloader";
 
-// Мок-данные для игр
-const mockGames: CompetitionCardProps[] = [];
-
-const mockTrainings: CompetitionCardProps[] = [];
-
 export const Competitions = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -92,8 +87,6 @@ export const Competitions = () => {
     ...transformedTournaments.map((tournament: any) => ({
       ...tournament,
     })),
-    ...mockGames,
-    ...mockTrainings,
   ];
 
   const filteredCompetitions = showOnlyAvailable

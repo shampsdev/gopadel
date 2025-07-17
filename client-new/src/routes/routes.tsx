@@ -1,4 +1,4 @@
-import type { RouteObject } from "react-router";
+import { Navigate, type RouteObject } from "react-router";
 import { ProtectedRoute } from "../components/helpers/protected-route";
 import { About } from "../pages/about/about";
 import { Registration } from "../pages/registration/registration";
@@ -84,7 +84,8 @@ export const routes: RouteObject[] = [
                 children: [
                   {
                     path: "",
-                    element: <Competitions />,
+                    element: <Navigate to="/tournaments" />,
+                    // element: <Competitions />,
                   },
                   {
                     path: "tournaments",
