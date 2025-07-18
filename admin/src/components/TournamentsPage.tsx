@@ -201,6 +201,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     loadWaitlist(tournament.id);
     
     // Заполняем форму данными турнира
+    const tournamentType = (tournament.data?.tournamentType as string) || 'americano';
     setFormData({
       name: tournament.name,
       startTime: convertUtcToLocalDate(tournament.startTime),
@@ -211,20 +212,19 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
       maxUsers: tournament.maxUsers,
       description: tournament.description || '',
       courtId: tournament.court?.id || '',
-      clubId: tournament.clubId,
-      tournamentType: (tournament as any).tournamentType || 'americano',
+      clubId: tournament.clubId || '',
+      tournamentType: tournamentType,
       customTournamentType: '',
       organizerId: tournament.organizer?.id || '',
     });
     
     // Проверяем, нужно ли показывать поле для кастомного типа
-    const tournamentTypeValue = (tournament as any).tournamentType || 'americano';
-    const isCustomType = !tournamentTypes.some(t => t.value === tournamentTypeValue);
+    const isCustomType = !tournamentTypes.some(t => t.value === tournamentType);
     setIsCustomTournamentType(isCustomType);
     if (isCustomType) {
       setFormData(prev => ({
         ...prev,
-        customTournamentType: tournamentTypeValue
+        customTournamentType: tournamentType
       }));
     }
   };
@@ -251,6 +251,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
         clubId: formData.clubId,
         type: 'tournament',
         organizerId: formData.organizerId,
+        data: { tournamentType },
       };
 
       await eventsApi.create(createData);
@@ -284,6 +285,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
         courtId: formData.courtId,
         clubId: formData.clubId,
         organizerId: formData.organizerId,
+        data: { tournamentType },
       };
 
       await eventsApi.patch(id, updateData);
@@ -1012,7 +1014,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                               {tournament.name}
                             </h3>
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
-                              {getTournamentTypeName((tournament as any).tournamentType || 'americano')}
+                              {getTournamentTypeName((tournament.data?.tournamentType as string) || 'americano')}
                             </Badge>
                           </div>
                           
@@ -1033,7 +1035,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
 
                           <div className="flex items-center gap-2 mt-2">
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
-                              {getClubName(tournament.clubId)}
+                              {getClubName(tournament.clubId || '')}
                             </Badge>
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
                               {tournament.price}₽

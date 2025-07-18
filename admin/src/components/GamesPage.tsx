@@ -200,7 +200,7 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
       maxUsers: game.maxUsers,
       description: game.description || '',
       courtId: game.court?.id || '',
-      clubId: game.clubId,
+      clubId: game.clubId || '',
       organizerId: game.organizer?.id || '',
     });
   };
@@ -961,7 +961,7 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
 
                           <div className="flex items-center gap-2 mt-2">
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
-                              {getClubName(game.clubId)}
+                              {getClubName(game.clubId || '')}
                             </Badge>
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
                               {game.price}₽
