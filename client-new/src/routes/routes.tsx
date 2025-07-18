@@ -7,7 +7,6 @@ import { MainLayout } from "../pages/main/layout";
 import { AnimatedOutlet } from "../components/helpers/animated-outlet";
 import { Players } from "../pages/home/players";
 import { Tournaments } from "../pages/home/tournaments";
-import { Competitions } from "../pages/home/competitions";
 import { Tournament } from "../pages/tournament/tournament";
 import { MyProfile } from "../pages/profile/my-profile/my-profile";
 import { TournamentPlayers } from "../pages/tournament/tournament-players";
