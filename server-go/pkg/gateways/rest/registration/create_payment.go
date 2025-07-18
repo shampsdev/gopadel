@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/ginerr"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/middlewares"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
@@ -46,6 +47,12 @@ func (h *Handler) createPayment(c *gin.Context) {
 			return
 		}
 		ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to get event")
+		return
+	}
+
+	// Проверяем, что это не игра (для игр платежи запрещены)
+	if event.Type == domain.EventTypeGame {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "payment is not allowed for games"})
 		return
 	}
 

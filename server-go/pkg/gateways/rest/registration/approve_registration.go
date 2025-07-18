@@ -57,19 +57,18 @@ func (h *Handler) approveRegistration(c *gin.Context) {
 	}
 	registration := registrations[0]
 
+	// Проверяем, что это игра - approve/reject работают только для игр
+	if event.Type != domain.EventTypeGame {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "approve/reject functionality is only available for games"})
+		return
+	}
+
 	// Проверяем права через GameStrategy
-	if event.Type == domain.EventTypeGame {
-		gameStrategy := &usecase.GameStrategy{}
-		err = gameStrategy.CanApprove(organizer, event, registration)
-		if err != nil {
-			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
-			return
-		}
-	} else {
-		if organizer.ID != event.Organizer.ID {
-			c.JSON(http.StatusForbidden, gin.H{"error": "only event organizer can approve registrations"})
-			return
-		}
+	gameStrategy := &usecase.GameEventStrategy{}
+	err = gameStrategy.CanApprove(organizer, event, registration)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
 	}
 
 	confirmStatus := domain.RegistrationStatusConfirmed

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/ginerr"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/middlewares"
 )
@@ -28,22 +27,8 @@ func (h *Handler) createRegistration(c *gin.Context) {
 		return
 	}
 
-	// Получаем пользователя из контекста
 	user := middlewares.MustGetUser(c)
 
-	// Проверяем, не зарегистрирован ли уже пользователь
-	existingRegistrations, err := h.cases.Registration.GetRegistrationsByUserAndEvent(c, user.ID, eventID)
-	if err == nil && len(existingRegistrations) > 0 {
-		// Проверяем есть ли активная регистрация
-		for _, reg := range existingRegistrations {
-			if reg.Status == domain.RegistrationStatusConfirmed || reg.Status == domain.RegistrationStatusPending {
-				c.JSON(http.StatusForbidden, gin.H{"error": "user already has active registration for this event"})
-				return
-			}
-		}
-	}
-
-	// Используем метод RegisterForEvent который включает все проверки и стратегии
 	registration, err := h.cases.Registration.RegisterForEvent(c, user, eventID)
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to create registration") {
 		return

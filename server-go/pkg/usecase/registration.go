@@ -135,7 +135,7 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 	for _, reg := range existingRegistrations {
 		// Для игр проверяем возможность повторной подачи заявки
 		if event.Type == domain.EventTypeGame {
-			gameStrategy := strategy.(*GameStrategy)
+			gameStrategy := strategy.(*GameEventStrategy)
 			if !gameStrategy.CanReapply(reg) {
 				switch reg.Status {
 				case domain.RegistrationStatusPending:
@@ -146,12 +146,25 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 					return nil, fmt.Errorf("user cannot reapply for this event")
 				}
 			}
-			// Если можно подать заявку повторно, удаляем старую регистрацию
-			err = r.registrationRepo.Delete(ctx, user.ID, eventID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to remove old registration: %w", err)
+			
+			// Проверяем доступные слоты перед переактивацией
+			if err := r.validateAvailableSlots(ctx, eventID); err != nil {
+				return nil, err
 			}
-			break // Выходим из цикла
+			
+			// Если можно подать заявку повторно, переиспользуем существующую регистрацию
+			// вместо удаления создаем новую заявку с статусом PENDING
+			newStatus := domain.RegistrationStatusPending
+			patch := &domain.PatchRegistration{
+				Status: &newStatus,
+			}
+			
+			err := r.registrationRepo.Patch(ctx, reg.UserID, reg.EventID, patch)
+			if err != nil {
+				return nil, fmt.Errorf("failed to update registration status: %w", err)
+			}
+			
+			return r.getRegistrationByID(ctx, reg.UserID, reg.EventID)
 		} else {
 			// Старая логика для турниров и тренировок
 			switch reg.Status {
