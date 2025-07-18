@@ -7,6 +7,7 @@ COMMENT ON COLUMN "event"."data" IS 'JSONB поле для хранения до
 -- Добавляем новые статусы регистрации
 ALTER TYPE registrationstatus ADD VALUE 'CANCELLED';
 ALTER TYPE registrationstatus ADD VALUE 'LEFT';
+ALTER TYPE registrationstatus ADD VALUE 'INVITED';
 
 -- Исправляем существующие события с некорректными рангами
 UPDATE "event" 

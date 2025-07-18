@@ -7,7 +7,8 @@ import (
 type RegistrationStatus string
 
 const (
-	RegistrationStatusPending                RegistrationStatus = "PENDING"                  // заявка отправлена, ожидает подтверждения
+	RegistrationStatusPending                RegistrationStatus = "PENDING"                  // заявка отправлена, ожидает подтверждения (используется в турнирах, занимает место)
+	RegistrationStatusInvited                RegistrationStatus = "INVITED"                  // приглашение в игру отправлено, ожидает подтверждения (не занимает место)
 	RegistrationStatusConfirmed              RegistrationStatus = "CONFIRMED"                // участник принят в игру
 	RegistrationStatusCancelledBeforePayment RegistrationStatus = "CANCELLED_BEFORE_PAYMENT" // не используется в играх (можно удалить, если не нужен)
 	RegistrationStatusCancelledAfterPayment  RegistrationStatus = "CANCELLED_AFTER_PAYMENT"  // не используется в играх (можно удалить, если не нужен)

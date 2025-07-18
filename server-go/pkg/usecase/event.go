@@ -73,9 +73,25 @@ func (e *Event) FilterForUser(ctx *Context, filter *domain.FilterEvent) ([]*doma
 
 // Обновляет событие
 func (e *Event) Patch(ctx context.Context, id string, patch *domain.PatchEvent) (*domain.Event, error) {
+	// Проверяем, было ли изменено поле data
+	dataChanged := len(patch.Data) > 0
+	
 	err := e.eventRepo.Patch(ctx, id, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch event: %w", err)
+	}
+	
+	// Если было изменено поле data, автоматически устанавливаем статус completed
+	if dataChanged {
+		completedStatus := domain.EventStatusCompleted
+		statusPatch := &domain.PatchEvent{
+			Status: &completedStatus,
+		}
+		
+		err = e.eventRepo.Patch(ctx, id, statusPatch)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update event status to completed: %w", err)
+		}
 	}
 	
 	filter := &domain.FilterEvent{ID: &id}
@@ -203,9 +219,25 @@ func (e *Event) AdminCreate(ctx *Context, createEvent *domain.CreateEvent) (*dom
 
 // Обновляет событие для админов
 func (e *Event) AdminPatch(ctx *Context, id string, patch *domain.AdminPatchEvent) (*domain.Event, error) {
+	// Проверяем, было ли изменено поле data
+	dataChanged := patch.Data != nil
+
 	err := e.eventRepo.AdminPatch(ctx.Context, id, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch event: %w", err)
+	}
+	
+	// Если было изменено поле data, автоматически устанавливаем статус completed
+	if dataChanged {
+		completedStatus := domain.EventStatusCompleted
+		statusPatch := &domain.AdminPatchEvent{
+			Status: &completedStatus,
+		}
+		
+		err = e.eventRepo.AdminPatch(ctx.Context, id, statusPatch)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update event status to completed: %w", err)
+		}
 	}
 	
 	filter := &domain.AdminFilterEvent{ID: &id}

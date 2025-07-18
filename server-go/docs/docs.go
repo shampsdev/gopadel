@@ -3621,6 +3621,7 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "PENDING",
+                "INVITED",
                 "CONFIRMED",
                 "CANCELLED_BEFORE_PAYMENT",
                 "CANCELLED_AFTER_PAYMENT",
@@ -3633,12 +3634,14 @@ const docTemplate = `{
                 "RegistrationStatusCancelledAfterPayment": "не используется в играх (можно удалить, если не нужен)",
                 "RegistrationStatusCancelledBeforePayment": "не используется в играх (можно удалить, если не нужен)",
                 "RegistrationStatusConfirmed": "участник принят в игру",
+                "RegistrationStatusInvited": "приглашение в игру отправлено, ожидает подтверждения (не занимает место)",
                 "RegistrationStatusLeft": "участник вышел после подтверждения",
-                "RegistrationStatusPending": "заявка отправлена, ожидает подтверждения",
+                "RegistrationStatusPending": "заявка отправлена, ожидает подтверждения (используется в турнирах, занимает место)",
                 "RegistrationStatusRefunded": "не используется в играх (можно удалить)"
             },
             "x-enum-varnames": [
                 "RegistrationStatusPending",
+                "RegistrationStatusInvited",
                 "RegistrationStatusConfirmed",
                 "RegistrationStatusCancelledBeforePayment",
                 "RegistrationStatusCancelledAfterPayment",

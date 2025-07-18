@@ -15,6 +15,9 @@ type EventStrategy interface {
 	// DetermineRegistrationStatus определяет статус регистрации при создании
 	DetermineRegistrationStatus(ctx context.Context, event *domain.Event) domain.RegistrationStatus
 	
+	// DetermineRegistrationStatusForUser определяет статус регистрации с учетом пользователя
+	DetermineRegistrationStatusForUser(ctx context.Context, event *domain.Event, user *domain.User) domain.RegistrationStatus
+	
 	// HandleCancellation обрабатывает отмену регистрации
 	HandleCancellation(ctx context.Context, registration *domain.Registration, event *domain.Event, hasPaid bool) domain.RegistrationStatus
 	
@@ -53,8 +56,19 @@ type GameEventStrategy struct {
 }
 
 func (g *GameEventStrategy) DetermineRegistrationStatus(ctx context.Context, event *domain.Event) domain.RegistrationStatus {
-	// Для игр всегда PENDING - ожидает решения организатора
-	return domain.RegistrationStatusPending
+	// Эта функция будет переопределена в RegisterForEvent для проверки организатора
+	// Для игр по умолчанию INVITED - приглашение, которое не занимает место до подтверждения
+	return domain.RegistrationStatusInvited
+}
+
+// DetermineRegistrationStatusForUser определяет статус регистрации с учетом пользователя
+func (g *GameEventStrategy) DetermineRegistrationStatusForUser(ctx context.Context, event *domain.Event, user *domain.User) domain.RegistrationStatus {
+	// Если пользователь - организатор события, автоматически подтверждаем
+	if user.ID == event.Organizer.ID {
+		return domain.RegistrationStatusConfirmed
+	}
+	// Для остальных участников - статус приглашения
+	return domain.RegistrationStatusInvited
 }
 
 func (g *GameEventStrategy) HandleCancellation(ctx context.Context, registration *domain.Registration, event *domain.Event, hasPaid bool) domain.RegistrationStatus {
@@ -110,8 +124,8 @@ func (g *GameEventStrategy) CanCancel(user *domain.User, event *domain.Event, re
 }
 
 func (g *GameEventStrategy) GetCancelStatus(registration *domain.Registration) domain.RegistrationStatus {
-	// Если заявка еще на рассмотрении - статус CANCELLED
-	if registration.Status == domain.RegistrationStatusPending {
+	// Если заявка еще на рассмотрении (PENDING для турниров, INVITED для игр) - статус CANCELLED
+	if registration.Status == domain.RegistrationStatusPending || registration.Status == domain.RegistrationStatusInvited {
 		return domain.RegistrationStatusCancelled
 	}
 	// Если уже подтвержден - статус LEFT
@@ -132,22 +146,20 @@ func (g *GameEventStrategy) CanApprove(organizer *domain.User, event *domain.Eve
 		return errors.New("only event organizer can approve registrations")
 	}
 	
-	if registration.Status != domain.RegistrationStatusPending {
-		return errors.New("can only approve pending registrations")
+	if registration.Status != domain.RegistrationStatusInvited {
+		return errors.New("can only approve invited registrations")
 	}
 	
 	return nil
 }
 
 func (g *GameEventStrategy) CanReject(organizer *domain.User, event *domain.Event, registration *domain.Registration) error {
-	// Только организатор может отклонять заявки
 	if organizer.ID != event.Organizer.ID {
 		return errors.New("only event organizer can reject registrations")
 	}
 	
-	// Можно отклонять только заявки со статусом PENDING
-	if registration.Status != domain.RegistrationStatusPending {
-		return errors.New("can only reject pending registrations")
+	if registration.Status != domain.RegistrationStatusInvited {
+		return errors.New("can only reject invited registrations")
 	}
 	
 	return nil
@@ -159,10 +171,18 @@ type TournamentEventStrategy struct {
 }
 
 func (t *TournamentEventStrategy) DetermineRegistrationStatus(ctx context.Context, event *domain.Event) domain.RegistrationStatus {
-	// Для турниров: бесплатные -> CONFIRMED, платные -> PENDING
-	if event.Price == 0 {
+	// Эта функция будет переопределена в RegisterForEvent для проверки организатора
+	// Для турниров по умолчанию PENDING - ожидает оплаты и занимает место
+	return domain.RegistrationStatusPending
+}
+
+// DetermineRegistrationStatusForUser определяет статус регистрации с учетом пользователя
+func (t *TournamentEventStrategy) DetermineRegistrationStatusForUser(ctx context.Context, event *domain.Event, user *domain.User) domain.RegistrationStatus {
+	// Если пользователь - организатор события, автоматически подтверждаем
+	if user.ID == event.Organizer.ID {
 		return domain.RegistrationStatusConfirmed
 	}
+	// Для остальных участников - статус ожидания оплаты
 	return domain.RegistrationStatusPending
 }
 
@@ -214,6 +234,11 @@ func (tr *TrainingEventStrategy) ValidateRegistration(ctx context.Context, user 
 }
 
 func (tr *TrainingEventStrategy) DetermineRegistrationStatus(ctx context.Context, event *domain.Event) domain.RegistrationStatus {
+	// Этот метод не должен вызываться, так как ValidateRegistration вернет ошибку
+	return domain.RegistrationStatusPending
+}
+
+func (tr *TrainingEventStrategy) DetermineRegistrationStatusForUser(ctx context.Context, event *domain.Event, user *domain.User) domain.RegistrationStatus {
 	// Этот метод не должен вызываться, так как ValidateRegistration вернет ошибку
 	return domain.RegistrationStatusPending
 }
