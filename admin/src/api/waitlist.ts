@@ -20,9 +20,15 @@ export interface WaitlistUser {
 }
 
 export const waitlistApi = {
-  // Получить список ожидания турнира
+  // Получить список ожидания события (админский API)
+  getEventWaitlist: async (eventId: string): Promise<WaitlistUser[]> => {
+    const response = await api.get(`/admin/events/${eventId}/waitlist`);
+    return response.data;
+  },
+  
+  // Получить список ожидания турнира (оставляем для совместимости)
   getTournamentWaitlist: async (tournamentId: string): Promise<WaitlistUser[]> => {
-    const response = await api.get(`/admin/waitlist/tournament/${tournamentId}`);
+    const response = await api.get(`/admin/events/${tournamentId}/waitlist`);
     return response.data;
   },
 }; 

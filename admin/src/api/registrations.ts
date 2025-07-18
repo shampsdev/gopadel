@@ -10,23 +10,25 @@ export interface User {
   city: string;
 }
 
-export interface Tournament {
+export interface Event {
   id: string;
   name: string;
   startTime: string;
-  endTime: string;
+  endTime?: string;
   price: number;
   rankMin: number;
   rankMax: number;
   maxUsers: number;
-  description: string;
+  description?: string;
+  type: 'game' | 'tournament' | 'training';
   court: {
     id: string;
     name: string;
     address: string;
   };
-  tournamentType: string;
-  organizator: User;
+  organizer: User;
+  clubId?: string;
+  data?: Record<string, unknown>;
 }
 
 export type RegistrationStatus = 'PENDING' | 'ACTIVE' | 'CANCELED' | 'CANCELED_BY_USER';
@@ -34,7 +36,8 @@ export type RegistrationStatus = 'PENDING' | 'ACTIVE' | 'CANCELED' | 'CANCELED_B
 export interface RegistrationWithPayments {
   id: string;
   userId: string;
-  tournamentId: string;
+  eventId: string;
+  tournamentId?: string; // Обратная совместимость
   date: string;
   status: RegistrationStatus;
   user?: {
@@ -48,6 +51,7 @@ export interface RegistrationWithPayments {
     city?: string;
     isRegistered: boolean;
   };
+  event?: Event;
   tournament?: {
     id: string;
     name: string;
@@ -91,12 +95,22 @@ export interface Payment {
 export interface AdminFilterRegistration {
   id?: string;
   userId?: string;
-  tournamentId?: string;
+  eventId?: string;
+  tournamentId?: string; // Обратная совместимость
   status?: RegistrationStatus;
   userTelegramId?: number;
   userTelegramUsername?: string;
   userFirstName?: string;
-  tournamentName?: string;
+  eventName?: string;
+  tournamentName?: string; // Обратная совместимость
+}
+
+export interface EventOption {
+  id: string;
+  name: string;
+  type: 'game' | 'tournament' | 'training';
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface TournamentOption {
@@ -146,9 +160,25 @@ export const registrationsApi = {
     return response.data;
   },
 
+  getEventOptions: async (): Promise<EventOption[]> => {
+    const response = await api.post<Event[]>('/admin/events/filter', {});
+    return response.data.map((event) => ({
+      id: event.id,
+      name: event.name,
+      type: event.type,
+      startTime: event.startTime,
+      endTime: event.endTime,
+    }));
+  },
+
   getTournamentOptions: async (): Promise<TournamentOption[]> => {
-    const response = await api.get<TournamentOption[]>('/admin/registrations/tournaments');
-    return response.data;
+    const response = await api.post<Event[]>('/admin/events/filter', { type: 'tournament' });
+    return response.data.map((event) => ({
+      id: event.id,
+      name: event.name,
+      startTime: event.startTime,
+      endTime: event.endTime,
+    }));
   },
 
   getUserOptions: async (telegramUsername: string): Promise<UserOption[]> => {

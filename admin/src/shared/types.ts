@@ -4,6 +4,25 @@ export interface Court {
   address: string
 }
 
+export interface Event {
+  id: string
+  name: string
+  startTime: string
+  endTime?: string
+  price: number
+  courtId: string
+  type: 'game' | 'tournament' | 'training'
+  rankMin: number
+  rankMax: number
+  maxUsers: number
+  description?: string
+  organizerId: string
+  clubId?: string
+  status: 'registration' | 'full' | 'completed' | 'cancelled'
+  data?: Record<string, unknown>
+}
+
+// Обратная совместимость
 export interface Tournament {
   id?: number
   name: string
@@ -64,7 +83,8 @@ export enum RegistrationStatus {
 export interface Participant {
   id: string
   user_id: string
-  tournament_id: string
+  event_id: string
+  tournament_id?: string // Обратная совместимость
   date: string | undefined
   status: string
   user: User
@@ -74,7 +94,8 @@ export interface Participant {
 export interface WaitlistEntry {
   id: number
   user_id: string
-  tournament_id: string
+  event_id: string
+  tournament_id?: string // Обратная совместимость
   date: string
   user: User
 }

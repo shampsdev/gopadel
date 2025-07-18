@@ -9,7 +9,7 @@ import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Plus, Edit, Trash2, Save, X, Trophy, Calendar, MapPin, UserCheck, Clock, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Gamepad2, Calendar, MapPin, UserCheck, Clock, Users } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { ru } from 'date-fns/locale/ru';
 import "react-datepicker/dist/react-datepicker.css";
@@ -27,20 +27,19 @@ import { ratingLevels, getRatingRangeDescription } from '../utils/ratingUtils';
 // Регистрируем русскую локаль для DatePicker
 registerLocale('ru', ru);
 
-interface TournamentsPageProps {
+interface GamesPageProps {
   onNavigateToRegistrations?: (eventId: string, eventName: string) => void;
 }
 
-export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRegistrations }) => {
-  const [tournaments, setTournaments] = useState<Event[]>([]);
+export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations }) => {
+  const [games, setGames] = useState<Event[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [courts, setCourts] = useState<Court[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [isCustomTournamentType, setIsCustomTournamentType] = useState(false);
-  const [selectedTournament, setSelectedTournament] = useState<Event | null>(null);
+  const [selectedGame, setSelectedGame] = useState<Event | null>(null);
   const [registrations, setRegistrations] = useState<RegistrationWithPayments[]>([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
   const [waitlist, setWaitlist] = useState<WaitlistUser[]>([]);
@@ -61,8 +60,6 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     description: '',
     courtId: '',
     clubId: '',
-    tournamentType: 'americano',
-    customTournamentType: '',
     organizerId: '',
   });
 
@@ -71,14 +68,6 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
   
   // Проверяем права доступа
   const canEdit = user?.is_superuser || user?.is_active || false;
-
-  // Предустановленные типы турниров
-  const tournamentTypes = [
-    { value: 'americano', label: 'Американо' },
-    { value: 'mexicano', label: 'Мексиканка' },
-    { value: 'training', label: 'Тренировка' },
-    { value: 'custom', label: 'Ввести вручную' }
-  ];
 
   const convertLocalDateToUtc = (localDate: Date): string => {
     if (!localDate) return '';
@@ -98,7 +87,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     setLoading(true);
     try {
       await Promise.all([
-        loadTournaments(),
+        loadGames(),
         loadClubs(),
         loadCourts(),
         loadAdmins(),
@@ -111,13 +100,13 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     }
   };
 
-  const loadTournaments = async () => {
+  const loadGames = async () => {
     try {
-      const data = await eventsApi.filter({ type: 'tournament' });
-      setTournaments(data);
+      const data = await eventsApi.filter({ type: 'game' });
+      setGames(data);
     } catch (error: unknown) {
-      toast.error('Ошибка при загрузке турниров');
-      console.error('Error loading tournaments:', error);
+      toast.error('Ошибка при загрузке игр');
+      console.error('Error loading games:', error);
     }
   };
 
@@ -194,45 +183,30 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     }
   };
 
-  const handleTournamentSelect = (tournament: Event) => {
-    setSelectedTournament(tournament);
-    setEditingId(tournament.id);
-    loadRegistrations(tournament.id);
-    loadWaitlist(tournament.id);
+  const handleGameSelect = (game: Event) => {
+    setSelectedGame(game);
+    setEditingId(game.id);
+    loadRegistrations(game.id);
+    loadWaitlist(game.id);
     
-    // Заполняем форму данными турнира
+    // Заполняем форму данными игры
     setFormData({
-      name: tournament.name,
-      startTime: convertUtcToLocalDate(tournament.startTime),
-      endTime: tournament.endTime ? convertUtcToLocalDate(tournament.endTime) : null,
-      price: tournament.price,
-      rankMin: tournament.rankMin,
-      rankMax: tournament.rankMax,
-      maxUsers: tournament.maxUsers,
-      description: tournament.description || '',
-      courtId: tournament.court?.id || '',
-      clubId: tournament.clubId,
-      tournamentType: (tournament as any).tournamentType || 'americano',
-      customTournamentType: '',
-      organizerId: tournament.organizer?.id || '',
+      name: game.name,
+      startTime: convertUtcToLocalDate(game.startTime),
+      endTime: game.endTime ? convertUtcToLocalDate(game.endTime) : null,
+      price: game.price,
+      rankMin: game.rankMin,
+      rankMax: game.rankMax,
+      maxUsers: game.maxUsers,
+      description: game.description || '',
+      courtId: game.court?.id || '',
+      clubId: game.clubId,
+      organizerId: game.organizer?.id || '',
     });
-    
-    // Проверяем, нужно ли показывать поле для кастомного типа
-    const tournamentTypeValue = (tournament as any).tournamentType || 'americano';
-    const isCustomType = !tournamentTypes.some(t => t.value === tournamentTypeValue);
-    setIsCustomTournamentType(isCustomType);
-    if (isCustomType) {
-      setFormData(prev => ({
-        ...prev,
-        customTournamentType: tournamentTypeValue
-      }));
-    }
   };
 
   const handleCreate = async () => {
     try {
-      const tournamentType = isCustomTournamentType ? formData.customTournamentType : formData.tournamentType;
-      
       if (!formData.startTime) {
         toast.error('Время начала обязательно');
         return;
@@ -249,24 +223,22 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
         description: formData.description || undefined,
         courtId: formData.courtId,
         clubId: formData.clubId,
-        type: 'tournament',
+        type: 'game',
         organizerId: formData.organizerId,
       };
 
       await eventsApi.create(createData);
-      toast.success('Турнир создан');
+      toast.success('Игра создана');
       
-      await loadTournaments();
+      await loadGames();
     } catch (error: unknown) {
-      toast.error('Ошибка при создании турнира');
-      console.error('Error creating tournament:', error);
+      toast.error('Ошибка при создании игры');
+      console.error('Error creating game:', error);
     }
   };
 
   const handleUpdate = async (id: string) => {
     try {
-      const tournamentType = isCustomTournamentType ? formData.customTournamentType : formData.tournamentType;
-      
       if (!formData.startTime) {
         toast.error('Время начала обязательно');
         return;
@@ -287,39 +259,39 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
       };
 
       await eventsApi.patch(id, updateData);
-      toast.success('Турнир обновлен');
+      toast.success('Игра обновлена');
       
-      await loadTournaments();
+      await loadGames();
     } catch (error: unknown) {
-      toast.error('Ошибка при обновлении турнира');
-      console.error('Error updating tournament:', error);
+      toast.error('Ошибка при обновлении игры');
+      console.error('Error updating game:', error);
     }
   };
 
-  const handleDelete = async (tournament: Event) => {
-    if (!window.confirm(`Вы уверены, что хотите удалить турнир "${tournament.name}"?`)) {
+  const handleDelete = async (game: Event) => {
+    if (!window.confirm(`Вы уверены, что хотите удалить игру "${game.name}"?`)) {
       return;
     }
 
     try {
-      await eventsApi.delete(tournament.id);
-      toast.success('Турнир удален');
-      await loadTournaments();
+      await eventsApi.delete(game.id);
+      toast.success('Игра удалена');
+      await loadGames();
       
-      // Если удаляем текущий редактируемый турнир, сбрасываем форму
-      if (editingId === tournament.id) {
+      // Если удаляем текущую редактируемую игру, сбрасываем форму
+      if (editingId === game.id) {
         resetForm();
       }
     } catch (error: unknown) {
-      toast.error('Ошибка при удалении турнира');
-      console.error('Error deleting tournament:', error);
+      toast.error('Ошибка при удалении игры');
+      console.error('Error deleting game:', error);
     }
   };
 
   const startCreate = () => {
     setIsCreating(true);
     setEditingId(null);
-    setSelectedTournament(null);
+    setSelectedGame(null);
     setRegistrations([]);
     setWaitlist([]);
     setFormData({
@@ -333,17 +305,14 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
       description: '',
       courtId: '',
       clubId: '',
-      tournamentType: 'americano',
-      customTournamentType: '',
       organizerId: '',
     });
-    setIsCustomTournamentType(false);
   };
 
   const resetForm = () => {
     setIsCreating(false);
     setEditingId(null);
-    setSelectedTournament(null);
+    setSelectedGame(null);
     setRegistrations([]);
     setWaitlist([]);
     setFormData({
@@ -357,20 +326,12 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
       description: '',
       courtId: '',
       clubId: '',
-      tournamentType: 'americano',
-      customTournamentType: '',
       organizerId: '',
     });
-    setIsCustomTournamentType(false);
   };
 
   const handleInputChange = (field: string, value: string | number | Date | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleTournamentTypeChange = (value: string) => {
-    setFormData(prev => ({ ...prev, tournamentType: value }));
-    setIsCustomTournamentType(value === 'custom');
   };
 
   const handleRankChange = (field: 'rankMin' | 'rankMax', levelIndex: number) => {
@@ -415,23 +376,21 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
   };
 
   const getClubName = (clubId: string) => {
+    if (!clubId) return '';
     const club = clubs.find(c => c.id === clubId);
     return club ? club.name : clubId;
   };
 
   const getCourtName = (courtId: string) => {
+    if (!courtId) return '';
     const court = courts.find(c => c.id === courtId);
     return court ? court.name : courtId;
   };
 
   const getAdminName = (userId: string) => {
+    if (!userId) return '';
     const admin = admins.find(a => a.user_id === userId);
     return admin ? `${admin.user?.firstName} ${admin.user?.lastName}` : userId;
-  };
-
-  const getTournamentTypeName = (type: string) => {
-    const tournamentType = tournamentTypes.find(t => t.value === type);
-    return tournamentType ? tournamentType.label : type;
   };
 
   const getSelectedMinRatingLevel = () => {
@@ -444,10 +403,10 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     return level ? `${level.label} (${level.min} - ${level.max})` : `${formData.rankMax}`;
   };
 
-  const filteredTournaments = tournaments.filter(tournament => {
-    const nameMatch = !filters.name || tournament.name.toLowerCase().includes(filters.name.toLowerCase());
-    const clubMatch = !filters.clubId || tournament.clubId === filters.clubId;
-    const organizatorMatch = !filters.organizerId || tournament.organizer?.id === filters.organizerId;
+  const filteredGames = games.filter(game => {
+    const nameMatch = !filters.name || game.name.toLowerCase().includes(filters.name.toLowerCase());
+    const clubMatch = !filters.clubId || game.clubId === filters.clubId;
+    const organizatorMatch = !filters.organizerId || game.organizer?.id === filters.organizerId;
     
     return nameMatch && clubMatch && organizatorMatch;
   });
@@ -470,7 +429,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader className="pb-4">
             <CardTitle className="text-white flex items-center justify-between text-lg">
-              {isCreating ? 'Создать турнир' : editingId ? `Редактировать: ${selectedTournament?.name}` : 'Форма управления'}
+              {isCreating ? 'Создать игру' : editingId ? `Редактировать: ${selectedGame?.name}` : 'Форма управления'}
               {(isCreating || editingId) && (
                 <Button
                   variant="outline"
@@ -490,13 +449,13 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                   <TabsTrigger value="edit" className="data-[state=active]:bg-zinc-700 data-[state=active]:text-white">Редактирование</TabsTrigger>
                   <TabsTrigger 
                     value="participants" 
-                    className={`data-[state=active]:bg-zinc-700 data-[state=active]:text-white ${!selectedTournament ? 'opacity-50 pointer-events-none' : ''}`}
+                    className={`data-[state=active]:bg-zinc-700 data-[state=active]:text-white ${!selectedGame ? 'opacity-50 pointer-events-none' : ''}`}
                   >
-                    Участники ({registrations.filter(r => r.status === 'ACTIVE' || r.status === 'PENDING').length}/{selectedTournament?.maxUsers})
+                    Участники ({registrations.filter(r => r.status === 'ACTIVE' || r.status === 'PENDING').length}/{selectedGame?.maxUsers})
                   </TabsTrigger>
                   <TabsTrigger 
                     value="waiting" 
-                    className={`data-[state=active]:bg-zinc-700 data-[state=active]:text-white ${!selectedTournament ? 'opacity-50 pointer-events-none' : ''}`}
+                    className={`data-[state=active]:bg-zinc-700 data-[state=active]:text-white ${!selectedGame ? 'opacity-50 pointer-events-none' : ''}`}
                   >
                     Список ожидания ({waitlist.length})
                   </TabsTrigger>
@@ -510,7 +469,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
                         className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 mt-1"
-                        placeholder="Например: Турнир выходного дня"
+                        placeholder="Например: Игра в четверг"
                         required
                       />
                     </div>
@@ -617,37 +576,6 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                       </div>
                     </div>
 
-                    <div>
-                      <Label className="text-zinc-300 text-sm font-medium">Тип турнира</Label>
-                      <Select value={formData.tournamentType} onValueChange={handleTournamentTypeChange}>
-                        <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
-                          <SelectValue placeholder="Выберите тип турнира">
-                            {getTournamentTypeName(formData.tournamentType)}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                          {tournamentTypes.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {isCustomTournamentType && (
-                      <div>
-                        <Label className="text-zinc-300 text-sm font-medium">Введите тип турнира</Label>
-                        <Input
-                          value={formData.customTournamentType}
-                          onChange={(e) => handleInputChange('customTournamentType', e.target.value)}
-                          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 mt-1"
-                          placeholder="Например: Круговая система"
-                          required
-                        />
-                      </div>
-                    )}
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <Label className="text-zinc-300 text-sm font-medium">Клуб</Label>
@@ -671,7 +599,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                         <Select value={formData.courtId} onValueChange={(value) => handleInputChange('courtId', value)}>
                           <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
                             <SelectValue placeholder="Выберите корт">
-                              {getCourtName(formData.courtId) || 'Выберите корт'}
+                              {getCourtName(formData.courtId)}
                             </SelectValue>
                           </SelectTrigger>
                           <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
@@ -709,7 +637,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                         value={formData.description}
                         onChange={(e) => handleInputChange('description', e.target.value)}
                         className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 mt-1 resize-none"
-                        placeholder="Дополнительная информация о турнире"
+                        placeholder="Дополнительная информация об игре"
                         rows={3}
                       />
                     </div>
@@ -894,26 +822,26 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
               </Tabs>
             ) : (
               <div className="text-center py-8">
-                <Trophy className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
-                <p className="text-zinc-400 mb-4">Выберите турнир для редактирования или создайте новый</p>
+                <Gamepad2 className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
+                <p className="text-zinc-400 mb-4">Выберите игру для редактирования или создайте новую</p>
                 <Button
                   onClick={startCreate}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                   disabled={!canEdit}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Создать турнир
+                  Создать игру
                 </Button>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Список турниров */}
+        {/* Список игр */}
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader className="pb-4">
             <CardTitle className="text-white flex items-center justify-between text-lg">
-              <span>Турниры ({filteredTournaments.length})</span>
+              <span>Игры ({filteredGames.length})</span>
               {canEdit && (
                 <Button
                   size="sm"
@@ -936,7 +864,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                     value={filters.name}
                     onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value }))}
                     className="bg-zinc-700 border-zinc-600 text-white placeholder:text-zinc-500 mt-1"
-                    placeholder="Введите название турнира"
+                    placeholder="Введите название игры"
                   />
                 </div>
                 <div>
@@ -978,68 +906,68 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
               </div>
             </div>
             
-            {filteredTournaments.length === 0 ? (
+            {filteredGames.length === 0 ? (
               <div className="text-center py-8">
                 <Calendar className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
-                <p className="text-zinc-400 mb-4">Турниры не найдены</p>
+                <p className="text-zinc-400 mb-4">Игры не найдены</p>
                 {canEdit && (
                   <Button
                     onClick={startCreate}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Создать первый турнир
+                    Создать первую игру
                   </Button>
                 )}
               </div>
             ) : (
               <ScrollArea className="h-[600px] pr-4">
                 <div className="space-y-3">
-                  {filteredTournaments.map((tournament) => (
+                  {filteredGames.map((game) => (
                     <div
-                      key={tournament.id}
+                      key={game.id}
                       className={`p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
-                        editingId === tournament.id
+                        editingId === game.id
                           ? 'bg-green-900/30 border-green-600' 
                           : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-750 hover:border-zinc-600'
                       }`}
-                      onClick={() => handleTournamentSelect(tournament)}
+                      onClick={() => handleGameSelect(game)}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-medium text-white text-sm md:text-base line-clamp-1">
-                              {tournament.name}
+                              {game.name}
                             </h3>
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
-                              {getTournamentTypeName((tournament as any).tournamentType || 'americano')}
+                              Игра
                             </Badge>
                           </div>
                           
                           <div className="flex items-center gap-2 mb-2">
                             <div className="flex items-center gap-1 text-zinc-400 text-xs">
                               <Calendar className="h-3 w-3" />
-                              <span>{formatDateTime(tournament.startTime)}</span>
+                              <span>{formatDateTime(game.startTime)}</span>
                             </div>
                             <div className="flex items-center gap-1 text-zinc-400 text-xs">
                               <MapPin className="h-3 w-3" />
-                              <span>{getCourtName(tournament.court?.id || '') || 'Корт не указан'}</span>
+                              <span>{getCourtName(game.court?.id || '') || 'Корт не указан'}</span>
                             </div>
                           </div>
 
-                          {tournament.description && (
-                            <p className="text-zinc-400 text-xs md:text-sm line-clamp-2 md:line-clamp-3 mt-2">{tournament.description}</p>
+                          {game.description && (
+                            <p className="text-zinc-400 text-xs md:text-sm line-clamp-2 md:line-clamp-3 mt-2">{game.description}</p>
                           )}
 
                           <div className="flex items-center gap-2 mt-2">
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
-                              {getClubName(tournament.clubId)}
+                              {getClubName(game.clubId)}
                             </Badge>
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
-                              {tournament.price}₽
+                              {game.price}₽
                             </Badge>
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
-                              {getRatingRangeDescription(tournament.rankMin, tournament.rankMax)}
+                              {getRatingRangeDescription(game.rankMin, game.rankMax)}
                             </Badge>
                           </div>
                         </div>
@@ -1051,7 +979,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                             onClick={(e) => {
                               e.stopPropagation();
                               if (onNavigateToRegistrations) {
-                                onNavigateToRegistrations(tournament.id, tournament.name);
+                                onNavigateToRegistrations(game.id, game.name);
                               }
                             }}
                             className="bg-purple-600 border-purple-500 hover:bg-purple-700 text-white h-8 px-2"
@@ -1066,7 +994,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                                 variant="outline"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleTournamentSelect(tournament);
+                                  handleGameSelect(game);
                                 }}
                                 className="bg-blue-600 border-blue-500 hover:bg-blue-700 text-white h-8 px-2"
                               >
@@ -1078,7 +1006,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                                 variant="outline"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDelete(tournament);
+                                  handleDelete(game);
                                 }}
                                 className="bg-red-600 border-red-500 hover:bg-red-700 text-white h-8 w-8 p-0"
                               >

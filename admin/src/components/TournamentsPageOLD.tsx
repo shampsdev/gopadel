@@ -15,7 +15,7 @@ import { ru } from 'date-fns/locale/ru';
 import "react-datepicker/dist/react-datepicker.css";
 import { useToastContext } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
-import { eventsApi, type Event, type CreateEvent, type AdminPatchEvent } from '../api/events';
+import { tournamentsApi, type Tournament, type CreateTournament, type AdminPatchTournament } from '../api/tournaments';
 import { clubsApi, type Club } from '../api/clubs';
 import { courtsApi, type Court } from '../api/courts';
 import { adminsApi } from '../api/admins';
@@ -28,11 +28,11 @@ import { ratingLevels, getRatingRangeDescription } from '../utils/ratingUtils';
 registerLocale('ru', ru);
 
 interface TournamentsPageProps {
-  onNavigateToRegistrations?: (eventId: string, eventName: string) => void;
+  onNavigateToRegistrations?: (tournamentId: string, tournamentName: string) => void;
 }
 
 export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRegistrations }) => {
-  const [tournaments, setTournaments] = useState<Event[]>([]);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [courts, setCourts] = useState<Court[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
@@ -40,7 +40,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isCustomTournamentType, setIsCustomTournamentType] = useState(false);
-  const [selectedTournament, setSelectedTournament] = useState<Event | null>(null);
+  const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
   const [registrations, setRegistrations] = useState<RegistrationWithPayments[]>([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
   const [waitlist, setWaitlist] = useState<WaitlistUser[]>([]);
@@ -48,7 +48,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
   const [filters, setFilters] = useState({
     name: '',
     clubId: '',
-    organizerId: '',
+    organizatorId: '',
   });
   const [formData, setFormData] = useState({
     name: '',
@@ -61,9 +61,9 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     description: '',
     courtId: '',
     clubId: '',
-    tournamentType: 'americano',
+    tournamentType: 'tournament',
     customTournamentType: '',
-    organizerId: '',
+    organizatorId: '',
   });
 
   const toast = useToastContext();
@@ -87,7 +87,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
 
   const convertUtcToLocalDate = (utcDateTime: string): Date | null => {
     if (!utcDateTime) return null;
-    return new Date(utcDateTime);
+        return new Date(utcDateTime);
   };
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
 
   const loadTournaments = async () => {
     try {
-      const data = await eventsApi.filter({ type: 'tournament' });
+      const data = await tournamentsApi.getAll();
       setTournaments(data);
     } catch (error: unknown) {
       toast.error('Ошибка при загрузке турниров');
@@ -149,10 +149,10 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     }
   };
 
-  const loadRegistrations = async (eventId: string) => {
+  const loadRegistrations = async (tournamentId: string) => {
     setLoadingRegistrations(true);
     try {
-      const data = await registrationsApi.filter({ eventId });
+      const data = await registrationsApi.filter({ tournamentId });
       setRegistrations(data);
     } catch (error: unknown) {
       toast.error('Ошибка при загрузке регистраций');
@@ -162,10 +162,10 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     }
   };
 
-  const loadWaitlist = async (eventId: string) => {
+  const loadWaitlist = async (tournamentId: string) => {
     setLoadingWaitlist(true);
     try {
-      const data = await waitlistApi.getEventWaitlist(eventId);
+      const data = await waitlistApi.getTournamentWaitlist(tournamentId);
       setWaitlist(data);
     } catch (error: unknown) {
       toast.error('Ошибка при загрузке списка ожидания');
@@ -194,7 +194,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     }
   };
 
-  const handleTournamentSelect = (tournament: Event) => {
+  const handleTournamentSelect = (tournament: Tournament) => {
     setSelectedTournament(tournament);
     setEditingId(tournament.id);
     loadRegistrations(tournament.id);
@@ -212,19 +212,18 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
       description: tournament.description || '',
       courtId: tournament.court?.id || '',
       clubId: tournament.clubId,
-      tournamentType: (tournament as any).tournamentType || 'americano',
+      tournamentType: tournament.tournamentType,
       customTournamentType: '',
-      organizerId: tournament.organizer?.id || '',
+      organizatorId: tournament.organizator?.id || '',
     });
     
     // Проверяем, нужно ли показывать поле для кастомного типа
-    const tournamentTypeValue = (tournament as any).tournamentType || 'americano';
-    const isCustomType = !tournamentTypes.some(t => t.value === tournamentTypeValue);
+    const isCustomType = !tournamentTypes.some(t => t.value === tournament.tournamentType);
     setIsCustomTournamentType(isCustomType);
     if (isCustomType) {
       setFormData(prev => ({
         ...prev,
-        customTournamentType: tournamentTypeValue
+        customTournamentType: tournament.tournamentType
       }));
     }
   };
@@ -238,7 +237,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
         return;
       }
       
-      const createData: CreateEvent = {
+      const createData: CreateTournament = {
         name: formData.name,
         startTime: convertLocalDateToUtc(formData.startTime),
         endTime: formData.endTime ? convertLocalDateToUtc(formData.endTime) : undefined,
@@ -249,11 +248,11 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
         description: formData.description || undefined,
         courtId: formData.courtId,
         clubId: formData.clubId,
-        type: 'tournament',
-        organizerId: formData.organizerId,
+        tournamentType: tournamentType,
+        organizatorId: formData.organizatorId,
       };
 
-      await eventsApi.create(createData);
+      await tournamentsApi.create(createData);
       toast.success('Турнир создан');
       
       await loadTournaments();
@@ -272,7 +271,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
         return;
       }
       
-      const updateData: AdminPatchEvent = {
+      const updateData: AdminPatchTournament = {
         name: formData.name,
         startTime: convertLocalDateToUtc(formData.startTime),
         endTime: formData.endTime ? convertLocalDateToUtc(formData.endTime) : undefined,
@@ -283,10 +282,11 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
         description: formData.description || undefined,
         courtId: formData.courtId,
         clubId: formData.clubId,
-        organizerId: formData.organizerId,
+        tournamentType: tournamentType,
+        organizatorId: formData.organizatorId,
       };
 
-      await eventsApi.patch(id, updateData);
+      await tournamentsApi.patch(id, updateData);
       toast.success('Турнир обновлен');
       
       await loadTournaments();
@@ -296,13 +296,13 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     }
   };
 
-  const handleDelete = async (tournament: Event) => {
+  const handleDelete = async (tournament: Tournament) => {
     if (!window.confirm(`Вы уверены, что хотите удалить турнир "${tournament.name}"?`)) {
       return;
     }
 
     try {
-      await eventsApi.delete(tournament.id);
+      await tournamentsApi.delete(tournament.id);
       toast.success('Турнир удален');
       await loadTournaments();
       
@@ -315,6 +315,8 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
       console.error('Error deleting tournament:', error);
     }
   };
+
+
 
   const startCreate = () => {
     setIsCreating(true);
@@ -333,9 +335,9 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
       description: '',
       courtId: '',
       clubId: '',
-      tournamentType: 'americano',
+      tournamentType: 'tournament',
       customTournamentType: '',
-      organizerId: '',
+      organizatorId: '',
     });
     setIsCustomTournamentType(false);
   };
@@ -357,9 +359,9 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
       description: '',
       courtId: '',
       clubId: '',
-      tournamentType: 'americano',
+      tournamentType: 'tournament',
       customTournamentType: '',
-      organizerId: '',
+      organizatorId: '',
     });
     setIsCustomTournamentType(false);
   };
@@ -402,16 +404,16 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     try {
       const date = new Date(dateTime);
       return date.toLocaleString('ru-RU', {
-        year: 'numeric',
+      year: 'numeric',
         month: '2-digit',
         day: '2-digit',
-        hour: '2-digit',
+      hour: '2-digit',
         minute: '2-digit',
         timeZone: 'Europe/Moscow'
-      });
-    } catch {
-      return dateTime;
-    }
+    });
+         } catch {
+       return dateTime;
+     }
   };
 
   const getClubName = (clubId: string) => {
@@ -447,7 +449,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
   const filteredTournaments = tournaments.filter(tournament => {
     const nameMatch = !filters.name || tournament.name.toLowerCase().includes(filters.name.toLowerCase());
     const clubMatch = !filters.clubId || tournament.clubId === filters.clubId;
-    const organizatorMatch = !filters.organizerId || tournament.organizer?.id === filters.organizerId;
+    const organizatorMatch = !filters.organizatorId || tournament.organizator?.id === filters.organizatorId;
     
     return nameMatch && clubMatch && organizatorMatch;
   });
@@ -486,254 +488,248 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
           <CardContent className="pt-0">
             {isCreating || editingId ? (
               <Tabs defaultValue="edit" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-zinc-800">
-                  <TabsTrigger value="edit" className="data-[state=active]:bg-zinc-700 data-[state=active]:text-white">Редактирование</TabsTrigger>
-                  <TabsTrigger 
-                    value="participants" 
-                    className={`data-[state=active]:bg-zinc-700 data-[state=active]:text-white ${!selectedTournament ? 'opacity-50 pointer-events-none' : ''}`}
-                  >
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="edit">Редактирование</TabsTrigger>
+                  <TabsTrigger value="participants" className={!selectedTournament ? 'opacity-50 pointer-events-none' : ''}>
                     Участники ({registrations.filter(r => r.status === 'ACTIVE' || r.status === 'PENDING').length}/{selectedTournament?.maxUsers})
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="waiting" 
-                    className={`data-[state=active]:bg-zinc-700 data-[state=active]:text-white ${!selectedTournament ? 'opacity-50 pointer-events-none' : ''}`}
-                  >
+                  <TabsTrigger value="waiting" className={!selectedTournament ? 'opacity-50 pointer-events-none' : ''}>
                     Список ожидания ({waitlist.length})
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="edit" className="space-y-4 mt-4">
-                  <form onSubmit={handleSubmit} className="space-y-3">
-                    <div>
-                      <Label className="text-zinc-300 text-sm font-medium">Название</Label>
-                      <Input
-                        value={formData.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
-                        className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 mt-1"
-                        placeholder="Например: Турнир выходного дня"
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                  <Label className="text-zinc-300 text-sm font-medium">Название</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 mt-1"
+                    placeholder="Например: Турнир выходного дня"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-zinc-300 text-sm font-medium">Время начала</Label>
+                    <div className="mt-1">
+                      <DatePicker
+                        selected={formData.startTime}
+                        onChange={(date) => handleInputChange('startTime', date)}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        dateFormat="dd.MM.yyyy HH:mm"
+                        locale="ru"
+                        placeholderText="Выберите дату и время"
+                        className="w-full h-10 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        calendarClassName="react-datepicker-dark"
+                        popperClassName="react-datepicker-popper"
+                        wrapperClassName="w-full"
                         required
                       />
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-zinc-300 text-sm font-medium">Время начала</Label>
-                        <div className="mt-1">
-                          <DatePicker
-                            selected={formData.startTime}
-                            onChange={(date) => handleInputChange('startTime', date)}
-                            showTimeSelect
-                            timeFormat="HH:mm"
-                            timeIntervals={15}
-                            dateFormat="dd.MM.yyyy HH:mm"
-                            locale="ru"
-                            placeholderText="Выберите дату и время"
-                            className="w-full h-10 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            calendarClassName="react-datepicker-dark"
-                            popperClassName="react-datepicker-popper"
-                            wrapperClassName="w-full"
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-zinc-300 text-sm font-medium">Время окончания</Label>
-                        <div className="mt-1">
-                          <DatePicker
-                            selected={formData.endTime}
-                            onChange={(date) => handleInputChange('endTime', date)}
-                            showTimeSelect
-                            timeFormat="HH:mm"
-                            timeIntervals={15}
-                            dateFormat="dd.MM.yyyy HH:mm"
-                            locale="ru"
-                            placeholderText="Выберите дату и время"
-                            className="w-full h-10 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            calendarClassName="react-datepicker-dark"
-                            popperClassName="react-datepicker-popper"
-                            wrapperClassName="w-full"
-                          />
-                        </div>
-                      </div>
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300 text-sm font-medium">Время окончания</Label>
+                    <div className="mt-1">
+                      <DatePicker
+                        selected={formData.endTime}
+                        onChange={(date) => handleInputChange('endTime', date)}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        dateFormat="dd.MM.yyyy HH:mm"
+                        locale="ru"
+                        placeholderText="Выберите дату и время"
+                        className="w-full h-10 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        calendarClassName="react-datepicker-dark"
+                        popperClassName="react-datepicker-popper"
+                        wrapperClassName="w-full"
+                      />
                     </div>
+                  </div>
+                </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-zinc-300 text-sm font-medium">Цена (₽)</Label>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={formData.price}
-                          onChange={(e) => handleInputChange('price', parseInt(e.target.value) || 0)}
-                          className="bg-zinc-800 border-zinc-700 text-white mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-zinc-300 text-sm font-medium">Макс. участников</Label>
-                        <Input
-                          type="number"
-                          min="2"
-                          value={formData.maxUsers}
-                          onChange={(e) => handleInputChange('maxUsers', parseInt(e.target.value) || 2)}
-                          className="bg-zinc-800 border-zinc-700 text-white mt-1"
-                        />
-                      </div>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-zinc-300 text-sm font-medium">Цена (₽)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={formData.price}
+                      onChange={(e) => handleInputChange('price', parseInt(e.target.value) || 0)}
+                      className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300 text-sm font-medium">Макс. участников</Label>
+                    <Input
+                      type="number"
+                      min="2"
+                      value={formData.maxUsers}
+                      onChange={(e) => handleInputChange('maxUsers', parseInt(e.target.value) || 2)}
+                      className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                    />
+                  </div>
+                </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-zinc-300 text-sm font-medium">Минимальный рейтинг</Label>
-                        <Select value={formData.rankMin.toString()} onValueChange={(value) => handleRankChange('rankMin', parseInt(value))}>
-                          <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
-                            <SelectValue placeholder="Выберите минимальный рейтинг">
-                              {getSelectedMinRatingLevel()}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                            {ratingLevels.map((level, index) => (
-                              <SelectItem key={index} value={index.toString()}>
-                                {level.label} ({level.min} - {level.max})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-zinc-300 text-sm font-medium">Максимальный рейтинг</Label>
-                        <Select value={formData.rankMax.toString()} onValueChange={(value) => handleRankChange('rankMax', parseInt(value))}>
-                          <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
-                            <SelectValue placeholder="Выберите максимальный рейтинг">
-                              {getSelectedMaxRatingLevel()}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                            {ratingLevels.map((level, index) => (
-                              <SelectItem key={index} value={index.toString()}>
-                                {level.label} ({level.min} - {level.max})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-zinc-300 text-sm font-medium">Минимальный рейтинг</Label>
+                    <Select value={formData.rankMin.toString()} onValueChange={(value) => handleRankChange('rankMin', parseInt(value))}>
+                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
+                        <SelectValue placeholder="Выберите минимальный рейтинг">
+                          {getSelectedMinRatingLevel()}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                        {ratingLevels.map((level, index) => (
+                          <SelectItem key={index} value={index.toString()}>
+                            {level.label} ({level.min} - {level.max})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300 text-sm font-medium">Максимальный рейтинг</Label>
+                    <Select value={formData.rankMax.toString()} onValueChange={(value) => handleRankChange('rankMax', parseInt(value))}>
+                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
+                        <SelectValue placeholder="Выберите максимальный рейтинг">
+                          {getSelectedMaxRatingLevel()}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                        {ratingLevels.map((level, index) => (
+                          <SelectItem key={index} value={index.toString()}>
+                            {level.label} ({level.min} - {level.max})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-                    <div>
-                      <Label className="text-zinc-300 text-sm font-medium">Тип турнира</Label>
-                      <Select value={formData.tournamentType} onValueChange={handleTournamentTypeChange}>
-                        <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
-                          <SelectValue placeholder="Выберите тип турнира">
-                            {getTournamentTypeName(formData.tournamentType)}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                          {tournamentTypes.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                <div>
+                  <Label className="text-zinc-300 text-sm font-medium">Тип турнира</Label>
+                  <Select value={formData.tournamentType} onValueChange={handleTournamentTypeChange}>
+                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
+                      <SelectValue placeholder="Выберите тип турнира">
+                        {getTournamentTypeName(formData.tournamentType)}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                      {tournamentTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    {isCustomTournamentType && (
-                      <div>
-                        <Label className="text-zinc-300 text-sm font-medium">Введите тип турнира</Label>
-                        <Input
-                          value={formData.customTournamentType}
-                          onChange={(e) => handleInputChange('customTournamentType', e.target.value)}
-                          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 mt-1"
-                          placeholder="Например: Круговая система"
-                          required
-                        />
-                      </div>
-                    )}
+                {isCustomTournamentType && (
+                  <div>
+                    <Label className="text-zinc-300 text-sm font-medium">Введите тип турнира</Label>
+                    <Input
+                      value={formData.customTournamentType}
+                      onChange={(e) => handleInputChange('customTournamentType', e.target.value)}
+                      className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 mt-1"
+                      placeholder="Например: Круговая система"
+                      required
+                    />
+                  </div>
+                )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-zinc-300 text-sm font-medium">Клуб</Label>
-                        <Select value={formData.clubId} onValueChange={(value) => handleInputChange('clubId', value)}>
-                          <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
-                            <SelectValue placeholder="Выберите клуб">
-                              {getClubName(formData.clubId)}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                            {clubs.map((club) => (
-                              <SelectItem key={club.id} value={club.id}>
-                                {club.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-zinc-300 text-sm font-medium">Корт</Label>
-                        <Select value={formData.courtId} onValueChange={(value) => handleInputChange('courtId', value)}>
-                          <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
-                            <SelectValue placeholder="Выберите корт">
-                              {getCourtName(formData.courtId) || 'Выберите корт'}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                            {courts.map((court) => (
-                              <SelectItem key={court.id} value={court.id}>
-                                {court.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-zinc-300 text-sm font-medium">Клуб</Label>
+                    <Select value={formData.clubId} onValueChange={(value) => handleInputChange('clubId', value)}>
+                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
+                        <SelectValue placeholder="Выберите клуб">
+                          {getClubName(formData.clubId)}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                        {clubs.map((club) => (
+                          <SelectItem key={club.id} value={club.id}>
+                            {club.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300 text-sm font-medium">Корт</Label>
+                    <Select value={formData.courtId} onValueChange={(value) => handleInputChange('courtId', value)}>
+                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
+                        <SelectValue placeholder="Выберите корт">
+                          {getCourtName(formData.courtId)}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                        {courts.map((court) => (
+                          <SelectItem key={court.id} value={court.id}>
+                            {court.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-                    <div>
-                      <Label className="text-zinc-300 text-sm font-medium">Организатор</Label>
-                      <Select value={formData.organizerId} onValueChange={(value) => handleInputChange('organizerId', value)}>
-                        <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
-                          <SelectValue placeholder="Выберите организатора">
-                            {getAdminName(formData.organizerId)}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                          {admins.map((admin) => (
+                <div>
+                  <Label className="text-zinc-300 text-sm font-medium">Организатор</Label>
+                  <Select value={formData.organizatorId} onValueChange={(value) => handleInputChange('organizatorId', value)}>
+                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
+                      <SelectValue placeholder="Выберите организатора">
+                        {getAdminName(formData.organizatorId)}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                      {admins.map((admin) => (
                             <SelectItem key={admin.id} value={admin.user_id}>
                               {admin.user?.firstName} {admin.user?.lastName} (@{admin.user?.telegramUsername})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    <div>
-                      <Label className="text-zinc-300 text-sm font-medium">Описание</Label>
-                      <Textarea
-                        value={formData.description}
-                        onChange={(e) => handleInputChange('description', e.target.value)}
+                <div>
+                  <Label className="text-zinc-300 text-sm font-medium">Описание</Label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
                         className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 mt-1 resize-none"
                         placeholder="Дополнительная информация о турнире"
                         rows={3}
-                      />
-                    </div>
+                  />
+                </div>
 
                     <div className="flex gap-2 pt-2">
-                      <Button
-                        type="submit"
+                  <Button
+                    type="submit"
                         className="bg-blue-600 hover:bg-blue-700 text-white flex-1"
                         disabled={!canEdit}
-                      >
-                        <Save className="h-4 w-4 mr-2" />
-                        {isCreating ? 'Создать' : 'Сохранить'}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={resetForm}
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {isCreating ? 'Создать' : 'Сохранить'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={resetForm}
                         className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white"
-                      >
+                  >
                         <X className="h-4 w-4 mr-2" />
-                        Отмена
-                      </Button>
-                    </div>
-                  </form>
+                    Отмена
+                  </Button>
+                </div>
+              </form>
                 </TabsContent>
 
                 <TabsContent value="participants" className="space-y-4 mt-4">
@@ -896,14 +892,14 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
               <div className="text-center py-8">
                 <Trophy className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
                 <p className="text-zinc-400 mb-4">Выберите турнир для редактирования или создайте новый</p>
-                <Button
-                  onClick={startCreate}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  <Button
+                    onClick={startCreate}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   disabled={!canEdit}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Создать турнир
-                </Button>
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Создать турнир
+                  </Button>
               </div>
             )}
           </CardContent>
@@ -959,10 +955,10 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                 </div>
                 <div>
                   <Label className="text-zinc-300 text-sm">Организатор</Label>
-                  <Select value={filters.organizerId} onValueChange={(value) => setFilters(prev => ({ ...prev, organizerId: value }))}>
+                  <Select value={filters.organizatorId} onValueChange={(value) => setFilters(prev => ({ ...prev, organizatorId: value }))}>
                     <SelectTrigger className="bg-zinc-700 border-zinc-600 text-white mt-1">
                       <SelectValue placeholder="Все организаторы">
-                        {filters.organizerId ? getAdminName(filters.organizerId) : 'Все организаторы'}
+                        {filters.organizatorId ? getAdminName(filters.organizatorId) : 'Все организаторы'}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
@@ -998,10 +994,10 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                   {filteredTournaments.map((tournament) => (
                     <div
                       key={tournament.id}
-                      className={`p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
+                                             className={`p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
                         editingId === tournament.id
-                          ? 'bg-green-900/30 border-green-600' 
-                          : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-750 hover:border-zinc-600'
+                           ? 'bg-green-900/30 border-green-600' 
+                           : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-750 hover:border-zinc-600'
                       }`}
                       onClick={() => handleTournamentSelect(tournament)}
                     >
@@ -1012,7 +1008,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                               {tournament.name}
                             </h3>
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
-                              {getTournamentTypeName((tournament as any).tournamentType || 'americano')}
+                              {getTournamentTypeName(tournament.tournamentType)}
                             </Badge>
                           </div>
                           
@@ -1023,7 +1019,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                             </div>
                             <div className="flex items-center gap-1 text-zinc-400 text-xs">
                               <MapPin className="h-3 w-3" />
-                              <span>{getCourtName(tournament.court?.id || '') || 'Корт не указан'}</span>
+                              <span>{getCourtName(tournament.court?.id || '')}</span>
                             </div>
                           </div>
 

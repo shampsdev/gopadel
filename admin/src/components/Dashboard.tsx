@@ -14,7 +14,8 @@ import {
   Home,
   Menu,
   X,
-  Building2
+  Building2,
+  Gamepad2
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { UsersPage } from './UsersPage';
@@ -24,6 +25,7 @@ import { CourtsPage } from './CourtsPage';
 import { RegistrationsPage } from './RegistrationsPage';
 import { ClubsPage } from './ClubsPage';
 import { TournamentsPage } from './TournamentsPage';
+import { GamesPage } from './GamesPage';
 import type { NavItem } from '../types/navigation';
 
 interface NavigationParams {
@@ -97,6 +99,14 @@ export const Dashboard: React.FC = () => {
     path: '/tournaments'
   },
   {
+    id: 'games',
+    title: 'Игры',
+    description: 'Управление играми и матчами',
+    icon: Gamepad2,
+    color: 'text-cyan-400 hover:border-cyan-400/50',
+    path: '/games'
+  },
+  {
     id: 'courts',
     title: 'Корты',
     description: 'Управление кортами и клубами',
@@ -151,6 +161,8 @@ export const Dashboard: React.FC = () => {
         return <UsersPage />;
       case '/tournaments':
         return <TournamentsPage onNavigateToRegistrations={handleNavigateToRegistrations} />;
+      case '/games':
+        return <GamesPage onNavigateToRegistrations={handleNavigateToRegistrations} />;
       case '/courts':
         return <CourtsPage />;
       case '/registrations':
