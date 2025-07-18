@@ -28,12 +28,12 @@ func TestCreateGamePermissions(t *testing.T) {
 				Description: shared.StringPtr("Test game description"),
 				StartTime:   time.Now().Add(24 * time.Hour),
 				EndTime:     time.Now().Add(26 * time.Hour),
-				RankMin:     1.0,
-				RankMax:     10.0,
+				RankMin:     0.0,
+				RankMax:     7.0,
 				Price:       0,
 				MaxUsers:    4,
 				Type:        domain.EventTypeGame,
-				CourtID:     "9603f0b7-7729-410f-92bf-04de55527a8f",
+				CourtID:     "4ea67445-b73a-4b5b-b200-cc7f98b7f102",
 				ClubID:      shared.StringPtr("global"),
 			}
 
@@ -77,12 +77,12 @@ func TestCreateTournamentPermissions(t *testing.T) {
 				Description: shared.StringPtr("Test tournament description"),
 				StartTime:   time.Now().Add(24 * time.Hour),
 				EndTime:     time.Now().Add(26 * time.Hour),
-				RankMin:     1.0,
-				RankMax:     10.0,
+				RankMin:     0.0,
+				RankMax:     7.0,
 				Price:       1000,
 				MaxUsers:    16,
 				Type:        domain.EventTypeTournament,
-				CourtID:     "9603f0b7-7729-410f-92bf-04de55527a8f",
+				CourtID:     "4ea67445-b73a-4b5b-b200-cc7f98b7f102",
 				ClubID:      shared.StringPtr("global"),
 			}
 
@@ -163,12 +163,12 @@ func TestCreateTrainingPermissions(t *testing.T) {
 		Description: shared.StringPtr("Training should be forbidden"),
 		StartTime:   time.Now().Add(24 * time.Hour),
 		EndTime:     time.Now().Add(26 * time.Hour),
-		RankMin:     1.0,
-		RankMax:     10.0,
+		RankMin:     0.0,
+		RankMax:     7.0,
 		Price:       500,
 		MaxUsers:    8,
 		Type:        domain.EventTypeTraining,
-		CourtID:     "9603f0b7-7729-410f-92bf-04de55527a8f",
+		CourtID:     "4ea67445-b73a-4b5b-b200-cc7f98b7f102",
 		ClubID:      shared.StringPtr("global"),
 	}
 
@@ -176,4 +176,4 @@ func TestCreateTrainingPermissions(t *testing.T) {
 	if err == nil {
 		t.Error("Training creation should fail")
 	}
-} 
+}

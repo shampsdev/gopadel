@@ -40,11 +40,11 @@ func GetAdminToken() string {
 func SkipIfNoTokens(t *testing.T) (userToken, adminToken string) {
 	userToken = GetUserToken()
 	adminToken = GetAdminToken()
-	
+
 	if userToken == "" || adminToken == "" {
 		t.Skip("USER_WEBAPP_TOKEN and ADMIN_WEBAPP_TOKEN must be set in .env file. Use real signed Telegram Web App tokens.")
 	}
-	
+
 	return userToken, adminToken
 }
 
@@ -63,11 +63,11 @@ func CreateTestTournament(t *testing.T, client *Client, token string) *domain.Ev
 		StartTime:   time.Now().Add(24 * time.Hour),
 		EndTime:     time.Now().Add(26 * time.Hour),
 		RankMin:     0.0,
-		RankMax:     15.0,
+		RankMax:     7.0,
 		Price:       1000,
 		MaxUsers:    16,
 		Type:        domain.EventTypeTournament,
-		CourtID:     "9603f0b7-7729-410f-92bf-04de55527a8f",
+		CourtID:     "4ea67445-b73a-4b5b-b200-cc7f98b7f102",
 		ClubID:      StringPtr("global"),
 	}
 
@@ -85,12 +85,12 @@ func CreateTestGame(t *testing.T, client *Client, token string) *domain.Event {
 		Description: StringPtr("Test game description"),
 		StartTime:   time.Now().Add(24 * time.Hour),
 		EndTime:     time.Now().Add(26 * time.Hour),
-		RankMin:     1.0,
-		RankMax:     10.0,
+		RankMin:     0.0,
+		RankMax:     7.0,
 		Price:       0,
 		MaxUsers:    4,
 		Type:        domain.EventTypeGame,
-		CourtID:     "9603f0b7-7729-410f-92bf-04de55527a8f",
+		CourtID:     "4ea67445-b73a-4b5b-b200-cc7f98b7f102",
 		ClubID:      StringPtr("global"),
 	}
 
@@ -104,4 +104,4 @@ func CreateTestGame(t *testing.T, client *Client, token string) *domain.Event {
 
 func CleanupEvent(client *Client, token, eventID string) {
 	client.DeleteEvent(token, eventID)
-} 
+}

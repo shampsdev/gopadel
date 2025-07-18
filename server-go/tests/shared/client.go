@@ -10,7 +10,7 @@ import (
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 )
 
-const BaseURL = "http://localhost:8000/api/v1"
+const BaseURL = "http://localhost:8888/api/v1"
 
 type Client struct {
 	http *http.Client
@@ -21,7 +21,6 @@ func NewClient() *Client {
 		http: &http.Client{Timeout: 10 * time.Second},
 	}
 }
-
 
 func (c *Client) CreateEvent(token string, event domain.CreateEvent) (*domain.Event, error) {
 	body, err := json.Marshal(event)
@@ -211,4 +210,4 @@ func (c *Client) PatchEvent(token, eventID string, patch domain.PatchEvent) (*do
 	}
 
 	return &updatedEvent, nil
-} 
+}
