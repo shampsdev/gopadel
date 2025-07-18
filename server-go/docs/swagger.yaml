@@ -1,4 +1,26 @@
 definitions:
+  domain.AdminFilterEvent:
+    properties:
+      clubId:
+        type: string
+      clubName:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      organizerFirstName:
+        type: string
+      organizerId:
+        type: string
+      organizerTelegramId:
+        description: Дополнительные поля для удобства фильтрации
+        type: integer
+      status:
+        $ref: '#/definitions/domain.EventStatus'
+      type:
+        $ref: '#/definitions/domain.EventType'
+    type: object
   domain.AdminLogin:
     properties:
       password:
@@ -31,6 +53,37 @@ definitions:
     required:
     - new_password
     - old_password
+    type: object
+  domain.AdminPatchEvent:
+    properties:
+      clubId:
+        type: string
+      courtId:
+        type: string
+      data:
+        type: object
+      description:
+        type: string
+      endTime:
+        type: string
+      maxUsers:
+        type: integer
+      name:
+        type: string
+      organizerId:
+        type: string
+      price:
+        type: integer
+      rankMax:
+        type: number
+      rankMin:
+        type: number
+      startTime:
+        type: string
+      status:
+        $ref: '#/definitions/domain.EventStatus'
+      type:
+        $ref: '#/definitions/domain.EventType'
     type: object
   domain.AdminPatchUser:
     properties:
@@ -1173,6 +1226,162 @@ paths:
       summary: Update court (Admin)
       tags:
       - admin-courts
+  /admin/events:
+    post:
+      consumes:
+      - application/json
+      description: Create a new event. Available for any admin.
+      parameters:
+      - description: Event data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateEvent'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create event (Admin)
+      tags:
+      - admin-events
+  /admin/events/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing event. Available for any admin.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Event deleted successfully
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete event (Admin)
+      tags:
+      - admin-events
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing event. Available for any admin.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Event update data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AdminPatchEvent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update event (Admin)
+      tags:
+      - admin-events
+  /admin/events/filter:
+    post:
+      consumes:
+      - application/json
+      description: Get filtered list of events with extended admin filters. Available
+        for any admin.
+      parameters:
+      - description: Event filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AdminFilterEvent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Event'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Filter events (Admin)
+      tags:
+      - admin-events
   /admin/filter:
     post:
       consumes:
