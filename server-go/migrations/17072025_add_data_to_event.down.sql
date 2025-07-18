@@ -1,3 +1,9 @@
+-- Удаляем ограничения
+ALTER TABLE "event" DROP CONSTRAINT IF EXISTS check_rank_min_range;
+ALTER TABLE "event" DROP CONSTRAINT IF EXISTS check_rank_max_range;
+ALTER TABLE "event" DROP CONSTRAINT IF EXISTS check_rank_order;
+ALTER TABLE "event" DROP CONSTRAINT IF EXISTS check_max_users_positive;
+
 -- Удаление поля data из таблицы event
 ALTER TABLE "event" DROP COLUMN data;
 
@@ -9,4 +15,4 @@ CREATE TYPE registrationstatus AS ENUM ('PENDING', 'CONFIRMED', 'CANCELLED_BEFOR
 ALTER TABLE registrations ALTER COLUMN status TYPE registrationstatus USING status::text::registrationstatus;
 
 -- Удаляем старый тип
-DROP TYPE registrationstatus_old; 
+DROP TYPE registrationstatus_old;
