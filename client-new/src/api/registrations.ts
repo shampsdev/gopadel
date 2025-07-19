@@ -13,12 +13,12 @@ export const getMyRegistrations = async (
   return response.data;
 };
 
-export const registerToTournament = async (
+export const registerToEvent = async (
   token: string,
-  tournamentId: string
+  eventId: string
 ): Promise<Registration | null> => {
   const response = await api.post(
-    `/registrations/${tournamentId}`,
+    `/registrations/${eventId}`,
     {},
     {
       headers: {
@@ -31,10 +31,10 @@ export const registerToTournament = async (
 
 export const cancelRegistrationBeforePayment = async (
   token: string,
-  tournamentId: string
+  eventId: string
 ): Promise<Registration | null> => {
   const response = await api.post(
-    `/registrations/${tournamentId}/cancel`,
+    `/registrations/${eventId}/cancel`,
     {},
     {
       headers: {
@@ -47,10 +47,10 @@ export const cancelRegistrationBeforePayment = async (
 
 export const cancelRegistrationAfterPayment = async (
   token: string,
-  tournamentId: string
+  eventId: string
 ): Promise<Registration | null> => {
   const response = await api.post(
-    `/registrations/${tournamentId}/cancel-paid`,
+    `/registrations/${eventId}/cancel-paid`,
     {},
     {
       headers: {
@@ -61,13 +61,13 @@ export const cancelRegistrationAfterPayment = async (
   return response.data;
 };
 
-export const createPaymentForTournamentRegistration = async (
+export const createPaymentForEventRegistration = async (
   token: string,
-  tournamentId: string,
+  eventId: string,
   returnUrl: string
 ): Promise<Payment | null> => {
   const response = await api.post(
-    `/registrations/${tournamentId}/payment`,
+    `/registrations/${eventId}/payment`,
     {
       returnUrl: returnUrl,
     },
@@ -83,10 +83,10 @@ export const createPaymentForTournamentRegistration = async (
 
 export const reactivateCancelledRegistration = async (
   token: string,
-  tournamentId: string
+  eventId: string
 ): Promise<Registration | null> => {
   const response = await api.post(
-    `/registrations/${tournamentId}/reactivate`,
+    `/registrations/${eventId}/reactivate`,
     {},
     {
       headers: {

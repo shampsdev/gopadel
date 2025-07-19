@@ -2,7 +2,7 @@ import {
   CompetitionCard,
   type CompetitionCardProps,
 } from "../../components/widgets/competition-card";
-import { useGetTournaments } from "../../api/hooks/useGetTournaments";
+import { useGetTournaments } from "../../api/hooks/useGetEvents";
 import type { Tournament } from "../../types/tournament.type";
 import type { FilterTournament } from "../../types/filter.type";
 import { useEffect, useState } from "react";

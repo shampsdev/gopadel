@@ -14,7 +14,7 @@ import {
 import { Button } from "../../components/ui/button";
 import { RankSelector } from "../../components/ui/froms/rank-selector";
 import { ranks } from "../../shared/constants/ranking";
-import type { CreateTournament as CreateTournamentType } from "../../types/create-tournament";
+import type { CreateTournament as CreateTournamentType } from "../../types/create-event.type";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { useGetCourts } from "../../api/hooks/useGetCourts";
 import { useGetMyClubs } from "../../api/hooks/useGetMyClubs";

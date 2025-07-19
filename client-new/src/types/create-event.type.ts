@@ -1,14 +1,16 @@
-export interface CreateTournament {
+import type { EventType } from "./event-type.type";
+
+export interface CreateEvent {
+  clubId: string;
   courtId: string;
   description: string;
   endTime: string;
   maxUsers: number;
   name: string;
-  organizatorId: string;
+  organizerId: string;
   price: number;
   rankMax: number;
   rankMin: number;
   startTime: string;
-  tournamentType: string;
-  clubId: string;
+  type: EventType;
 }

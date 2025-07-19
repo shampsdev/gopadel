@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../../../../shared/stores/auth.store";
-import { deleteTournament } from "../../../tournaments";
+import { deleteTournament } from "../../../events";
 
 export const useDeleteTournament = () => {
   const { token } = useAuthStore();

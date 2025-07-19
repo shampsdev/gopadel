@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router";
 import { useDeleteTournament } from "../../../api/hooks/mutations/tournament/useDeleteTournament";
 import { usePatchTournament } from "../../../api/hooks/mutations/tournament/usePatchTournament";
 import { useGetCourts } from "../../../api/hooks/useGetCourts";
-import { useGetTournaments } from "../../../api/hooks/useGetTournaments";
+import { useGetTournaments } from "../../../api/hooks/useGetEvents";
 import { useIsAdmin } from "../../../api/hooks/useIsAdmin";
 import { Icons } from "../../../assets/icons";
 import { Button } from "../../../components/ui/button";

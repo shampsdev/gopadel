@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import { useGetTournaments } from "../../../api/hooks/useGetTournaments";
+import { useGetTournaments } from "../../../api/hooks/useGetEvents";
 import { Preloader } from "../../../components/widgets/preloader";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
 import { getRankTitle } from "../../../utils/rank-title";

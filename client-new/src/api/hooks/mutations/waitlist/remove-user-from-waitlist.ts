@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { removeUserFromWaitlist } from "../../../tournaments";
+import { removeUserFromWaitlist } from "../../../events";
 import { useAuthStore } from "../../../../shared/stores/auth.store";
 
 export const useRemoveUserFromWaitlist = () => {

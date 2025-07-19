@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
-import { useGetTournamentWaitlist } from "../../api/hooks/useGetTournamentWaitlist";
+import { useGetTournamentWaitlist } from "../../api/hooks/useGetEventWaitlist";
 import { getRankTitle } from "../../utils/rank-title";
 import { Link } from "react-router";
 import { Preloader } from "../../components/widgets/preloader";

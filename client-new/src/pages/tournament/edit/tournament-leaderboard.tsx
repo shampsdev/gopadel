@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
-import { useGetTournaments } from "../../../api/hooks/useGetTournaments";
+import { useGetTournaments } from "../../../api/hooks/useGetEvents";
 import { Preloader } from "../../../components/widgets/preloader";
 import GoldMedal from "../../../assets/gold-medal.png";
 import SilverMedal from "../../../assets/silver-medal.png";

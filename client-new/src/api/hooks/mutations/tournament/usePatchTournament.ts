@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../../../../shared/stores/auth.store";
 import type { PatchTournament } from "../../../../types/patch-tournament";
-import { patchTournament } from "../../../tournaments";
+import { patchTournament } from "../../../events";
 
 export const usePatchTournament = (tournamentId: string) => {
   const { token } = useAuthStore();

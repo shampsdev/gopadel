@@ -1,15 +1,14 @@
-import type { FilterTournament } from "../types/filter.type";
-import type { CreateTournament } from "../types/create-tournament";
-import type { Tournament } from "../types/tournament.type";
-import type { Waitlist } from "../types/waitlist.type";
+import type { CreateEvent } from "../types/create-event.type";
+import type { FilterEvent } from "../types/filter.type";
+import type { PatchEvent } from "../types/patch-tournament";
+import type { Waitlist, WaitlistUser } from "../types/waitlist.type";
 import { api } from "./axios.instance";
-import type { PatchTournament } from "../types/patch-tournament";
 
-export const getTournaments = async (
+export const getEvents = async (
   token: string,
-  filter: FilterTournament
-): Promise<Tournament[] | null> => {
-  const response = await api.post("/tournaments/filter", filter, {
+  filter: FilterEvent
+): Promise<Event[] | null> => {
+  const response = await api.post("/events/filter", filter, {
     headers: {
       "X-Api-Token": token,
     },
@@ -17,11 +16,11 @@ export const getTournaments = async (
   return response.data;
 };
 
-export const getTournamentWaitlist = async (
+export const getEventWaitlist = async (
   token: string,
   id: string
-): Promise<Waitlist | null> => {
-  const response = await api.get(`/tournaments/${id}/waitlist`, {
+): Promise<WaitlistUser | null> => {
+  const response = await api.get(`/events/${id}/waitlist`, {
     headers: {
       "X-Api-Token": token,
     },
@@ -57,11 +56,11 @@ export const removeUserFromWaitlist = async (
   return response.data;
 };
 
-export const createTournament = async (
+export const createEvent = async (
   token: string,
-  tournament: CreateTournament
-): Promise<Tournament | null> => {
-  const response = await api.post("/tournaments", tournament, {
+  event: CreateEvent
+): Promise<Event | null> => {
+  const response = await api.post("/events", event, {
     headers: {
       "X-Api-Token": token,
     },
@@ -69,12 +68,12 @@ export const createTournament = async (
   return response.data;
 };
 
-export const patchTournament = async (
+export const patchEvent = async (
   token: string,
-  tournamentId: string,
-  tournament: PatchTournament
-): Promise<Tournament | null> => {
-  const response = await api.patch(`/tournaments/${tournamentId}`, tournament, {
+  eventId: string,
+  event: PatchEvent
+): Promise<Event | null> => {
+  const response = await api.patch(`/events/${eventId}`, event, {
     headers: {
       "X-Api-Token": token,
     },
@@ -82,11 +81,11 @@ export const patchTournament = async (
   return response.data;
 };
 
-export const deleteTournament = async (
+export const deleteEvent = async (
   token: string,
-  tournamentId: string
+  eventId: string
 ): Promise<boolean> => {
-  const response = await api.delete(`/tournaments/${tournamentId}`, {
+  const response = await api.delete(`/events/${eventId}`, {
     headers: {
       "X-Api-Token": token,
     },

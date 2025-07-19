@@ -1,9 +1,9 @@
 import { Link, useParams } from "react-router";
 import { getRankTitle } from "../../utils/rank-title";
-import { useGetTournaments } from "../../api/hooks/useGetTournaments";
+import { useGetTournaments } from "../../api/hooks/useGetEvents";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Preloader } from "../../components/widgets/preloader";
-import { useGetTournamentWaitlist } from "../../api/hooks/useGetTournamentWaitlist";
+import { useGetTournamentWaitlist } from "../../api/hooks/useGetEventWaitlist";
 
 export const TournamentPlayers = () => {
   useTelegramBackButton({ showOnMount: true });
