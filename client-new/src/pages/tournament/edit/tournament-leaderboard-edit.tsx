@@ -8,7 +8,7 @@ import { useState } from "react";
 import type { Prize } from "../../../types/prize.type";
 import { Button } from "../../../components/ui/button";
 import { usePatchTournament } from "../../../api/hooks/mutations/tournament/usePatchTournament";
-import type { TournamentResult } from "../../../types/tournament-result.type";
+import type { TournamentResult } from "../../../types/event-result.type";
 import type { PlayerPlace } from "../../../types/player-place.type";
 import { useNavigate } from "react-router";
 

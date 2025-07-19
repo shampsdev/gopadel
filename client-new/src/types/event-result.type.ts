@@ -1,5 +1,5 @@
 import type { PlayerPlace } from "./player-place.type";
 
-export interface TournamentResult {
+export interface EventResult {
   leaderboard: PlayerPlace[];
 }

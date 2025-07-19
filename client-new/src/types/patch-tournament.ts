@@ -1,4 +1,4 @@
-import type { TournamentResult } from "./tournament-result.type";
+import type { TournamentResult } from "./event-result.type";
 
 export interface PatchTournament {
   courtId?: string;
