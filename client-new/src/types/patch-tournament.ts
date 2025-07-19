@@ -1,4 +1,3 @@
-import type { EventResult } from "./event-result.type";
 import type { EventStatus } from "./event-status.type";
 
 export interface PatchEvent {
@@ -15,6 +14,6 @@ export interface PatchEvent {
   startTime?: string;
   status?: EventStatus;
   data?: {
-    result: EventResult;
+    [key: string]: any;
   };
 }

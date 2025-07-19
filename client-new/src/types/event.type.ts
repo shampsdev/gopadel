@@ -17,7 +17,7 @@ export interface Event {
   maxUsers: number;
   name: string;
   organizer: User;
-  participants: Registration[];
+  participants?: Registration[];
   price: number;
   rankMax: number;
   rankMin: number;

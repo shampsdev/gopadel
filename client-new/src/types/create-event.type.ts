@@ -13,4 +13,7 @@ export interface CreateEvent {
   rankMin: number;
   startTime: string;
   type: EventType;
+  data?: {
+    [key: string]: any;
+  };
 }

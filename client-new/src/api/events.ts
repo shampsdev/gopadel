@@ -1,4 +1,5 @@
 import type { CreateEvent } from "../types/create-event.type";
+import type { Event } from "../types/event.type";
 import type { FilterEvent } from "../types/filter.type";
 import type { PatchEvent } from "../types/patch-tournament";
 import type { Waitlist, WaitlistUser } from "../types/waitlist.type";

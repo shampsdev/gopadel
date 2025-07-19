@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
-import { useGetTournamentWaitlist } from "../../api/hooks/useGetEventWaitlist";
+import { useGetEventWaitlist } from "../../api/hooks/useGetEventWaitlist";
 import { getRankTitle } from "../../utils/rank-title";
 import { Link } from "react-router";
 import { Preloader } from "../../components/widgets/preloader";
@@ -9,7 +9,7 @@ export const TournamentWaitlist = () => {
   useTelegramBackButton({ showOnMount: true });
   const { id } = useParams();
 
-  const { data: waitlist, isLoading } = useGetTournamentWaitlist(id!);
+  const { data: waitlist, isLoading } = useGetEventWaitlist(id!);
 
   if (isLoading) return <Preloader />;
 

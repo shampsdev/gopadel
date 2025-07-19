@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import { useDeleteTournament } from "../../../api/hooks/mutations/tournament/useDeleteEvent";
-import { usePatchTournament } from "../../../api/hooks/mutations/tournament/usePatchEvent";
+import { useDeleteEvent } from "../../../api/hooks/mutations/events/useDeleteEvent";
+import { usePatchEvent } from "../../../api/hooks/mutations/events/usePatchEvent";
 import { useGetCourts } from "../../../api/hooks/useGetCourts";
-import { useGetTournaments } from "../../../api/hooks/useGetEvents";
+import { useGetEvents } from "../../../api/hooks/useGetEvents";
 import { useIsAdmin } from "../../../api/hooks/useIsAdmin";
 import { Icons } from "../../../assets/icons";
 import { Button } from "../../../components/ui/button";
@@ -15,7 +15,6 @@ import { Preloader } from "../../../components/widgets/preloader";
 import { ranks } from "../../../shared/constants/ranking";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
 import { useModalStore } from "../../../shared/stores/modal.store";
-import type { PatchTournament } from "../../../types/patch-tournament";
 import {
   validateDateFormat,
   validateTimeFormat,
@@ -24,6 +23,7 @@ import {
   formatTimeInput,
 } from "../../../utils/date-format";
 import AboutImage from "../../../assets/about.png";
+import type { PatchEvent } from "../../../types/patch-tournament";
 
 export const TournamentEdit = () => {
   const { id } = useParams();
@@ -53,24 +53,23 @@ export const TournamentEdit = () => {
 
   const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
 
-  const { mutateAsync: patchTournament, isPending: isUpdatingTournament } =
-    usePatchTournament(id!);
-
-  const { mutateAsync: deleteTournament, isPending: isDeletingTournament } =
-    useDeleteTournament();
-
-  const { data: tournaments, isLoading: tournamentLoading } = useGetTournaments(
-    { id: id! }
+  const { mutateAsync: patchEvent, isPending: isUpdatingEvent } = usePatchEvent(
+    id!
   );
-  const tournament = tournaments?.[0];
+
+  const { mutateAsync: deleteEvent, isPending: isDeletingEvent } =
+    useDeleteEvent();
+
+  const { data: events, isLoading: eventLoading } = useGetEvents({ id: id! });
+  const event = events?.[0];
 
   useEffect(() => {
-    if (tournament) {
-      setTitle(tournament.name || "");
-      setDescription(tournament.description || "");
+    if (event) {
+      setTitle(event.name || "");
+      setDescription(event.description || "");
 
-      const startDate = new Date(tournament.startTime);
-      const endDate = new Date(tournament.endTime);
+      const startDate = new Date(event.startTime);
+      const endDate = new Date(event.endTime);
 
       const formattedDate = startDate
         .toLocaleDateString("ru-RU", {
@@ -92,16 +91,16 @@ export const TournamentEdit = () => {
 
       setDate(formattedDate);
       setTime(`${startTime}-${endTime}`);
-      setClubName(tournament.court?.name || "");
-      setClubAddress(tournament.court?.address || "");
-      setType(tournament.tournamentType || "");
-      setCourtId(tournament.court?.id || "");
+      setClubName(event.court?.name || "");
+      setClubAddress(event.court?.address || "");
+      setType(event.type || "");
+      setCourtId(event.court?.id || "");
 
       const minRank = ranks.find(
-        (r) => tournament.rankMin >= r.from && tournament.rankMin <= r.to
+        (r) => event.rankMin >= r.from && event.rankMin <= r.to
       );
       const maxRank = ranks.find(
-        (r) => tournament.rankMax >= r.from && tournament.rankMax <= r.to
+        (r) => event.rankMax >= r.from && event.rankMax <= r.to
       );
 
       if (minRank) {
@@ -114,12 +113,12 @@ export const TournamentEdit = () => {
         setRankMax(maxRank.from);
       }
 
-      setPrice(tournament.price);
-      setPriceInput(tournament.price.toString());
-      setMaxUsers(tournament.maxUsers);
-      setMaxUsersInput(tournament.maxUsers.toString());
+      setPrice(event.price);
+      setPriceInput(event.price.toString());
+      setMaxUsers(event.maxUsers);
+      setMaxUsersInput(event.maxUsers.toString());
     }
-  }, [tournament]);
+  }, [event]);
 
   const handleRankMinChange = (rankTitle: string) => {
     setRankMinInput(rankTitle);
@@ -204,7 +203,7 @@ export const TournamentEdit = () => {
       return;
     }
 
-    const tournamentData: PatchTournament = {
+    const tournamentData: PatchEvent = {
       courtId: courtId,
       description: description,
       endTime: end,
@@ -214,11 +213,11 @@ export const TournamentEdit = () => {
       rankMax: ranks.find((r) => r.title === rankMaxInput)?.to ?? 0,
       rankMin: ranks.find((r) => r.title === rankMinInput)?.from ?? 0,
       startTime: start,
-      tournamentType: type,
+      data: { tournament: { type: type } },
     };
 
     try {
-      await patchTournament(tournamentData);
+      await patchEvent(tournamentData);
       navigate(-1);
     } catch (error) {
       alert("Ошибка при обновлении турнира");
@@ -234,13 +233,12 @@ export const TournamentEdit = () => {
       acceptButtonText: "Удалить",
       declineButtonOnClick: () => {},
       acceptButtonOnClick: async () => {
-        await deleteTournament(id!);
+        await deleteEvent(id!);
       },
     });
   };
 
-  if (isAdminLoading || courtsLoading || tournamentLoading)
-    return <Preloader />;
+  if (isAdminLoading || courtsLoading || eventLoading) return <Preloader />;
 
   if (!isAdmin?.admin) {
     return (
@@ -263,7 +261,7 @@ export const TournamentEdit = () => {
     );
   }
 
-  if (!tournament) {
+  if (!event) {
     return (
       <div className="flex flex-col h-screen w-full">
         <div className="flex-1 flex flex-col text-center items-center justify-center gap-11">
@@ -459,7 +457,7 @@ export const TournamentEdit = () => {
             }}
           />
           <Button
-            disabled={isDeletingTournament}
+            disabled={isDeletingEvent}
             onClick={handleDeleteTournament}
             className="w-full flex justify-between bg-[#f344387a] text-[#F34338]"
           >
@@ -471,7 +469,7 @@ export const TournamentEdit = () => {
 
       <div className="flex flex-col fixed bottom-[80px]  right-0 left-0 gap-4 w-full">
         <Button
-          disabled={isUpdatingTournament}
+          disabled={isUpdatingEvent}
           onClick={() => {
             if (isFormValid()) {
               handleUpdateTournament();

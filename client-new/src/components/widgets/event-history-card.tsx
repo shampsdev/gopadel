@@ -1,12 +1,12 @@
 import { twMerge } from "tailwind-merge";
 import { Icons } from "../../assets/icons";
 import { getRankTitle } from "../../utils/rank-title";
-import type { RegistrationStatus } from "../../types/registration-status";
+import { RegistrationStatus } from "../../types/registration-status";
 import type { Prize } from "../../types/prize.type";
 import GoldMedal from "../../assets/gold-medal.png";
 import SilverMedal from "../../assets/silver-medal.png";
 import BronzeMedal from "../../assets/bronze-medal.png";
-export interface CompetitionHistoryCardProps {
+export interface EventHistoryCardProps {
   className?: string;
   rankMin: number;
   rankMax: number;
@@ -21,7 +21,7 @@ export interface CompetitionHistoryCardProps {
   place: Prize | null;
 }
 
-export const CompetitionHistoryCard = ({
+export const EventHistoryCard = ({
   className,
   rankMin,
   rankMax,
@@ -34,7 +34,7 @@ export const CompetitionHistoryCard = ({
   status,
   isFinished,
   place,
-}: CompetitionHistoryCardProps) => {
+}: EventHistoryCardProps) => {
   return (
     <div
       className={twMerge(
@@ -98,53 +98,59 @@ export const CompetitionHistoryCard = ({
 
       <div className="flex flex-row justify-between items-center">
         <p className="text-[16px] text-[#868D98]">статус</p>
-        {status === "CANCELED_BY_USER" && (
+        {status === RegistrationStatus.CANCELLED && (
           <p className="text-[#F34338]">Вы отменили участие</p>
         )}
-        {status === "CANCELED" && (
+        {status === RegistrationStatus.CANCELLED && (
           <p className="text-[#F34338]">Участие отменено</p>
         )}
-        {status === "PENDING" && <p>Ожидает подтверждения</p>}
-        {status === "ACTIVE" && !isFinished && (
+        {status === RegistrationStatus.PENDING && <p>Ожидает подтверждения</p>}
+        {status === RegistrationStatus.CONFIRMED && !isFinished && (
           <p className="text-[#77BE14]">Участие подтверждено</p>
         )}
-        {status === "ACTIVE" && isFinished && place === 1 && (
-          <div className="flex flex-row items-center gap-[12px]">
-            <div className="flex flex-row items-center gap-[6px]">
-              <div className="w-[24px] h-[24px]">
-                <img src={GoldMedal} alt="gold medal" />
+        {status === RegistrationStatus.CONFIRMED &&
+          isFinished &&
+          place === 1 && (
+            <div className="flex flex-row items-center gap-[12px]">
+              <div className="flex flex-row items-center gap-[6px]">
+                <div className="w-[24px] h-[24px]">
+                  <img src={GoldMedal} alt="gold medal" />
+                </div>
               </div>
+              <p className="text-[#FDB440] bg-[#FFF8EC] text-[14px] rounded-[10px] px-[10px] py-[6px]">
+                Победитель
+              </p>
             </div>
-            <p className="text-[#FDB440] bg-[#FFF8EC] text-[14px] rounded-[10px] px-[10px] py-[6px]">
-              Победитель
-            </p>
-          </div>
-        )}
-        {status === "ACTIVE" && isFinished && place === 2 && (
-          <div className="flex flex-row items-center gap-[12px]">
-            <div className="flex flex-row items-center gap-[6px]">
-              <div className="w-[24px] h-[24px]">
-                <img src={SilverMedal} alt="silver medal" />
+          )}
+        {status === RegistrationStatus.CONFIRMED &&
+          isFinished &&
+          place === 2 && (
+            <div className="flex flex-row items-center gap-[12px]">
+              <div className="flex flex-row items-center gap-[6px]">
+                <div className="w-[24px] h-[24px]">
+                  <img src={SilverMedal} alt="silver medal" />
+                </div>
               </div>
+              <p className="text-[#7CADE0] bg-[#F2F7FC] text-[14px] rounded-[10px] px-[10px] py-[6px]">
+                Призёр
+              </p>
             </div>
-            <p className="text-[#7CADE0] bg-[#F2F7FC] text-[14px] rounded-[10px] px-[10px] py-[6px]">
-              Призёр
-            </p>
-          </div>
-        )}
-        {status === "ACTIVE" && isFinished && place === 3 && (
-          <div className="flex flex-row items-center gap-[12px]">
-            <div className="flex flex-row items-center gap-[6px]">
-              <div className="w-[24px] h-[24px]">
-                <img src={BronzeMedal} alt="bronze medal" />
+          )}
+        {status === RegistrationStatus.CONFIRMED &&
+          isFinished &&
+          place === 3 && (
+            <div className="flex flex-row items-center gap-[12px]">
+              <div className="flex flex-row items-center gap-[6px]">
+                <div className="w-[24px] h-[24px]">
+                  <img src={BronzeMedal} alt="bronze medal" />
+                </div>
               </div>
+              <p className="text-[#7CADE0] bg-[#F2F7FC] text-[14px] rounded-[10px] px-[10px] py-[6px]">
+                Призёр
+              </p>
             </div>
-            <p className="text-[#7CADE0] bg-[#F2F7FC] text-[14px] rounded-[10px] px-[10px] py-[6px]">
-              Призёр
-            </p>
-          </div>
-        )}
-        {status === "ACTIVE" && isFinished && !place && (
+          )}
+        {status === RegistrationStatus.CONFIRMED && isFinished && !place && (
           <p className="text-[#868D98] bg-[#F8F8FA] rounded-[10px] px-[10px] py-[6px] text-[14px]">
             участник
           </p>

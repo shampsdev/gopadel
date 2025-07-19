@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import { useGetTournaments } from "../../../api/hooks/useGetEvents";
+import { useGetEvents } from "../../../api/hooks/useGetEvents";
 import { Preloader } from "../../../components/widgets/preloader";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
 import { getRankTitle } from "../../../utils/rank-title";
@@ -7,20 +7,21 @@ import { PrizeSelector } from "../../../components/ui/froms/prize-selector";
 import { useState } from "react";
 import type { Prize } from "../../../types/prize.type";
 import { Button } from "../../../components/ui/button";
-import { usePatchTournament } from "../../../api/hooks/mutations/tournament/usePatchEvent";
-import type { TournamentResult } from "../../../types/event-result.type";
+import { usePatchEvent } from "../../../api/hooks/mutations/events/usePatchEvent";
 import type { PlayerPlace } from "../../../types/player-place.type";
 import { useNavigate } from "react-router";
+import { RegistrationStatus } from "../../../types/registration-status";
+import type { EventResult } from "../../../types/event-result.type";
 
 export const TournamentLeaderboardEdit = () => {
   useTelegramBackButton({ showOnMount: true });
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { data: tournaments, isLoading } = useGetTournaments({ id: id });
-  const { mutateAsync: patchTournament, isPending } = usePatchTournament(id!);
+  const { data: events, isLoading } = useGetEvents({ id: id });
+  const { mutateAsync: patchEvent, isPending } = usePatchEvent(id!);
 
-  const existingResults = tournaments?.[0]?.data?.result?.leaderboard;
+  const existingResults = events?.[0]?.data?.result?.leaderboard;
   const [firstPrizeUserId, setFirstPrizeUserId] = useState<string | null>(
     existingResults?.find((p) => p.place === 1)?.userId || null
   );
@@ -74,7 +75,7 @@ export const TournamentLeaderboardEdit = () => {
 
   // Функция для сохранения результатов турнира
   const handleSaveResults = async () => {
-    if (!tournaments?.[0]) return;
+    if (!events?.[0]) return;
 
     const leaderboard: PlayerPlace[] = [];
 
@@ -89,12 +90,12 @@ export const TournamentLeaderboardEdit = () => {
       leaderboard.push({ place: 3, userId: thirdPrizeUserId });
     }
 
-    const tournamentResult: TournamentResult = { leaderboard };
+    const eventResult: EventResult = { leaderboard };
 
     try {
-      await patchTournament({
+      await patchEvent({
         data: {
-          result: tournamentResult,
+          result: eventResult,
         },
       });
 
@@ -120,12 +121,12 @@ export const TournamentLeaderboardEdit = () => {
 
   if (isLoading) return <Preloader />;
 
-  if (tournaments) {
-    const activeParticipants = tournaments[0].participants.filter(
-      (participant) => participant.status === "ACTIVE"
+  if (events) {
+    const activeParticipants = events[0].participants?.filter(
+      (participant) => participant.status === RegistrationStatus.CONFIRMED
     );
 
-    const sortedParticipants = activeParticipants.sort((a, b) => {
+    const sortedParticipants = activeParticipants?.sort((a, b) => {
       const prizeA = getUserPrize(a.userId);
       const prizeB = getUserPrize(b.userId);
 
@@ -147,51 +148,52 @@ export const TournamentLeaderboardEdit = () => {
         </div>
 
         <div className="flex flex-col gap-[20px] justify-around">
-          {sortedParticipants.map((userRegistration) => {
-            const userPrize = getUserPrize(userRegistration.userId);
+          {sortedParticipants &&
+            sortedParticipants.map((userRegistration) => {
+              const userPrize = getUserPrize(userRegistration.userId);
 
-            return (
-              <div
-                key={userRegistration.id}
-                className="flex flex-row items-center gap-[21px]"
-              >
-                <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
-                  <img
-                    className="object-cover w-full h-full"
-                    src={userRegistration.user.avatar}
-                    alt="avatar"
-                  />
-                </div>
-
-                <div className="flex flex-row gap-[21px] flex-1 flex-grow items-center">
-                  <div className="flex flex-row flex-grow flex-1 ">
-                    <div className="flex flex-col gap-[2px]">
-                      <p className="text-[14px]">
-                        {userRegistration.user.firstName}{" "}
-                        {userRegistration.user.lastName}
-                      </p>
-                      <p className="text-[#868D98] text-[14px]">
-                        {getRankTitle(userRegistration.user.rank)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="w-fit h-full flex flex-col rounded-[30px] px-[10px] py-[6px] items-start text-[12px]">
-                    <PrizeSelector
-                      title={"Место"}
-                      value={userPrize}
-                      userId={userRegistration.userId}
-                      functions={[
-                        (userId: string) => setPrizeForUser(userId, 1),
-                        (userId: string) => setPrizeForUser(userId, 2),
-                        (userId: string) => setPrizeForUser(userId, 3),
-                      ]}
-                      onClear={clearPrizeForUser}
+              return (
+                <div
+                  key={userRegistration.userId}
+                  className="flex flex-row items-center gap-[21px]"
+                >
+                  <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
+                    <img
+                      className="object-cover w-full h-full"
+                      src={userRegistration.user.avatar}
+                      alt="avatar"
                     />
                   </div>
+
+                  <div className="flex flex-row gap-[21px] flex-1 flex-grow items-center">
+                    <div className="flex flex-row flex-grow flex-1 ">
+                      <div className="flex flex-col gap-[2px]">
+                        <p className="text-[14px]">
+                          {userRegistration.user.firstName}{" "}
+                          {userRegistration.user.lastName}
+                        </p>
+                        <p className="text-[#868D98] text-[14px]">
+                          {getRankTitle(userRegistration.user.rank)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="w-fit h-full flex flex-col rounded-[30px] px-[10px] py-[6px] items-start text-[12px]">
+                      <PrizeSelector
+                        title={"Место"}
+                        value={userPrize}
+                        userId={userRegistration.userId}
+                        functions={[
+                          (userId: string) => setPrizeForUser(userId, 1),
+                          (userId: string) => setPrizeForUser(userId, 2),
+                          (userId: string) => setPrizeForUser(userId, 3),
+                        ]}
+                        onClear={clearPrizeForUser}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
         <div className="flex flex-col fixed bottom-[80px]  right-0 left-0 gap-4 w-full">
           <Button

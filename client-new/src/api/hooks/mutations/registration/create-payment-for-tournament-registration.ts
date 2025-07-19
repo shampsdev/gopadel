@@ -8,22 +8,21 @@ export const useCreatePaymentForTournamentRegistration = () => {
 
   return useMutation({
     mutationFn: ({
-      tournamentId,
+      eventId,
       returnUrl,
     }: {
-      tournamentId: string;
+      eventId: string;
       returnUrl: string;
-    }) =>
-      createPaymentForEventRegistration(token ?? "", tournamentId, returnUrl),
-    onSuccess: (_, { tournamentId }) => {
+    }) => createPaymentForEventRegistration(token ?? "", eventId, returnUrl),
+    onSuccess: (_, { eventId }) => {
       queryClient.invalidateQueries({
         queryKey: ["my-registrations"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["tournaments"],
+        queryKey: ["events"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["tournament-waitlist", tournamentId],
+        queryKey: ["event-waitlist", eventId],
       });
     },
     onError: (error) => {

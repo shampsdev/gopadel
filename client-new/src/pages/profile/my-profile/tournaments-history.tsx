@@ -1,8 +1,9 @@
 import { Link } from "react-router";
 import { useGetMyRegistrations } from "../../../api/hooks/useGetMyRegistrations";
-import { CompetitionHistoryCard } from "../../../components/widgets/competition-history-card";
+import { EventHistoryCard } from "../../../components/widgets/event-history-card";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
 import { Preloader } from "../../../components/widgets/preloader";
+import { EventStatus } from "../../../types/event-status.type";
 
 export const TournamentsHistory = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -19,33 +20,34 @@ export const TournamentsHistory = () => {
       <div className="flex flex-col gap-4">
         {registrations?.map((registration) => (
           <Link
-            key={registration.tournament.id}
-            to={`/tournament/${registration.tournament.id}`}
+            key={registration.event.id}
+            to={`/event/${registration.event.id}`}
           >
-            <CompetitionHistoryCard
-              rankMin={registration.tournament.rankMin}
-              rankMax={registration.tournament.rankMax}
+            <EventHistoryCard
+              rankMin={registration.event.rankMin}
+              rankMax={registration.event.rankMax}
               organizerName={
-                registration.tournament.organizator.firstName +
+                registration.event.organizer.firstName +
                 " " +
-                registration.tournament.organizator.lastName
+                registration.event.organizer.lastName
               }
-              date={new Date(
-                registration.tournament.startTime
-              ).toLocaleDateString("ru-RU", {
-                day: "numeric",
-                month: "long",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-              locationTitle={registration.tournament.court.name}
-              address={registration.tournament.court.address}
-              type={registration.tournament.tournamentType}
-              name={registration.tournament.name}
+              date={new Date(registration.event.startTime).toLocaleDateString(
+                "ru-RU",
+                {
+                  day: "numeric",
+                  month: "long",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              )}
+              locationTitle={registration.event.court.name}
+              address={registration.event.court.address}
+              type={registration.event.type}
+              name={registration.event.name}
               status={registration.status}
-              isFinished={registration.tournament.isFinished}
+              isFinished={registration.event.status === EventStatus.completed}
               place={
-                registration.tournament.data?.result.leaderboard.find(
+                registration.event.data?.result.leaderboard.find(
                   (place) => place.userId === registration.userId
                 )?.place || null
               }

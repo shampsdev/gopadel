@@ -11,16 +11,16 @@ export const isEventFinished = (event: Event) => {
 export const participatingAvailable = (event: Event) => {
   return (
     event.maxUsers >
-    event.participants.filter(
+    (event.participants?.filter(
       (participant) =>
         participant.status == RegistrationStatus.CONFIRMED ||
         participant.status === RegistrationStatus.PENDING
-    ).length
+    ).length || 0)
   );
 };
 
 export const isUserRegistered = (event: Event, user: User) => {
-  return event.participants.some(
+  return event.participants?.some(
     (participant) => participant.user.id === user.id
   );
 };
@@ -46,7 +46,7 @@ export const isUserRegisteredAndPaymentProceeded = (
   event: Event,
   user: User
 ) => {
-  return event.participants.some(
+  return event.participants?.some(
     (participant) =>
       participant.user.id === user.id &&
       participant.status === RegistrationStatus.CONFIRMED
@@ -54,7 +54,7 @@ export const isUserRegisteredAndPaymentProceeded = (
 };
 
 export const userHasRegisteredAndHasNotPaid = (event: Event, user: User) => {
-  return event.participants.some(
+  return event.participants?.some(
     (participant) =>
       participant.user.id === user.id &&
       participant.status === RegistrationStatus.PENDING
@@ -62,7 +62,7 @@ export const userHasRegisteredAndHasNotPaid = (event: Event, user: User) => {
 };
 
 export const isUserCancelledParticipating = (event: Event, user: User) => {
-  return event.participants.some(
+  return event.participants?.some(
     (participant) =>
       participant.user.id === user.id &&
       participant.status === RegistrationStatus.CANCELLED
