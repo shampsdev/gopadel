@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import { useDeleteTournament } from "../../../api/hooks/mutations/tournament/useDeleteTournament";
-import { usePatchTournament } from "../../../api/hooks/mutations/tournament/usePatchTournament";
+import { useDeleteTournament } from "../../../api/hooks/mutations/tournament/useDeleteEvent";
+import { usePatchTournament } from "../../../api/hooks/mutations/tournament/usePatchEvent";
 import { useGetCourts } from "../../../api/hooks/useGetCourts";
 import { useGetTournaments } from "../../../api/hooks/useGetEvents";
 import { useIsAdmin } from "../../../api/hooks/useIsAdmin";

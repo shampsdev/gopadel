@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createPaymentForTournamentRegistration } from "../../../registrations";
 import { useAuthStore } from "../../../../shared/stores/auth.store";
+import { createPaymentForEventRegistration } from "../../../registrations";
 
 export const useCreatePaymentForTournamentRegistration = () => {
   const { token } = useAuthStore();
@@ -14,11 +14,7 @@ export const useCreatePaymentForTournamentRegistration = () => {
       tournamentId: string;
       returnUrl: string;
     }) =>
-      createPaymentForTournamentRegistration(
-        token ?? "",
-        tournamentId,
-        returnUrl
-      ),
+      createPaymentForEventRegistration(token ?? "", tournamentId, returnUrl),
     onSuccess: (_, { tournamentId }) => {
       queryClient.invalidateQueries({
         queryKey: ["my-registrations"],

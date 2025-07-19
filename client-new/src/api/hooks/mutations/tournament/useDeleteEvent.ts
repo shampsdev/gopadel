@@ -1,17 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { removeUserFromWaitlist } from "../../../events";
 import { useAuthStore } from "../../../../shared/stores/auth.store";
+import { deleteEvent } from "../../../events";
 
-export const useRemoveUserFromWaitlist = () => {
+export const useDeleteEvent = () => {
   const { token } = useAuthStore();
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: (eventId: string) => removeUserFromWaitlist(token!, eventId),
-    onSuccess: (_, eventId) => {
-      queryClient.invalidateQueries({
-        queryKey: ["event-waitlist", eventId],
-      });
+    mutationFn: (eventId: string) => deleteEvent(token!, eventId),
+    mutationKey: ["events"],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["events"] });
     },
     onError: (error) => {
       console.error(error);
