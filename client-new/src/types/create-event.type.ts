@@ -17,3 +17,19 @@ export interface CreateEvent {
     [key: string]: any;
   };
 }
+
+export interface CreateTournament extends CreateEvent {
+  data?: {
+    tournament: {
+      type: string;
+    };
+  };
+}
+
+export interface CreateGame extends CreateEvent {
+  data?: {
+    game: {
+      type: string;
+    };
+  };
+}

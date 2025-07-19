@@ -17,6 +17,7 @@ export interface EventCardProps {
   date: string;
   locationTitle: string;
   address: string;
+  eventType: string;
   type: string;
   cost: number;
   playersCapacity: number;
@@ -33,6 +34,7 @@ export const EventCard = ({
   date,
   locationTitle,
   address,
+  eventType,
   type,
   cost,
   playersCapacity,
@@ -45,7 +47,7 @@ export const EventCard = ({
   if (!user) return <Preloader />;
 
   return (
-    <Link to={getLinkToEvent(id, type as EventType)}>
+    <Link to={getLinkToEvent(id, eventType as EventType)}>
       <div
         className={twMerge(
           "py-5 px-7 flex flex-col gap-9 border-[#EBEDF0] border-[1px] rounded-[24px] bg-white",

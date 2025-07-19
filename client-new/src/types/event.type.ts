@@ -8,9 +8,7 @@ import type { User } from "./user.type";
 export interface Event {
   clubId: string;
   court: Court;
-  data?: {
-    result: EventResult;
-  };
+  data?: any;
   description: string;
   endTime: string;
   id: string;

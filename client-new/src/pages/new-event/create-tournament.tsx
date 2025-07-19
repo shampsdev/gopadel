@@ -21,7 +21,7 @@ import { useNavigate } from "react-router";
 import { useIsAdmin } from "../../api/hooks/useIsAdmin";
 import { Preloader } from "../../components/widgets/preloader";
 import AboutImage from "../../assets/about.png";
-import type { CreateEvent } from "../../types/create-event.type";
+import type { CreateTournament as CreateTournamentType } from "../../types/create-event.type";
 import { EventType } from "../../types/event-type.type";
 import { useCreateEvent } from "../../api/hooks/mutations/events/useCreateEvent";
 
@@ -143,7 +143,7 @@ export const CreateTournament = () => {
       return;
     }
 
-    const tournamentData: CreateEvent = {
+    const tournamentData: CreateTournamentType = {
       courtId: courtId,
       clubId: clubId,
       description: description,

@@ -20,9 +20,8 @@ import { LinksWrapper } from "../../components/helpers/links-wrapper";
 import { RegistrationStatus } from "../../types/registration-status";
 import type { Waitlist } from "../../types/waitlist.type";
 import { EventStatus } from "../../types/event-status.type";
-import type { Tournament as TournamentType } from "../../types/tournament.type";
 
-export const Tournament = () => {
+export const Game = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   const { id } = useParams();
   const { user } = useAuthStore();
@@ -31,7 +30,7 @@ export const Tournament = () => {
 
   const { data: events, isLoading } = useGetEvents({
     id: id!,
-  }) as { data: TournamentType[] | undefined; isLoading: boolean };
+  });
   const { data: waitlist } = useGetEventWaitlist(id!);
   const { data: isAdmin } = useIsAdmin();
 
@@ -122,7 +121,7 @@ export const Tournament = () => {
                         (participant) => participant.userId === user?.id
                       ) &&
                       getPrizeString(
-                        events?.[0].data?.result?.leaderboard.find(
+                        events?.[0].data?.result.leaderboard.find(
                           (place) => place.userId === user?.id
                         )?.place
                       )}
@@ -189,9 +188,7 @@ export const Tournament = () => {
               <div className="flex flex-col gap-[2px]">
                 <div className="text-[16px] gap-1 text-[#868D98] flex flex-row items-start">
                   <p>Тип:</p>
-                  <p className="text-black">
-                    {events?.[0].data?.tournament?.type.toLowerCase()}
-                  </p>
+                  <p className="text-black">{events?.[0].type.toLowerCase()}</p>
                 </div>
                 <div className="text-[16px] text-[#868D98] gap-1 flex flex-row items-start">
                   <p>Ранг:</p>

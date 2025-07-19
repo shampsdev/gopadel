@@ -26,6 +26,7 @@ import { Trainings } from "../pages/home/trainings";
 import { TournamentEdit } from "../pages/tournament/edit/tournament-edit";
 import { TournamentLeaderboardEdit } from "../pages/tournament/edit/tournament-leaderboard-edit";
 import { TournamentLeaderboard } from "../pages/tournament/edit/tournament-leaderboard";
+import { Game } from "../pages/game/game";
 
 const authRoutes: RouteObject[] = [
   {
@@ -125,6 +126,42 @@ export const routes: RouteObject[] = [
                         path: "",
                         children: [
                           { path: "", element: <Tournament /> },
+                          {
+                            path: "edit",
+                            children: [
+                              {
+                                path: "",
+                                element: <TournamentEdit />,
+                              },
+                              {
+                                path: "leaderboard",
+                                element: <TournamentLeaderboardEdit />,
+                              },
+                            ],
+                          },
+                          {
+                            path: "leaderboard",
+                            element: <TournamentLeaderboard />,
+                          },
+                        ],
+                      },
+                      { path: "players", element: <TournamentPlayers /> },
+                      { path: "waitlist", element: <TournamentWaitlist /> },
+                    ],
+                  },
+                ],
+              },
+              {
+                path: "game",
+                children: [
+                  {
+                    path: ":id",
+
+                    children: [
+                      {
+                        path: "",
+                        children: [
+                          { path: "", element: <Game /> },
                           {
                             path: "edit",
                             children: [

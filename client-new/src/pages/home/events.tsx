@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
 import { Preloader } from "../../components/widgets/preloader";
+import { getEventType } from "../../utils/get-event-type";
 
 export const Events = () => {
   const location = useLocation();
@@ -71,6 +72,7 @@ export const Events = () => {
       <div className="flex flex-col gap-4  mt-4">
         {events?.map((event) => (
           <EventCard
+            eventType={event.type}
             key={event.id}
             id={event.id}
             title={event.name}
@@ -82,7 +84,7 @@ export const Events = () => {
             date={event.startTime}
             locationTitle={event.court.name}
             address={event.court.address}
-            type={event.type}
+            type={getEventType(event)}
             cost={event.price}
             playersCapacity={event.maxUsers}
             playersAmount={event.participants?.length || 0}

@@ -89,7 +89,8 @@ export const Games = () => {
             })}
             locationTitle={event.court.name}
             address={event.court.address}
-            type={event.type}
+            eventType={event.type}
+            type={event.data?.game?.type ?? ""}
             cost={event.price}
             playersCapacity={event.maxUsers}
             playersAmount={
