@@ -1736,7 +1736,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/clubs/{club_id}/join": {
+        "/clubs/{url}/join": {
             "post": {
                 "security": [
                     {
@@ -1756,8 +1756,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Club ID",
-                        "name": "club_id",
+                        "description": "Club URL",
+                        "name": "url",
                         "in": "path",
                         "required": true
                     }
@@ -3043,7 +3043,16 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "isPrivate": {
+                    "type": "boolean"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -3108,7 +3117,13 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "isPrivate": {
+                    "type": "boolean"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -3392,7 +3407,13 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "isPrivate": {
+                    "type": "boolean"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -3515,7 +3536,13 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "isPrivate": {
+                    "type": "boolean"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }

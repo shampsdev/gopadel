@@ -21,7 +21,6 @@ func NewClub(ctx context.Context, repo repo.Club) *Club {
 }
 
 func (uc *Club) Create(ctx *Context, club *domain.CreateClub) error {
-	// Проверяем, что пользователь авторизован
 	if ctx.User == nil {
 		return fmt.Errorf("user not authenticated")
 	}
@@ -30,7 +29,6 @@ func (uc *Club) Create(ctx *Context, club *domain.CreateClub) error {
 }
 
 func (uc *Club) Filter(ctx *Context, filter *domain.FilterClub) ([]*domain.Club, error) {
-	// Проверяем, что пользователь авторизован
 	if ctx.User == nil {
 		return nil, fmt.Errorf("user not authenticated")
 	}
@@ -38,29 +36,12 @@ func (uc *Club) Filter(ctx *Context, filter *domain.FilterClub) ([]*domain.Club,
 	return uc.repo.Filter(ctx, filter)
 }
 
-func (uc *Club) JoinClub(ctx *Context, clubID string) error {
-	// Проверяем, что пользователь авторизован
-	if ctx.User == nil {
-		return fmt.Errorf("user not authenticated")
-	}
-
-	return uc.repo.JoinClub(ctx, clubID, ctx.User.ID)
-}
-
-func (uc *Club) JoinClubAndGet(ctx *Context, clubID string) (*domain.Club, error) {
-	// Проверяем, что пользователь авторизован
+func (uc *Club) JoinClubAndGet(ctx *Context, clubURL string) (*domain.Club, error) {
 	if ctx.User == nil {
 		return nil, fmt.Errorf("user not authenticated")
 	}
 
-	// Вступаем в клуб
-	err := uc.repo.JoinClub(ctx, clubID, ctx.User.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Получаем данные клуба
-	filter := &domain.FilterClub{ID: &clubID}
+	filter := &domain.FilterClub{Url: &clubURL}
 	clubs, err := uc.repo.Filter(ctx, filter)
 	if err != nil {
 		return nil, err
@@ -70,11 +51,17 @@ func (uc *Club) JoinClubAndGet(ctx *Context, clubID string) (*domain.Club, error
 		return nil, fmt.Errorf("club not found")
 	}
 
-	return clubs[0], nil
+	club := clubs[0]
+
+	err = uc.repo.JoinClub(ctx, club.ID, ctx.User.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return club, nil
 }
 
 func (uc *Club) GetUserClubs(ctx *Context) ([]*domain.Club, error) {
-	// Проверяем, что пользователь авторизован
 	if ctx.User == nil {
 		return nil, fmt.Errorf("user not authenticated")
 	}
@@ -82,22 +69,18 @@ func (uc *Club) GetUserClubs(ctx *Context) ([]*domain.Club, error) {
 	return uc.repo.GetUserClubs(ctx, ctx.User.ID)
 }
 
-// Patch обновляет клуб (админская операция)
 func (uc *Club) Patch(ctx *Context, clubID string, patch *domain.PatchClub) error {
 	return uc.repo.Patch(ctx.Context, clubID, patch)
 }
 
-// Delete удаляет клуб (админская операция)
 func (uc *Club) Delete(ctx *Context, clubID string) error {
 	return uc.repo.Delete(ctx.Context, clubID)
 }
 
-// AdminFilter получает клубы для админов (без проверки аутентификации)
 func (uc *Club) AdminFilter(ctx *Context, filter *domain.FilterClub) ([]*domain.Club, error) {
 	return uc.repo.Filter(ctx.Context, filter)
 }
 
-// AdminCreate создает клуб для админов (без проверки аутентификации)
 func (uc *Club) AdminCreate(ctx *Context, club *domain.CreateClub) error {
 	return uc.repo.Create(ctx.Context, club)
 } 

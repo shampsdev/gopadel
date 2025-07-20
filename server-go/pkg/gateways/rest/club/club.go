@@ -12,5 +12,5 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases) {
 
 	g.POST("/filter", FilterClubs(cases.Club))
 	g.GET("/my", GetMyClubs(cases.Club))
-	g.POST("/:club_id/join", JoinClub(cases.Club))
+	g.POST("/:url/join", JoinClub(cases.Club))
 } 

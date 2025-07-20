@@ -1728,7 +1728,7 @@
                 }
             }
         },
-        "/clubs/{club_id}/join": {
+        "/clubs/{url}/join": {
             "post": {
                 "security": [
                     {
@@ -1748,8 +1748,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Club ID",
-                        "name": "club_id",
+                        "description": "Club URL",
+                        "name": "url",
                         "in": "path",
                         "required": true
                     }
@@ -3035,7 +3035,16 @@
                 "id": {
                     "type": "string"
                 },
+                "isPrivate": {
+                    "type": "boolean"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -3100,7 +3109,13 @@
                 "id": {
                     "type": "string"
                 },
+                "isPrivate": {
+                    "type": "boolean"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -3384,7 +3399,13 @@
                 "id": {
                     "type": "string"
                 },
+                "isPrivate": {
+                    "type": "boolean"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -3507,7 +3528,13 @@
                 "description": {
                     "type": "string"
                 },
+                "isPrivate": {
+                    "type": "boolean"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }

@@ -24,9 +24,22 @@ func NewClubRepo(db *pgxpool.Pool) *ClubRepo {
 }
 
 func (r *ClubRepo) Create(ctx context.Context, club *domain.CreateClub) error {
+	columns := []string{"id", "name", "description"}
+	values := []interface{}{club.ID, club.Name, club.Description}
+
+	if club.Url != nil {
+		columns = append(columns, "url")
+		values = append(values, *club.Url)
+	}
+
+	if club.IsPrivate != nil {
+		columns = append(columns, "is_private")
+		values = append(values, *club.IsPrivate)
+	}
+
 	s := r.psql.Insert(`"clubs"`).
-		Columns("id", "name", "description").
-		Values(club.ID, club.Name, club.Description)
+		Columns(columns...).
+		Values(values...)
 
 	sql, args, err := s.ToSql()
 	if err != nil {
@@ -42,7 +55,7 @@ func (r *ClubRepo) Create(ctx context.Context, club *domain.CreateClub) error {
 }
 
 func (r *ClubRepo) Filter(ctx context.Context, filter *domain.FilterClub) ([]*domain.Club, error) {
-	s := r.psql.Select("id", "name", "description", "created_at").From(`"clubs"`)
+	s := r.psql.Select("id", "url", "name", "is_private", "description", "created_at", "updated_at").From(`"clubs"`)
 
 	if filter.ID != nil {
 		s = s.Where(sq.Eq{"id": *filter.ID})
@@ -50,6 +63,14 @@ func (r *ClubRepo) Filter(ctx context.Context, filter *domain.FilterClub) ([]*do
 
 	if filter.Name != nil {
 		s = s.Where(sq.ILike{"name": fmt.Sprintf("%%%s%%", *filter.Name)})
+	}
+
+	if filter.Url != nil {
+		s = s.Where(sq.Eq{"url": *filter.Url})
+	}
+
+	if filter.IsPrivate != nil {
+		s = s.Where(sq.Eq{"is_private": *filter.IsPrivate})
 	}
 
 	sql, args, err := s.ToSql()
@@ -72,9 +93,12 @@ func (r *ClubRepo) Filter(ctx context.Context, filter *domain.FilterClub) ([]*do
 
 		err := rows.Scan(
 			&club.ID,
+			&club.Url,
 			&club.Name,
+			&club.IsPrivate,
 			&club.Description,
 			&club.CreatedAt,
+			&club.UpdatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
@@ -109,7 +133,7 @@ func (r *ClubRepo) JoinClub(ctx context.Context, clubID, userID string) error {
 }
 
 func (r *ClubRepo) GetUserClubs(ctx context.Context, userID string) ([]*domain.Club, error) {
-	s := r.psql.Select("c.id", "c.name", "c.description", "c.created_at").
+	s := r.psql.Select("c.id", "c.url", "c.name", "c.is_private", "c.description", "c.created_at", "c.updated_at").
 		From(`"clubs" c`).
 		Join(`"clubs_users" cu ON c.id = cu.club_id`).
 		Where(sq.Eq{"cu.user_id": userID})
@@ -134,9 +158,12 @@ func (r *ClubRepo) GetUserClubs(ctx context.Context, userID string) ([]*domain.C
 
 		err := rows.Scan(
 			&club.ID,
+			&club.Url,
 			&club.Name,
+			&club.IsPrivate,
 			&club.Description,
 			&club.CreatedAt,
+			&club.UpdatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
@@ -163,6 +190,14 @@ func (r *ClubRepo) Patch(ctx context.Context, clubID string, patch *domain.Patch
 
 	if patch.Description != nil {
 		s = s.Set("description", *patch.Description)
+	}
+
+	if patch.Url != nil {
+		s = s.Set("url", *patch.Url)
+	}
+
+	if patch.IsPrivate != nil {
+		s = s.Set("is_private", *patch.IsPrivate)
 	}
 
 	sql, args, err := s.ToSql()

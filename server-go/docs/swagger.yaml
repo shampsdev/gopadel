@@ -144,7 +144,13 @@ definitions:
         type: string
       id:
         type: string
+      isPrivate:
+        type: boolean
       name:
+        type: string
+      updatedAt:
+        type: string
+      url:
         type: string
     type: object
   domain.Court:
@@ -185,7 +191,11 @@ definitions:
         type: string
       id:
         type: string
+      isPrivate:
+        type: boolean
       name:
+        type: string
+      url:
         type: string
     required:
     - id
@@ -383,7 +393,11 @@ definitions:
     properties:
       id:
         type: string
+      isPrivate:
+        type: boolean
       name:
+        type: string
+      url:
         type: string
     type: object
   domain.FilterEvent:
@@ -464,7 +478,11 @@ definitions:
     properties:
       description:
         type: string
+      isPrivate:
+        type: boolean
       name:
+        type: string
+      url:
         type: string
     type: object
   domain.PatchCourt:
@@ -1734,14 +1752,14 @@ paths:
       summary: YooKassa webhook for payment notifications
       tags:
       - webhook
-  /clubs/{club_id}/join:
+  /clubs/{url}/join:
     post:
       consumes:
       - application/json
       parameters:
-      - description: Club ID
+      - description: Club URL
         in: path
-        name: club_id
+        name: url
         required: true
         type: string
       produces:
