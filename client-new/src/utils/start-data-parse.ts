@@ -23,7 +23,7 @@ export const parseStartParam = (startParam: string): StartParamData => {
     };
   }
 
-  if (startParam.startsWith("training-")) {
+  if (startParam.startsWith("train-")) {
     return {
       trainingId: startParam,
     };
