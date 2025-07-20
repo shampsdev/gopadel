@@ -25,6 +25,7 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases, cfg *config.Config) {
 	g := r.Group("/registrations")
 	middlewares.SetupAuth(g, cases.User)
 
+	g.GET("/my", handler.getMyRegistrations)                             // получить все мои регистрации
 	g.POST("/:event_id", handler.createRegistration)                    // создание регистрации (статус PENDING)
 	g.POST("/:event_id/payment", handler.createPayment)                 // создание платежа (получение ссылки)
 	g.POST("/:event_id/cancel", handler.cancelRegistration)             // отмена до оплаты (CANCELLED_BEFORE_PAYMENT)

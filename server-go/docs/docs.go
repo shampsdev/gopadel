@@ -2254,6 +2254,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/registrations/my": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "registrations"
+                ],
+                "summary": "Get my registrations",
+                "responses": {
+                    "200": {
+                        "description": "List of user's registrations with event details",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.RegistrationWithEvent"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/registrations/{event_id}": {
             "post": {
                 "security": [
@@ -3731,6 +3767,32 @@ const docTemplate = `{
                 "RegistrationStatusCancelled",
                 "RegistrationStatusLeft"
             ]
+        },
+        "domain.RegistrationWithEvent": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "event": {
+                    "$ref": "#/definitions/domain.EventForRegistration"
+                },
+                "eventId": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/domain.RegistrationStatus"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/domain.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
         },
         "domain.User": {
             "type": "object",

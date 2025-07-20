@@ -6,9 +6,9 @@ ALTER TABLE "clubs" ADD COLUMN "updated_at" TIMESTAMP NOT NULL DEFAULT NOW();
 CREATE TRIGGER update_clubs_updated_at BEFORE UPDATE ON "clubs" FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 
-INSERT INTO "clubs" ("id", "url", "name", "description") VALUES
-('46BG2RAXPF', 'yandex', 'Yandex', 'Private Yandex club'),
-('SVO4ZGOIDA', 'global', 'Global', 'GoPadel League global club');
+INSERT INTO "clubs" ("id", "url", "name", "description", "is_private") VALUES
+('46BG2RAXPF', 'yandex', 'Yandex', 'Private Yandex club', true),
+('SVO4ZGOIDA', 'global', 'Global', 'GoPadel League global club', false);
 
 UPDATE "clubs_users"
 SET "club_id" = 'SVO4ZGOIDA'
