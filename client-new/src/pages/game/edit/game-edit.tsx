@@ -438,7 +438,7 @@ export const GameEdit = () => {
           <Button
             disabled={isDeletingEvent}
             onClick={handleDeleteTournament}
-            className="w-full flex justify-between mt-2 bg-[#f344387a] text-[#F34338]"
+            className="w-full flex justify-between mt-2 bg-[#FFF0F1] text-[#F34338]"
           >
             <div>Удалить игру</div>
             <div>{Icons.Delete()}</div>
