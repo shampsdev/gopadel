@@ -8,17 +8,14 @@ import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { BOT_NAME } from "../../shared/constants/api";
 import { RegistrationStatus } from "../../types/registration-status";
 
-interface TurnamentPlayers {
-  tournamentId: string;
+interface GamePlayers {
+  gameId: string;
   registrations?: Registration[];
   showAll?: boolean;
   maxDisplay?: number;
 }
 
-export const TournamentPlayers = ({
-  registrations,
-  tournamentId,
-}: TurnamentPlayers) => {
+export const GamePlayers = ({ registrations, gameId }: GamePlayers) => {
   const { user } = useAuthStore();
   const [showLeftShadow, setShowLeftShadow] = useState(false);
   const [showRightShadow, setShowRightShadow] = useState(false);
@@ -62,7 +59,7 @@ export const TournamentPlayers = ({
           <div
             onClick={() => {
               openTelegramLink(
-                `https://t.me/share/url?url=https://t.me/${BOT_NAME}/app?startapp=${tournamentId}`
+                `https://t.me/share/url?url=https://t.me/${BOT_NAME}/app?startapp=${gameId}`
               );
             }}
             className="flex flex-col items-center cursor-pointer relative"

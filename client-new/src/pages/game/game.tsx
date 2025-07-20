@@ -5,7 +5,7 @@ import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton"
 import { useGetEvents } from "../../api/hooks/useGetEvents";
 import { useState } from "react";
 import { useGetEventWaitlist } from "../../api/hooks/useGetEventWaitlist";
-import { TournamentPlayers } from "../../components/widgets/tournament-players";
+import { GamePlayers } from "../../components/widgets/game-players";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { TournamentStatusActions } from "../../components/widgets/tournament-status-actions";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
@@ -14,7 +14,6 @@ import { Preloader } from "../../components/widgets/preloader";
 import { BOT_NAME } from "../../shared/constants/api";
 import { useIsAdmin } from "../../api/hooks/useIsAdmin";
 import { Prize } from "../../components/widgets/prize";
-import { getPrizeString } from "../../utils/get-prize-string";
 import { checkOrganizerRight } from "../../utils/check-organizer-right";
 import { LinksWrapper } from "../../components/helpers/links-wrapper";
 import { RegistrationStatus } from "../../types/registration-status";
@@ -73,12 +72,13 @@ export const Game = () => {
             user?.id,
             events?.[0]
           ) &&
-            events?.[0].status === EventStatus.completed && (
+            events?.[0].status !== EventStatus.completed &&
+            events?.[0].status !== EventStatus.cancelled && (
               <>
                 <div className="py-5 border-b border-[#DADCE0]">
                   <div
                     onClick={async () => {
-                      navigate(`/tournament/${id}/edit`);
+                      navigate(`/game/${id}/edit`);
                     }}
                     className="flex flex-row justify-between items-center gap-[18px]"
                   >
@@ -87,7 +87,7 @@ export const Game = () => {
                     </div>
 
                     <p className="text-black text-[16px] flex-grow">
-                      Изменить турнир
+                      Изменить игру
                     </p>
 
                     {Icons.ArrowRight("#A4A9B4", "24", "24")}
@@ -95,43 +95,6 @@ export const Game = () => {
                 </div>
               </>
             )}
-          <div className="py-5 border-b border-[#DADCE0]">
-            <div
-              onClick={async () => {
-                navigate(`/tournament/${id}/leaderboard`);
-              }}
-              className="flex flex-row justify-between items-center gap-[18px]"
-            >
-              <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#041124] rounded-full">
-                {Icons.Stack()}
-              </div>
-
-              <div className="text-black text-[16px] flex-grow flex flex-col gap-[2px]">
-                <p>Результаты турнира</p>
-                <div className="text-[#868D98] text-[12px]">
-                  Ваш результат:{" "}
-                  <span className="text-black">
-                    {(events?.[0].status !== EventStatus.completed ||
-                      !events?.[0].participants?.find(
-                        (participant) => participant.userId === user?.id
-                      )) &&
-                      "-"}
-                    {events?.[0].status === EventStatus.completed &&
-                      events?.[0].participants?.find(
-                        (participant) => participant.userId === user?.id
-                      ) &&
-                      getPrizeString(
-                        events?.[0].data?.result.leaderboard.find(
-                          (place) => place.userId === user?.id
-                        )?.place
-                      )}
-                  </span>
-                </div>
-              </div>
-
-              {Icons.ArrowRight("#A4A9B4", "24", "24")}
-            </div>
-          </div>
 
           <div className="py-5 border-b border-[#DADCE0]">
             <div className="flex flex-row justify-between items-center">
@@ -188,7 +151,9 @@ export const Game = () => {
               <div className="flex flex-col gap-[2px]">
                 <div className="text-[16px] gap-1 text-[#868D98] flex flex-row items-start">
                   <p>Тип:</p>
-                  <p className="text-black">{events?.[0].type.toLowerCase()}</p>
+                  <p className="text-black">
+                    {events?.[0].data?.game?.type.toLowerCase()}
+                  </p>
                 </div>
                 <div className="text-[16px] text-[#868D98] gap-1 flex flex-row items-start">
                   <p>Ранг:</p>
@@ -321,14 +286,11 @@ export const Game = () => {
         </div>
 
         <div className="px-[12px]">
-          <TournamentPlayers
-            tournamentId={id!}
-            registrations={events?.[0].participants}
-          />
+          <GamePlayers gameId={id!} registrations={events?.[0].participants} />
         </div>
 
         {waitlist && waitlist.length > 0 && (
-          <Link to={`/tournament/${id}/waitlist`}>
+          <Link to={`/game/${id}/waitlist`}>
             <div className="flex flex-row items-center gap-[18px] py-[17px] px-[16px] rounded-[30px] bg-[#F8F8FA]">
               <div className="flex w-[42px] h-[42px] min-w-[42px] min-h-[42px] justify-center items-center bg-[#AFFF3F] rounded-full">
                 {Icons.Clock("black", "18", "18")}
@@ -376,12 +338,12 @@ export const Game = () => {
           )}
         >
           <div className="flex flex-col gap-[2px] flex-grow">
-            <p>{isCopied ? "Ссылка скопирована!" : "Поделиться турниром"}</p>
+            <p>{isCopied ? "Ссылка скопирована!" : "Поделиться игрой"}</p>
           </div>
           <div
             onClick={() => {
               navigator.clipboard.writeText(
-                `https://t.me/${BOT_NAME}/app?startapp=tour-${id}`
+                `https://t.me/${BOT_NAME}/app?startapp=game-${id}`
               );
               setIsCopied(true);
               setTimeout(() => {

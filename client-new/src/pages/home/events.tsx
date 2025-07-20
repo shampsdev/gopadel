@@ -81,7 +81,13 @@ export const Events = () => {
             organizerName={
               event.organizer.firstName + " " + event.organizer.lastName
             }
-            date={event.startTime}
+            date={new Date(event.startTime).toLocaleDateString("ru-RU", {
+              day: "numeric",
+              month: "long",
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone: "Europe/Moscow",
+            })}
             locationTitle={event.court.name}
             address={event.court.address}
             type={getEventType(event)}

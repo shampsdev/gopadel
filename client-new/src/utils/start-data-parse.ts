@@ -1,5 +1,7 @@
 export interface StartParamData {
   tournamentId?: string;
+  gameId?: string;
+  trainingId?: string;
   clubId?: string;
 }
 
@@ -9,42 +11,25 @@ export interface StartParamData {
  * @returns объект с tournamentId или courtId
  */
 export const parseStartParam = (startParam: string): StartParamData => {
-  // Если строка начинается с tour-, то это турнир
   if (startParam.startsWith("tour-")) {
     return {
-      tournamentId: startParam.substring(5), // Убираем префикс "tour-"
+      tournamentId: startParam,
     };
   }
 
-  // Иначе это ID клуба
+  if (startParam.startsWith("game-")) {
+    return {
+      gameId: startParam,
+    };
+  }
+
+  if (startParam.startsWith("training-")) {
+    return {
+      trainingId: startParam,
+    };
+  }
+
   return {
     clubId: startParam,
   };
-};
-
-/**
- * Создает startParam строку для турнира
- * @param tournamentId - ID турнира
- * @returns строка параметров для Telegram
- */
-export const createTournamentStartParam = (tournamentId: string): string => {
-  return `tour-${tournamentId}`;
-};
-
-/**
- * Создает startParam строку для клуба
- * @param courtId - ID клуба
- * @returns строка параметров для Telegram
- */
-export const createCourtStartParam = (courtId: string): string => {
-  return courtId;
-};
-
-/**
- * Проверяет, является ли startParam турниром
- * @param startParam - строка параметров
- * @returns true, если это турнир
- */
-export const isTournamentStartParam = (startParam: string): boolean => {
-  return startParam.startsWith("tour-");
 };

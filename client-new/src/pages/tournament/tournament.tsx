@@ -74,7 +74,8 @@ export const Tournament = () => {
             user?.id,
             events?.[0]
           ) &&
-            events?.[0].status === EventStatus.completed && (
+            events?.[0].status !== EventStatus.completed &&
+            events?.[0].status !== EventStatus.cancelled && (
               <>
                 <div className="py-5 border-b border-[#DADCE0]">
                   <div
@@ -384,7 +385,7 @@ export const Tournament = () => {
           <div
             onClick={() => {
               navigator.clipboard.writeText(
-                `https://t.me/${BOT_NAME}/app?startapp=tour-${id}`
+                `https://t.me/${BOT_NAME}/app?startapp=${id}`
               );
               setIsCopied(true);
               setTimeout(() => {

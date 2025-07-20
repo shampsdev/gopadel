@@ -147,7 +147,7 @@ export const TournamentStatusActions = ({
                 onClick={async () => {
                   const payment = await createPaymentForTournamentRegistration({
                     eventId: tournament.id,
-                    returnUrl: `https://t.me/${BOT_NAME}/app?startapp=tour-${tournament.id}`,
+                    returnUrl: `https://t.me/${BOT_NAME}/app?startapp=${tournament.id}`,
                   });
                   if (payment?.paymentLink) {
                     postEvent("web_app_open_link", {
@@ -247,7 +247,7 @@ export const TournamentStatusActions = ({
               onClick={async () => {
                 const payment = await createPaymentForTournamentRegistration({
                   eventId: tournament.id,
-                  returnUrl: `https://t.me/${BOT_NAME}/app?startapp=tour-${tournament.id}`,
+                  returnUrl: `https://t.me/${BOT_NAME}/app?startapp=${tournament.id}`,
                 });
                 if (payment?.paymentLink) {
                   postEvent("web_app_open_link", {
