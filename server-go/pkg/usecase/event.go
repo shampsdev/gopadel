@@ -6,6 +6,7 @@ import (
 
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
+	"github.com/shampsdev/go-telegram-template/pkg/utils"
 )
 
 type Event struct {
@@ -63,7 +64,6 @@ func (e *Event) Filter(ctx context.Context, filter *domain.FilterEvent) ([]*doma
 
 // FilterForUser получает события для пользователя с учетом его клубов
 func (e *Event) FilterForUser(ctx *Context, filter *domain.FilterEvent) ([]*domain.Event, error) {
-	// Автоматически добавляем фильтрацию по клубам пользователя
 	if ctx.User != nil && filter.FilterByUserClubs == nil {
 		filter.FilterByUserClubs = &ctx.User.ID
 	}
@@ -73,16 +73,26 @@ func (e *Event) FilterForUser(ctx *Context, filter *domain.FilterEvent) ([]*doma
 
 // Обновляет событие
 func (e *Event) Patch(ctx context.Context, id string, patch *domain.PatchEvent) (*domain.Event, error) {
-	// Проверяем, было ли изменено поле data
-	dataChanged := len(patch.Data) > 0
+	var hasValidResult bool
+	if len(patch.Data) > 0 {
+		userID := "unknown"
+		if ctxUser, ok := ctx.Value("user").(*domain.User); ok && ctxUser != nil {
+			userID = ctxUser.ID
+		}
+
+		hasResult, err := utils.ValidateEventDataJSON(patch.Data, userID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to validate event data: %w", err)
+		}
+		hasValidResult = hasResult
+	}
 	
 	err := e.eventRepo.Patch(ctx, id, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch event: %w", err)
 	}
 	
-	// Если было изменено поле data, автоматически устанавливаем статус completed
-	if dataChanged {
+	if hasValidResult {
 		completedStatus := domain.EventStatusCompleted
 		statusPatch := &domain.PatchEvent{
 			Status: &completedStatus,
@@ -219,16 +229,30 @@ func (e *Event) AdminCreate(ctx *Context, createEvent *domain.CreateEvent) (*dom
 
 // Обновляет событие для админов
 func (e *Event) AdminPatch(ctx *Context, id string, patch *domain.AdminPatchEvent) (*domain.Event, error) {
-	// Проверяем, было ли изменено поле data
-	dataChanged := patch.Data != nil
+	// Проверяем и валидируем JSON данные если они переданы
+	var hasValidResult bool
+	if len(patch.Data) > 0 {
+		// Получаем информацию об админе для логирования
+		userID := "admin-unknown"
+		if ctx.User != nil {
+			userID = "admin-" + ctx.User.ID
+		}
+
+		// Проверяем наличие поля result и безопасность
+		hasResult, err := utils.ValidateEventDataJSON(patch.Data, userID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to validate event data: %w", err)
+		}
+		hasValidResult = hasResult
+	}
 
 	err := e.eventRepo.AdminPatch(ctx.Context, id, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch event: %w", err)
 	}
 	
-	// Если было изменено поле data, автоматически устанавливаем статус completed
-	if dataChanged {
+	// Если в JSON данных есть поле result, автоматически устанавливаем статус completed
+	if hasValidResult {
 		completedStatus := domain.EventStatusCompleted
 		statusPatch := &domain.AdminPatchEvent{
 			Status: &completedStatus,
