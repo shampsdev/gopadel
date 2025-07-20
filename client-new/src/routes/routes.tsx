@@ -27,6 +27,9 @@ import { TournamentEdit } from "../pages/tournament/edit/tournament-edit";
 import { TournamentLeaderboardEdit } from "../pages/tournament/edit/tournament-leaderboard-edit";
 import { TournamentLeaderboard } from "../pages/tournament/edit/tournament-leaderboard";
 import { Game } from "../pages/game/game";
+import { GamePlayers } from "../pages/game/game-players";
+import { GameEdit } from "../pages/game/edit/game-edit";
+import { GameLeaderboardEdit } from "../pages/game/edit/game-leaderboard-edit";
 
 const authRoutes: RouteObject[] = [
   {
@@ -167,11 +170,11 @@ export const routes: RouteObject[] = [
                             children: [
                               {
                                 path: "",
-                                element: <TournamentEdit />,
+                                element: <GameEdit />,
                               },
                               {
                                 path: "leaderboard",
-                                element: <TournamentLeaderboardEdit />,
+                                element: <GameLeaderboardEdit />,
                               },
                             ],
                           },
@@ -181,7 +184,7 @@ export const routes: RouteObject[] = [
                           },
                         ],
                       },
-                      { path: "players", element: <TournamentPlayers /> },
+                      { path: "players", element: <GamePlayers /> },
                       { path: "waitlist", element: <TournamentWaitlist /> },
                     ],
                   },

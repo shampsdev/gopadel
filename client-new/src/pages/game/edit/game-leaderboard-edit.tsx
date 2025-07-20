@@ -12,15 +12,15 @@ import type { PlayerPlace } from "../../../types/player-place.type";
 import { useNavigate } from "react-router";
 import { RegistrationStatus } from "../../../types/registration-status";
 import type { EventResult } from "../../../types/event-result.type";
-import type { Tournament } from "../../../types/tournament.type";
+import type { Game } from "../../../types/game.type";
 
-export const TournamentLeaderboardEdit = () => {
+export const GameLeaderboardEdit = () => {
   useTelegramBackButton({ showOnMount: true });
   const { id } = useParams();
   const navigate = useNavigate();
 
   const { data: events, isLoading } = useGetEvents({ id: id }) as {
-    data: Tournament[] | undefined;
+    data: Game[] | undefined;
     isLoading: boolean;
   };
   const { mutateAsync: patchEvent, isPending } = usePatchEvent(id!);
@@ -145,7 +145,7 @@ export const TournamentLeaderboardEdit = () => {
     return (
       <div className="flex flex-col gap-9 pb-[100px] min-h-screen">
         <div className="flex flex-col gap-4">
-          <p className="text-[24px] font-medium">Результаты турнира</p>
+          <p className="text-[24px] font-medium">Результаты игры</p>
           <div className="flex flex-col gap-[6px] text-[#5D6674] text-[16px] font-medium">
             <p>Укажите распределение призовых мест </p>
           </div>

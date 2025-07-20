@@ -277,7 +277,7 @@ export const Game = () => {
           {events?.[0] &&
             events?.[0].participants?.length &&
             events?.[0].participants?.length > 0 && (
-              <Link to={`players`}>
+              <Link to={`/game/${id}/players`}>
                 <div className="bg-[#F8F8FA] rounded-[20px] py-[6px] px-[14px] text-[12px] text-[#5D6674]">
                   смотреть все
                 </div>
@@ -290,7 +290,7 @@ export const Game = () => {
         </div>
 
         {waitlist && waitlist.length > 0 && (
-          <Link to={`/game/${id}/waitlist`}>
+          <Link to={`/tournament/${id}/waitlist`}>
             <div className="flex flex-row items-center gap-[18px] py-[17px] px-[16px] rounded-[30px] bg-[#F8F8FA]">
               <div className="flex w-[42px] h-[42px] min-w-[42px] min-h-[42px] justify-center items-center bg-[#AFFF3F] rounded-full">
                 {Icons.Clock("black", "18", "18")}
