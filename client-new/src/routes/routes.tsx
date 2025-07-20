@@ -16,7 +16,6 @@ import { CreateTournament } from "../pages/new-event/create-tournament";
 import { CreateGame } from "../pages/new-event/create-game";
 import { EditProfile } from "../pages/profile/my-profile/edit";
 import { UserProfile } from "../pages/profile/user-profile";
-import { TournamentsHistory } from "../pages/profile/my-profile/tournaments-history";
 import { Loyalty } from "../pages/loyalty";
 import { StartDataChecker } from "../components/helpers/startdata-checker";
 import { TournamentWaitlist } from "../pages/tournament/tournament-waitlist";
@@ -30,6 +29,7 @@ import { Game } from "../pages/game/game";
 import { GamePlayers } from "../pages/game/game-players";
 import { GameEdit } from "../pages/game/edit/game-edit";
 import { GameLeaderboardEdit } from "../pages/game/edit/game-leaderboard-edit";
+import { EventsHistory } from "../pages/profile/my-profile/events-history";
 
 const authRoutes: RouteObject[] = [
   {
@@ -115,7 +115,7 @@ export const routes: RouteObject[] = [
                   { path: "", element: <MyProfile /> },
                   { path: "edit", element: <EditProfile /> },
                   { path: ":id", element: <UserProfile /> },
-                  { path: "tournaments", element: <TournamentsHistory /> },
+                  { path: "events", element: <EventsHistory /> },
                 ],
               },
               {

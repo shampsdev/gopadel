@@ -1,5 +1,4 @@
 import type { Court } from "./court.type";
-import type { EventResult } from "./event-result.type";
 import type { EventStatus } from "./event-status.type";
 import type { EventType } from "./event-type.type";
 import type { Registration } from "./registration.type";

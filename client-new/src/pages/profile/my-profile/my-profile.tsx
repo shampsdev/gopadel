@@ -29,12 +29,12 @@ export const MyProfile = () => {
         </div>
       </div>
 
-      <Link to="tournaments">
+      <Link to="events">
         <div className="flex flex-row justify-between gap-[18px] items-center bg-[#F8F8FA] rounded-[30px] p-[16px]">
           <div className="flex flex-col items-center justify-center w-[42px] h-[42px] bg-[#AFFF3F] rounded-full">
             {Icons.History()}
           </div>
-          <p className="flex-grow">История турниров</p>
+          <p className="flex-grow">История участия</p>
           <div>{Icons.ArrowRight("black")}</div>
         </div>
       </Link>
