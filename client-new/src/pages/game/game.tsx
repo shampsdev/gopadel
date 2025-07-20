@@ -225,7 +225,7 @@ export const Game = () => {
 
           {events?.[0].description.length > 0 && (
             <div className="flex flex-col pt-[20px] gap-[8px]">
-              <div className="text-[16px] font-medium">Описание турнира</div>
+              <div className="text-[16px] font-medium">Описание игры</div>
               <div className="text-[14px] text-[#5D6674]">
                 <LinksWrapper text={events?.[0].description} />
               </div>
@@ -290,7 +290,7 @@ export const Game = () => {
         </div>
 
         {waitlist && waitlist.length > 0 && (
-          <Link to={`/tournament/${id}/waitlist`}>
+          <Link to={`/game/${id}/waitlist`}>
             <div className="flex flex-row items-center gap-[18px] py-[17px] px-[16px] rounded-[30px] bg-[#F8F8FA]">
               <div className="flex w-[42px] h-[42px] min-w-[42px] min-h-[42px] justify-center items-center bg-[#AFFF3F] rounded-full">
                 {Icons.Clock("black", "18", "18")}
@@ -343,7 +343,7 @@ export const Game = () => {
           <div
             onClick={() => {
               navigator.clipboard.writeText(
-                `https://t.me/${BOT_NAME}/app?startapp=game-${id}`
+                `https://t.me/${BOT_NAME}/app?startapp=${id}`
               );
               setIsCopied(true);
               setTimeout(() => {

@@ -9,6 +9,7 @@ import { Icons } from "../../../assets/icons";
 import { Button } from "../../../components/ui/button";
 import { CourtSelector } from "../../../components/ui/froms/court-selector";
 import { Input } from "../../../components/ui/froms/input";
+import { PlayerCountSelector } from "../../../components/ui/froms/player-count-selector";
 import { RankSelector } from "../../../components/ui/froms/rank-selector";
 import { Textarea } from "../../../components/ui/froms/textarea";
 import { Preloader } from "../../../components/widgets/preloader";
@@ -116,7 +117,6 @@ export const GameEdit = () => {
       setPrice(event.price);
       setPriceInput(event.price.toString());
       setMaxUsers(event.maxUsers);
-      setMaxUsersInput(event.maxUsers.toString());
     }
   }, [event]);
 
@@ -152,7 +152,6 @@ export const GameEdit = () => {
   const [price, setPrice] = useState<number>(0);
   const [priceInput, setPriceInput] = useState<string>("");
   const [maxUsers, setMaxUsers] = useState<number>(0);
-  const [maxUsersInput, setMaxUsersInput] = useState<string>("");
 
   const isFormValid = () => {
     return (
@@ -234,6 +233,7 @@ export const GameEdit = () => {
       declineButtonOnClick: () => {},
       acceptButtonOnClick: async () => {
         await deleteEvent(id!);
+        navigate(-1);
       },
     });
   };
@@ -416,7 +416,6 @@ export const GameEdit = () => {
               }
             }}
             onBlur={() => {
-              // При потере фокуса форматируем число
               if (priceInput && /^\d+$/.test(priceInput)) {
                 const num = parseInt(priceInput);
                 setPrice(num);
@@ -427,41 +426,21 @@ export const GameEdit = () => {
               }
             }}
           />
-          <Input
-            title={"Максимальное количество участников"}
-            value={maxUsersInput}
-            maxLength={3}
-            placeholder={"0"}
-            hasError={maxUsers === null}
-            onChangeFunction={(raw) => {
-              const sanitized = raw.replace(/[^\d]/g, "");
-
-              setMaxUsersInput(sanitized);
-
-              if (sanitized) {
-                setMaxUsers(parseInt(sanitized));
-              } else {
-                setMaxUsers(0);
-              }
-            }}
-            onBlur={() => {
-              // При потере фокуса форматируем число
-              if (maxUsersInput && /^\d+$/.test(maxUsersInput)) {
-                const num = parseInt(maxUsersInput);
-                setMaxUsers(num);
-                setMaxUsersInput(String(num));
-              } else {
-                setMaxUsers(0);
-                setMaxUsersInput("");
-              }
-            }}
-          />
+          <div className="flex flex-col gap-[8px]">
+            <p className="text-[15px] font-semibold text-[#A4A9B4] ml-2">
+              Максимальное количество участников
+            </p>
+            <PlayerCountSelector
+              selectedCount={maxUsers}
+              onCountChange={setMaxUsers}
+            />
+          </div>
           <Button
             disabled={isDeletingEvent}
             onClick={handleDeleteTournament}
-            className="w-full flex justify-between bg-[#f344387a] text-[#F34338]"
+            className="w-full flex justify-between mt-2 bg-[#f344387a] text-[#F34338]"
           >
-            <div>Удалить турнир</div>
+            <div>Удалить игру</div>
             <div>{Icons.Delete()}</div>
           </Button>
         </div>

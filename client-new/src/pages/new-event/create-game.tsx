@@ -4,6 +4,7 @@ import { Input } from "../../components/ui/froms/input";
 import { Textarea } from "../../components/ui/froms/textarea";
 import { CourtSelector } from "../../components/ui/froms/court-selector";
 import { ClubSelector } from "../../components/ui/froms/club-selector";
+import { PlayerCountSelector } from "../../components/ui/froms/player-count-selector";
 import {
   formatDateInput,
   validateDateFormat,
@@ -87,7 +88,6 @@ export const CreateGame = () => {
   };
 
   const [maxUsers, setMaxUsers] = useState<number | null>(null);
-  const [maxUsersInput, setMaxUsersInput] = useState<string>("");
 
   const isFormValid = () => {
     return (
@@ -305,35 +305,15 @@ export const CreateGame = () => {
             hasError={rankMax === null || rankMaxError}
           />
 
-          <Input
-            title={"Максимальное количество участников"}
-            value={maxUsersInput}
-            maxLength={3}
-            placeholder={"0"}
-            hasError={maxUsers === null}
-            onChangeFunction={(raw) => {
-              const sanitized = raw.replace(/[^\d]/g, "");
-
-              setMaxUsersInput(sanitized);
-
-              if (sanitized) {
-                setMaxUsers(parseInt(sanitized));
-              } else {
-                setMaxUsers(null);
-              }
-            }}
-            onBlur={() => {
-              // При потере фокуса форматируем число
-              if (maxUsersInput && /^\d+$/.test(maxUsersInput)) {
-                const num = parseInt(maxUsersInput);
-                setMaxUsers(num);
-                setMaxUsersInput(String(num));
-              } else {
-                setMaxUsers(null);
-                setMaxUsersInput("");
-              }
-            }}
-          />
+          <div className="flex flex-col gap-[8px] pt-[12px]">
+            <p className="text-[15px] font-semibold text-[#A4A9B4] ml-2">
+              Максимальное количество участников
+            </p>
+            <PlayerCountSelector
+              selectedCount={maxUsers}
+              onCountChange={setMaxUsers}
+            />
+          </div>
         </div>
       </div>
 
