@@ -8,7 +8,7 @@ import SilverMedal from "../../assets/silver-medal.png";
 import BronzeMedal from "../../assets/bronze-medal.png";
 import { Link } from "react-router";
 import { getLinkToEvent } from "../../utils/get-link-to-event";
-import type { EventType } from "../../types/event-type.type";
+import { EventType } from "../../types/event-type.type";
 
 export interface EventHistoryCardProps {
   className?: string;
@@ -62,7 +62,9 @@ export const EventHistoryCard = ({
 
             <div>
               <div className="bg-[#E7FFC6] rounded-full p-[10px]">
-                {Icons.Medal("#77BE14")}
+                {eventType === EventType.tournament && Icons.Medal("#77BE14")}
+
+                {eventType === EventType.game && Icons.Padel("#77BE14")}
               </div>
             </div>
           </div>

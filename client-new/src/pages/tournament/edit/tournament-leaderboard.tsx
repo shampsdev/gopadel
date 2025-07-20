@@ -12,13 +12,17 @@ import { twMerge } from "tailwind-merge";
 import { useAuthStore } from "../../../shared/stores/auth.store";
 import { checkOrganizerRight } from "../../../utils/check-organizer-right";
 import { EventStatus } from "../../../types/event-status.type";
+import type { Tournament } from "../../../types/tournament.type";
 
 export const TournamentLeaderboard = () => {
   useTelegramBackButton({ showOnMount: true });
   const { id } = useParams();
   const { user } = useAuthStore();
 
-  const { data: events, isLoading } = useGetEvents({ id: id });
+  const { data: events, isLoading } = useGetEvents({ id: id }) as {
+    data: Tournament[] | undefined;
+    isLoading: boolean;
+  };
   const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
 
   if (isLoading || isAdminLoading) return <Preloader />;
@@ -37,7 +41,7 @@ export const TournamentLeaderboard = () => {
 
         {events[0].status === EventStatus.completed && (
           <div className="flex flex-col gap-[20px] justify-around">
-            {events[0].data?.result.leaderboard.map((place) => {
+            {events[0].data?.result?.leaderboard.map((place) => {
               return [
                 events[0].participants?.find(
                   (participant) => participant.userId === place.userId
@@ -180,11 +184,10 @@ export const TournamentLeaderboard = () => {
 
             {events[0].participants &&
               events[0].participants
-                ?.filter(
-                  (participant) =>
-                    !events[0].data?.result.leaderboard.some(
-                      (place) => place.userId === participant.userId
-                    )
+                ?.filter((participant) =>
+                  events[0].data?.result?.leaderboard.some(
+                    (place) => place.userId === participant.userId
+                  )
                 )
                 ?.map((userRegistration) => {
                   return (

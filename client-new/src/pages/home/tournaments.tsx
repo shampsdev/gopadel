@@ -75,6 +75,7 @@ export const Tournaments = () => {
       <div className="flex flex-col gap-4 pb-[100px] mt-4">
         {events?.map((event: Event) => (
           <EventCard
+            eventType={event.type}
             key={event.id}
             id={event.id}
             title={event.name}

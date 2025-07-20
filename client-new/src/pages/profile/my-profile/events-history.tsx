@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 import { useGetMyRegistrations } from "../../../api/hooks/useGetMyRegistrations";
 import { EventHistoryCard } from "../../../components/widgets/event-history-card";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";

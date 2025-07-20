@@ -5,7 +5,7 @@ import { useGetMe } from "../../api/hooks/useGetMe";
 import { Preloader } from "./preloader";
 import { Link } from "react-router";
 import { getLinkToEvent } from "../../utils/get-link-to-event";
-import type { EventType } from "../../types/event-type.type";
+import { EventType } from "../../types/event-type.type";
 
 export interface EventCardProps {
   className?: string;
@@ -17,7 +17,7 @@ export interface EventCardProps {
   date: string;
   locationTitle: string;
   address: string;
-  eventType: string;
+  eventType: EventType;
   type: string;
   cost: number;
   playersCapacity: number;
@@ -66,7 +66,9 @@ export const EventCard = ({
 
             <div>
               <div className="bg-[#E7FFC6] rounded-full p-[10px]">
-                {Icons.Medal("#77BE14")}
+                {eventType === EventType.tournament && Icons.Medal("#77BE14")}
+
+                {eventType === EventType.game && Icons.Padel("#77BE14")}
               </div>
             </div>
           </div>
