@@ -88,6 +88,8 @@ export const CreateGame = () => {
   };
 
   const [maxUsers, setMaxUsers] = useState<number | null>(null);
+  const [price, setPrice] = useState<number | null>(0);
+  const [priceInput, setPriceInput] = useState<string>("0");
 
   const isFormValid = () => {
     return (
@@ -105,7 +107,9 @@ export const CreateGame = () => {
       rankMax >= 0 &&
       rankMax >= rankMin &&
       maxUsers !== null &&
-      maxUsers > 0
+      maxUsers > 0 &&
+      price !== null &&
+      price >= 0
     );
   };
 
@@ -147,7 +151,7 @@ export const CreateGame = () => {
       maxUsers: maxUsers ?? 0,
       name: title ?? "",
       organizerId: user?.id ?? "",
-      price: 0,
+      price: price ?? 0,
       rankMax: ranks.find((r) => r.title === rankMaxInput)?.to ?? 0,
       rankMin: ranks.find((r) => r.title === rankMinInput)?.from ?? 0,
       startTime: start,
@@ -303,6 +307,35 @@ export const CreateGame = () => {
             value={rankMaxInput}
             onChangeFunction={handleRankMaxChange}
             hasError={rankMax === null || rankMaxError}
+          />
+
+          <Input
+            title={"Стоимость участия"}
+            value={priceInput}
+            maxLength={10}
+            placeholder={"0"}
+            hasError={price === null}
+            onChangeFunction={(raw) => {
+              const sanitized = raw.replace(/[^\d]/g, "");
+
+              setPriceInput(sanitized);
+
+              if (sanitized) {
+                setPrice(parseInt(sanitized));
+              } else {
+                setPrice(null);
+              }
+            }}
+            onBlur={() => {
+              if (priceInput && /^\d+$/.test(priceInput)) {
+                const num = parseInt(priceInput);
+                setPrice(num);
+                setPriceInput(String(num));
+              } else {
+                setPrice(null);
+                setPriceInput("");
+              }
+            }}
           />
 
           <div className="flex flex-col gap-[8px] pt-[12px]">
