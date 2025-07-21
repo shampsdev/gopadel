@@ -121,7 +121,7 @@ export const TournamentLeaderboardEdit = () => {
   if (isLoading) return <Preloader />;
 
   if (tournaments) {
-    const activeParticipants = tournaments[0].participants.filter(
+    const activeParticipants = tournaments?.[0]?.participants.filter(
       (participant) => participant.status === "ACTIVE"
     );
 

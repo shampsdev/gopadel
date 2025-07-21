@@ -38,7 +38,7 @@ export const TournamentLeaderboard = () => {
           <div className="flex flex-col gap-[20px] justify-around">
             {tournaments[0].data?.result.leaderboard.map((place) => {
               return [
-                tournaments[0].participants.find(
+                tournaments[0]?.participants?.find(
                   (participant) => participant.userId === place.userId
                 ),
               ].map((userRegistration) => {
@@ -177,7 +177,7 @@ export const TournamentLeaderboard = () => {
               });
             })}
 
-            {tournaments[0].participants
+            {tournaments[0]?.participants
               .filter(
                 (participant) =>
                   !tournaments[0].data?.result.leaderboard.some(

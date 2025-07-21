@@ -24,7 +24,7 @@ export const TournamentPlayers = () => {
             <p>
               Сейчас зарегистрировано:{" "}
               {
-                tournaments[0].participants.filter(
+                tournaments?.[0]?.participants.filter(
                   (participant) =>
                     participant.status === "ACTIVE" ||
                     participant.status === "PENDING"

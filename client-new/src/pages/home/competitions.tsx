@@ -74,7 +74,7 @@ export const Competitions = () => {
       type: tournament.tournamentType || "Турнир",
       cost: tournament.price,
       playersCapacity: tournament.maxUsers,
-      playersAmount: tournament.participants?.filter(
+      playersAmount: tournament?.participants?.filter(
         (participant) =>
           participant.status === "ACTIVE" || participant.status === "PENDING"
       ).length,
