@@ -1,20 +1,18 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import { useDeleteEvent } from "../../../api/hooks/mutations/events/useDeleteEvent";
 import { usePatchEvent } from "../../../api/hooks/mutations/events/usePatchEvent";
 import { useGetCourts } from "../../../api/hooks/useGetCourts";
 import { useGetEvents } from "../../../api/hooks/useGetEvents";
 import { useIsAdmin } from "../../../api/hooks/useIsAdmin";
-import { Icons } from "../../../assets/icons";
 import { Button } from "../../../components/ui/button";
 import { CourtSelector } from "../../../components/ui/froms/court-selector";
+import { EventStatusSelector } from "../../../components/ui/froms/event-status-selector";
 import { Input } from "../../../components/ui/froms/input";
 import { RankSelector } from "../../../components/ui/froms/rank-selector";
 import { Textarea } from "../../../components/ui/froms/textarea";
 import { Preloader } from "../../../components/widgets/preloader";
 import { ranks } from "../../../shared/constants/ranking";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
-import { useModalStore } from "../../../shared/stores/modal.store";
 import {
   validateDateFormat,
   validateTimeFormat,
@@ -24,12 +22,12 @@ import {
 } from "../../../utils/date-format";
 import AboutImage from "../../../assets/about.png";
 import type { PatchEvent } from "../../../types/patch-tournament";
+import { EventStatus } from "../../../types/event-status.type";
 
 export const TournamentEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
-  const { openModal } = useModalStore();
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [date, setDate] = useState<string>("");
@@ -56,9 +54,6 @@ export const TournamentEdit = () => {
   const { mutateAsync: patchEvent, isPending: isUpdatingEvent } = usePatchEvent(
     id!
   );
-
-  const { mutateAsync: deleteEvent, isPending: isDeletingEvent } =
-    useDeleteEvent();
 
   const { data: events, isLoading: eventLoading } = useGetEvents({ id: id! });
   const event = events?.[0];
@@ -117,6 +112,7 @@ export const TournamentEdit = () => {
       setPriceInput(event.price.toString());
       setMaxUsers(event.maxUsers);
       setMaxUsersInput(event.maxUsers.toString());
+      setStatus(event.status || EventStatus.registration);
     }
   }, [event]);
 
@@ -153,6 +149,7 @@ export const TournamentEdit = () => {
   const [priceInput, setPriceInput] = useState<string>("");
   const [maxUsers, setMaxUsers] = useState<number>(0);
   const [maxUsersInput, setMaxUsersInput] = useState<string>("");
+  const [status, setStatus] = useState<EventStatus | null>(null);
 
   const isFormValid = () => {
     return (
@@ -165,6 +162,7 @@ export const TournamentEdit = () => {
       clubAddress &&
       type &&
       courtId &&
+      status !== null &&
       rankMin !== null &&
       rankMin >= 0 &&
       rankMax !== null &&
@@ -213,6 +211,7 @@ export const TournamentEdit = () => {
       rankMax: ranks.find((r) => r.title === rankMaxInput)?.to ?? 0,
       rankMin: ranks.find((r) => r.title === rankMinInput)?.from ?? 0,
       startTime: start,
+      status: status || EventStatus.registration,
       data: { tournament: { type: type } },
     };
 
@@ -223,20 +222,6 @@ export const TournamentEdit = () => {
       alert("Ошибка при обновлении турнира");
       console.error(error);
     }
-  };
-
-  const handleDeleteTournament = async () => {
-    openModal({
-      title: "Уверены, что хотите удалить событие?",
-      subtitle: "Восстановить заполненную информацию будет невозможно",
-      declineButtonText: "Отмена",
-      acceptButtonText: "Удалить",
-      declineButtonOnClick: () => {},
-      acceptButtonOnClick: async () => {
-        await deleteEvent(id!);
-        navigate(-1);
-      },
-    });
   };
 
   if (isAdminLoading || courtsLoading || eventLoading) return <Preloader />;
@@ -387,6 +372,12 @@ export const TournamentEdit = () => {
             hasError={!courtId}
             courts={courts ?? []}
           />
+          <EventStatusSelector
+            title="Статус события"
+            value={status}
+            onChangeFunction={setStatus}
+            hasError={status === null}
+          />
           <RankSelector
             title="Минимальный ранг"
             value={rankMinInput}
@@ -457,14 +448,6 @@ export const TournamentEdit = () => {
               }
             }}
           />
-          <Button
-            disabled={isDeletingEvent}
-            onClick={handleDeleteTournament}
-            className="w-full flex justify-between mt-2 bg-[#FFF0F1] text-[#F34338]"
-          >
-            <div>Удалить турнир</div>
-            <div>{Icons.Delete()}</div>
-          </Button>
         </div>
       </div>
 

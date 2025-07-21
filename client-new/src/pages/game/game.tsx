@@ -7,7 +7,6 @@ import { useState } from "react";
 import { useGetEventWaitlist } from "../../api/hooks/useGetEventWaitlist";
 import { GamePlayers } from "../../components/widgets/game-players";
 import { useAuthStore } from "../../shared/stores/auth.store";
-import { TournamentStatusActions } from "../../components/widgets/tournament-status-actions";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { twMerge } from "tailwind-merge";
 import { Preloader } from "../../components/widgets/preloader";
@@ -400,7 +399,7 @@ export const Game = () => {
       </div>
 
       <GameStatusActions
-        tournament={events?.[0]}
+        game={events?.[0]}
         user={user}
         waitlist={(waitlist as Waitlist) || []}
       />

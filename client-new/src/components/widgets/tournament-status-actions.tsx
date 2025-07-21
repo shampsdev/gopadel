@@ -5,7 +5,6 @@ import { useReactivateCancelledRegistration } from "../../api/hooks/mutations/re
 import { useAddUserToWaitlist } from "../../api/hooks/mutations/waitlist/add-user-to-waitlist";
 import { useRemoveUserFromWaitlist } from "../../api/hooks/mutations/waitlist/remove-user-from-waitlist";
 import { Icons } from "../../assets/icons";
-import type { Event } from "../../types/event.type";
 import type { User } from "../../types/user.type";
 import type { Waitlist } from "../../types/waitlist.type";
 import {
@@ -24,9 +23,11 @@ import { useModalStore } from "../../shared/stores/modal.store";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { BOT_NAME } from "../../shared/constants/api";
 import { useRegisterToEvent } from "../../api/hooks/mutations/registration/register-to-event";
+import { EventStatus } from "../../types/event-status.type";
+import type { Tournament } from "../../types/tournament.type";
 
 interface TournamentStatusActionsProps {
-  tournament: Event;
+  tournament: Tournament;
   user: User;
   waitlist: Waitlist;
 }
@@ -53,10 +54,18 @@ export const TournamentStatusActions = ({
       <div className="flex flex-col text-center gap-[18px]">
         <div className="mb-10 flex flex-row gap-4 justify-center">
           <Button
-            className="flex flex-row items-center gap-3 bg-[#EBEDF0]"
+            className={
+              tournament.status === EventStatus.cancelled
+                ? "flex flex-row items-center gap-3 bg-[#FF5053] text-white"
+                : "flex flex-row items-center gap-3 bg-[#EBEDF0]"
+            }
             onClick={() => {}}
           >
-            <p>Турнир завершен</p>
+            {tournament.status === EventStatus.cancelled ? (
+              <p>Турнир отменен</p>
+            ) : (
+              <p>Турнир завершен</p>
+            )}
             <div className="flex flex-col items-center justify-center w-[18px] h-[18px]">
               {Icons.Approve()}
             </div>

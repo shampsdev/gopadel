@@ -5,18 +5,14 @@ import { EventStatus } from "../types/event-status.type";
 import { RegistrationStatus } from "../types/registration-status";
 
 export const isEventFinished = (event: Event) => {
-  return event.status === EventStatus.completed;
+  return (
+    event.status === EventStatus.completed ||
+    event.status === EventStatus.cancelled
+  );
 };
 
 export const participatingAvailable = (event: Event) => {
-  return (
-    event.maxUsers >
-    (event.participants?.filter(
-      (participant) =>
-        participant.status == RegistrationStatus.CONFIRMED ||
-        participant.status === RegistrationStatus.PENDING
-    ).length || 0)
-  );
+  return event.status === EventStatus.registration;
 };
 
 export const isUserRegistered = (event: Event, user: User) => {

@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import { useDeleteEvent } from "../../../api/hooks/mutations/events/useDeleteEvent";
 import { usePatchEvent } from "../../../api/hooks/mutations/events/usePatchEvent";
 import { useGetCourts } from "../../../api/hooks/useGetCourts";
 import { useGetEvents } from "../../../api/hooks/useGetEvents";
 import { useIsAdmin } from "../../../api/hooks/useIsAdmin";
-import { Icons } from "../../../assets/icons";
 import { Button } from "../../../components/ui/button";
 import { CourtSelector } from "../../../components/ui/froms/court-selector";
+import { EventStatusSelector } from "../../../components/ui/froms/event-status-selector";
 import { Input } from "../../../components/ui/froms/input";
 import { PlayerCountSelector } from "../../../components/ui/froms/player-count-selector";
 import { RankSelector } from "../../../components/ui/froms/rank-selector";
@@ -15,7 +14,6 @@ import { Textarea } from "../../../components/ui/froms/textarea";
 import { Preloader } from "../../../components/widgets/preloader";
 import { ranks } from "../../../shared/constants/ranking";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
-import { useModalStore } from "../../../shared/stores/modal.store";
 import {
   validateDateFormat,
   validateTimeFormat,
@@ -25,12 +23,12 @@ import {
 } from "../../../utils/date-format";
 import AboutImage from "../../../assets/about.png";
 import type { PatchEvent } from "../../../types/patch-tournament";
+import { EventStatus } from "../../../types/event-status.type";
 
 export const GameEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
-  const { openModal } = useModalStore();
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [date, setDate] = useState<string>("");
@@ -57,9 +55,6 @@ export const GameEdit = () => {
   const { mutateAsync: patchEvent, isPending: isUpdatingEvent } = usePatchEvent(
     id!
   );
-
-  const { mutateAsync: deleteEvent, isPending: isDeletingEvent } =
-    useDeleteEvent();
 
   const { data: events, isLoading: eventLoading } = useGetEvents({ id: id! });
   const event = events?.[0];
@@ -117,6 +112,7 @@ export const GameEdit = () => {
       setPrice(event.price);
       setPriceInput(event.price.toString());
       setMaxUsers(event.maxUsers);
+      setStatus(event.status || EventStatus.registration);
     }
   }, [event]);
 
@@ -152,6 +148,7 @@ export const GameEdit = () => {
   const [price, setPrice] = useState<number>(0);
   const [priceInput, setPriceInput] = useState<string>("");
   const [maxUsers, setMaxUsers] = useState<number>(0);
+  const [status, setStatus] = useState<EventStatus | null>(null);
 
   const isFormValid = () => {
     return (
@@ -164,6 +161,7 @@ export const GameEdit = () => {
       clubAddress &&
       type &&
       courtId &&
+      status !== null &&
       rankMin !== null &&
       rankMin >= 0 &&
       rankMax !== null &&
@@ -212,6 +210,7 @@ export const GameEdit = () => {
       rankMax: ranks.find((r) => r.title === rankMaxInput)?.to ?? 0,
       rankMin: ranks.find((r) => r.title === rankMinInput)?.from ?? 0,
       startTime: start,
+      status: status || undefined,
       data: { game: { type: type } },
     };
 
@@ -222,20 +221,6 @@ export const GameEdit = () => {
       alert("Ошибка при обновлении турнира");
       console.error(error);
     }
-  };
-
-  const handleDeleteTournament = async () => {
-    openModal({
-      title: "Уверены, что хотите удалить событие?",
-      subtitle: "Восстановить заполненную информацию будет невозможно",
-      declineButtonText: "Отмена",
-      acceptButtonText: "Удалить",
-      declineButtonOnClick: () => {},
-      acceptButtonOnClick: async () => {
-        await deleteEvent(id!);
-        navigate(-1);
-      },
-    });
   };
 
   if (isAdminLoading || courtsLoading || eventLoading) return <Preloader />;
@@ -356,6 +341,7 @@ export const GameEdit = () => {
             placeholder={"чч:мм-чч:мм"}
             hasError={timeError}
           />
+
           <Input
             onChangeFunction={setClubName}
             title={"Место"}
@@ -385,6 +371,12 @@ export const GameEdit = () => {
             }}
             hasError={!courtId}
             courts={courts ?? []}
+          />
+          <EventStatusSelector
+            title="Статус события"
+            value={status}
+            onChangeFunction={setStatus}
+            hasError={status === null}
           />
           <RankSelector
             title="Минимальный ранг"
@@ -435,14 +427,6 @@ export const GameEdit = () => {
               onCountChange={setMaxUsers}
             />
           </div>
-          <Button
-            disabled={isDeletingEvent}
-            onClick={handleDeleteTournament}
-            className="w-full flex justify-between mt-2 bg-[#FFF0F1] text-[#F34338]"
-          >
-            <div>Удалить игру</div>
-            <div>{Icons.Delete()}</div>
-          </Button>
         </div>
       </div>
 
