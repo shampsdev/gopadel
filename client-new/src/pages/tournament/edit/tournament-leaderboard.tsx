@@ -184,10 +184,11 @@ export const TournamentLeaderboard = () => {
 
             {events[0].participants &&
               events[0].participants
-                ?.filter((participant) =>
-                  events[0].data?.result?.leaderboard.some(
-                    (place) => place.userId === participant.userId
-                  )
+                ?.filter(
+                  (participant) =>
+                    !events[0].data?.result?.leaderboard.some(
+                      (place) => place.userId === participant.userId
+                    )
                 )
                 ?.map((userRegistration) => {
                   return (
