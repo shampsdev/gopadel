@@ -19,6 +19,9 @@ import { LinksWrapper } from "../../components/helpers/links-wrapper";
 import { RegistrationStatus } from "../../types/registration-status";
 import type { Waitlist } from "../../types/waitlist.type";
 import { EventStatus } from "../../types/event-status.type";
+import { getPrizeString } from "../../utils/get-prize-string";
+import type { Game as GameType } from "../../types/game.type";
+import { GameStatusActions } from "../../components/widgets/game-status-actions";
 
 export const Game = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -29,7 +32,10 @@ export const Game = () => {
 
   const { data: events, isLoading } = useGetEvents({
     id: id!,
-  });
+  }) as {
+    data: GameType[] | undefined;
+    isLoading: boolean;
+  };
   const { data: waitlist } = useGetEventWaitlist(id!);
   const { data: isAdmin } = useIsAdmin();
 
@@ -95,7 +101,43 @@ export const Game = () => {
                 </div>
               </>
             )}
+          <div className="py-5 border-b border-[#DADCE0]">
+            <div
+              onClick={async () => {
+                navigate(`/game/${id}/leaderboard`);
+              }}
+              className="flex flex-row justify-between items-center gap-[18px]"
+            >
+              <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#041124] rounded-full">
+                {Icons.Stack()}
+              </div>
 
+              <div className="text-black text-[16px] flex-grow flex flex-col gap-[2px]">
+                <p>Результаты игры</p>
+                <div className="text-[#868D98] text-[12px]">
+                  Ваш результат:{" "}
+                  <span className="text-black">
+                    {(events?.[0].status !== EventStatus.completed ||
+                      !events?.[0].participants?.find(
+                        (participant) => participant.userId === user?.id
+                      )) &&
+                      "-"}
+                    {events?.[0].status === EventStatus.completed &&
+                      events?.[0].participants?.find(
+                        (participant) => participant.userId === user?.id
+                      ) &&
+                      getPrizeString(
+                        events?.[0].data?.result?.leaderboard.find(
+                          (place) => place.userId === user?.id
+                        )?.place
+                      )}
+                  </span>
+                </div>
+              </div>
+
+              {Icons.ArrowRight("#A4A9B4", "24", "24")}
+            </div>
+          </div>
           <div className="py-5 border-b border-[#DADCE0]">
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-col gap-[2px]  text-[14px] text-[#5D6674] ">
@@ -357,7 +399,7 @@ export const Game = () => {
         </div>
       </div>
 
-      <TournamentStatusActions
+      <GameStatusActions
         tournament={events?.[0]}
         user={user}
         waitlist={(waitlist as Waitlist) || []}

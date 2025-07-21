@@ -31,10 +31,10 @@ export const GameLeaderboard = () => {
     return (
       <div className="flex flex-col gap-9 pb-[100px]">
         <div className="flex flex-col gap-4 px-[12px]">
-          <p className="text-[24px] font-medium">Результаты турнира</p>
+          <p className="text-[24px] font-medium">Результаты игры</p>
           {events[0].status !== EventStatus.completed && (
             <div className="flex flex-col gap-[6px] text-[#5D6674] text-[16px] font-medium">
-              <p>Вы пока не добавили результаты прошедшего турнира</p>
+              <p>Вы пока не добавили результаты прошедшей игры</p>
             </div>
           )}
         </div>
@@ -249,7 +249,7 @@ export const GameLeaderboard = () => {
           user?.id || "",
           events?.[0]
         ) && (
-          <Link to={`/tournament/${id}/edit/leaderboard`}>
+          <Link to={`/game/${id}/edit/leaderboard`}>
             <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
               <Button>Внести результаты</Button>
             </div>

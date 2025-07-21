@@ -5,7 +5,7 @@ import { useAuthStore } from "../../shared/stores/auth.store";
 export const useGetEventWaitlist = (id: string) => {
   const { token } = useAuthStore();
   return useQuery({
-    queryKey: ["tournament-waitlist", id],
+    queryKey: ["waitlist", id],
     queryFn: () => getEventWaitlist(token ?? "", id),
     enabled: !!id && !!token,
   });

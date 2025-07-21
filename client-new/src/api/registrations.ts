@@ -96,3 +96,37 @@ export const reactivateCancelledRegistration = async (
   );
   return response.data;
 };
+
+export const approveRegistration = async (
+  token: string,
+  eventId: string,
+  userId: string
+): Promise<Registration | null> => {
+  const response = await api.put(
+    `/registrations/${eventId}/${userId}/approve`,
+    {},
+    {
+      headers: {
+        "X-Api-Token": token,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const rejectRegistration = async (
+  token: string,
+  eventId: string,
+  userId: string
+): Promise<Registration | null> => {
+  const response = await api.put(
+    `/registrations/${eventId}/${userId}/reject`,
+    {},
+    {
+      headers: {
+        "X-Api-Token": token,
+      },
+    }
+  );
+  return response.data;
+};

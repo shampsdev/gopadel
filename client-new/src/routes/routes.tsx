@@ -31,6 +31,7 @@ import { GameEdit } from "../pages/game/edit/game-edit";
 import { GameLeaderboardEdit } from "../pages/game/edit/game-leaderboard-edit";
 import { EventsHistory } from "../pages/profile/my-profile/events-history";
 import { GameLeaderboard } from "../pages/game/edit/game-leaderboard";
+import { GameWaitlist } from "../pages/game/game-waitlist";
 
 const authRoutes: RouteObject[] = [
   {
@@ -186,7 +187,7 @@ export const routes: RouteObject[] = [
                         ],
                       },
                       { path: "players", element: <GamePlayers /> },
-                      { path: "waitlist", element: <TournamentWaitlist /> },
+                      { path: "waitlist", element: <GameWaitlist /> },
                     ],
                   },
                 ],
