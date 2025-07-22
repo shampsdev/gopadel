@@ -7,7 +7,8 @@ import {
   Calendar, 
   DollarSign, 
   Hash,
-  Copy
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 import type { Payment } from '../shared/types';
 
@@ -26,6 +27,36 @@ const formatDate = (dateString: string) => {
     minute: '2-digit',
     second: '2-digit'
   });
+};
+
+const getStatusColor = (status: Payment['status']) => {
+  switch (status) {
+    case 'pending':
+      return 'text-yellow-400 bg-yellow-900/20';
+    case 'waiting_for_capture':
+      return 'text-blue-400 bg-blue-900/20';
+    case 'succeeded':
+      return 'text-green-400 bg-green-900/20';
+    case 'canceled':
+      return 'text-red-400 bg-red-900/20';
+    default:
+      return 'text-gray-400 bg-gray-900/20';
+  }
+};
+
+const getStatusLabel = (status: Payment['status']) => {
+  switch (status) {
+    case 'pending':
+      return 'Ожидание';
+    case 'waiting_for_capture':
+      return 'Ожидает подтверждения';
+    case 'succeeded':
+      return 'Успешно';
+    case 'canceled':
+      return 'Отменен';
+    default:
+      return status;
+  }
 };
 
 const copyToClipboard = async (text: string) => {
@@ -50,16 +81,19 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ payment, isOpen, onC
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Сумма */}
+          {/* Сумма и статус */}
           <Card className="bg-zinc-800 border-zinc-700">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />
-                Сумма
+                Сумма и статус
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-0">
+            <CardContent className="pt-0 space-y-2">
               <p className="text-2xl font-bold text-white">{payment.amount} ₽</p>
+              <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(payment.status)}`}>
+                {getStatusLabel(payment.status)}
+              </div>
             </CardContent>
           </Card>
 
@@ -76,7 +110,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ payment, isOpen, onC
             </CardContent>
           </Card>
 
-          {/* Payment ID */}
+          {/* Payment ID в YooKassa */}
           <Card className="bg-zinc-800 border-zinc-700">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
@@ -86,18 +120,49 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ payment, isOpen, onC
             </CardHeader>
             <CardContent className="pt-0">
               <div className="flex items-center justify-between">
-                <p className="font-mono text-white">{payment.id}</p>
+                <p className="font-mono text-white break-all">{payment.paymentId}</p>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => copyToClipboard(payment.id)}
-                  className="bg-zinc-700 border-zinc-600 hover:bg-zinc-600"
+                  onClick={() => copyToClipboard(payment.paymentId)}
+                  className="bg-zinc-700 border-zinc-600 hover:bg-zinc-600 ml-2"
                 >
                   <Copy className="h-3 w-3" />
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          {/* Ссылка на оплату */}
+          {payment.paymentLink && (
+            <Card className="bg-zinc-800 border-zinc-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                  <ExternalLink className="h-4 w-4" />
+                  Ссылка на оплату
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex items-center justify-between">
+                  <Button
+                    onClick={() => window.open(payment.paymentLink, '_blank')}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Открыть ссылку
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => copyToClipboard(payment.paymentLink!)}
+                    className="bg-zinc-700 border-zinc-600 hover:bg-zinc-600"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Кнопка закрытия */}
           <div className="flex justify-end pt-4">

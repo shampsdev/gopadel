@@ -89,10 +89,17 @@ export interface Registration {
 // Базовая модель платежа
 export interface Payment {
   id: string;
+  paymentId: string;
+  date: string;
   amount: number;
-  status: 'pending' | 'succeeded' | 'canceled' | 'refunded';
+  status: 'pending' | 'waiting_for_capture' | 'succeeded' | 'canceled';
+  paymentLink?: string;
+  confirmationToken?: string;
   createdAt: string;
   updatedAt: string;
+  userId?: string;
+  eventId?: string;
+  registration?: Registration;
 }
 
 // Базовая модель клуба

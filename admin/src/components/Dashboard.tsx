@@ -50,7 +50,7 @@ const HomePage = ({ setCurrentPage, navItems }: { setCurrentPage: (page: string,
           <CardHeader className="pb-3 p-4 md:p-6">
             <div className="flex items-center space-x-3">
               <div className="p-2 md:p-3 rounded-lg bg-zinc-800 group-hover:bg-zinc-700 transition-colors">
-                <item.icon className="h-5 w-5 md:h-6 md:w-6" />
+                <item.icon className={`h-5 w-5 md:h-6 md:w-6 ${item.color.split(' ')[0]}`} />
               </div>
               <div className="min-w-0 flex-1">
                 <CardTitle className="text-white text-base md:text-lg truncate">{item.title}</CardTitle>

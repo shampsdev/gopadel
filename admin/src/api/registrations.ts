@@ -11,9 +11,9 @@ import type {
 // Реэкспорт для удобства использования в компонентах
 export type { User, Event, RegistrationStatus, Registration, Payment, EventType };
 
-// Расширенная модель регистрации с платежами
+// Расширенная модель регистрации с платежами (из swagger.json)
 export interface RegistrationWithPayments extends Registration {
-  // Убираем поля от базовой Registration и добавляем специфичные для админки
+  payments?: Payment[];
 }
 
 // Модель опции события для выпадающих списков
@@ -51,27 +51,47 @@ export interface UserSearchRequest {
   telegramId?: number;
 }
 
-// Модель фильтра админских регистраций
+// Модель фильтра админских регистраций (из swagger.json)
 export interface AdminFilterRegistration {
-  id?: string;
-  userId?: string;
   eventId?: string;
+  eventName?: string;
   status?: RegistrationStatus;
+  userFirstName?: string;
+  userId?: string;
   userTelegramId?: number;
   userTelegramUsername?: string;
-  userFirstName?: string;
-  eventName?: string;
 }
 
-export const statusOptions = [
-  { value: 'PENDING', label: 'Ожидает', color: 'text-yellow-400', icon: 'Clock' },
-  { value: 'INVITED', label: 'Приглашён', color: 'text-blue-400', icon: 'Mail' },
-  { value: 'CONFIRMED', label: 'Подтверждено', color: 'text-green-400', icon: 'CheckCircle' },
-  { value: 'CANCELLED_BEFORE_PAYMENT', label: 'Отменено до оплаты', color: 'text-red-400', icon: 'XCircle' },
-  { value: 'CANCELLED_AFTER_PAYMENT', label: 'Отменено после оплаты', color: 'text-red-400', icon: 'XCircle' },
-  { value: 'REFUNDED', label: 'Возврат', color: 'text-purple-400', icon: 'RotateCcw' },
-  { value: 'CANCELLED', label: 'Отклонено', color: 'text-red-400', icon: 'XCircle' },
-  { value: 'LEFT', label: 'Покинул', color: 'text-gray-400', icon: 'LogOut' },
+// Модель для обновления статуса регистрации (из swagger.json)
+export interface RegistrationStatusUpdate {
+  status: RegistrationStatus;
+}
+
+// Статусы для игр
+export const gameStatusOptions = [
+  { value: 'INVITED' as RegistrationStatus, label: 'Приглашён', color: 'text-blue-300', bgColor: 'bg-blue-900/30' },
+  { value: 'CONFIRMED' as RegistrationStatus, label: 'Подтверждено', color: 'text-green-300', bgColor: 'bg-green-900/30' },
+  { value: 'CANCELLED' as RegistrationStatus, label: 'Отменена', color: 'text-red-300', bgColor: 'bg-red-900/30' },
+  { value: 'LEFT' as RegistrationStatus, label: 'Покинул', color: 'text-gray-300', bgColor: 'bg-gray-900/30' },
+];
+
+// Статусы для турниров
+export const tournamentStatusOptions = [
+  { value: 'PENDING' as RegistrationStatus, label: 'Ожидание', color: 'text-yellow-300', bgColor: 'bg-yellow-900/30' },
+  { value: 'CANCELLED_BEFORE_PAYMENT' as RegistrationStatus, label: 'Отменена до оплаты', color: 'text-red-300', bgColor: 'bg-red-900/30' },
+  { value: 'CONFIRMED' as RegistrationStatus, label: 'Подтверждено', color: 'text-green-300', bgColor: 'bg-green-900/30' },
+  { value: 'REFUNDED' as RegistrationStatus, label: 'Возврат', color: 'text-purple-300', bgColor: 'bg-purple-900/30' },
+];
+
+// Все статусы для отображения в фильтрах
+export const allStatusOptions = [
+  { value: 'PENDING' as RegistrationStatus, label: 'Ожидание', color: 'text-yellow-300', bgColor: 'bg-yellow-900/30' },
+  { value: 'INVITED' as RegistrationStatus, label: 'Приглашён', color: 'text-blue-300', bgColor: 'bg-blue-900/30' },
+  { value: 'CONFIRMED' as RegistrationStatus, label: 'Подтверждено', color: 'text-green-300', bgColor: 'bg-green-900/30' },
+  { value: 'CANCELLED_BEFORE_PAYMENT' as RegistrationStatus, label: 'Отменена до оплаты', color: 'text-red-300', bgColor: 'bg-red-900/30' },
+  { value: 'REFUNDED' as RegistrationStatus, label: 'Возврат', color: 'text-purple-300', bgColor: 'bg-purple-900/30' },
+  { value: 'CANCELLED' as RegistrationStatus, label: 'Отменена', color: 'text-red-300', bgColor: 'bg-red-900/30' },
+  { value: 'LEFT' as RegistrationStatus, label: 'Покинул', color: 'text-gray-300', bgColor: 'bg-gray-900/30' },
 ];
 
 export const paymentStatusOptions = [
@@ -81,106 +101,19 @@ export const paymentStatusOptions = [
   { value: 'refunded', label: 'Возврат', color: 'text-purple-400', icon: 'RotateCcw' },
 ];
 
-// Новое API согласно swagger.json
+// API согласно swagger.json
 export const registrationsApi = {
-  // Получение всех регистраций пользователя (используем для получения всех через фильтр пользователей)
-  getMyRegistrations: async (): Promise<RegistrationWithPayments[]> => {
-    const response = await api.get<RegistrationWithPayments[]>('/registrations/my');
+  // Получение регистраций с фильтрацией (из swagger.json)
+  filter: async (filter: AdminFilterRegistration): Promise<RegistrationWithPayments[]> => {
+    const response = await api.post<RegistrationWithPayments[]>('/admin/registrations/filter', filter);
     return response.data;
   },
 
-  // Фильтрация через API пользователей и событий (комбинированный подход)
-  filter: async (filter: AdminFilterRegistration): Promise<RegistrationWithPayments[]> => {
-    try {
-      // Получаем все события через admin API
-      const eventsResponse = await api.post('/admin/events/filter', {});
-      const events = eventsResponse.data;
-      
-      const allRegistrations: RegistrationWithPayments[] = [];
-      
-      // Извлекаем участников из всех событий
-      events.forEach((event: Event & { participants?: RegistrationWithPayments[] }) => {
-        if (event.participants) {
-          event.participants.forEach((participant: RegistrationWithPayments) => {
-            allRegistrations.push({
-              ...participant,
-              event: event
-            });
-          });
-        }
-      });
-      
-      // Применяем фильтры
-      let filteredRegistrations = allRegistrations;
-      
-      if (filter.eventId) {
-        filteredRegistrations = filteredRegistrations.filter(reg => reg.eventId === filter.eventId);
-      }
-      
-      if (filter.userId) {
-        filteredRegistrations = filteredRegistrations.filter(reg => reg.userId === filter.userId);
-      }
-      
-      if (filter.status) {
-        filteredRegistrations = filteredRegistrations.filter(reg => reg.status === filter.status);
-      }
-      
-      if (filter.userTelegramId) {
-        filteredRegistrations = filteredRegistrations.filter(reg => 
-          reg.user?.telegramId === filter.userTelegramId
-        );
-      }
-      
-      if (filter.userTelegramUsername) {
-        filteredRegistrations = filteredRegistrations.filter(reg => 
-          reg.user?.telegramUsername?.toLowerCase().includes(filter.userTelegramUsername!.toLowerCase())
-        );
-      }
-      
-      if (filter.userFirstName) {
-        filteredRegistrations = filteredRegistrations.filter(reg => 
-          reg.user?.firstName.toLowerCase().includes(filter.userFirstName!.toLowerCase())
-        );
-      }
-      
-      if (filter.eventName) {
-        filteredRegistrations = filteredRegistrations.filter(reg => 
-          reg.event?.name.toLowerCase().includes(filter.eventName!.toLowerCase())
-        );
-      }
-      
-      return filteredRegistrations;
-    } catch (error) {
-      console.error('Error filtering registrations:', error);
-      return [];
-    }
+  // Обновление статуса регистрации (из swagger.json)
+  updateStatus: async (userId: string, eventId: string, statusUpdate: RegistrationStatusUpdate): Promise<RegistrationWithPayments> => {
+    const response = await api.patch<RegistrationWithPayments>(`/admin/registrations/${userId}/${eventId}/status`, statusUpdate);
+    return response.data;
   },
-
-  getAll: async (): Promise<RegistrationWithPayments[]> => {
-    // Получаем все события и извлекаем из них участников
-    try {
-      const response = await api.post('/admin/events/filter', {});
-      const events = response.data;
-      
-      const allRegistrations: RegistrationWithPayments[] = [];
-      
-      events.forEach((event: Event & { participants?: RegistrationWithPayments[] }) => {
-        if (event.participants) {
-          allRegistrations.push(...event.participants);
-        }
-      });
-      
-      return allRegistrations;
-    } catch (error) {
-      console.error('Error getting all registrations:', error);
-      return [];
-    }
-  },
-
-  // Обновление статуса пока недоступно в новом API
-  // updateStatus: async (id: string, status: RegistrationStatus): Promise<RegistrationWithPayments> => {
-  //   throw new Error('Обновление статуса регистрации не поддерживается в новом API');
-  // },
 
   getEventOptions: async (): Promise<EventOption[]> => {
     const response = await api.post<Event[]>('/admin/events/filter', {});

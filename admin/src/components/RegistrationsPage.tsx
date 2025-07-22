@@ -6,15 +6,22 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { ScrollArea } from './ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Label } from './ui/label';
+import { Badge } from './ui/badge';
 import { 
   Filter, 
   RefreshCw, 
   ChevronLeft, 
   ChevronRight,
   Calendar,
-  Trophy
+  Trophy,
+  CreditCard,
+  Edit3,
+  Save,
+  X
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import { useToastContext } from '../contexts/ToastContext';
+import { RegistrationModal } from './RegistrationModal';
 import { registrationsApi } from '../api/registrations';
 import type { 
   RegistrationWithPayments as Registration, 
@@ -23,6 +30,7 @@ import type {
   UserOption,
   RegistrationStatus
 } from '../api/registrations';
+import { allStatusOptions, gameStatusOptions, tournamentStatusOptions } from '../api/registrations';
 
 const REGISTRATIONS_PER_PAGE = 10;
 
@@ -30,22 +38,6 @@ interface RegistrationsPageProps {
   eventId?: string;
   eventName?: string;
 }
-
-const statusOptions: { value: RegistrationStatus; label: string; color: string; bgColor: string }[] = [
-  { value: 'PENDING', label: 'Ожидание', color: 'text-yellow-300', bgColor: 'bg-yellow-900/30' },
-  { value: 'INVITED', label: 'Приглашён', color: 'text-blue-300', bgColor: 'bg-blue-900/30' },
-  { value: 'CONFIRMED', label: 'Подтверждено', color: 'text-green-300', bgColor: 'bg-green-900/30' },
-  { value: 'CANCELLED', label: 'Отменена', color: 'text-red-300', bgColor: 'bg-red-900/30' },
-  { value: 'LEFT', label: 'Покинул', color: 'text-gray-300', bgColor: 'bg-gray-900/30' },
-];
-
-// Опции статусов платежей (пока не используются)
-// const paymentStatusOptions: { value: Payment['status']; label: string; icon: React.ReactNode; color: string }[] = [
-//   { value: 'pending', label: 'Ожидание', icon: <Clock className="h-3 w-3" />, color: 'text-yellow-300 bg-yellow-900/20' },
-//   { value: 'succeeded', label: 'Успешно', icon: <CheckCircle className="h-3 w-3" />, color: 'text-green-300 bg-green-900/20' },
-//   { value: 'canceled', label: 'Отменен', icon: <XCircle className="h-3 w-3" />, color: 'text-red-300 bg-red-900/20' },
-//   { value: 'refunded', label: 'Возврат', icon: <AlertCircle className="h-3 w-3" />, color: 'text-purple-300 bg-purple-900/20' },
-// ];
 
 export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: initialEventId }) => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -55,16 +47,28 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [showUserResults, setShowUserResults] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingStatusId, setEditingStatusId] = useState<string | null>(null);
+  const [newStatus, setNewStatus] = useState<RegistrationStatus>('PENDING');
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   
   // Фильтры
   const [selectedEvent, setSelectedEvent] = useState<string>(initialEventId || '');
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   
-  const { error: showErrorToast } = useToastContext();
+  const { user } = useAuth();
+  const { error: showErrorToast, success: showSuccessToast } = useToastContext();
+
+  const canEditStatus = user?.is_superuser || false;
 
   useEffect(() => {
     loadEvents();
+    // Автоматически загружаем регистрации если есть начальные фильтры
+    if (initialEventId) {
+      loadRegistrations();
+    }
   }, []);
 
   // Автоматический поиск при изменении фильтров
@@ -168,8 +172,65 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
     setSelectedStatus(value);
   };
 
+  const handleViewPayments = (registration: Registration) => {
+    setSelectedRegistration(registration);
+    setIsModalOpen(true);
+  };
+
+  const getRegistrationKey = (registration: Registration) => {
+    return `${registration.userId}-${registration.eventId}`;
+  };
+
+  const getAvailableStatuses = (eventType?: string) => {
+    if (eventType === 'game') {
+      return gameStatusOptions;
+    } else if (eventType === 'tournament') {
+      return tournamentStatusOptions;
+    }
+    return allStatusOptions;
+  };
+
+  const handleEditStatus = (registration: Registration) => {
+    const key = getRegistrationKey(registration);
+    setEditingStatusId(key);
+    setNewStatus(registration.status);
+  };
+
+  const handleSaveStatus = async (registration: Registration) => {
+    setUpdatingStatus(true);
+    try {
+      const updatedRegistration = await registrationsApi.updateStatus(
+        registration.userId,
+        registration.eventId,
+        { status: newStatus }
+      );
+      
+      // Обновляем локальное состояние
+      setRegistrations(prev => 
+        prev.map(reg => 
+          reg.userId === updatedRegistration.userId && reg.eventId === updatedRegistration.eventId
+            ? updatedRegistration
+            : reg
+        )
+      );
+      
+      setEditingStatusId(null);
+      showSuccessToast('Статус регистрации обновлен');
+    } catch (error: any) {
+      console.error('Ошибка обновления статуса:', error);
+      showErrorToast(error.response?.data?.error || 'Ошибка при обновлении статуса');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingStatusId(null);
+    setNewStatus('PENDING');
+  };
+
   const getStatusConfig = (status: RegistrationStatus) => {
-    return statusOptions.find(s => s.value === status) || statusOptions[0];
+    return allStatusOptions.find(s => s.value === status) || allStatusOptions[0];
   };
 
   const formatDate = (dateString: string) => {
@@ -229,8 +290,8 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                 <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                   <SelectValue placeholder="Выберите событие" />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-800 border-zinc-700">
-                  <SelectItem value="">Все события</SelectItem>
+                                 <SelectContent className="bg-zinc-800 border-zinc-700">
+                    <SelectItem value="">Все события</SelectItem>
                   {tournaments.map((event) => (
                     <SelectItem key={event.id} value={event.id}>
                       {event.name}
@@ -279,9 +340,9 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                 <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                   <SelectValue placeholder="Выберите статус" />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-800 border-zinc-700">
-                  <SelectItem value="">Все статусы</SelectItem>
-                  {statusOptions.map((status) => (
+                                 <SelectContent className="bg-zinc-800 border-zinc-700">
+                    <SelectItem value="">Все статусы</SelectItem>
+                  {allStatusOptions.map((status) => (
                     <SelectItem key={status.value} value={status.value}>
                       <span className={status.color}>{status.label}</span>
                     </SelectItem>
@@ -332,50 +393,136 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                       <th className="text-left py-3 px-4 text-zinc-300 font-medium">Пользователь</th>
                       <th className="text-left py-3 px-4 text-zinc-300 font-medium">Событие</th>
                       <th className="text-left py-3 px-4 text-zinc-300 font-medium">Статус</th>
+                      <th className="text-left py-3 px-4 text-zinc-300 font-medium">Платежи</th>
                       <th className="text-left py-3 px-4 text-zinc-300 font-medium">Дата регистрации</th>
+                      {canEditStatus && <th className="text-right py-3 px-4 text-zinc-300 font-medium">Действия</th>}
                     </tr>
                   </thead>
                   <tbody>
-                    {currentRegistrations.map((registration, index) => (
-                      <tr key={`${registration.userId}-${registration.eventId}-${index}`} className="border-b border-zinc-800 hover:bg-zinc-800/50">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-zinc-700 text-white text-xs">
-                                {registration.user && getInitials(registration.user.firstName, registration.user.lastName)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="text-white font-medium">
-                                {registration.user?.firstName} {registration.user?.lastName}
-                              </p>
-                              <p className="text-sm text-zinc-400">@{registration.user?.telegramUsername}</p>
+                    {currentRegistrations.map((registration, index) => {
+                      const key = getRegistrationKey(registration);
+                      const isEditing = editingStatusId === key;
+                      
+                      return (
+                        <tr key={`${key}-${index}`} className="border-b border-zinc-800 hover:bg-zinc-800/50">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback className="bg-zinc-700 text-white text-xs">
+                                  {registration.user && getInitials(registration.user.firstName, registration.user.lastName)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="text-white font-medium">
+                                  {registration.user?.firstName} {registration.user?.lastName}
+                                </p>
+                                <p className="text-sm text-zinc-400">@{registration.user?.telegramUsername}</p>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-2">
-                            <Trophy className="h-4 w-4 text-yellow-500" />
-                            <div>
-                              <p className="text-white font-medium">{registration.event?.name}</p>
-                              <p className="text-sm text-zinc-400">
-                                {registration.event && formatDate(registration.event.startTime)}
-                              </p>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-2">
+                              <Trophy className="h-4 w-4 text-yellow-500" />
+                              <div>
+                                <p className="text-white font-medium">{registration.event?.name}</p>
+                                <p className="text-sm text-zinc-400">
+                                  {registration.event && formatDate(registration.event.startTime)}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-2">
-                            <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusConfig(registration.status).bgColor} ${getStatusConfig(registration.status).color}`}>
-                              {getStatusConfig(registration.status).label}
+                          </td>
+                          <td className="py-3 px-4">
+                            {isEditing ? (
+                              <div className="flex items-center space-x-2">
+                                                                 <Select 
+                                   value={newStatus} 
+                                   onValueChange={(value) => setNewStatus(value as RegistrationStatus)}
+                                 >
+                                   <SelectTrigger className="bg-zinc-700 border-zinc-600 text-white w-40">
+                                     <SelectValue />
+                                   </SelectTrigger>
+                                   <SelectContent className="bg-zinc-800 border-zinc-700">
+                                     {getAvailableStatuses(registration.event?.type).map((status) => (
+                                       <SelectItem key={status.value} value={status.value}>
+                                         <span className={status.color}>{status.label}</span>
+                                       </SelectItem>
+                                     ))}
+                                   </SelectContent>
+                                 </Select>
+                                <Button
+                                  onClick={() => handleSaveStatus(registration)}
+                                  disabled={updatingStatus}
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700 px-2"
+                                >
+                                  <Save className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  onClick={handleCancelEdit}
+                                  disabled={updatingStatus}
+                                  size="sm"
+                                  variant="outline"
+                                  className="bg-zinc-700 border-zinc-600 hover:bg-zinc-600 px-2"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-2">
+                                <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusConfig(registration.status).bgColor} ${getStatusConfig(registration.status).color}`}>
+                                  {getStatusConfig(registration.status).label}
+                                </div>
+                                {canEditStatus && (
+                                  <Button
+                                    onClick={() => handleEditStatus(registration)}
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 w-6 p-0 hover:bg-zinc-700"
+                                  >
+                                    <Edit3 className="h-3 w-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-2">
+                              {registration.payments && registration.payments.length > 0 ? (
+                                <Button
+                                  onClick={() => handleViewPayments(registration)}
+                                  size="sm"
+                                  variant="outline"
+                                  className="flex items-center space-x-2 bg-green-600/20 border-green-600 text-green-300 hover:bg-green-600/30 hover:border-green-500"
+                                >
+                                  <CreditCard className="h-4 w-4" />
+                                  <span>Платежи ({registration.payments.length})</span>
+                                </Button>
+                              ) : (
+                                <span className="text-zinc-500 text-sm">Нет платежей</span>
+                              )}
                             </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <p className="text-zinc-300">{formatDate(registration.createdAt)}</p>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="text-zinc-300">{formatDate(registration.createdAt)}</p>
+                          </td>
+                          {canEditStatus && (
+                            <td className="py-3 px-4 text-right">
+                              {!isEditing && (
+                                <Button
+                                  onClick={() => handleEditStatus(registration)}
+                                  size="sm"
+                                  variant="outline"
+                                  className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white"
+                                >
+                                  <Edit3 className="h-4 w-4 mr-2" />
+                                  Изменить статус
+                                </Button>
+                              )}
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -418,6 +565,16 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
           )}
         </CardContent>
       </Card>
+
+      {/* Модальное окно платежей */}
+      <RegistrationModal
+        registration={selectedRegistration}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedRegistration(null);
+        }}
+      />
     </div>
   );
 };
