@@ -9,7 +9,7 @@ import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Plus, Edit, Trash2, Save, X, Gamepad2, Calendar, MapPin, UserCheck, Clock, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Gamepad2, Calendar, MapPin, UserCheck, Clock, Users, Target } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { ru } from 'date-fns/locale/ru';
 import "react-datepicker/dist/react-datepicker.css";
@@ -24,6 +24,7 @@ import { registrationsApi, type RegistrationWithPayments } from '../api/registra
 import { waitlistApi, type WaitlistUser } from '../api/waitlist';
 import type { AdminUser } from '../types/admin';
 import { ratingLevels, getRatingRangeDescription } from '../utils/ratingUtils';
+import { EventResultsModal } from './EventResultsModal';
 
 // Регистрируем русскую локаль для DatePicker
 registerLocale('ru', ru);
@@ -45,6 +46,8 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
   const [waitlist, setWaitlist] = useState<WaitlistUser[]>([]);
   const [loadingWaitlist, setLoadingWaitlist] = useState(false);
+  const [isResultsModalOpen, setIsResultsModalOpen] = useState(false);
+  const [resultsEvent, setResultsEvent] = useState<Event | null>(null);
   const [filters, setFilters] = useState({
     name: '',
     clubId: '',
@@ -165,18 +168,6 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
     }
   };
 
-  // Функция для обновления статуса регистрации (пока отключена)
-  // const handleStatusChange = async (registrationId: string, newStatus: RegistrationStatus) => {
-  //   try {
-  //     // Обновление статуса пока недоступно в новом API
-  //     toast.error('Обновление статуса регистрации временно недоступно');
-  //     console.warn('updateStatus not supported in new API');
-  //   } catch (error: unknown) {
-  //     toast.error('Ошибка при изменении статуса');
-  //     console.error('Error updating registration status:', error);
-  //   }
-  // };
-
   const handleEventStatusChange = async (eventId: string, newStatus: EventStatus) => {
     try {
       await eventsApi.updateStatus(eventId, newStatus);
@@ -199,6 +190,11 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
       toast.error('Ошибка при изменении статуса события');
       console.error('Error updating event status:', error);
     }
+  };
+
+  const handleManageResults = (game: Event) => {
+    setResultsEvent(game);
+    setIsResultsModalOpen(true);
   };
 
   const handleGameSelect = (game: Event) => {
@@ -1000,6 +996,18 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
                                 variant="outline"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  handleManageResults(game);
+                                }}
+                                className="bg-yellow-600 border-yellow-500 hover:bg-yellow-700 text-white h-8 px-2"
+                              >
+                                <Target className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                                Результаты
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   handleGameSelect(game);
                                 }}
                                 className="bg-blue-600 border-blue-500 hover:bg-blue-700 text-white h-8 px-2"
@@ -1030,6 +1038,17 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
           </CardContent>
         </Card>
       </div>
+
+      {/* Модальное окно для управления результатами */}
+      <EventResultsModal
+        event={resultsEvent}
+        isOpen={isResultsModalOpen}
+        onClose={() => setIsResultsModalOpen(false)}
+        onUpdate={() => {
+          loadGames();
+          setSelectedGame(null);
+        }}
+      />
     </div>
   );
 }; 

@@ -54,6 +54,34 @@ export interface User {
   loyalty?: Loyalty;
 }
 
+// Результаты событий
+export interface LeaderboardEntry {
+  place: number;
+  userId: string;
+}
+
+export interface GameResult {
+  leaderboard: LeaderboardEntry[];
+}
+
+export interface TournamentResult {
+  leaderboard: LeaderboardEntry[];
+}
+
+export interface GameData {
+  game?: {
+    type: string;
+  };
+  result?: GameResult;
+}
+
+export interface TournamentData {
+  tournament?: {
+    type: string;
+  };
+  result?: TournamentResult;
+}
+
 // Базовая модель события
 export interface Event {
   id: string;
@@ -70,7 +98,7 @@ export interface Event {
   clubId?: string;
   court: Court;
   organizer: User;
-  data?: Record<string, unknown>;
+  data?: Record<string, unknown> | GameData | TournamentData;
   createdAt: string;
   updatedAt: string;
 }

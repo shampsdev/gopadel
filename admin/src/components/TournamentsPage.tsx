@@ -9,7 +9,7 @@ import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Plus, Edit, Trash2, Save, X, Trophy, Calendar, MapPin, UserCheck, Clock, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Trophy, Calendar, MapPin, UserCheck, Clock, Users, Target } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { ru } from 'date-fns/locale/ru';
 import "react-datepicker/dist/react-datepicker.css";
@@ -24,6 +24,7 @@ import { registrationsApi, type RegistrationWithPayments } from '../api/registra
 import { waitlistApi, type WaitlistUser } from '../api/waitlist';
 import type { AdminUser } from '../types/admin';
 import { ratingLevels, getRatingRangeDescription } from '../utils/ratingUtils';
+import { EventResultsModal } from './EventResultsModal';
 
 // Регистрируем русскую локаль для DatePicker
 registerLocale('ru', ru);
@@ -46,6 +47,8 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
   const [waitlist, setWaitlist] = useState<WaitlistUser[]>([]);
   const [loadingWaitlist, setLoadingWaitlist] = useState(false);
+  const [isResultsModalOpen, setIsResultsModalOpen] = useState(false);
+  const [resultsEvent, setResultsEvent] = useState<Event | null>(null);
   const [filters, setFilters] = useState({
     name: '',
     clubId: '',
@@ -212,6 +215,11 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     }
   };
 
+  const handleManageResults = (tournament: Event) => {
+    setResultsEvent(tournament);
+    setIsResultsModalOpen(true);
+  };
+
   const handleTournamentSelect = (tournament: Event) => {
     setSelectedTournament(tournament);
     setEditingId(tournament.id);
@@ -219,7 +227,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     loadWaitlist(tournament.id);
     
     // Заполняем форму данными турнира
-    const tournamentType = (tournament.data?.tournamentType as string) || 'americano';
+    const tournamentType = getTournamentTypeFromData(tournament.data);
     setFormData({
       name: tournament.name,
       startTime: convertUtcToLocalDate(tournament.startTime),
@@ -447,6 +455,12 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
   const getAdminName = (userId: string) => {
     const admin = admins.find(a => a.user_id === userId);
     return admin ? `${admin.user?.firstName} ${admin.user?.lastName}` : userId;
+  };
+
+  const getTournamentTypeFromData = (data: any) => {
+    if (data?.tournament?.type) return data.tournament.type;
+    if (data?.tournamentType) return data.tournamentType;
+    return 'americano';
   };
 
   const getTournamentTypeName = (type: string) => {
@@ -1011,7 +1025,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                               {tournament.name}
                             </h3>
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
-                              {getTournamentTypeName((tournament.data?.tournamentType as string) || 'americano')}
+                              {getTournamentTypeName(getTournamentTypeFromData(tournament.data))}
                             </Badge>
                           </div>
                           
@@ -1074,6 +1088,18 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                                 variant="outline"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  handleManageResults(tournament);
+                                }}
+                                className="bg-yellow-600 border-yellow-500 hover:bg-yellow-700 text-white h-8 px-2"
+                              >
+                                <Target className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                                Результаты
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   handleTournamentSelect(tournament);
                                 }}
                                 className="bg-blue-600 border-blue-500 hover:bg-blue-700 text-white h-8 px-2"
@@ -1104,6 +1130,17 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
           </CardContent>
         </Card>
       </div>
+
+      {/* Модальное окно для управления результатами */}
+      <EventResultsModal
+        event={resultsEvent}
+        isOpen={isResultsModalOpen}
+        onClose={() => setIsResultsModalOpen(false)}
+        onUpdate={() => {
+          loadTournaments();
+          setSelectedTournament(null);
+        }}
+      />
     </div>
   );
 }; 
