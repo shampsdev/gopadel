@@ -104,7 +104,7 @@ export const SelectItem: React.FC<SelectItemProps> = ({ value, children }) => {
         onValueChange?.(value)
         setIsOpen(false)
       }}
-      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-zinc-700 hover:text-white text-white"
     >
       {children}
     </div>

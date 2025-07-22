@@ -9,7 +9,7 @@ import {
   Hash,
   Copy
 } from 'lucide-react';
-import type { Payment } from '../api/registrations';
+import type { Payment } from '../shared/types';
 
 interface PaymentModalProps {
   payment: Payment | null;
@@ -72,7 +72,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ payment, isOpen, onC
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-lg font-medium text-white">{formatDate(payment.date)}</p>
+              <p className="text-lg font-medium text-white">{formatDate(payment.createdAt)}</p>
             </CardContent>
           </Card>
 
@@ -86,11 +86,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ payment, isOpen, onC
             </CardHeader>
             <CardContent className="pt-0">
               <div className="flex items-center justify-between">
-                <p className="font-mono text-white">{payment.paymentId}</p>
+                <p className="font-mono text-white">{payment.id}</p>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => copyToClipboard(payment.paymentId)}
+                  onClick={() => copyToClipboard(payment.id)}
                   className="bg-zinc-700 border-zinc-600 hover:bg-zinc-600"
                 >
                   <Copy className="h-3 w-3" />

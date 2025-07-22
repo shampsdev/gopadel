@@ -166,7 +166,7 @@ export const Dashboard: React.FC = () => {
       case '/courts':
         return <CourtsPage />;
       case '/registrations':
-        return <RegistrationsPage tournamentId={navigationParams.tournamentId} tournamentName={navigationParams.tournamentName} />;
+        return <RegistrationsPage eventId={navigationParams.tournamentId} eventName={navigationParams.tournamentName} />;
       case '/loyalty':
         return <LoyaltyPage />;
       case '/clubs':

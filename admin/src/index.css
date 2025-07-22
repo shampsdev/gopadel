@@ -98,6 +98,23 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Глобальный белый цвет текста для темной темы */
+  html {
+    color-scheme: dark;
+  }
+  
+  body, 
+  div, 
+  span, 
+  p, 
+  h1, h2, h3, h4, h5, h6,
+  button,
+  input,
+  select,
+  textarea {
+    @apply text-white;
+  }
 }
 
 /* Кастомные стили для scrollbar */
@@ -149,4 +166,30 @@ input[type="datetime-local"]::-webkit-inner-spin-button {
 /* Убираем стили по умолчанию для select */
 select {
   color-scheme: dark;
+}
+
+/* Дополнительные стили для темной темы */
+.dark-theme-select {
+  background-color: #27272a !important;
+  color: white !important;
+  border-color: #3f3f46 !important;
+}
+
+.dark-theme-select:hover {
+  background-color: #3f3f46 !important;
+}
+
+.dark-theme-select option {
+  background-color: #27272a !important;
+  color: white !important;
+}
+
+/* Стили для Radix UI компонентов */
+[data-radix-collection-item] {
+  color: white !important;
+}
+
+[data-radix-collection-item]:hover {
+  background-color: #3f3f46 !important;
+  color: white !important;
 }

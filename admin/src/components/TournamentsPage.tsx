@@ -15,11 +15,12 @@ import { ru } from 'date-fns/locale/ru';
 import "react-datepicker/dist/react-datepicker.css";
 import { useToastContext } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
-import { eventsApi, type Event, type CreateEvent, type AdminPatchEvent } from '../api/events';
+import { eventsApi, type Event, type CreateEvent, type AdminPatchEvent, type EventStatus } from '../api/events';
+import { StatusSelector } from './StatusSelector';
 import { clubsApi, type Club } from '../api/clubs';
 import { courtsApi, type Court } from '../api/courts';
 import { adminsApi } from '../api/admins';
-import { registrationsApi, type RegistrationWithPayments, type RegistrationStatus } from '../api/registrations';
+import { registrationsApi, type RegistrationWithPayments } from '../api/registrations';
 import { waitlistApi, type WaitlistUser } from '../api/waitlist';
 import type { AdminUser } from '../types/admin';
 import { ratingLevels, getRatingRangeDescription } from '../utils/ratingUtils';
@@ -175,22 +176,39 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
     }
   };
 
-  const handleStatusChange = async (registrationId: string, newStatus: RegistrationStatus) => {
+  // Функция для обновления статуса регистрации (пока отключена)
+  // const handleStatusChange = async (registrationId: string, newStatus: RegistrationStatus) => {
+  //   try {
+  //     // Обновление статуса пока недоступно в новом API
+  //     toast.error('Обновление статуса регистрации временно недоступно');
+  //     console.warn('updateStatus not supported in new API');
+  //   } catch (error: unknown) {
+  //     toast.error('Ошибка при изменении статуса');
+  //     console.error('Error updating registration status:', error);
+  //   }
+  // };
+
+  const handleEventStatusChange = async (eventId: string, newStatus: EventStatus) => {
     try {
-      await registrationsApi.updateStatus(registrationId, newStatus);
-      toast.success('Статус регистрации обновлен');
+      await eventsApi.updateStatus(eventId, newStatus);
+      toast.success('Статус события обновлен');
       
       // Обновляем локальное состояние
-      setRegistrations(prev => 
-        prev.map(reg => 
-          reg.id === registrationId 
-            ? { ...reg, status: newStatus }
-            : reg
+      setTournaments(prev => 
+        prev.map(tournament => 
+          tournament.id === eventId 
+            ? { ...tournament, status: newStatus }
+            : tournament
         )
       );
+      
+      // Обновляем выбранный турнир если он изменился
+      if (selectedTournament && selectedTournament.id === eventId) {
+        setSelectedTournament((prev: any) => prev ? { ...prev, status: newStatus } : null);
+      }
     } catch (error: unknown) {
-      toast.error('Ошибка при изменении статуса');
-      console.error('Error updating registration status:', error);
+      toast.error('Ошибка при изменении статуса события');
+      console.error('Error updating event status:', error);
     }
   };
 
@@ -494,7 +512,7 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                     value="participants" 
                     className={`data-[state=active]:bg-zinc-700 data-[state=active]:text-white ${!selectedTournament ? 'opacity-50 pointer-events-none' : ''}`}
                   >
-                    Участники ({registrations.filter(r => r.status === 'ACTIVE' || r.status === 'PENDING').length}/{selectedTournament?.maxUsers})
+                                              Участники ({registrations.filter(r => r.status === 'CONFIRMED' || r.status === 'PENDING').length}/{selectedTournament?.maxUsers})
                   </TabsTrigger>
                   <TabsTrigger 
                     value="waiting" 
@@ -767,8 +785,8 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
-                                {registrations.map((registration) => (
-                                  <TableRow key={registration.id}>
+                                                              {registrations.map((registration, index) => (
+                                <TableRow key={`${registration.userId}-${registration.eventId}-${index}`}>
                                     <TableCell className="text-white">
                                       {registration.user?.firstName} {registration.user?.lastName}
                                     </TableCell>
@@ -786,43 +804,22 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                                       {registration.user?.rank || 0}
                                     </TableCell>
                                     <TableCell>
-                                      <div className="flex gap-1">
-                                        <Button
-                                          size="sm"
-                                          variant={registration.status === 'ACTIVE' ? 'default' : 'outline'}
-                                          onClick={() => handleStatusChange(registration.id, 'ACTIVE')}
-                                          className={`h-7 px-2 text-xs ${
-                                            registration.status === 'ACTIVE' 
-                                              ? 'bg-green-600 border-green-500 hover:bg-green-700 text-white' 
-                                              : 'bg-zinc-700 border-zinc-600 hover:bg-green-600 hover:border-green-500 text-zinc-300 hover:text-white'
-                                          }`}
-                                        >
-                                          Активен
-                                        </Button>
-                                        <Button
-                                          size="sm"
-                                          variant={registration.status === 'PENDING' ? 'default' : 'outline'}
-                                          onClick={() => handleStatusChange(registration.id, 'PENDING')}
-                                          className={`h-7 px-2 text-xs ${
-                                            registration.status === 'PENDING' 
-                                              ? 'bg-yellow-600 border-yellow-500 hover:bg-yellow-700 text-white' 
-                                              : 'bg-zinc-700 border-zinc-600 hover:bg-yellow-600 hover:border-yellow-500 text-zinc-300 hover:text-white'
-                                          }`}
-                                        >
-                                          Ожидание
-                                        </Button>
-                                        <Button
-                                          size="sm"
-                                          variant={registration.status === 'CANCELED' ? 'default' : 'outline'}
-                                          onClick={() => handleStatusChange(registration.id, 'CANCELED')}
-                                          className={`h-7 px-2 text-xs ${
-                                            registration.status === 'CANCELED' 
-                                              ? 'bg-red-600 border-red-500 hover:bg-red-700 text-white' 
-                                              : 'bg-zinc-700 border-zinc-600 hover:bg-red-600 hover:border-red-500 text-zinc-300 hover:text-white'
-                                          }`}
-                                        >
-                                          Отменен
-                                        </Button>
+                                      <div className="flex items-center">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                          registration.status === 'CONFIRMED' 
+                                            ? 'bg-green-900/30 text-green-400' 
+                                            : registration.status === 'PENDING'
+                                            ? 'bg-yellow-900/30 text-yellow-400'
+                                            : registration.status === 'INVITED'
+                                            ? 'bg-blue-900/30 text-blue-400'
+                                            : 'bg-red-900/30 text-red-400'
+                                        }`}>
+                                          {registration.status === 'CONFIRMED' ? 'Подтвержден' :
+                                           registration.status === 'PENDING' ? 'Ожидание' :
+                                           registration.status === 'INVITED' ? 'Приглашен' :
+                                           registration.status === 'CANCELLED' ? 'Отменен' :
+                                           registration.status === 'LEFT' ? 'Покинул' : registration.status}
+                                        </span>
                                       </div>
                                     </TableCell>
                                   </TableRow>
@@ -1043,6 +1040,15 @@ export const TournamentsPage: React.FC<TournamentsPageProps> = ({ onNavigateToRe
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
                               {getRatingRangeDescription(tournament.rankMin, tournament.rankMax)}
                             </Badge>
+                          </div>
+
+                          <div className="mt-3">
+                            <StatusSelector
+                              currentStatus={tournament.status}
+                              eventId={tournament.id}
+                              onStatusChange={handleEventStatusChange}
+                              disabled={!canEdit}
+                            />
                           </div>
                         </div>
                         
