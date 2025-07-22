@@ -21,6 +21,24 @@ definitions:
       type:
         $ref: '#/definitions/domain.EventType'
     type: object
+  domain.AdminFilterRegistration:
+    properties:
+      eventId:
+        type: string
+      eventName:
+        type: string
+      status:
+        $ref: '#/definitions/domain.RegistrationStatus'
+      userFirstName:
+        type: string
+      userId:
+        type: string
+      userTelegramId:
+        description: Дополнительные поля для удобства фильтрации
+        type: integer
+      userTelegramUsername:
+        type: string
+    type: object
   domain.AdminLogin:
     properties:
       password:
@@ -559,6 +577,41 @@ definitions:
       telegramUsername:
         type: string
     type: object
+  domain.Payment:
+    properties:
+      amount:
+        type: integer
+      confirmationToken:
+        type: string
+      date:
+        type: string
+      eventId:
+        type: string
+      id:
+        type: string
+      paymentId:
+        type: string
+      paymentLink:
+        type: string
+      registration:
+        $ref: '#/definitions/domain.Registration'
+      status:
+        $ref: '#/definitions/domain.PaymentStatus'
+      userId:
+        type: string
+    type: object
+  domain.PaymentStatus:
+    enum:
+    - pending
+    - waiting_for_capture
+    - succeeded
+    - canceled
+    type: string
+    x-enum-varnames:
+    - PaymentStatusPending
+    - PaymentStatusWaitingForCapture
+    - PaymentStatusSucceeded
+    - PaymentStatusCanceled
   domain.PlayingPosition:
     enum:
     - right
@@ -620,6 +673,13 @@ definitions:
     - RegistrationStatusRefunded
     - RegistrationStatusCancelled
     - RegistrationStatusLeft
+  domain.RegistrationStatusUpdate:
+    properties:
+      status:
+        $ref: '#/definitions/domain.RegistrationStatus'
+    required:
+    - status
+    type: object
   domain.RegistrationWithEvent:
     properties:
       createdAt:
@@ -628,6 +688,27 @@ definitions:
         $ref: '#/definitions/domain.EventForRegistration'
       eventId:
         type: string
+      status:
+        $ref: '#/definitions/domain.RegistrationStatus'
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      userId:
+        type: string
+    type: object
+  domain.RegistrationWithPayments:
+    properties:
+      createdAt:
+        type: string
+      event:
+        $ref: '#/definitions/domain.EventForRegistration'
+      eventId:
+        type: string
+      payments:
+        items:
+          $ref: '#/definitions/domain.Payment'
+        type: array
       status:
         $ref: '#/definitions/domain.RegistrationStatus'
       updatedAt:
@@ -1640,6 +1721,99 @@ paths:
       summary: Update loyalty level (Admin)
       tags:
       - admin-loyalties
+  /admin/registrations/{user_id}/{event_id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Update registration status. Available only for superuser.
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RegistrationStatusUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.RegistrationWithPayments'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update registration status (Admin)
+      tags:
+      - admin-registrations
+  /admin/registrations/filter:
+    post:
+      consumes:
+      - application/json
+      description: Get filtered list of registrations with payment info. Available
+        for any admin.
+      parameters:
+      - description: Registration filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AdminFilterRegistration'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.RegistrationWithPayments'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Filter registrations (Admin)
+      tags:
+      - admin-registrations
   /admin/users/{id}:
     patch:
       consumes:

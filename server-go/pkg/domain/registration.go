@@ -77,3 +77,8 @@ type AdminFilterRegistration struct {
 	UserFirstName        *string `json:"userFirstName,omitempty"`
 	EventName            *string `json:"eventName,omitempty"`
 }
+
+// RegistrationStatusUpdate для обновления статуса регистрации в админке
+type RegistrationStatusUpdate struct {
+	Status RegistrationStatus `json:"status" binding:"required"`
+}
