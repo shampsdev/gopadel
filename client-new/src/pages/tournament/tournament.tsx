@@ -68,7 +68,7 @@ export const Tournament = () => {
             user?.id,
             tournament?.[0]
           ) &&
-            tournament?.[0].isFinished && (
+            !tournament?.[0].isFinished && (
               <>
                 <div className="py-5 border-b border-[#DADCE0]">
                   <div
