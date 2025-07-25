@@ -24,7 +24,7 @@ export const GameWaitlist = () => {
         </div>
 
         <div className="flex flex-col gap-[20px] justify-around">
-          {waitlist.map((waitlistItem) => {
+          {waitlist.map((waitlistItem, index) => {
             return (
               <Link to={`/profile/${waitlistItem.user.id}`}>
                 <div
@@ -40,7 +40,7 @@ export const GameWaitlist = () => {
                   </div>
 
                   <div className="flex flex-row gap-[21px] flex-1 flex-grow ">
-                    <div className="flex flex-row flex-grow flex-1 ">
+                    <div className="flex flex-row flex-grow flex-1 justify-between">
                       <div className="flex flex-col gap-[2px]">
                         <p className="text-[14px]">
                           {waitlistItem.user.firstName}{" "}
@@ -49,6 +49,9 @@ export const GameWaitlist = () => {
                         <p className="text-[#868D98] text-[14px]">
                           {getRankTitle(waitlistItem.user.rank)}
                         </p>
+                      </div>
+                      <div className="text-[#A4A9B4] text-[14px] p-[8px] bg-[#F8F8FA] rounded-full">
+                        {index + 1}
                       </div>
                     </div>
                   </div>
