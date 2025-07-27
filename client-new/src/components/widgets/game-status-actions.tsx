@@ -13,6 +13,7 @@ import {
   isUserCancelledParticipating,
   isUserInWaitlist,
   isUserApproved,
+  isUserInvited,
 } from "../../utils/game-status-checks";
 import { Button } from "../ui/button";
 import { useModalStore } from "../../shared/stores/modal.store";
@@ -64,7 +65,7 @@ export const GameStatusActions = ({
 
   if (participatingAvailable(game)) {
     if (isUserRegistered(game, user)) {
-      if (isUserApproved(game, user)) {
+      if (isUserInvited(game, user)) {
         return (
           <div className="flex flex-col text-center gap-[18px]">
             <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">

@@ -38,6 +38,14 @@ export const isRankAllowed = (event: Event, user: User) => {
   );
 };
 
+export const isUserInvited = (event: Event, user: User) => {
+  return event.participants?.some(
+    (participant) =>
+      participant.user.id === user.id &&
+      participant.status === RegistrationStatus.INVITED
+  );
+};
+
 export const isUserApproved = (event: Event, user: User) => {
   return event.participants?.some(
     (participant) =>

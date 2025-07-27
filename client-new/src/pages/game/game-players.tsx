@@ -8,6 +8,9 @@ import { useGetEventWaitlist } from "../../api/hooks/useGetEventWaitlist";
 import { Button } from "../../components/ui/button";
 import { useRejectGameRegistration } from "../../api/hooks/mutations/registration/reject-game-registration";
 import { useApproveGameRegistration } from "../../api/hooks/mutations/registration/approve-game-registration";
+import { checkOrganizerRight } from "../../utils/check-organizer-right";
+import { useIsAdmin } from "../../api/hooks/useIsAdmin";
+import { useAuthStore } from "../../shared/stores/auth.store";
 
 export const GamePlayers = () => {
   useTelegramBackButton({ showOnMount: true });
@@ -17,9 +20,12 @@ export const GamePlayers = () => {
   const { data: waitlist, isLoading: waitlistLoading } = useGetEventWaitlist(
     id!
   );
+  const { user } = useAuthStore();
 
   const { mutate: approveRegistration } = useApproveGameRegistration();
   const { mutate: rejectRegistration } = useRejectGameRegistration();
+
+  const { data: isAdmin } = useIsAdmin();
 
   if (isLoading || waitlistLoading) return <Preloader />;
 
@@ -54,11 +60,11 @@ export const GamePlayers = () => {
               )
               ?.map((userRegistration) => {
                 return (
-                  <Link
+                  <div
                     key={userRegistration.userId}
-                    to={`/profile/${userRegistration.userId}`}
+                    className="flex flex-col gap-[10px] bg-[#F8F8FA] rounded-[30px] px-[16px] py-[8px]"
                   >
-                    <div className="flex flex-col gap-[10px] bg-[#F8F8FA] rounded-[30px] px-[16px] py-[8px]">
+                    <Link to={`/profile/${userRegistration.userId}`}>
                       <div className="flex flex-row items-center gap-[21px] ">
                         <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
                           <img
@@ -117,8 +123,13 @@ export const GamePlayers = () => {
                           )}
                         </div>
                       </div>
-                      {userRegistration.status ===
-                        RegistrationStatus.INVITED && (
+                    </Link>
+                    {userRegistration.status === RegistrationStatus.INVITED &&
+                      checkOrganizerRight(
+                        isAdmin?.admin || false,
+                        user?.id || "",
+                        events?.[0]
+                      ) && (
                         <div className="flex flex-row gap-4 justify-center text-[12px]">
                           <Button
                             className="text-[12px] py-[10px] text-white bg-[#FF5053]"
@@ -144,8 +155,7 @@ export const GamePlayers = () => {
                           </Button>
                         </div>
                       )}
-                    </div>
-                  </Link>
+                  </div>
                 );
               })}
         </div>
