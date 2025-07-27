@@ -34,7 +34,7 @@ export const addUserToWaitlist = async (
   tournamentId: string
 ): Promise<Waitlist | null> => {
   const response = await api.post(
-    `/tournaments/${tournamentId}/waitlist`,
+    `/events/${tournamentId}/waitlist`,
     {},
     {
       headers: {
@@ -49,7 +49,7 @@ export const removeUserFromWaitlist = async (
   token: string,
   tournamentId: string
 ): Promise<Waitlist | null> => {
-  const response = await api.delete(`/tournaments/${tournamentId}/waitlist`, {
+  const response = await api.delete(`/events/${tournamentId}/waitlist`, {
     headers: {
       "X-Api-Token": token,
     },

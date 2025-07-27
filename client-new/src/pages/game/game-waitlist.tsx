@@ -50,7 +50,7 @@ export const GameWaitlist = () => {
                           {getRankTitle(waitlistItem.user.rank)}
                         </p>
                       </div>
-                      <div className="text-[#A4A9B4] text-[14px] p-[8px] bg-[#F8F8FA] rounded-full">
+                      <div className="text-[#A4A9B4] text-[14px] w-[32px] h-[32px] bg-[#F8F8FA] rounded-full flex items-center justify-center flex-shrink-0">
                         {index + 1}
                       </div>
                     </div>

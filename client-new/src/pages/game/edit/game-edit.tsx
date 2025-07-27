@@ -200,7 +200,7 @@ export const GameEdit = () => {
       return;
     }
 
-    const tournamentData: PatchEvent = {
+    const patchEventData: PatchEvent = {
       courtId: courtId,
       description: description,
       endTime: end,
@@ -215,7 +215,7 @@ export const GameEdit = () => {
     };
 
     try {
-      await patchEvent(tournamentData);
+      await patchEvent(patchEventData);
       navigate(-1);
     } catch (error) {
       alert("Ошибка при обновлении турнира");
