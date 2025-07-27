@@ -109,13 +109,14 @@ export const EventHistoryCard = ({
 
         <div className="flex flex-row justify-between items-center">
           <p className="text-[16px] text-[#868D98]">статус</p>
-          {status === RegistrationStatus.CANCELLED && (
+          {status === RegistrationStatus.LEFT && (
             <p className="text-[#F34338]">Вы отменили участие</p>
           )}
           {status === RegistrationStatus.CANCELLED && (
             <p className="text-[#F34338]">Участие отменено</p>
           )}
-          {status === RegistrationStatus.PENDING && (
+          {(status === RegistrationStatus.PENDING ||
+            status === RegistrationStatus.INVITED) && (
             <p>Ожидает подтверждения</p>
           )}
           {status === RegistrationStatus.CONFIRMED && !isFinished && (
@@ -165,7 +166,7 @@ export const EventHistoryCard = ({
             )}
           {status === RegistrationStatus.CONFIRMED && isFinished && !place && (
             <p className="text-[#868D98] bg-[#F8F8FA] rounded-[10px] px-[10px] py-[6px] text-[14px]">
-              участник
+              участник {place}
             </p>
           )}
         </div>
