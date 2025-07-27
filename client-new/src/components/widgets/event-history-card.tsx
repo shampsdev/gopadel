@@ -166,7 +166,7 @@ export const EventHistoryCard = ({
             )}
           {status === RegistrationStatus.CONFIRMED && isFinished && !place && (
             <p className="text-[#868D98] bg-[#F8F8FA] rounded-[10px] px-[10px] py-[6px] text-[14px]">
-              участник {place}
+              участник
             </p>
           )}
         </div>

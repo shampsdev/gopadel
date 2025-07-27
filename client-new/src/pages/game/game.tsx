@@ -229,37 +229,18 @@ export const Game = () => {
                     <div
                       className={twMerge(
                         "text-[20px] ",
-                        user.loyalty.discount > 0
-                          ? "text-[#77BE14]"
-                          : "text-[#5D6674]"
+
+                        "text-[#5D6674]"
                       )}
                     >
-                      <span
-                        className={twMerge(
-                          "text-black font-semibold text-[20px]",
-                          user.loyalty.discount > 0 && "text-[#77BE14]"
-                        )}
-                      >
-                        {user.loyalty.discount > 0
-                          ? Math.round(
-                              events?.[0].price *
-                                (1 - user.loyalty.discount / 100)
-                            )
-                          : events?.[0].price}
+                      <span className={"text-black font-semibold text-[20px]"}>
+                        {events?.[0].price}
                       </span>{" "}
                       ₽
                     </div>
                   )}
                   <p className="text-[12px] text-[#868D98]">участие</p>
                 </div>
-                {user.loyalty.discount > 0 && events?.[0].price > 0 && (
-                  <div className="text-[14px]  text-[#F34338] line-through">
-                    <span className="font-semibold text-[14px] ">
-                      {events?.[0].price}
-                    </span>{" "}
-                    <span className="opacity-40">₽</span>
-                  </div>
-                )}
               </div>
             </div>
           </div>

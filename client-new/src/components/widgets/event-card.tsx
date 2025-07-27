@@ -122,7 +122,8 @@ export const EventCard = ({
                 <div
                   className={twMerge(
                     "text-[20px] ",
-                    user.loyalty.discount > 0
+                    user.loyalty.discount > 0 &&
+                      eventType === EventType.tournament
                       ? "text-[#77BE14]"
                       : "text-[#5D6674]"
                   )}
@@ -130,7 +131,9 @@ export const EventCard = ({
                   <span
                     className={twMerge(
                       "text-black font-semibold text-[20px]",
-                      user.loyalty.discount > 0 && "text-[#77BE14]"
+                      user.loyalty.discount > 0 &&
+                        eventType === EventType.tournament &&
+                        "text-[#77BE14]"
                     )}
                   >
                     {user.loyalty.discount > 0
@@ -142,12 +145,14 @@ export const EventCard = ({
               )}
               <p className="text-[12px] text-[#868D98]">участие</p>
             </div>
-            {user.loyalty.discount > 0 && cost > 0 && (
-              <div className="text-[14px]  text-[#F34338] line-through">
-                <span className="font-semibold text-[14px] ">{cost}</span>{" "}
-                <span className="opacity-40">₽</span>
-              </div>
-            )}
+            {user.loyalty.discount > 0 &&
+              cost > 0 &&
+              eventType === EventType.tournament && (
+                <div className="text-[14px]  text-[#F34338] line-through">
+                  <span className="font-semibold text-[14px] ">{cost}</span>{" "}
+                  <span className="opacity-40">₽</span>
+                </div>
+              )}
           </div>
           <div className="flex flex-row gap-3 items-center">
             <div className="flex flex-row items-center gap-2">
