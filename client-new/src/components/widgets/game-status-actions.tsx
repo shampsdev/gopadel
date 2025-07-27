@@ -12,11 +12,10 @@ import {
   isEventFinished,
   isUserRegistered,
   participatingAvailable,
-  userHasRegisteredAndHasNotPaid,
-  isUserRegisteredAndPaymentProceeded,
   isUserCancelledParticipating,
   isUserInWaitlist,
-} from "../../utils/tournament-status-checks";
+  isUserApproved,
+} from "../../utils/game-status-checks";
 import { Button } from "../ui/button";
 import { useCancelRegistrationBeforePayment } from "../../api/hooks/mutations/registration/cancel-registration-before-payment";
 import { useModalStore } from "../../shared/stores/modal.store";
@@ -73,7 +72,7 @@ export const GameStatusActions = ({
 
   if (participatingAvailable(game)) {
     if (isUserRegistered(game, user)) {
-      if (isUserRegisteredAndPaymentProceeded(game, user)) {
+      if (isUserApproved(game, user)) {
         return (
           <div className="flex flex-col text-center gap-[18px]">
             <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
@@ -126,7 +125,7 @@ export const GameStatusActions = ({
         );
       }
 
-      if (userHasRegisteredAndHasNotPaid(game, user)) {
+      if (isUserApproved(game, user)) {
         return (
           <div className="flex flex-col text-center gap-[18px]">
             <div>Вы зарегистрированы</div>
@@ -141,7 +140,7 @@ export const GameStatusActions = ({
                     acceptButtonText: "Отменить регистрацию",
                     declineButtonOnClick: () => {},
                     acceptButtonOnClick: async () => {
-                      await cancelRegistrationBeforePayment(game.id);
+                      await cancelRegistrationAfterPayment(game.id);
                     },
                   });
                 }}
@@ -183,7 +182,7 @@ export const GameStatusActions = ({
   }
 
   if (!participatingAvailable(game)) {
-    if (isUserRegisteredAndPaymentProceeded(game, user)) {
+    if (isUserApproved(game, user)) {
       return (
         <div className="flex flex-col text-center gap-[18px]">
           <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
@@ -203,48 +202,6 @@ export const GameStatusActions = ({
               }}
             >
               Отменить регистрацию
-            </Button>
-          </div>
-        </div>
-      );
-    }
-
-    if (userHasRegisteredAndHasNotPaid(game, user)) {
-      return (
-        <div className="flex flex-col text-center gap-[18px]">
-          <div>Вы зарегистрированы</div>
-          <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
-            <Button
-              className="bg-[#FF5053] text-white"
-              onClick={async () => {
-                openModal({
-                  title: "Уверены, что хотите отказаться от участия?",
-                  subtitle: "Ваше место сможет занять другой участник",
-                  declineButtonText: "Назад",
-                  acceptButtonText: "Отменить регистрацию",
-                  declineButtonOnClick: () => {},
-                  acceptButtonOnClick: async () => {
-                    await cancelRegistrationBeforePayment(game.id);
-                  },
-                });
-              }}
-            >
-              Не участвую
-            </Button>
-            <Button
-              onClick={async () => {
-                const payment = await createPaymentForTournamentRegistration({
-                  eventId: game.id,
-                  returnUrl: `https://t.me/${BOT_NAME}/app?startapp=${game.id}`,
-                });
-                if (payment?.paymentLink) {
-                  postEvent("web_app_open_link", {
-                    url: payment.paymentLink,
-                  });
-                }
-              }}
-            >
-              Оплатить
             </Button>
           </div>
         </div>

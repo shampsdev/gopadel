@@ -50,7 +50,7 @@ export const GamePlayers = () => {
                 (participant) =>
                   participant.status === RegistrationStatus.CONFIRMED ||
                   participant.status === RegistrationStatus.LEFT ||
-                  participant.status === RegistrationStatus.PENDING
+                  participant.status === RegistrationStatus.INVITED
               )
               ?.map((userRegistration) => {
                 return (
@@ -104,7 +104,7 @@ export const GamePlayers = () => {
                               </div>
                             )}
                           {userRegistration.status ===
-                            RegistrationStatus.PENDING && (
+                            RegistrationStatus.INVITED && (
                             <div className="w-fit bg-[#F8F8FA] text-[#A4A9B4] h-full flex flex-col rounded-[30px] px-[10px] py-[6px] items-start text-[12px]">
                               ожидает подтверждения
                             </div>
@@ -118,7 +118,7 @@ export const GamePlayers = () => {
                         </div>
                       </div>
                       {userRegistration.status ===
-                        RegistrationStatus.PENDING && (
+                        RegistrationStatus.INVITED && (
                         <div className="flex flex-row gap-4 justify-center text-[12px]">
                           <Button
                             className="text-[12px] py-[10px] text-white bg-[#FF5053]"
