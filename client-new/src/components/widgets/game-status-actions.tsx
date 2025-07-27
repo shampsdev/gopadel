@@ -1,6 +1,4 @@
-import { postEvent } from "@telegram-apps/sdk-react";
 import { useCancelRegistrationAfterPayment } from "../../api/hooks/mutations/registration/cancel-registration-after-payment";
-import { useCreatePaymentForTournamentRegistration } from "../../api/hooks/mutations/registration/create-payment-for-tournament-registration";
 import { useReactivateCancelledRegistration } from "../../api/hooks/mutations/registration/reactivate-cancelled-registration";
 import { useAddUserToWaitlist } from "../../api/hooks/mutations/waitlist/add-user-to-waitlist";
 import { useRemoveUserFromWaitlist } from "../../api/hooks/mutations/waitlist/remove-user-from-waitlist";
@@ -17,10 +15,8 @@ import {
   isUserApproved,
 } from "../../utils/game-status-checks";
 import { Button } from "../ui/button";
-import { useCancelRegistrationBeforePayment } from "../../api/hooks/mutations/registration/cancel-registration-before-payment";
 import { useModalStore } from "../../shared/stores/modal.store";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
-import { BOT_NAME } from "../../shared/constants/api";
 import { useRegisterToEvent } from "../../api/hooks/mutations/registration/register-to-event";
 import { EventStatus } from "../../types/event-status.type";
 import type { Game } from "../../types/game.type";
@@ -40,14 +36,10 @@ export const GameStatusActions = ({
   const { mutateAsync: addUserToWaitlist } = useAddUserToWaitlist();
   const { mutateAsync: removeUserFromWaitlist } = useRemoveUserFromWaitlist();
   const { mutateAsync: registerToEvent } = useRegisterToEvent();
-  const { mutateAsync: createPaymentForTournamentRegistration } =
-    useCreatePaymentForTournamentRegistration();
   const { mutateAsync: reactivateCancelledRegistration } =
     useReactivateCancelledRegistration();
   const { mutateAsync: cancelRegistrationAfterPayment } =
     useCancelRegistrationAfterPayment();
-  const { mutateAsync: cancelRegistrationBeforePayment } =
-    useCancelRegistrationBeforePayment();
   if (isEventFinished(game)) {
     return (
       <div className="flex flex-col text-center gap-[18px]">
