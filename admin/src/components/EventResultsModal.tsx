@@ -8,11 +8,9 @@ import { ScrollArea } from './ui/scroll-area';
 import { Plus, Trash2, Save, Trophy, Medal, Target, Users } from 'lucide-react';
 import { useToastContext } from '../contexts/ToastContext';
 import { eventsApi, type Event, type AdminPatchEvent } from '../api/events';
-import { registrationsApi, type RegistrationWithPayments } from '../api/registrations';
+import { registrationsApi } from '../api/registrations';
 import type { 
   LeaderboardEntry, 
-  GameResult, 
-  TournamentResult, 
   GameData, 
   TournamentData,
   User 

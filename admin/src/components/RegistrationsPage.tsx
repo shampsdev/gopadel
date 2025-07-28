@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { ScrollArea } from './ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Label } from './ui/label';
-import { Badge } from './ui/badge';
+
 import { 
   Filter, 
   RefreshCw, 
