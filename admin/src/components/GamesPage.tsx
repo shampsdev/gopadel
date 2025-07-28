@@ -48,6 +48,7 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
   const [loadingWaitlist, setLoadingWaitlist] = useState(false);
   const [isResultsModalOpen, setIsResultsModalOpen] = useState(false);
   const [resultsEvent, setResultsEvent] = useState<Event | null>(null);
+  const [isCustomGameType, setIsCustomGameType] = useState(false);
   const [filters, setFilters] = useState({
     name: '',
     clubId: '',
@@ -65,6 +66,8 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
     courtId: '',
     clubId: '',
     organizerId: '',
+    gameType: 'americano',
+    customGameType: '',
   });
 
   const toast = useToastContext();
@@ -72,6 +75,30 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
   
   // Проверяем права доступа
   const canEdit = user?.is_superuser || user?.is_active || false;
+
+  // Предустановленные типы игр
+  const gameTypes = [
+    { value: 'americano', label: 'Американо' },
+    { value: 'mexicano', label: 'Мексиканка' },
+    { value: 'training', label: 'Тренировка' },
+    { value: 'custom', label: 'Ввести вручную' }
+  ];
+
+  const getGameTypeFromData = (data: any) => {
+    if (data?.game?.type) return data.game.type;
+    if (data?.gameType) return data.gameType;
+    return 'americano';
+  };
+
+  const getGameTypeName = (type: string) => {
+    const gameType = gameTypes.find(t => t.value === type);
+    return gameType ? gameType.label : type;
+  };
+
+  const handleGameTypeChange = (value: string) => {
+    setFormData(prev => ({ ...prev, gameType: value }));
+    setIsCustomGameType(value === 'custom');
+  };
 
   const convertLocalDateToUtc = (localDate: Date): string => {
     if (!localDate) return '';
@@ -204,6 +231,7 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
     loadWaitlist(game.id);
     
     // Заполняем форму данными игры
+    const gameType = getGameTypeFromData(game.data);
     setFormData({
       name: game.name,
       startTime: convertUtcToLocalDate(game.startTime),
@@ -216,11 +244,25 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
       courtId: game.court?.id || '',
       clubId: game.clubId || '',
       organizerId: game.organizer?.id || '',
+      gameType: gameType,
+      customGameType: '',
     });
+    
+    // Проверяем, нужно ли показывать поле для кастомного типа
+    const isCustomType = !gameTypes.some(t => t.value === gameType);
+    setIsCustomGameType(isCustomType);
+    if (isCustomType) {
+      setFormData(prev => ({
+        ...prev,
+        customGameType: gameType
+      }));
+    }
   };
 
   const handleCreate = async () => {
     try {
+      const gameType = isCustomGameType ? formData.customGameType : formData.gameType;
+      
       if (!formData.startTime) {
         toast.error('Время начала обязательно');
         return;
@@ -239,6 +281,7 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
         clubId: formData.clubId,
         type: 'game',
         organizerId: formData.organizerId,
+        data: { gameType },
       };
 
       await eventsApi.create(createData);
@@ -253,6 +296,8 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
 
   const handleUpdate = async (id: string) => {
     try {
+      const gameType = isCustomGameType ? formData.customGameType : formData.gameType;
+      
       if (!formData.startTime) {
         toast.error('Время начала обязательно');
         return;
@@ -270,6 +315,7 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
         courtId: formData.courtId,
         clubId: formData.clubId,
         organizerId: formData.organizerId,
+        data: { gameType },
       };
 
       await eventsApi.patch(id, updateData);
@@ -308,6 +354,7 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
     setSelectedGame(null);
     setRegistrations([]);
     setWaitlist([]);
+    setIsCustomGameType(false);
     setFormData({
       name: '',
       startTime: null,
@@ -320,6 +367,8 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
       courtId: '',
       clubId: '',
       organizerId: '',
+      gameType: 'americano',
+      customGameType: '',
     });
   };
 
@@ -329,6 +378,7 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
     setSelectedGame(null);
     setRegistrations([]);
     setWaitlist([]);
+    setIsCustomGameType(false);
     setFormData({
       name: '',
       startTime: null,
@@ -341,6 +391,8 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
       courtId: '',
       clubId: '',
       organizerId: '',
+      gameType: 'americano',
+      customGameType: '',
     });
   };
 
@@ -487,6 +539,37 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
                         required
                       />
                     </div>
+
+                    <div>
+                      <Label className="text-zinc-300 text-sm font-medium">Тип игры</Label>
+                      <Select value={formData.gameType} onValueChange={handleGameTypeChange}>
+                        <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1">
+                          <SelectValue placeholder="Выберите тип игры">
+                            {getGameTypeName(formData.gameType)}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                          {gameTypes.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {isCustomGameType && (
+                      <div>
+                        <Label className="text-zinc-300 text-sm font-medium">Введите тип игры</Label>
+                        <Input
+                          value={formData.customGameType}
+                          onChange={(e) => handleInputChange('customGameType', e.target.value)}
+                          className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 mt-1"
+                          placeholder="Например: Круговая система"
+                          required
+                        />
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
@@ -933,7 +1016,7 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
                               {game.name}
                             </h3>
                             <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">
-                              Игра
+                              {getGameTypeName(getGameTypeFromData(game.data))}
                             </Badge>
                           </div>
                           

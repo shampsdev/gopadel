@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
@@ -43,7 +41,6 @@ export const EventResultsModal: React.FC<EventResultsModalProps> = ({
   const [saving, setSaving] = useState(false);
   const [participants, setParticipants] = useState<ParticipantOption[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [eventType, setEventType] = useState<string>('');
   const [newParticipant, setNewParticipant] = useState<string>('');
 
   const toast = useToastContext();
@@ -74,15 +71,12 @@ export const EventResultsModal: React.FC<EventResultsModalProps> = ({
       if (event.data) {
         if (event.type === 'game') {
           const gameData = event.data as GameData;
-          setEventType(gameData.game?.type || '');
           setLeaderboard(gameData.result?.leaderboard || []);
         } else if (event.type === 'tournament') {
           const tournamentData = event.data as TournamentData;
-          setEventType(tournamentData.tournament?.type || '');
           setLeaderboard(tournamentData.result?.leaderboard || []);
         }
       } else {
-        setEventType('');
         setLeaderboard([]);
       }
     } catch (error) {
@@ -149,16 +143,24 @@ export const EventResultsModal: React.FC<EventResultsModalProps> = ({
 
     setSaving(true);
     try {
-      let updatedData: GameData | TournamentData;
+      let updatedData: any;
+
+      const eventData = event.data as any;
 
       if (event.type === 'game') {
         updatedData = {
-          game: { type: eventType },
+          ...eventData,
+          game: { 
+            type: eventData?.game?.type || eventData?.gameType || 'americano' 
+          },
           result: { leaderboard }
         };
       } else {
         updatedData = {
-          tournament: { type: eventType },
+          ...eventData,
+          tournament: { 
+            type: eventData?.tournament?.type || eventData?.tournamentType || 'americano' 
+          },
           result: { leaderboard }
         };
       }
@@ -205,7 +207,7 @@ export const EventResultsModal: React.FC<EventResultsModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader onClose={onClose}>
           <DialogTitle className="text-xl font-semibold flex items-center gap-2">
             {event.type === 'tournament' ? (
@@ -221,45 +223,23 @@ export const EventResultsModal: React.FC<EventResultsModalProps> = ({
           <div className="flex items-center justify-center py-8">
             <div className="text-zinc-400">Загрузка...</div>
           </div>
+        ) : participants.length === 0 ? (
+          <div className="text-center py-12">
+            <Users className="h-16 w-16 text-zinc-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-zinc-300 mb-2">Нет участников</h3>
+            <p className="text-zinc-400 mb-6">
+              В этом {event.type === 'tournament' ? 'турнире' : 'мероприятии'} пока нет подтвержденных участников.
+            </p>
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="bg-zinc-800 border-zinc-600 text-zinc-300 hover:bg-zinc-700"
+            >
+              Закрыть
+            </Button>
+          </div>
         ) : (
           <div className="space-y-6">
-            {/* Тип события */}
-            <div className="space-y-2">
-              <Label className="text-zinc-300">
-                Тип {event.type === 'tournament' ? 'турнира' : 'игры'}
-              </Label>
-              <Input
-                value={eventType}
-                onChange={(e) => setEventType(e.target.value)}
-                placeholder={event.type === 'tournament' ? 'например: мексикано' : 'например: мексикано'}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-            </div>
-
-            {/* Статистика */}
-            <div className="grid grid-cols-3 gap-4">
-              <Card className="bg-zinc-800 border-zinc-700">
-                <CardContent className="p-4 text-center">
-                  <Users className="h-8 w-8 text-blue-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">{participants.length}</div>
-                  <div className="text-sm text-zinc-400">Участников</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-zinc-800 border-zinc-700">
-                <CardContent className="p-4 text-center">
-                  <Trophy className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">{leaderboard.length}</div>
-                  <div className="text-sm text-zinc-400">В результатах</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-zinc-800 border-zinc-700">
-                <CardContent className="p-4 text-center">
-                  <Target className="h-8 w-8 text-green-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">{availableParticipants.length}</div>
-                  <div className="text-sm text-zinc-400">Доступно</div>
-                </CardContent>
-              </Card>
-            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Добавление участников */}
@@ -291,7 +271,7 @@ export const EventResultsModal: React.FC<EventResultsModalProps> = ({
                     </Select>
                     <Button 
                       onClick={handleAddToLeaderboard}
-                      disabled={!newParticipant}
+                      disabled={!newParticipant || availableParticipants.length === 0}
                       className="bg-green-600 hover:bg-green-700"
                     >
                       <Plus className="h-4 w-4" />
@@ -311,7 +291,7 @@ export const EventResultsModal: React.FC<EventResultsModalProps> = ({
                 <CardHeader>
                   <CardTitle className="text-lg text-zinc-300 flex items-center gap-2">
                     <Trophy className="h-4 w-4" />
-                    Итоговая таблица
+                    Таблица результатов ({leaderboard.length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
