@@ -3027,8 +3027,11 @@ const docTemplate = `{
                     "description": "Дополнительные поля для удобства фильтрации",
                     "type": "integer"
                 },
-                "status": {
-                    "$ref": "#/definitions/domain.EventStatus"
+                "statuses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.EventStatus"
+                    }
                 },
                 "type": {
                     "$ref": "#/definitions/domain.EventType"
@@ -3651,8 +3654,11 @@ const docTemplate = `{
                 "organizerId": {
                     "type": "string"
                 },
-                "status": {
-                    "$ref": "#/definitions/domain.EventStatus"
+                "statuses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.EventStatus"
+                    }
                 },
                 "type": {
                     "$ref": "#/definitions/domain.EventType"

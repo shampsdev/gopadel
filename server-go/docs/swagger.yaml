@@ -16,8 +16,10 @@ definitions:
       organizerTelegramId:
         description: Дополнительные поля для удобства фильтрации
         type: integer
-      status:
-        $ref: '#/definitions/domain.EventStatus'
+      statuses:
+        items:
+          $ref: '#/definitions/domain.EventStatus'
+        type: array
       type:
         $ref: '#/definitions/domain.EventType'
     type: object
@@ -437,8 +439,10 @@ definitions:
         type: boolean
       organizerId:
         type: string
-      status:
-        $ref: '#/definitions/domain.EventStatus'
+      statuses:
+        items:
+          $ref: '#/definitions/domain.EventStatus'
+        type: array
       type:
         $ref: '#/definitions/domain.EventType'
     type: object
