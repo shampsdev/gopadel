@@ -43,7 +43,7 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, userID
 		UserID:  &userID,
 		EventID: &eventID,
 	}
-	
+
 	currentRegistrations, err := r.AdminFilter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current registration: %w", err)
@@ -64,13 +64,13 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, userID
 		if err != nil {
 			return nil, fmt.Errorf("failed to get event: %w", err)
 		}
-		
+
 		if len(events) == 0 {
 			return nil, fmt.Errorf("event not found")
 		}
-		
+
 		event := events[0]
-		
+
 		// Для игр проверяем свободные места (так как INVITED не занимает места, а CONFIRMED занимает)
 		if event.Type == domain.EventTypeGame {
 			if err := r.validateAvailableSlots(ctx, eventID); err != nil {
@@ -83,7 +83,7 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, userID
 	patch := &domain.PatchRegistration{
 		Status: &status,
 	}
-	
+
 	err = r.registrationRepo.Patch(ctx, userID, eventID, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update registration status: %w", err)
@@ -120,7 +120,7 @@ func (r *Registration) GetRegistrationWithPayments(ctx context.Context, userID s
 		UserID:  &userID,
 		EventID: &eventID,
 	}
-	
+
 	registrations, err := r.AdminFilter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get registration: %w", err)
@@ -145,7 +145,7 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 	if len(events) == 0 {
 		return nil, fmt.Errorf("event not found")
 	}
-	
+
 	event := events[0]
 
 	// Получаем стратегию для данного типа события
@@ -156,7 +156,7 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 		UserID:  &user.ID,
 		EventID: &eventID,
 	}
-	
+
 	existingRegistrations, err := r.registrationRepo.Filter(ctx, registrationFilter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check existing registrations: %w", err)
@@ -177,27 +177,27 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 					return nil, fmt.Errorf("user cannot reapply for this event")
 				}
 			}
-			
+
 			// Для игр НЕ проверяем доступные слоты при повторной подаче заявки,
 			// так как INVITED статус не занимает места (если это не организатор)
-			
+
 			// Если можно подать заявку повторно, переиспользуем существующую регистрацию
 			// Определяем статус через стратегию с учетом пользователя
 			newStatus := gameStrategy.DetermineRegistrationStatusForUser(ctx, event, user)
 			patch := &domain.PatchRegistration{
 				Status: &newStatus,
 			}
-			
+
 			err := r.registrationRepo.Patch(ctx, reg.UserID, reg.EventID, patch)
 			if err != nil {
 				return nil, fmt.Errorf("failed to update registration status: %w", err)
 			}
-			
+
 			// Обновляем статус события после обновления регистрации
 			if err := r.updateEventStatusAfterRegistration(ctx, eventID); err != nil {
 				fmt.Printf("Warning: failed to update event status after registration update: %v\n", err)
 			}
-			
+
 			return r.getRegistrationByID(ctx, reg.UserID, reg.EventID)
 		} else {
 			// Старая логика для турниров и тренировок
@@ -216,11 +216,11 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 
 				// Определяем новый статус с использованием стратегии с учетом пользователя
 				newStatus := strategy.DetermineRegistrationStatusForUser(ctx, event, user)
-				
+
 				patch := &domain.PatchRegistration{
 					Status: &newStatus,
 				}
-				
+
 				err := r.registrationRepo.Patch(ctx, reg.UserID, reg.EventID, patch)
 				if err != nil {
 					return nil, fmt.Errorf("failed to update registration status: %w", err)
@@ -293,9 +293,9 @@ func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain
 		return nil, err
 	}
 
-	if registration.Status == domain.RegistrationStatusCancelledBeforePayment || 
-	   registration.Status == domain.RegistrationStatusCancelledAfterPayment ||
-	   registration.Status == domain.RegistrationStatusRefunded {
+	if registration.Status == domain.RegistrationStatusCancelledBeforePayment ||
+		registration.Status == domain.RegistrationStatusCancelledAfterPayment ||
+		registration.Status == domain.RegistrationStatusRefunded {
 		return nil, fmt.Errorf("registration is already cancelled")
 	}
 
@@ -340,14 +340,14 @@ func (r *Registration) ReactivateRegistration(ctx context.Context, user *domain.
 	// Получаем событие напрямую через репозиторий
 	eventFilter := &domain.FilterEvent{ID: &eventID}
 	events, err := r.cases.Event.Filter(ctx, eventFilter)
-		if err != nil {
+	if err != nil {
 		return nil, fmt.Errorf("failed to get event: %w", err)
-		}
-	
+	}
+
 	if len(events) == 0 {
 		return nil, fmt.Errorf("event not found")
 	}
-	
+
 	event := events[0]
 
 	if err := r.validateEventNotEnded(event); err != nil {
@@ -394,14 +394,14 @@ func (r *Registration) ActivateRegistration(ctx context.Context, user *domain.Us
 	// Получаем событие напрямую через репозиторий
 	eventFilter := &domain.FilterEvent{ID: &eventID}
 	events, err := r.cases.Event.Filter(ctx, eventFilter)
-			if err != nil {
+	if err != nil {
 		return nil, fmt.Errorf("failed to get event: %w", err)
-			}
-	
+	}
+
 	if len(events) == 0 {
 		return nil, fmt.Errorf("event not found")
 	}
-	
+
 	event := events[0]
 
 	// Проверяем, что событие еще не закончилось
@@ -500,6 +500,7 @@ func (r *Registration) GetUserRegistrationsWithEvent(ctx context.Context, userID
 			Court:       event.Court,
 			Organizer:   event.Organizer,
 			ClubID:      event.ClubID,
+			Data:        event.Data,
 		}
 
 		regWithEvent.Event = &eventForReg
@@ -569,7 +570,7 @@ func (r *Registration) validateEventNotEnded(event *domain.Event) error {
 
 func (r *Registration) validateUserRank(user *domain.User, event *domain.Event) error {
 	if user.Rank < event.RankMin || user.Rank > event.RankMax {
-		return fmt.Errorf("user rank %.1f does not fit event range %.1f-%.1f", 
+		return fmt.Errorf("user rank %.1f does not fit event range %.1f-%.1f",
 			user.Rank, event.RankMin, event.RankMax)
 	}
 	return nil
@@ -581,17 +582,17 @@ func (r *Registration) validateAvailableSlots(ctx context.Context, eventID strin
 	if err != nil {
 		return fmt.Errorf("failed to get event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return fmt.Errorf("event not found")
 	}
-	
+
 	event := events[0]
 
 	filter := &domain.FilterRegistration{
 		EventID: &eventID,
 	}
-	
+
 	registrations, err := r.registrationRepo.Filter(ctx, filter)
 	if err != nil {
 		return fmt.Errorf("failed to get event registrations: %w", err)
@@ -692,7 +693,7 @@ func (r *Registration) GetEventParticipants(ctx context.Context, eventID string)
 	filter := &domain.FilterRegistration{
 		EventID: &eventID,
 	}
-	
+
 	registrations, err := r.registrationRepo.Filter(ctx, filter)
 	if err != nil {
 		return nil, err
@@ -701,16 +702,16 @@ func (r *Registration) GetEventParticipants(ctx context.Context, eventID string)
 	// Фильтруем только активные статусы
 	participants := make([]*domain.Registration, 0)
 	for _, reg := range registrations {
-		if reg.Status == domain.RegistrationStatusConfirmed || 
-		   reg.Status == domain.RegistrationStatusPending || 
-		   reg.Status == domain.RegistrationStatusInvited || 
-		   reg.Status == domain.RegistrationStatusCancelledAfterPayment {
+		if reg.Status == domain.RegistrationStatusConfirmed ||
+			reg.Status == domain.RegistrationStatusPending ||
+			reg.Status == domain.RegistrationStatusInvited ||
+			reg.Status == domain.RegistrationStatusCancelledAfterPayment {
 			participants = append(participants, reg)
 		}
 	}
 
 	return participants, nil
-} 
+}
 
 // updateEventStatusAfterRegistration обновляет статус события после создания/активации регистрации
 func (r *Registration) updateEventStatusAfterRegistration(ctx context.Context, eventID string) error {
@@ -720,11 +721,11 @@ func (r *Registration) updateEventStatusAfterRegistration(ctx context.Context, e
 	if err != nil {
 		return fmt.Errorf("failed to get event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return fmt.Errorf("event not found")
 	}
-	
+
 	event := events[0]
 
 	// Только для событий в статусе registration или full
@@ -751,7 +752,7 @@ func (r *Registration) updateEventStatusAfterRegistration(ctx context.Context, e
 		patch := &domain.PatchEvent{
 			Status: &needStatus,
 		}
-		
+
 		err = r.cases.Event.eventRepo.Patch(ctx, eventID, patch)
 		if err != nil {
 			return fmt.Errorf("failed to update event status: %w", err)
@@ -769,11 +770,11 @@ func (r *Registration) updateEventStatusAfterCancellation(ctx context.Context, e
 	if err != nil {
 		return fmt.Errorf("failed to get event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return fmt.Errorf("event not found")
 	}
-	
+
 	event := events[0]
 
 	// Только если событие полное - можем освободить места
@@ -793,7 +794,7 @@ func (r *Registration) updateEventStatusAfterCancellation(ctx context.Context, e
 		patch := &domain.PatchEvent{
 			Status: &newStatus,
 		}
-		
+
 		err = r.cases.Event.eventRepo.Patch(ctx, eventID, patch)
 		if err != nil {
 			return fmt.Errorf("failed to update event status: %w", err)
@@ -811,17 +812,17 @@ func (r *Registration) getActiveRegistrationsCount(ctx context.Context, eventID 
 	if err != nil {
 		return 0, fmt.Errorf("failed to get event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return 0, fmt.Errorf("event not found")
 	}
-	
+
 	event := events[0]
 
 	filter := &domain.FilterRegistration{
 		EventID: &eventID,
 	}
-	
+
 	registrations, err := r.registrationRepo.Filter(ctx, filter)
 	if err != nil {
 		return 0, fmt.Errorf("failed to get event registrations: %w", err)
@@ -849,4 +850,4 @@ func (r *Registration) getActiveRegistrationsCount(ctx context.Context, eventID 
 	}
 
 	return activeCount, nil
-} 
+}

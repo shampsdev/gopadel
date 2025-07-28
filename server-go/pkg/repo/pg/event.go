@@ -52,7 +52,7 @@ func NewEventRepo(db *pgxpool.Pool) *EventRepo {
 
 func (r *EventRepo) Create(ctx context.Context, event *domain.CreateEvent) (string, error) {
 	id := r.generateID(event.Type)
-	
+
 	s := r.psql.Insert(`"event"`).
 		Columns("id", "name", "description", "start_time", "end_time", "rank_min", "rank_max", "price", "max_users", "type", "court_id", "organizer_id", "club_id", "data").
 		Values(id, event.Name, event.Description, event.StartTime, event.EndTime, event.RankMin, event.RankMax, event.Price, event.MaxUsers, event.Type, event.CourtID, event.OrganizerID, event.ClubID, event.Data)
@@ -93,8 +93,8 @@ func (r *EventRepo) Filter(ctx context.Context, filter *domain.FilterEvent) ([]*
 		s = s.Where(sq.ILike{`"e"."name"`: "%" + *filter.Name + "%"})
 	}
 
-	if filter.Status != nil {
-		s = s.Where(sq.Eq{`"e"."status"`: *filter.Status})
+	if filter.Statuses != nil {
+		s = s.Where(sq.Eq{`"e"."status"`: *filter.Statuses})
 	}
 
 	if filter.Type != nil {
@@ -337,8 +337,8 @@ func (r *EventRepo) AdminFilter(ctx context.Context, filter *domain.AdminFilterE
 		s = s.Where(sq.ILike{`"e"."name"`: "%" + *filter.Name + "%"})
 	}
 
-	if filter.Status != nil {
-		s = s.Where(sq.Eq{`"e"."status"`: *filter.Status})
+	if filter.Statuses != nil {
+		s = s.Where(sq.Eq{`"e"."status"`: *filter.Statuses})
 	}
 
 	if filter.Type != nil {
@@ -569,4 +569,4 @@ func (r *EventRepo) scanEvent(rows pgx.Rows) (*domain.Event, error) {
 	event.Organizer = organizer
 
 	return &event, nil
-} 
+}

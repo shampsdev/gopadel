@@ -60,59 +60,58 @@ type CreateEvent struct {
 }
 
 type PatchEvent struct {
-	Name        *string          `json:"name,omitempty"`
-	Description *string          `json:"description,omitempty"`
-	StartTime   *time.Time       `json:"startTime,omitempty"`
-	EndTime     *time.Time       `json:"endTime,omitempty"`
-	RankMin     *float64         `json:"rankMin,omitempty"`
-	RankMax     *float64         `json:"rankMax,omitempty"`
-	Price       *int             `json:"price,omitempty"`
-	MaxUsers    *int             `json:"maxUsers,omitempty"`
-	Status      *EventStatus     `json:"status,omitempty"`
-	Type        *EventType       `json:"type,omitempty"`
-	CourtID     *string          `json:"courtId,omitempty"`
-	ClubID      *string          `json:"clubId,omitempty"`
-	Data        json.RawMessage  `json:"data,omitempty" swaggertype:"object"`
+	Name        *string         `json:"name,omitempty"`
+	Description *string         `json:"description,omitempty"`
+	StartTime   *time.Time      `json:"startTime,omitempty"`
+	EndTime     *time.Time      `json:"endTime,omitempty"`
+	RankMin     *float64        `json:"rankMin,omitempty"`
+	RankMax     *float64        `json:"rankMax,omitempty"`
+	Price       *int            `json:"price,omitempty"`
+	MaxUsers    *int            `json:"maxUsers,omitempty"`
+	Status      *EventStatus    `json:"status,omitempty"`
+	Type        *EventType      `json:"type,omitempty"`
+	CourtID     *string         `json:"courtId,omitempty"`
+	ClubID      *string         `json:"clubId,omitempty"`
+	Data        json.RawMessage `json:"data,omitempty" swaggertype:"object"`
 }
 
 type FilterEvent struct {
-	ID               *string      `json:"id,omitempty"`
-	Name             *string      `json:"name,omitempty"`
-	Status           *EventStatus `json:"status,omitempty"`
-	Type             *EventType   `json:"type,omitempty"`
-	NotFull          *bool        `json:"notFull,omitempty"`       // true если событие не заполнено
-	NotCompleted     *bool        `json:"notCompleted,omitempty"`  // true если событие не завершено
-	OrganizerID      *string      `json:"organizerId,omitempty"`
-	ClubID           *string      `json:"clubId,omitempty"`
-	FilterByUserClubs *string     `json:"filterByUserClubs,omitempty"` // user ID для фильтрации по клубам пользователя
+	ID                *string        `json:"id,omitempty"`
+	Name              *string        `json:"name,omitempty"`
+	Statuses          *[]EventStatus `json:"statuses,omitempty"`
+	Type              *EventType     `json:"type,omitempty"`
+	NotFull           *bool          `json:"notFull,omitempty"`      // true если событие не заполнено
+	NotCompleted      *bool          `json:"notCompleted,omitempty"` // true если событие не завершено
+	OrganizerID       *string        `json:"organizerId,omitempty"`
+	ClubID            *string        `json:"clubId,omitempty"`
+	FilterByUserClubs *string        `json:"filterByUserClubs,omitempty"` // user ID для фильтрации по клубам пользователя
 }
 
 // Админские события
 type AdminPatchEvent struct {
-	Name        *string          `json:"name,omitempty"`
-	Description *string          `json:"description,omitempty"`
-	StartTime   *time.Time       `json:"startTime,omitempty"`
-	EndTime     *time.Time       `json:"endTime,omitempty"`
-	RankMin     *float64         `json:"rankMin,omitempty"`
-	RankMax     *float64         `json:"rankMax,omitempty"`
-	Price       *int             `json:"price,omitempty"`
-	MaxUsers    *int             `json:"maxUsers,omitempty"`
-	Status      *EventStatus     `json:"status,omitempty"`
-	Type        *EventType       `json:"type,omitempty"`
-	CourtID     *string          `json:"courtId,omitempty"`
-	OrganizerID *string          `json:"organizerId,omitempty"`
-	ClubID      *string          `json:"clubId,omitempty"`
-	Data        json.RawMessage  `json:"data,omitempty" swaggertype:"object"`
+	Name        *string         `json:"name,omitempty"`
+	Description *string         `json:"description,omitempty"`
+	StartTime   *time.Time      `json:"startTime,omitempty"`
+	EndTime     *time.Time      `json:"endTime,omitempty"`
+	RankMin     *float64        `json:"rankMin,omitempty"`
+	RankMax     *float64        `json:"rankMax,omitempty"`
+	Price       *int            `json:"price,omitempty"`
+	MaxUsers    *int            `json:"maxUsers,omitempty"`
+	Status      *EventStatus    `json:"status,omitempty"`
+	Type        *EventType      `json:"type,omitempty"`
+	CourtID     *string         `json:"courtId,omitempty"`
+	OrganizerID *string         `json:"organizerId,omitempty"`
+	ClubID      *string         `json:"clubId,omitempty"`
+	Data        json.RawMessage `json:"data,omitempty" swaggertype:"object"`
 }
 
-
 type AdminFilterEvent struct {
-	ID               *string      `json:"id,omitempty"`
-	Name             *string      `json:"name,omitempty"`
-	Status           *EventStatus `json:"status,omitempty"`
-	Type             *EventType   `json:"type,omitempty"`
-	ClubID           *string      `json:"clubId,omitempty"`
-	OrganizerID      *string      `json:"organizerId,omitempty"`
+	ID          *string        `json:"id,omitempty"`
+	Name        *string        `json:"name,omitempty"`
+	Statuses    *[]EventStatus `json:"statuses,omitempty"`
+	Type        *EventType     `json:"type,omitempty"`
+	ClubID      *string        `json:"clubId,omitempty"`
+	OrganizerID *string        `json:"organizerId,omitempty"`
 	// Дополнительные поля для удобства фильтрации
 	OrganizerTelegramID *int64  `json:"organizerTelegramId,omitempty"`
 	OrganizerFirstName  *string `json:"organizerFirstName,omitempty"`
@@ -136,4 +135,3 @@ type EventForRegistration struct {
 	ClubID      *string         `json:"clubId,omitempty"`
 	Data        json.RawMessage `json:"data,omitempty" swaggertype:"object"`
 }
- 
