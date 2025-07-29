@@ -9,6 +9,7 @@ import { EventType } from "../../types/event-type.type";
 import type { Event } from "../../types/event.type";
 import type { FilterEvent } from "../../types/filter.type";
 import { RegistrationStatus } from "../../types/registration-status";
+import { EventStatus } from "../../types/event-status.type";
 export const Games = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ export const Games = () => {
     notFull: showOnlyAvailable || undefined,
     type: EventType.game,
     notCompleted: true,
+    statuses: [EventStatus.registration, EventStatus.full],
   };
 
   const { data: events, isLoading } = useGetEvents(filter);

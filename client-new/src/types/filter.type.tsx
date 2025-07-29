@@ -9,7 +9,7 @@ export interface FilterEvent {
   notCompleted?: boolean;
   notFull?: boolean;
   organizerId?: string;
-  status?: EventStatus;
+  statuses?: EventStatus[];
   type?: EventType;
 }
 

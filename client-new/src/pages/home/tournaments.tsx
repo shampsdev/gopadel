@@ -9,6 +9,7 @@ import { HomeNavbar } from "../../components/widgets/home-navbar";
 import { Preloader } from "../../components/widgets/preloader";
 import { RegistrationStatus } from "../../types/registration-status";
 import { EventType } from "../../types/event-type.type";
+import { EventStatus } from "../../types/event-status.type";
 
 export const Tournaments = () => {
   const location = useLocation();
@@ -41,6 +42,7 @@ export const Tournaments = () => {
     notFull: showOnlyAvailable || undefined,
     type: EventType.tournament,
     notCompleted: true,
+    statuses: [EventStatus.registration, EventStatus.full],
   };
 
   const { data: events, isLoading } = useGetEvents(filter);

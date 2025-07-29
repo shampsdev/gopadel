@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
 import { Preloader } from "../../components/widgets/preloader";
 import { getEventType } from "../../utils/get-event-type";
+import { EventStatus } from "../../types/event-status.type";
 
 export const Events = () => {
   const location = useLocation();
@@ -38,6 +39,7 @@ export const Events = () => {
   const filter: FilterEvent = {
     notFull: showOnlyAvailable || undefined,
     notCompleted: true,
+    statuses: [EventStatus.registration, EventStatus.full],
   };
 
   const { data: events, isLoading } = useGetEvents(filter);
