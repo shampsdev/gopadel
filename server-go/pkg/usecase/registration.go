@@ -100,6 +100,11 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, userID
 		}
 	}
 
+	err = r.cases.Event.TryRegisterFromWaitlist(ctx, eventID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to try register from waitlist: %w", err)
+	}
+
 	// Получаем обновленную регистрацию
 	updatedRegistrations, err := r.AdminFilter(ctx, filter)
 	if err != nil {
@@ -111,11 +116,6 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, userID
 	}
 
 	updatedRegistration := updatedRegistrations[0]
-
-	err = r.cases.Event.TryRegisterFromWaitlist(ctx, eventID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to try register from waitlist: %w", err)
-	}
 
 	return updatedRegistration, nil
 }

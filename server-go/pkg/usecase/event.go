@@ -114,6 +114,11 @@ func (e *Event) Patch(ctx context.Context, id string, patch *domain.PatchEvent) 
 		}
 	}
 
+	err = e.cases.Event.TryRegisterFromWaitlist(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to try register from waitlist: %w", err)
+	}
+
 	filter := &domain.FilterEvent{ID: &id}
 	events, err := e.Filter(ctx, filter)
 	if err != nil {
@@ -272,6 +277,11 @@ func (e *Event) AdminPatch(ctx *Context, id string, patch *domain.AdminPatchEven
 		if err != nil {
 			return nil, fmt.Errorf("failed to update event status to completed: %w", err)
 		}
+	}
+
+	err = e.cases.Event.TryRegisterFromWaitlist(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to try register from waitlist: %w", err)
 	}
 
 	filter := &domain.AdminFilterEvent{ID: &id}
