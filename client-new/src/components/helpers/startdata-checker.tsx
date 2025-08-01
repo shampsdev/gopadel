@@ -15,6 +15,9 @@ export const StartDataChecker = () => {
       if (parsedData.tournamentId) {
         navigate(`/tournament/${parsedData.tournamentId}`);
       }
+      if (parsedData.gameId) {
+        navigate(`/game/${parsedData.gameId}`);
+      }
     }
   }, [initData, navigate]);
 
