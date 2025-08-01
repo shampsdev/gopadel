@@ -112,6 +112,11 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, userID
 
 	updatedRegistration := updatedRegistrations[0]
 
+	err = r.cases.Event.TryRegisterFromWaitlist(ctx, eventID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to try register from waitlist: %w", err)
+	}
+
 	return updatedRegistration, nil
 }
 
@@ -330,6 +335,11 @@ func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain
 	// Обновляем статус события после отмены регистрации
 	if err := r.updateEventStatusAfterCancellation(ctx, eventID); err != nil {
 		fmt.Printf("Warning: failed to update event status after cancellation: %v\n", err)
+	}
+
+	err = r.cases.Event.TryRegisterFromWaitlist(ctx, eventID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to try register from waitlist: %w", err)
 	}
 
 	return r.getRegistrationByID(ctx, registration.UserID, registration.EventID)

@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 
+	"github.com/go-telegram/bot"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shampsdev/go-telegram-template/pkg/config"
 	"github.com/shampsdev/go-telegram-template/pkg/repo/pg"
@@ -37,6 +38,15 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 		panic(err)
 	}
 
+	opts := []bot.Option{}
+	if cfg.Debug {
+		opts = append(opts, bot.WithDebug())
+	}
+	b, err := bot.New(cfg.TG.BotToken, opts...)
+	if err != nil {
+		panic(err)
+	}
+
 	// NATS и уведомления пока не используются
 	_ = cfg
 
@@ -49,7 +59,7 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	clubCase := NewClub(ctx, clubRepo)
 	loyaltyCase := NewLoyalty(ctx, loyaltyRepo)
 
-	eventCase := NewEvent(ctx, eventRepo, cases)           // нужен Registration
+	eventCase := NewEvent(ctx, eventRepo, b, cases)                   // нужен Registration
 	registrationCase := NewRegistration(ctx, registrationRepo, cases) // нужен Payment
 	paymentCase := NewPayment(ctx, paymentRepo, cfg, cases)           // нужен Event, Registration
 	waitlistCase := NewWaitlist(ctx, waitlistRepo, cases)             // нужен Event

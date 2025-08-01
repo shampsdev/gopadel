@@ -3,21 +3,28 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"slices"
 
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
 	"github.com/shampsdev/go-telegram-template/pkg/utils"
+	"github.com/shampsdev/go-telegram-template/pkg/utils/slogx"
 )
 
 type Event struct {
 	ctx       context.Context
 	eventRepo repo.Event
+	bot       *bot.Bot
 	cases     *Cases
 }
 
-func NewEvent(ctx context.Context, eventRepo repo.Event, cases *Cases) *Event {
+func NewEvent(ctx context.Context, eventRepo repo.Event, bot *bot.Bot, cases *Cases) *Event {
 	return &Event{
 		ctx:       ctx,
+		bot:       bot,
 		eventRepo: eventRepo,
 		cases:     cases,
 	}
@@ -29,17 +36,17 @@ func (e *Event) Create(ctx context.Context, createEvent *domain.CreateEvent) (*d
 	if err != nil {
 		return nil, fmt.Errorf("failed to create event: %w", err)
 	}
-	
+
 	filter := &domain.FilterEvent{ID: &id}
 	events, err := e.Filter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get created event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return nil, fmt.Errorf("created event not found")
 	}
-	
+
 	return events[0], nil
 }
 
@@ -86,34 +93,34 @@ func (e *Event) Patch(ctx context.Context, id string, patch *domain.PatchEvent) 
 		}
 		hasValidResult = hasResult
 	}
-	
+
 	err := e.eventRepo.Patch(ctx, id, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch event: %w", err)
 	}
-	
+
 	if hasValidResult {
 		completedStatus := domain.EventStatusCompleted
 		statusPatch := &domain.PatchEvent{
 			Status: &completedStatus,
 		}
-		
+
 		err = e.eventRepo.Patch(ctx, id, statusPatch)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update event status to completed: %w", err)
 		}
 	}
-	
+
 	filter := &domain.FilterEvent{ID: &id}
 	events, err := e.Filter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get updated event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return nil, fmt.Errorf("updated event not found")
 	}
-	
+
 	return events[0], nil
 }
 
@@ -132,16 +139,16 @@ func (e *Event) GetEventByID(ctx context.Context, eventID string) (*domain.Event
 	filter := &domain.FilterEvent{
 		ID: &eventID,
 	}
-	
+
 	events, err := e.Filter(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if len(events) == 0 {
 		return nil, fmt.Errorf("event not found")
 	}
-	
+
 	return events[0], nil
 }
 
@@ -151,11 +158,11 @@ func (e *Event) CheckOwnership(ctx context.Context, eventID string, adminUserID 
 	if err != nil {
 		return err
 	}
-	
+
 	if event.Organizer.ID != adminUserID {
 		return fmt.Errorf("event belongs to a different organizer")
 	}
-	
+
 	return nil
 }
 
@@ -184,7 +191,7 @@ func (e *Event) GetEventParticipants(ctx context.Context, eventID string) ([]*do
 		// Если Registration не инициализирован, возвращаем пустой список
 		return []*domain.Registration{}, nil
 	}
-	
+
 	return e.cases.Registration.GetEventParticipants(ctx, eventID)
 }
 
@@ -213,17 +220,17 @@ func (e *Event) AdminCreate(ctx *Context, createEvent *domain.CreateEvent) (*dom
 	if err != nil {
 		return nil, fmt.Errorf("failed to create event: %w", err)
 	}
-	
+
 	filter := &domain.AdminFilterEvent{ID: &id}
 	events, err := e.AdminFilter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get created event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return nil, fmt.Errorf("created event not found")
 	}
-	
+
 	return events[0], nil
 }
 
@@ -250,30 +257,30 @@ func (e *Event) AdminPatch(ctx *Context, id string, patch *domain.AdminPatchEven
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch event: %w", err)
 	}
-	
+
 	// Если в JSON данных есть поле result, автоматически устанавливаем статус completed
 	if hasValidResult {
 		completedStatus := domain.EventStatusCompleted
 		statusPatch := &domain.AdminPatchEvent{
 			Status: &completedStatus,
 		}
-		
+
 		err = e.eventRepo.AdminPatch(ctx.Context, id, statusPatch)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update event status to completed: %w", err)
 		}
 	}
-	
+
 	filter := &domain.AdminFilterEvent{ID: &id}
 	events, err := e.AdminFilter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get updated event: %w", err)
 	}
-	
+
 	if len(events) == 0 {
 		return nil, fmt.Errorf("updated event not found")
 	}
-	
+
 	return events[0], nil
 }
 
@@ -303,29 +310,69 @@ func (e *Event) DetermineRegistrationStatus(ctx context.Context, event *domain.E
 func (e *Event) HandleRegistrationCancellation(ctx context.Context, registration *domain.Registration, event *domain.Event, hasPaid bool) domain.RegistrationStatus {
 	strategy := e.GetRegistrationStrategy(event.Type)
 	return strategy.HandleCancellation(ctx, registration, event, hasPaid)
-} 
+}
 
 // CreateEventWithPermissionCheck создает событие с проверкой прав доступа по типу
 func (e *Event) CreateEventWithPermissionCheck(ctx context.Context, createEvent *domain.CreateEvent, user *domain.User) (*domain.Event, error) {
 	createEvent.OrganizerID = user.ID
-	
+
 	// Проверяем права доступа в зависимости от типа события
 	switch createEvent.Type {
-		case domain.EventTypeGame:
-			return e.Create(ctx, createEvent)
-		
-		case domain.EventTypeTournament:
-			adminCtx := NewContext(ctx, user)
-			return e.AdminCreate(&adminCtx, createEvent)
-		
-		case domain.EventTypeTraining:
-			strategy := GetEventStrategy(createEvent.Type)
-			if err := strategy.ValidateRegistration(ctx, user, &domain.Event{Type: createEvent.Type}); err != nil {
-				return nil, err
-			}
-			return e.Create(ctx, createEvent)
-			
-		default:
-			return nil, fmt.Errorf("invalid event type: %s", createEvent.Type)
+	case domain.EventTypeGame:
+		return e.Create(ctx, createEvent)
+
+	case domain.EventTypeTournament:
+		adminCtx := NewContext(ctx, user)
+		return e.AdminCreate(&adminCtx, createEvent)
+
+	case domain.EventTypeTraining:
+		strategy := GetEventStrategy(createEvent.Type)
+		if err := strategy.ValidateRegistration(ctx, user, &domain.Event{Type: createEvent.Type}); err != nil {
+			return nil, err
+		}
+		return e.Create(ctx, createEvent)
+
+	default:
+		return nil, fmt.Errorf("invalid event type: %s", createEvent.Type)
 	}
-} 
+}
+
+func (e *Event) TryRegisterFromWaitlist(ctx context.Context, eventID string) error {
+	event, err := e.GetEventByID(ctx, eventID)
+	if err != nil {
+		return fmt.Errorf("failed to get event: %w", err)
+	}
+	waitlist, err := e.cases.Waitlist.GetEventWaitlist(ctx, eventID)
+	if err != nil {
+		return fmt.Errorf("failed to get waitlist: %w", err)
+	}
+
+	slices.SortFunc(waitlist, func(a, b *domain.Waitlist) int {
+		return a.Date.Compare(b.Date)
+	})
+
+	for _, waitlistUser := range waitlist {
+		_, err := e.cases.Registration.RegisterForEvent(ctx, waitlistUser.User, eventID)
+		if err != nil {
+			slog.Error("failed to register user from waitlist", slogx.Err(err))
+			continue
+		}
+		_, err = e.bot.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: waitlistUser.User.TelegramID,
+			Text: fmt.Sprintf(`Вы были успешно перемещены из вайтлиста и зарегистрированы на событие "%s"! <br>Перейдите на <a href="startapp=%s">страницу события</a> и проверьте, требуется ли оплата.`,
+				event.Name, event.ID),
+			ParseMode: models.ParseModeHTML,
+		})
+		if err != nil {
+			slog.Error("failed to send message to user", slogx.Err(err))
+			continue
+		}
+
+		err = e.cases.Waitlist.Delete(ctx, waitlistUser.ID)
+		if err != nil {
+			return fmt.Errorf("failed to delete from waitlist")
+		}
+	}
+
+	return nil
+}
