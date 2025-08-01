@@ -357,6 +357,12 @@ func (e *Event) TryRegisterFromWaitlist(ctx context.Context, eventID string) err
 			slog.Error("failed to register user from waitlist", slogx.Err(err))
 			continue
 		}
+
+		err = e.cases.Waitlist.Delete(ctx, waitlistUser.ID)
+		if err != nil {
+			return fmt.Errorf("failed to delete from waitlist")
+		}
+
 		_, err = e.bot.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: waitlistUser.User.TelegramID,
 			Text: fmt.Sprintf(`Вы были успешно перемещены из вайтлиста и зарегистрированы на событие "%s"! <br>Перейдите на <a href="startapp=%s">страницу события</a> и проверьте, требуется ли оплата.`,
@@ -366,11 +372,6 @@ func (e *Event) TryRegisterFromWaitlist(ctx context.Context, eventID string) err
 		if err != nil {
 			slog.Error("failed to send message to user", slogx.Err(err))
 			continue
-		}
-
-		err = e.cases.Waitlist.Delete(ctx, waitlistUser.ID)
-		if err != nil {
-			return fmt.Errorf("failed to delete from waitlist")
 		}
 	}
 
