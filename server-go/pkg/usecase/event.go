@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	"github.com/shampsdev/go-telegram-template/pkg/config"
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
 	"github.com/shampsdev/go-telegram-template/pkg/utils"
@@ -18,13 +19,15 @@ type Event struct {
 	ctx       context.Context
 	eventRepo repo.Event
 	bot       *bot.Bot
+	cfg       *config.Config
 	cases     *Cases
 }
 
-func NewEvent(ctx context.Context, eventRepo repo.Event, bot *bot.Bot, cases *Cases) *Event {
+func NewEvent(ctx context.Context, eventRepo repo.Event, cfg *config.Config, bot *bot.Bot, cases *Cases) *Event {
 	return &Event{
 		ctx:       ctx,
 		bot:       bot,
+		cfg:       cfg,
 		eventRepo: eventRepo,
 		cases:     cases,
 	}
@@ -354,7 +357,7 @@ func (e *Event) TryRegisterFromWaitlist(ctx context.Context, eventID string) err
 	for _, waitlistUser := range waitlist {
 		_, err := e.cases.Registration.RegisterForEvent(ctx, waitlistUser.User, eventID)
 		if err != nil {
-			slog.Error("failed to register user from waitlist", slogx.Err(err))
+			slog.Info("failed to register user from waitlist", slogx.Err(err))
 			continue
 		}
 
@@ -366,12 +369,12 @@ func (e *Event) TryRegisterFromWaitlist(ctx context.Context, eventID string) err
 		_, err = e.bot.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: waitlistUser.User.TelegramID,
 			Text: fmt.Sprintf(`Вы были успешно перемещены из вайтлиста и зарегистрированы на событие "%s"!
-Перейдите на <a href="startapp=%s">страницу события</a> и проверьте, требуется ли оплата.`,
-				event.Name, event.ID),
+Перейдите на <a href="https://t.me/%s/app?startapp=%s">страницу события</a> и проверьте, требуется ли оплата.`,
+				event.Name, e.cfg.TG.BotUsername, event.ID),
 			ParseMode: models.ParseModeHTML,
 		})
 		if err != nil {
-			slog.Error("failed to send message to user", slogx.Err(err))
+			slog.Info("failed to send message to user", slogx.Err(err))
 			continue
 		}
 	}

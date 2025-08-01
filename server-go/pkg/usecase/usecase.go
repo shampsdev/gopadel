@@ -59,7 +59,7 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	clubCase := NewClub(ctx, clubRepo)
 	loyaltyCase := NewLoyalty(ctx, loyaltyRepo)
 
-	eventCase := NewEvent(ctx, eventRepo, b, cases)                   // нужен Registration
+	eventCase := NewEvent(ctx, eventRepo, cfg, b, cases)              // нужен Registration
 	registrationCase := NewRegistration(ctx, registrationRepo, cases) // нужен Payment
 	paymentCase := NewPayment(ctx, paymentRepo, cfg, cases)           // нужен Event, Registration
 	waitlistCase := NewWaitlist(ctx, waitlistRepo, cases)             // нужен Event
