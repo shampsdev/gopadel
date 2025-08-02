@@ -378,7 +378,7 @@ func (e *Event) TryRegisterFromWaitlist(ctx context.Context, eventID string) err
 
 		_, err = e.bot.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: waitlistUser.User.TelegramID,
-			Text: fmt.Sprintf(`Вы были успешно перемещены из вайтлиста и зарегистрированы на событие "%s"!
+			Text: fmt.Sprintf(`Вы были успешно перемещены из листа ожидания и зарегистрированы на событие "%s"!
 Перейдите на <a href="https://t.me/%s/app?startapp=%s">страницу события</a> и проверьте, требуется ли оплата.`,
 				event.Name, e.cfg.TG.BotUsername, event.ID),
 			ParseMode: models.ParseModeHTML,
