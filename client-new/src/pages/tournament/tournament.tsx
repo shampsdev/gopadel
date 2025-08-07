@@ -195,7 +195,7 @@ export const Tournament = () => {
                   </p>
                 </div>
                 <div className="text-[16px] text-[#868D98] gap-1 flex flex-row items-start">
-                  <p>Ранг:</p>
+                  <p>Уровень:</p>
                   <p className="text-black">
                     {getRankTitle(events?.[0].rankMin || 0) ===
                     getRankTitle(events?.[0].rankMax || 0)

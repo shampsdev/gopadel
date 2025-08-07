@@ -166,7 +166,9 @@ export const GameStatusActions = ({
       if (!isRankAllowed(game, user)) {
         return (
           <div className="flex flex-col text-center gap-[18px]">
-            <div>Ваш ранг не соответствует заявленному для&nbsp;этой игры</div>
+            <div>
+              Ваш уровень не соответствует заявленному для&nbsp;этой игры
+            </div>
           </div>
         );
       }
@@ -243,7 +245,7 @@ export const GameStatusActions = ({
     if (!isRankAllowed(game, user)) {
       return (
         <div className="flex flex-col text-center gap-[18px]">
-          <div>Ваш ранг не соответствует заявленному для&nbsp;этой игры</div>
+          <div>Ваш уровень не соответствует заявленному для&nbsp;этой игры</div>
         </div>
       );
     }

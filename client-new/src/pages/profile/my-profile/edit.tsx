@@ -49,7 +49,7 @@ export const EditProfile = () => {
       setLastName(user.lastName ?? null);
       setRank(user.rank ?? null);
 
-      // Находим соответствующий ранг по числовому значению
+      // Находим соответствующий уровень по числовому значению
       const userRank = ranks.find(
         (r) => r.from <= (user.rank ?? 0) && (user.rank ?? 0) <= r.to
       );
@@ -230,7 +230,7 @@ export const EditProfile = () => {
           hasError={lastNameError}
         />
         <RankSelector
-          title="Ранг"
+          title="Уровень"
           value={rankInput}
           onChangeFunction={handleRankChange}
           hasError={rankError}

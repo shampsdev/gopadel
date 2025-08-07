@@ -97,7 +97,7 @@ export const RankInput = ({
           }}
           maxLength={maxLength}
           className="w-full text-black outline-none pb-[12px] py-[3px] px-[16px] bg-transparent"
-          placeholder="Выберите ранг"
+          placeholder="Выберите уровень"
         />
       </fieldset>
 

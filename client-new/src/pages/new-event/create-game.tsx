@@ -63,7 +63,7 @@ export const CreateGame = () => {
     if (selectedRank) {
       setRankMin(selectedRank.from);
       setRankMinError(false);
-      // Проверяем, что максимальный ранг не меньше минимального
+      // Проверяем, что максимальный уровень не меньше минимального
       if (rankMax !== null && selectedRank.from > rankMax) {
         setRankMaxError(true);
       } else {
@@ -78,7 +78,7 @@ export const CreateGame = () => {
     if (selectedRank) {
       setRankMax(selectedRank.from);
       setRankMaxError(false);
-      // Проверяем, что минимальный ранг не больше максимального
+      // Проверяем, что минимальный уровень не больше максимального
       if (rankMin !== null && selectedRank.from < rankMin) {
         setRankMinError(true);
       } else {
@@ -297,13 +297,13 @@ export const CreateGame = () => {
             courts={courts ?? []}
           />
           <RankSelector
-            title="Минимальный ранг"
+            title="Минимальный уровень"
             value={rankMinInput}
             onChangeFunction={handleRankMinChange}
             hasError={rankMin === null || rankMinError}
           />
           <RankSelector
-            title="Максимальный ранг"
+            title="Максимальный уровень"
             value={rankMaxInput}
             onChangeFunction={handleRankMaxChange}
             hasError={rankMax === null || rankMaxError}

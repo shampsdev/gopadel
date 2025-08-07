@@ -194,7 +194,7 @@ export const TournamentStatusActions = ({
         return (
           <div className="flex flex-col text-center gap-[18px]">
             <div>
-              Ваш ранг не соответствует заявленному для&nbsp;этого турнира
+              Ваш уровень не соответствует заявленному для&nbsp;этого турнира
             </div>
           </div>
         );
@@ -315,7 +315,7 @@ export const TournamentStatusActions = ({
       return (
         <div className="flex flex-col text-center gap-[18px]">
           <div>
-            Ваш ранг не соответствует заявленному для&nbsp;этого турнира
+            Ваш уровень не соответствует заявленному для&nbsp;этого турнира
           </div>
         </div>
       );

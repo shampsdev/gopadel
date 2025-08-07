@@ -145,7 +145,7 @@ export const Registration = () => {
           maxLength={100}
         />
         <RankInput
-          title="Ранг"
+          title="Уровень"
           value={rankInput}
           onChangeFunction={handleRankChange}
         />

@@ -50,7 +50,7 @@ export const MyProfile = () => {
         )}
         <div className="py-5 border-b border-[#DADCE0]">
           <div className="flex flex-row justify-between">
-            <p className="text-[#868D98] text-[16px]">Ранг</p>
+            <p className="text-[#868D98] text-[16px]">Уровень</p>
             <p className="text-[16px]">{getRankTitle(user?.rank ?? 0)}</p>
           </div>
         </div>

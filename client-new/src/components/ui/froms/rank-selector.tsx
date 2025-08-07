@@ -34,7 +34,7 @@ export const RankSelector = ({
         </legend>
         <div className="flex justify-between items-center pb-[12px] py-[3px] px-[16px]">
           <span className={selectedRank ? "text-black" : "text-[#A4A9B4]"}>
-            {selectedRank ? selectedRank.title : "Выберите ранг"}
+            {selectedRank ? selectedRank.title : "Выберите уровень"}
           </span>
           <svg
             className={`w-5 h-5 transition-transform ${
