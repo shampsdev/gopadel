@@ -26,8 +26,8 @@ func NewPaymentRepo(db *pgxpool.Pool) *PaymentRepo {
 
 func (r *PaymentRepo) Create(ctx context.Context, payment *domain.CreatePayment) (string, error) {
 	s := r.psql.Insert(`"payments"`).
-		Columns("payment_id", "amount", "status", "payment_link", "confirmation_token", "registration_id").
-		Values(payment.PaymentID, payment.Amount, payment.Status, payment.PaymentLink, payment.ConfirmationToken, payment.RegistrationID).
+		Columns("payment_id", "amount", "status", "payment_link", "confirmation_token", "user_id", "event_id").
+		Values(payment.PaymentID, payment.Amount, payment.Status, payment.PaymentLink, payment.ConfirmationToken, payment.UserID, payment.EventID).
 		Suffix("RETURNING id")
 
 	sql, args, err := s.ToSql()
@@ -37,22 +37,23 @@ func (r *PaymentRepo) Create(ctx context.Context, payment *domain.CreatePayment)
 
 	var id string
 	err = r.db.QueryRow(ctx, sql, args...).Scan(&id)
-	return id, err
+	if err != nil {
+		return "", fmt.Errorf("failed to create payment: %w", err)
+	}
+
+	return id, nil
 }
 
 func (r *PaymentRepo) Filter(ctx context.Context, filter *domain.FilterPayment) ([]*domain.Payment, error) {
 	s := r.psql.Select(
 		`"p"."id"`, `"p"."payment_id"`, `"p"."date"`, `"p"."amount"`, `"p"."status"`,
-		`"p"."payment_link"`, `"p"."confirmation_token"`, `"p"."registration_id"`,
-		`"reg"."id"`, `"reg"."user_id"`, `"reg"."tournament_id"`, `"reg"."date"`, `"reg"."status"`,
+		`"p"."payment_link"`, `"p"."confirmation_token"`, `"p"."user_id"`, `"p"."event_id"`,
+		`"reg"."user_id"`, `"reg"."event_id"`, `"reg"."status"`, `"reg"."created_at"`, `"reg"."updated_at"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
-		`"t"."id"`, `"t"."name"`, `"t"."start_time"`, `"t"."end_time"`, `"t"."price"`,
-		`"t"."rank_min"`, `"t"."rank_max"`, `"t"."max_users"`, `"t"."description"`, `"t"."tournament_type"`,
 	).
 		From(`"payments" AS p`).
-		LeftJoin(`"registrations" AS reg ON "p"."registration_id" = "reg"."id"`).
-		LeftJoin(`"users" AS u ON "reg"."user_id" = "u"."id"`).
-		LeftJoin(`"tournaments" AS t ON "reg"."tournament_id" = "t"."id"`)
+		LeftJoin(`"registrations" AS reg ON "p"."user_id" = "reg"."user_id" AND "p"."event_id" = "reg"."event_id"`).
+		LeftJoin(`"users" AS u ON "reg"."user_id" = "u"."id"`)
 
 	if filter.ID != nil {
 		s = s.Where(sq.Eq{`"p"."id"`: *filter.ID})
@@ -66,8 +67,12 @@ func (r *PaymentRepo) Filter(ctx context.Context, filter *domain.FilterPayment) 
 		s = s.Where(sq.Eq{`"p"."status"`: *filter.Status})
 	}
 
-	if filter.RegistrationID != nil {
-		s = s.Where(sq.Eq{`"p"."registration_id"`: *filter.RegistrationID})
+	if filter.UserID != nil {
+		s = s.Where(sq.Eq{`"p"."user_id"`: *filter.UserID})
+	}
+
+	if filter.EventID != nil {
+		s = s.Where(sq.Eq{`"p"."event_id"`: *filter.EventID})
 	}
 
 	s = s.OrderBy(`"p"."date" DESC`)
@@ -88,137 +93,15 @@ func (r *PaymentRepo) Filter(ctx context.Context, filter *domain.FilterPayment) 
 
 	payments := []*domain.Payment{}
 	for rows.Next() {
-		var payment domain.Payment
-		var registration domain.Registration
-		var user domain.User
-		var tournament domain.Tournament
-
-		var registrationID pgtype.Text
-		var regID, regUserID, regTournamentID pgtype.Text
-		var regDate pgtype.Timestamp
-		var regStatus pgtype.Text
-
-		var userID pgtype.Text
-		var userTelegramID pgtype.Int8
-		var userTelegramUsername, userFirstName, userLastName, userAvatar pgtype.Text
-
-		var tournamentID pgtype.Text
-		var tournamentName pgtype.Text
-		var tournamentStartTime, tournamentEndTime pgtype.Timestamp
-		var tournamentPrice pgtype.Int4
-		var tournamentRankMin, tournamentRankMax pgtype.Float8
-		var tournamentMaxUsers pgtype.Int4
-		var tournamentDescription, tournamentType pgtype.Text
-
-		err := rows.Scan(
-			&payment.ID,
-			&payment.PaymentID,
-			&payment.Date,
-			&payment.Amount,
-			&payment.Status,
-			&payment.PaymentLink,
-			&payment.ConfirmationToken,
-			&registrationID,
-			&regID,
-			&regUserID,
-			&regTournamentID,
-			&regDate,
-			&regStatus,
-			&userID,
-			&userTelegramID,
-			&userTelegramUsername,
-			&userFirstName,
-			&userLastName,
-			&userAvatar,
-			&tournamentID,
-			&tournamentName,
-			&tournamentStartTime,
-			&tournamentEndTime,
-			&tournamentPrice,
-			&tournamentRankMin,
-			&tournamentRankMax,
-			&tournamentMaxUsers,
-			&tournamentDescription,
-			&tournamentType,
-		)
+		payment, err := r.scanPayment(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
+			return nil, err
 		}
+		payments = append(payments, payment)
+	}
 
-		if registrationID.Valid {
-			payment.RegistrationID = &registrationID.String
-		}
-
-		if regID.Valid {
-			registration.ID = regID.String
-			if regUserID.Valid {
-				registration.UserID = regUserID.String
-			}
-			if regTournamentID.Valid {
-				registration.TournamentID = regTournamentID.String
-			}
-			if regDate.Valid {
-				registration.Date = regDate.Time
-			}
-			if regStatus.Valid {
-				registration.Status = domain.RegistrationStatus(regStatus.String)
-			}
-
-			if userID.Valid {
-				user.ID = userID.String
-				if userTelegramID.Valid {
-					user.TelegramID = userTelegramID.Int64
-				}
-				if userTelegramUsername.Valid {
-					user.TelegramUsername = userTelegramUsername.String
-				}
-				if userFirstName.Valid {
-					user.FirstName = userFirstName.String
-				}
-				if userLastName.Valid {
-					user.LastName = userLastName.String
-				}
-				if userAvatar.Valid {
-					user.Avatar = userAvatar.String
-				}
-				registration.User = &user
-			}
-
-			if tournamentID.Valid {
-				tournament.ID = tournamentID.String
-				if tournamentName.Valid {
-					tournament.Name = tournamentName.String
-				}
-				if tournamentStartTime.Valid {
-					tournament.StartTime = tournamentStartTime.Time
-				}
-				if tournamentEndTime.Valid {
-					tournament.EndTime = tournamentEndTime.Time
-				}
-				if tournamentPrice.Valid {
-					tournament.Price = int(tournamentPrice.Int32)
-				}
-				if tournamentRankMin.Valid {
-					tournament.RankMin = tournamentRankMin.Float64
-				}
-				if tournamentRankMax.Valid {
-					tournament.RankMax = tournamentRankMax.Float64
-				}
-				if tournamentMaxUsers.Valid {
-					tournament.MaxUsers = int(tournamentMaxUsers.Int32)
-				}
-				if tournamentDescription.Valid {
-					tournament.Description = tournamentDescription.String
-				}
-				if tournamentType.Valid {
-					tournament.TournamentType = tournamentType.String
-				}
-			}
-
-			payment.Registration = &registration
-		}
-
-		payments = append(payments, &payment)
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
 	}
 
 	return payments, nil
@@ -227,16 +110,25 @@ func (r *PaymentRepo) Filter(ctx context.Context, filter *domain.FilterPayment) 
 func (r *PaymentRepo) Patch(ctx context.Context, id string, payment *domain.PatchPayment) error {
 	s := r.psql.Update(`"payments"`).Where(sq.Eq{"id": id})
 
+	hasUpdates := false
+
 	if payment.Status != nil {
 		s = s.Set("status", *payment.Status)
+		hasUpdates = true
 	}
 
 	if payment.PaymentLink != nil {
 		s = s.Set("payment_link", *payment.PaymentLink)
+		hasUpdates = true
 	}
 
 	if payment.ConfirmationToken != nil {
 		s = s.Set("confirmation_token", *payment.ConfirmationToken)
+		hasUpdates = true
+	}
+
+	if !hasUpdates {
+		return fmt.Errorf("no fields to update")
 	}
 
 	sql, args, err := s.ToSql()
@@ -244,19 +136,106 @@ func (r *PaymentRepo) Patch(ctx context.Context, id string, payment *domain.Patc
 		return fmt.Errorf("failed to build SQL: %w", err)
 	}
 
-	_, err = r.db.Exec(ctx, sql, args...)
-	return err
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update payment: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("payment with id %s not found", id)
+	}
+
+	return nil
 }
 
 func (r *PaymentRepo) Delete(ctx context.Context, id string) error {
-	s := r.psql.Delete(`"payments"`).
-		Where(sq.Eq{"id": id})
+	s := r.psql.Delete(`"payments"`).Where(sq.Eq{"id": id})
 
 	sql, args, err := s.ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build SQL: %w", err)
 	}
 
-	_, err = r.db.Exec(ctx, sql, args...)
-	return err
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to delete payment: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("payment with id %s not found", id)
+	}
+
+	return nil
+}
+
+// scanPayment сканирует строку результата в структуру Payment
+func (r *PaymentRepo) scanPayment(rows pgx.Rows) (*domain.Payment, error) {
+	var payment domain.Payment
+	var registration *domain.Registration
+	var user *domain.User
+
+	// Nullable fields
+	var regUserID, regEventID pgtype.Text
+	var regStatus pgtype.Text
+	var regCreatedAt, regUpdatedAt pgtype.Timestamp
+	var userID pgtype.Text
+	var userTelegramID pgtype.Int8
+	var userTelegramUsername, userFirstName, userLastName, userAvatar pgtype.Text
+
+	err := rows.Scan(
+		&payment.ID, &payment.PaymentID, &payment.Date, &payment.Amount, &payment.Status,
+		&payment.PaymentLink, &payment.ConfirmationToken, &payment.UserID, &payment.EventID,
+		&regUserID, &regEventID, &regStatus, &regCreatedAt, &regUpdatedAt,
+		&userID, &userTelegramID, &userTelegramUsername, &userFirstName, &userLastName, &userAvatar,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan row: %w", err)
+	}
+
+	// Если есть связанная регистрация, заполняем её
+	if regUserID.Valid && regEventID.Valid {
+		registration = &domain.Registration{
+			UserID:  regUserID.String,
+			EventID: regEventID.String,
+		}
+
+		if regStatus.Valid {
+			registration.Status = domain.RegistrationStatus(regStatus.String)
+		}
+		if regCreatedAt.Valid {
+			registration.CreatedAt = regCreatedAt.Time
+		}
+		if regUpdatedAt.Valid {
+			registration.UpdatedAt = regUpdatedAt.Time
+		}
+
+		// Если есть связанный пользователь, заполняем его
+		if userID.Valid {
+			user = &domain.User{
+				ID: userID.String,
+			}
+
+			if userTelegramID.Valid {
+				user.TelegramID = userTelegramID.Int64
+			}
+			if userTelegramUsername.Valid {
+				user.TelegramUsername = userTelegramUsername.String
+			}
+			if userFirstName.Valid {
+				user.FirstName = userFirstName.String
+			}
+			if userLastName.Valid {
+				user.LastName = userLastName.String
+			}
+			if userAvatar.Valid {
+				user.Avatar = userAvatar.String
+			}
+
+			registration.User = user
+		}
+
+		payment.Registration = registration
+	}
+
+	return &payment, nil
 } 

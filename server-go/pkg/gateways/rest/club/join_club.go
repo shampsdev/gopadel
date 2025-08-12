@@ -15,25 +15,25 @@ import (
 // @Accept json
 // @Produce json
 // @Schemes http https
-// @Param club_id path string true "Club ID"
+// @Param url path string true "Club URL"
 // @Success 200 {object} domain.Club "Club data"
 // @Failure 400 "Bad Request"
 // @Failure 401 "Unauthorized"
 // @Failure 500 "Internal Server Error"
 // @Security ApiKeyAuth
-// @Router /clubs/{club_id}/join [post]
+// @Router /clubs/{url}/join [post]
 func JoinClub(clubCase *usecase.Club) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := middlewares.MustGetUser(c)
-		clubID := c.Param("club_id")
+		clubURL := c.Param("url")
 
-		if clubID == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "club_id is required"})
+		if clubURL == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "club url is required"})
 			return
 		}
 
 		ctx := usecase.NewContext(c, user)
-		club, err := clubCase.JoinClubAndGet(&ctx, clubID)
+		club, err := clubCase.JoinClubAndGet(&ctx, clubURL)
 		if ginerr.AbortIfErr(c, err, http.StatusBadRequest, "failed to join club") {
 			return
 		}

@@ -1,112 +1,169 @@
+// Базовые типы и интерфейсы для всего приложения
+
+// Типы событий
+export type EventType = 'game' | 'tournament' | 'training';
+
+// Статусы событий
+export type EventStatus = 'registration' | 'full' | 'completed' | 'cancelled';
+
+// Статусы регистрации
+export type RegistrationStatus = 
+  | 'PENDING'
+  | 'INVITED' 
+  | 'CONFIRMED'
+  | 'CANCELLED_BEFORE_PAYMENT'
+  | 'CANCELLED_AFTER_PAYMENT'
+  | 'REFUNDED'
+  | 'CANCELLED'
+  | 'LEFT';
+
+// Позиция игрока
+export type PlayingPosition = 'right' | 'left' | 'both';
+
+// Базовая модель корта
 export interface Court {
-  id: string
-  name: string
-  address: string
+  id: string;
+  name: string;
+  address: string;
 }
 
-export interface Tournament {
-  id?: number
-  name: string
-  start_time: string
-  end_time?: string
-  price: number
-  court_id: string
-  tournament_type: string
-  rank_min: number
-  rank_max: number
-  max_users: number
-  description?: string
-  organizator_id: string // UUID
-}
-
-export interface User {
-  id: string
-  telegram_id: number
-  username?: string
-  first_name: string
-  second_name: string
-  avatar: string
-  rank: number
-  city: string
-  birth_date?: string
-  birth_date_ru?: string
-  playing_position?: 'right' | 'left' | 'both'
-  padel_profiles?: string
-  bio: string
-  loyalty_id: number
-  loyalty?: Loyalty
-  is_registered: boolean
-}
-
+// Базовая модель лояльности
 export interface Loyalty {
-  id?: number
-  name: string
-  discount: number
-  description?: string
-  requirements?: Record<string, unknown>
-  users_count?: number
+  id: number;
+  name: string;
+  discount: number;
+  description: string;
+  requirements: string;
 }
 
+// Базовая модель пользователя
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  telegramUsername?: string;
+  telegramId: number;
+  rank: number;
+  city?: string;
+  bio?: string;
+  avatar?: string;
+  birthDate?: string;
+  playingPosition?: PlayingPosition;
+  padelProfiles?: string;
+  isRegistered: boolean;
+  loyalty?: Loyalty;
+}
+
+// Результаты событий
+export interface LeaderboardEntry {
+  place: number;
+  userId: string;
+}
+
+export interface GameResult {
+  leaderboard: LeaderboardEntry[];
+}
+
+export interface TournamentResult {
+  leaderboard: LeaderboardEntry[];
+}
+
+export interface GameData {
+  game?: {
+    type: string;
+  };
+  result?: GameResult;
+}
+
+export interface TournamentData {
+  tournament?: {
+    type: string;
+  };
+  result?: TournamentResult;
+}
+
+// Базовая модель события
+export interface Event {
+  id: string;
+  name: string;
+  description?: string;
+  startTime: string;
+  endTime?: string;
+  rankMin: number;
+  rankMax: number;
+  price: number;
+  maxUsers: number;
+  status: EventStatus;
+  type: EventType;
+  clubId?: string;
+  court: Court;
+  organizer: User;
+  data?: Record<string, unknown> | GameData | TournamentData;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Базовая модель регистрации
+export interface Registration {
+  userId: string;
+  eventId: string;
+  status: RegistrationStatus;
+  createdAt: string;
+  updatedAt: string;
+  user?: User;
+  event?: Event;
+}
+
+// Базовая модель платежа
 export interface Payment {
-  id: string
-  amount: number
-  status: string
-  created_at: string
+  id: string;
+  paymentId: string;
+  date: string;
+  amount: number;
+  status: 'pending' | 'waiting_for_capture' | 'succeeded' | 'canceled';
+  paymentLink?: string;
+  confirmationToken?: string;
+  createdAt: string;
+  updatedAt: string;
+  userId?: string;
+  eventId?: string;
+  registration?: Registration;
 }
 
-export enum RegistrationStatus {
-  ACTIVE = 'active',
-  PENDING = 'pending',
-  CANCELED = 'canceled',
-  CANCELED_BY_USER = 'canceled_by_user'
-}
-
-export interface Participant {
-  id: string
-  user_id: string
-  tournament_id: string
-  date: string | undefined
-  status: string
-  user: User
-  payment?: Payment
-}
-
-export interface WaitlistEntry {
-  id: number
-  user_id: string
-  tournament_id: string
-  date: string
-  user: User
-}
-
-// Упрощенная модель пользователя для списка
-export interface UserListItem {
-  id: string
-  telegram_id: number
-  username?: string
-  first_name: string
-  second_name: string
-  avatar?: string
-  city: string
-  rank: number
-  is_registered: boolean
-}
-
+// Базовая модель клуба
 export interface Club {
-  id: string
-  name: string
-  description?: string
-  createdAt: string
-  userCount?: number
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  userCount?: number;
 }
+
+// Модель пользователя из списка ожидания
+export interface WaitlistUser {
+  user: User;
+  date: string;
+}
+
+// CRUD интерфейсы для создания/обновления
 
 export interface CreateClub {
-  id: string
-  name: string
-  description?: string
+  id: string;
+  name: string;
+  description?: string;
 }
 
 export interface PatchClub {
-  name?: string
-  description?: string
+  name?: string;
+  description?: string;
+}
+
+export interface CreateCourt {
+  name: string;
+  address: string;
+}
+
+export interface PatchCourt {
+  name?: string;
+  address?: string;
 }

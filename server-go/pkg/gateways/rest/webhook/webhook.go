@@ -8,5 +8,5 @@ import (
 )
 
 func Setup(r *gin.RouterGroup, cases usecase.Cases, cfg *config.Config, notificationService *notifications.NotificationService) {
-	r.POST("/yookassa_webhook", YooKassaWebhook(cases.Payment, cases.Registration, cases.Tournament, notificationService, cfg))
+	r.POST("/yookassa_webhook", YooKassaWebhook(cases.Payment, cases.Registration, cases.Event, notificationService, cfg))
 } 

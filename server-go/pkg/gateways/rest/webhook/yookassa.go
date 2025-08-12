@@ -35,7 +35,7 @@ type WebhookEvent struct {
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/yookassa_webhook [post]
-func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *usecase.Registration, tournamentUseCase *usecase.Tournament, notificationService *notifications.NotificationService, cfg *config.Config) gin.HandlerFunc {
+func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *usecase.Registration, eventUseCase *usecase.Event, notificationService *notifications.NotificationService, cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var event WebhookEvent
 		if err := c.ShouldBindJSON(&event); err != nil {
@@ -80,36 +80,21 @@ func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *useca
 
 		if paymentStatus == domain.PaymentStatusSucceeded && payment.Registration != nil {
 			if payment.Registration.Status == domain.RegistrationStatusPending {
-				err = registrationUseCase.UpdateRegistrationStatus(c.Request.Context(), payment.Registration.ID, domain.RegistrationStatusActive)
+				// Получаем событие для проверки типа
+				event, err := eventUseCase.GetEventByID(c.Request.Context(), payment.Registration.EventID)
 				if err != nil {
-					if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to update registration status") {
+					if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to get event") {
 						return
 					}
 				}
 				
-				// Уведа об успешной оплате
-				if notificationService != nil {
-					tournament, err := tournamentUseCase.GetTournamentByID(c.Request.Context(), payment.Registration.TournamentID)
-					if err == nil && payment.Registration.User != nil {
-						err = notificationService.SendTournamentPaymentSuccess(
-							payment.Registration.User.TelegramID,
-							tournament.ID,
-							tournament.Name,
-						)
-						if err != nil {
-							cfg.Logger().Error("Failed to send payment success notification", "error", err)
-						}
-					}
-				}
-				
-				// Отмена запланированных
-				if notificationService != nil && payment.Registration.User != nil {
-					err = notificationService.SendTournamentTasksCancel(
-						payment.Registration.User.TelegramID,
-						payment.Registration.TournamentID,
-					)
+				// Активируем регистрацию только для турниров, не для игр
+				if event.Type == domain.EventTypeTournament {
+					err = registrationUseCase.UpdateRegistrationStatus(c.Request.Context(), payment.Registration.UserID, payment.Registration.EventID, domain.RegistrationStatusConfirmed)
 					if err != nil {
-						cfg.Logger().Error("Failed to send tasks cancel notification", "error", err)
+						if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to update registration status") {
+							return
+						}
 					}
 				}
 			}

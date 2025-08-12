@@ -51,23 +51,23 @@ type Loyalty interface {
 	Delete(ctx context.Context, id int) error
 }
 
-type Tournament interface {
-	Create(ctx context.Context, tournament *domain.CreateTournament) (string, error)
-	Patch(ctx context.Context, id string, tournament *domain.PatchTournament) error
-	Filter(ctx context.Context, filter *domain.FilterTournament) ([]*domain.Tournament, error)
-	GetTournamentsByUserID(ctx context.Context, userID string) ([]*domain.Tournament, error)
+type Event interface {
+	Create(ctx context.Context, event *domain.CreateEvent) (string, error)
+	Patch(ctx context.Context, id string, event *domain.PatchEvent) error
+	Filter(ctx context.Context, filter *domain.FilterEvent) ([]*domain.Event, error)
+	GetEventsByUserID(ctx context.Context, userID string) ([]*domain.Event, error)
 	Delete(ctx context.Context, id string) error
-	AdminFilter(ctx context.Context, filter *domain.AdminFilterTournament) ([]*domain.Tournament, error)
-	AdminPatch(ctx context.Context, id string, tournament *domain.AdminPatchTournament) error
+	AdminFilter(ctx context.Context, filter *domain.AdminFilterEvent) ([]*domain.Event, error)
+	AdminPatch(ctx context.Context, id string, event *domain.AdminPatchEvent) error
 	AdminDelete(ctx context.Context, id string) error
 }
 
 type Registration interface {
-	Create(ctx context.Context, registration *domain.CreateRegistration) (string, error)
-	Patch(ctx context.Context, id string, registration *domain.PatchRegistration) error
+	Create(ctx context.Context, registration *domain.CreateRegistration) error
+	Patch(ctx context.Context, userID, eventID string, registration *domain.PatchRegistration) error
 	Filter(ctx context.Context, filter *domain.FilterRegistration) ([]*domain.Registration, error)
 	AdminFilter(ctx context.Context, filter *domain.AdminFilterRegistration) ([]*domain.RegistrationWithPayments, error)
-	Delete(ctx context.Context, id string) error
+	Delete(ctx context.Context, userID, eventID string) error
 }
 
 type Payment interface {

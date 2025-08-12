@@ -1,4 +1,5 @@
 import * as React from "react"
+import { createPortal } from "react-dom"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -33,16 +34,37 @@ const SelectContext = React.createContext<{
   onValueChange?: (value: string) => void
   isOpen: boolean
   setIsOpen: (open: boolean) => void
+  triggerRef: React.RefObject<HTMLButtonElement>
 }>({
   isOpen: false,
   setIsOpen: () => {},
+  triggerRef: { current: null },
 })
 
 export const Select: React.FC<SelectProps> = ({ value, onValueChange, children }) => {
   const [isOpen, setIsOpen] = React.useState(false)
+  const triggerRef = React.useRef<HTMLButtonElement>(null)
+
+  // Закрытие при клике вне
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (triggerRef.current && !triggerRef.current.contains(event.target as Node)) {
+        const target = event.target as Element
+        // Проверяем, что клик не был по элементу списка
+        if (!target.closest('[data-select-content]')) {
+          setIsOpen(false)
+        }
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
 
   return (
-    <SelectContext.Provider value={{ value, onValueChange, isOpen, setIsOpen }}>
+    <SelectContext.Provider value={{ value, onValueChange, isOpen, setIsOpen, triggerRef }}>
       <div className="relative">
         {children}
       </div>
@@ -51,10 +73,11 @@ export const Select: React.FC<SelectProps> = ({ value, onValueChange, children }
 }
 
 export const SelectTrigger: React.FC<SelectTriggerProps> = ({ className, children }) => {
-  const { isOpen, setIsOpen } = React.useContext(SelectContext)
+  const { isOpen, setIsOpen, triggerRef } = React.useContext(SelectContext)
 
   return (
     <button
+      ref={triggerRef}
       type="button"
       onClick={() => setIsOpen(!isOpen)}
       className={cn(
@@ -81,17 +104,34 @@ export const SelectValue: React.FC<SelectValueProps> = ({ placeholder, children 
 }
 
 export const SelectContent: React.FC<SelectContentProps> = ({ className, children }) => {
-  const { isOpen } = React.useContext(SelectContext)
+  const { isOpen, triggerRef } = React.useContext(SelectContext)
 
-  if (!isOpen) return null
+  if (!isOpen || !triggerRef.current) return null
 
-  return (
-    <div className={cn(
-      "absolute top-full left-0 right-0 z-50 mt-1 rounded-md border bg-popover text-popover-foreground shadow-md",
-      className
-    )}>
+  // Получаем позицию и размеры trigger элемента
+  const rect = triggerRef.current.getBoundingClientRect()
+  const scrollY = window.scrollY || document.documentElement.scrollTop
+
+  const contentStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: rect.bottom + scrollY + 4, // 4px отступ
+    left: rect.left,
+    width: rect.width,
+    zIndex: 9999,
+  }
+
+  return createPortal(
+    <div 
+      data-select-content
+      style={contentStyle}
+      className={cn(
+        "rounded-md border bg-popover text-popover-foreground shadow-md max-h-60 overflow-y-auto",
+        className
+      )}
+    >
       {children}
-    </div>
+    </div>,
+    document.body
   )
 }
 
@@ -104,7 +144,7 @@ export const SelectItem: React.FC<SelectItemProps> = ({ value, children }) => {
         onValueChange?.(value)
         setIsOpen(false)
       }}
-      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-zinc-700 hover:text-white text-white"
     >
       {children}
     </div>

@@ -2,32 +2,37 @@ package registration
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/shampsdev/go-telegram-template/pkg/config"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/middlewares"
 	"github.com/shampsdev/go-telegram-template/pkg/usecase"
 )
 
-func Setup(r *gin.RouterGroup, cases usecase.Cases) {
+type Handler struct {
+	cases  *usecase.Cases
+	config *config.Config
+}
+
+func NewHandler(cases *usecase.Cases, cfg *config.Config) *Handler {
+	return &Handler{
+		cases:  cases,
+		config: cfg,
+	}
+}
+
+func Setup(r *gin.RouterGroup, cases usecase.Cases, cfg *config.Config) {
+	handler := NewHandler(&cases, cfg)
+	
 	g := r.Group("/registrations")
-	
-	// Применяем middleware для аутентификации ко всем эндпоинтам
-	g.Use(middlewares.ExtractUserTGData())
-	g.Use(middlewares.AuthUser(cases.User))
+	middlewares.SetupAuth(g, cases.User)
 
-	// Create PENDING registration or update CANCELED -> PENDING
-	g.POST("/:tournament_id", RegisterForTournament(cases.Registration, cases.User))
+	g.GET("/my", handler.getMyRegistrations)                             // получить все мои регистрации
+	g.POST("/:event_id", handler.createRegistration)                    // создание регистрации (статус PENDING)
+	g.POST("/:event_id/payment", handler.createPayment)                 // создание платежа (получение ссылки)
+	g.POST("/:event_id/cancel", handler.cancelRegistration)             // отмена до оплаты (CANCELLED_BEFORE_PAYMENT)
+	g.POST("/:event_id/cancel-paid", handler.cancelPaidRegistration)    // отмена после оплаты (CANCELLED_AFTER_PAYMENT)
+	g.POST("/:event_id/reactivate", handler.reactivateRegistration)     // повторная активация
 	
-	// Create payment for tournament registration
-	g.POST("/:tournament_id/payment", CreatePayment(cases.Payment, cases.User))
-
-	// Cancel registration before payment (PENDING -> CANCELED)
-	g.POST("/:tournament_id/cancel", CancelBeforePayment(cases.Registration, cases.User))
-	
-	// Cancel registration after payment (ACTIVE -> CANCELED_BY_USER)
-	g.POST("/:tournament_id/cancel-paid", CancelAfterPayment(cases.Registration, cases.User))
-	
-	// Reactivate canceled registration (CANCELED_BY_USER -> ACTIVE)
-	g.POST("/:tournament_id/reactivate", ReactivateRegistration(cases.Registration, cases.User))
-	
-	// Get user registrations
-	g.GET("/my", GetMyRegistrations(cases.Registration, cases.User))
+	// Новые эндпоинты для организаторов игр
+	g.PUT("/:event_id/:user_id/approve", handler.approveRegistration)   // одобрить заявку (PENDING -> CONFIRMED)
+	g.PUT("/:event_id/:user_id/reject", handler.rejectRegistration)     // отклонить заявку (PENDING -> CANCELLED)
 } 

@@ -14,7 +14,8 @@ import {
   Home,
   Menu,
   X,
-  Building2
+  Building2,
+  Gamepad2
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { UsersPage } from './UsersPage';
@@ -24,6 +25,7 @@ import { CourtsPage } from './CourtsPage';
 import { RegistrationsPage } from './RegistrationsPage';
 import { ClubsPage } from './ClubsPage';
 import { TournamentsPage } from './TournamentsPage';
+import { GamesPage } from './GamesPage';
 import type { NavItem } from '../types/navigation';
 
 interface NavigationParams {
@@ -48,7 +50,7 @@ const HomePage = ({ setCurrentPage, navItems }: { setCurrentPage: (page: string,
           <CardHeader className="pb-3 p-4 md:p-6">
             <div className="flex items-center space-x-3">
               <div className="p-2 md:p-3 rounded-lg bg-zinc-800 group-hover:bg-zinc-700 transition-colors">
-                <item.icon className="h-5 w-5 md:h-6 md:w-6" />
+                <item.icon className={`h-5 w-5 md:h-6 md:w-6 ${item.color.split(' ')[0]}`} />
               </div>
               <div className="min-w-0 flex-1">
                 <CardTitle className="text-white text-base md:text-lg truncate">{item.title}</CardTitle>
@@ -95,6 +97,14 @@ export const Dashboard: React.FC = () => {
     icon: Trophy,
     color: 'text-yellow-400 hover:border-yellow-400/50',
     path: '/tournaments'
+  },
+  {
+    id: 'games',
+    title: 'Игры',
+    description: 'Управление играми и матчами',
+    icon: Gamepad2,
+    color: 'text-cyan-400 hover:border-cyan-400/50',
+    path: '/games'
   },
   {
     id: 'courts',
@@ -151,10 +161,12 @@ export const Dashboard: React.FC = () => {
         return <UsersPage />;
       case '/tournaments':
         return <TournamentsPage onNavigateToRegistrations={handleNavigateToRegistrations} />;
+      case '/games':
+        return <GamesPage onNavigateToRegistrations={handleNavigateToRegistrations} />;
       case '/courts':
         return <CourtsPage />;
       case '/registrations':
-        return <RegistrationsPage tournamentId={navigationParams.tournamentId} tournamentName={navigationParams.tournamentName} />;
+        return <RegistrationsPage eventId={navigationParams.tournamentId} eventName={navigationParams.tournamentName} />;
       case '/loyalty':
         return <LoyaltyPage />;
       case '/clubs':

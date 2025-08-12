@@ -6,23 +6,18 @@ import (
 	"time"
 
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
-	"github.com/shampsdev/go-telegram-template/pkg/notifications"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
 )
 
 type Registration struct {
-	registrationRepo    repo.Registration
-	tournamentRepo      repo.Tournament
-	paymentRepo         repo.Payment
-	notificationService *notifications.NotificationService
+	registrationRepo repo.Registration
+	cases            *Cases
 }
 
-func NewRegistration(ctx context.Context, registrationRepo repo.Registration, tournamentRepo repo.Tournament, paymentRepo repo.Payment, notificationService *notifications.NotificationService) *Registration {
+func NewRegistration(ctx context.Context, registrationRepo repo.Registration, cases *Cases) *Registration {
 	return &Registration{
-		registrationRepo:    registrationRepo,
-		tournamentRepo:      tournamentRepo,
-		paymentRepo:         paymentRepo,
-		notificationService: notificationService,
+		registrationRepo: registrationRepo,
+		cases:            cases,
 	}
 }
 
@@ -33,10 +28,7 @@ func (r *Registration) AdminFilter(ctx context.Context, adminFilter *domain.Admi
 	}
 
 	for _, reg := range registrations {
-		paymentFilter := &domain.FilterPayment{
-			RegistrationID: &reg.ID,
-		}
-		payments, err := r.paymentRepo.Filter(ctx, paymentFilter)
+		payments, err := r.cases.Payment.GetPaymentsByUserAndEvent(ctx, reg.UserID, reg.EventID)
 		if err == nil {
 			reg.Payments = payments
 		}
@@ -45,12 +37,13 @@ func (r *Registration) AdminFilter(ctx context.Context, adminFilter *domain.Admi
 	return registrations, nil
 }
 
-func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, registrationID string, status domain.RegistrationStatus) (*domain.RegistrationWithPayments, error) {
+func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, userID string, eventID string, status domain.RegistrationStatus) (*domain.RegistrationWithPayments, error) {
 	// Сначала получаем текущее состояние регистрации
 	filter := &domain.AdminFilterRegistration{
-		ID: &registrationID,
+		UserID:  &userID,
+		EventID: &eventID,
 	}
-	
+
 	currentRegistrations, err := r.AdminFilter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current registration: %w", err)
@@ -63,14 +56,53 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, regist
 	currentRegistration := currentRegistrations[0]
 	oldStatus := currentRegistration.Status
 
+	// Если переводим в статус CONFIRMED, проверяем свободные места
+	if status == domain.RegistrationStatusConfirmed && oldStatus != domain.RegistrationStatusConfirmed {
+		// Получаем событие для проверки мест
+		eventFilter := &domain.FilterEvent{ID: &eventID}
+		events, err := r.cases.Event.Filter(ctx, eventFilter)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get event: %w", err)
+		}
+
+		if len(events) == 0 {
+			return nil, fmt.Errorf("event not found")
+		}
+
+		event := events[0]
+
+		// Для игр проверяем свободные места (так как INVITED не занимает места, а CONFIRMED занимает)
+		if event.Type == domain.EventTypeGame {
+			if err := r.validateAvailableSlots(ctx, eventID); err != nil {
+				return nil, fmt.Errorf("cannot approve registration: %w", err)
+			}
+		}
+	}
+
 	// Обновляем статус
 	patch := &domain.PatchRegistration{
 		Status: &status,
 	}
-	
-	err = r.registrationRepo.Patch(ctx, registrationID, patch)
+
+	err = r.registrationRepo.Patch(ctx, userID, eventID, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update registration status: %w", err)
+	}
+
+	// Обновляем статус события после изменения регистрации
+	if status == domain.RegistrationStatusConfirmed {
+		if err := r.updateEventStatusAfterRegistration(ctx, eventID); err != nil {
+			fmt.Printf("Warning: failed to update event status after approval: %v\n", err)
+		}
+	} else if oldStatus == domain.RegistrationStatusConfirmed {
+		if err := r.updateEventStatusAfterCancellation(ctx, eventID); err != nil {
+			fmt.Printf("Warning: failed to update event status after status change: %v\n", err)
+		}
+	}
+
+	err = r.cases.Event.TryRegisterFromWaitlist(ctx, eventID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to try register from waitlist: %w", err)
 	}
 
 	// Получаем обновленную регистрацию
@@ -85,119 +117,15 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, regist
 
 	updatedRegistration := updatedRegistrations[0]
 
-	// Обрабатываем смену статуса с CANCELED на ACTIVE/PENDING
-	if oldStatus == domain.RegistrationStatusCanceled && 
-	   (status == domain.RegistrationStatusActive || status == domain.RegistrationStatusPending) {
-		
-		if r.notificationService != nil {
-			err = r.notificationService.SendTournamentTasksCancel(
-				updatedRegistration.User.TelegramID,
-				updatedRegistration.Tournament.ID,
-			)
-			if err != nil {
-				fmt.Printf("Failed to cancel related tasks: %v\n", err)
-			}
-
-			switch status {
-			case domain.RegistrationStatusActive:
-				// Если статус стал ACTIVE - отправляем уведомление об успешной оплате
-				err = r.notificationService.SendTournamentPaymentSuccess(
-					updatedRegistration.User.TelegramID,
-					updatedRegistration.Tournament.ID,
-					updatedRegistration.Tournament.Name,
-				)
-				if err != nil {
-					fmt.Printf("Failed to send payment success notification: %v\n", err)
-				}
-
-				tournament := updatedRegistration.Tournament
-				if tournament.StartTime.After(time.Now()) {
-					reminder48h := tournament.StartTime.Add(-48 * time.Hour)
-					if reminder48h.After(time.Now()) {
-						err = r.notificationService.SendTournamentReminder48Hours(
-							updatedRegistration.User.TelegramID,
-							tournament.ID,
-							tournament.Name,
-							true,
-							reminder48h,
-						)
-						if err != nil {
-							fmt.Printf("Failed to schedule 48h reminder: %v\n", err)
-						}
-					}
-
-					reminder24h := tournament.StartTime.Add(-24 * time.Hour)
-					if reminder24h.After(time.Now()) {
-						err = r.notificationService.SendTournamentReminder24Hours(
-							updatedRegistration.User.TelegramID,
-							tournament.ID,
-							tournament.Name,
-							true,
-							reminder24h,
-						)
-						if err != nil {
-							fmt.Printf("Failed to schedule 24h reminder: %v\n", err)
-						}
-					}
-				}
-			case domain.RegistrationStatusPending:
-				tournament := updatedRegistration.Tournament
-				if tournament.StartTime.After(time.Now()) {
-					reminder48h := tournament.StartTime.Add(-48 * time.Hour)
-					if reminder48h.After(time.Now()) {
-						err = r.notificationService.SendTournamentReminder48Hours(
-							updatedRegistration.User.TelegramID,
-							tournament.ID,
-							tournament.Name,
-							false,
-							reminder48h,
-						)
-						if err != nil {
-							fmt.Printf("Failed to schedule 48h payment reminder: %v\n", err)
-						}
-					}
-
-					reminder24h := tournament.StartTime.Add(-24 * time.Hour)
-					if reminder24h.After(time.Now()) {
-						err = r.notificationService.SendTournamentReminder24Hours(
-							updatedRegistration.User.TelegramID,
-							tournament.ID,
-							tournament.Name,
-							false,
-							reminder24h,
-						)
-						if err != nil {
-							fmt.Printf("Failed to schedule 24h payment reminder: %v\n", err)
-						}
-					}
-
-					// Автоматическое удаление отключено
-					// autoDelete := tournament.StartTime.Add(-12 * time.Hour)
-					// if autoDelete.After(time.Now()) {
-					// 	err = r.notificationService.SendTournamentAutoDeleteUnpaid(
-					// 		updatedRegistration.User.TelegramID,
-					// 		tournament.ID,
-					// 		tournament.Name,
-					// 		registrationID,
-					// 		autoDelete,
-					// 	)
-					// 	if err != nil {
-					// 		fmt.Printf("Failed to schedule auto delete: %v\n", err)
-					// 	}
-					// }
-				}
-			}
-		}
-	}
-
 	return updatedRegistration, nil
 }
 
-func (r *Registration) GetRegistrationWithPayments(ctx context.Context, registrationID string) (*domain.RegistrationWithPayments, error) {
+func (r *Registration) GetRegistrationWithPayments(ctx context.Context, userID string, eventID string) (*domain.RegistrationWithPayments, error) {
 	filter := &domain.AdminFilterRegistration{
-		ID: &registrationID,
+		UserID:  &userID,
+		EventID: &eventID,
 	}
-	
+
 	registrations, err := r.AdminFilter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get registration: %w", err)
@@ -210,463 +138,324 @@ func (r *Registration) GetRegistrationWithPayments(ctx context.Context, registra
 	return registrations[0], nil
 }
 
-// Новая рега или обновление существующую CANCELED -> PENDING
-func (r *Registration) RegisterForTournament(ctx context.Context, user *domain.User, tournamentID string) (*domain.Registration, error) {
-	tournament, err := r.getTournamentByID(ctx, tournamentID)
+// RegisterForEvent - регистрация на событие с использованием стратегий
+func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, eventID string) (*domain.Registration, error) {
+	// Получаем событие напрямую через репозиторий
+	eventFilter := &domain.FilterEvent{ID: &eventID}
+	events, err := r.cases.Event.Filter(ctx, eventFilter)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get tournament: %w", err)
+		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
 
-	if err := r.validateTournamentNotEnded(tournament); err != nil {
-		return nil, err
+	if len(events) == 0 {
+		return nil, fmt.Errorf("event not found")
 	}
 
-	if err := r.validateUserRank(user, tournament); err != nil {
-		return nil, err
+	event := events[0]
+
+	// Получаем стратегию для данного типа события
+	strategy := GetEventStrategy(event.Type)
+
+	// Проверяем существующие регистрации
+	registrationFilter := &domain.FilterRegistration{
+		UserID:  &user.ID,
+		EventID: &eventID,
 	}
 
-	filter := &domain.FilterRegistration{
-		UserID:       &user.ID,
-		TournamentID: &tournamentID,
-	}
-	
-	existingRegistrations, err := r.registrationRepo.Filter(ctx, filter)
+	existingRegistrations, err := r.registrationRepo.Filter(ctx, registrationFilter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check existing registrations: %w", err)
 	}
 
-	// Если есть рега, то обновить статус
+	// Если есть регистрация, обрабатываем её
 	for _, reg := range existingRegistrations {
-		switch reg.Status {
-		case domain.RegistrationStatusPending:
-			return nil, fmt.Errorf("user already has a pending registration for this tournament")
-		case domain.RegistrationStatusActive:
-			return nil, fmt.Errorf("user already has an active registration for this tournament")
-		case domain.RegistrationStatusCanceledByUser:
-			return nil, fmt.Errorf("user has a canceled registration. Use reactivate endpoint to restore it")
-		case domain.RegistrationStatusCanceled:
-			if err := r.validateAvailableSlots(ctx, tournamentID); err != nil {
-				return nil, err
+		// Для игр проверяем возможность повторной подачи заявки
+		if event.Type == domain.EventTypeGame {
+			gameStrategy := strategy.(*GameEventStrategy)
+			if !gameStrategy.CanReapply(reg) {
+				switch reg.Status {
+				case domain.RegistrationStatusInvited:
+					return nil, fmt.Errorf("user already has an invited registration for this event")
+				case domain.RegistrationStatusConfirmed:
+					return nil, fmt.Errorf("user is already registered for this event")
+				default:
+					return nil, fmt.Errorf("user cannot reapply for this event")
+				}
 			}
 
-			// CANCELED -> PENDING или ACTIVE (для бесплатных турниров)
-			var newStatus domain.RegistrationStatus
-			if tournament.Price == 0 {
-				newStatus = domain.RegistrationStatusActive
-			} else {
-				newStatus = domain.RegistrationStatusPending
-			}
-			
+			// Для игр НЕ проверяем доступные слоты при повторной подаче заявки,
+			// так как INVITED статус не занимает места (если это не организатор)
+
+			// Если можно подать заявку повторно, переиспользуем существующую регистрацию
+			// Определяем статус через стратегию с учетом пользователя
+			newStatus := gameStrategy.DetermineRegistrationStatusForUser(ctx, event, user)
 			patch := &domain.PatchRegistration{
 				Status: &newStatus,
 			}
-			
-			err := r.registrationRepo.Patch(ctx, reg.ID, patch)
+
+			err := r.registrationRepo.Patch(ctx, reg.UserID, reg.EventID, patch)
 			if err != nil {
 				return nil, fmt.Errorf("failed to update registration status: %w", err)
 			}
 
-			// Отправляем уведомление об успешной регистрации
-			if r.notificationService != nil {
-				err = r.notificationService.SendTournamentRegistrationSuccess(
-					user.TelegramID,
-					tournamentID,
-					tournament.Name,
-					tournament.Price == 0,
-				)
-				if err != nil {
-					fmt.Printf("Failed to send registration success notification: %v\n", err)
-				}
-
-				// Планируем напоминания в зависимости от статуса
-				if tournament.StartTime.After(time.Now()) {
-					switch newStatus {
-					case domain.RegistrationStatusActive:
-						reminder48h := tournament.StartTime.Add(-48 * time.Hour)
-						if reminder48h.After(time.Now()) {
-							err = r.notificationService.SendTournamentFreeReminder48Hours(
-								user.TelegramID,
-								tournamentID,
-								tournament.Name,
-								reminder48h,
-							)
-							if err != nil {
-								fmt.Printf("Failed to schedule 48h free reminder: %v\n", err)
-							}
-						}
-					case domain.RegistrationStatusPending:
-						reminder48h := tournament.StartTime.Add(-48 * time.Hour)
-						if reminder48h.After(time.Now()) {
-							err = r.notificationService.SendTournamentReminder48Hours(
-								user.TelegramID,
-								tournamentID,
-								tournament.Name,
-								false,
-								reminder48h,
-							)
-							if err != nil {
-								fmt.Printf("Failed to schedule 48h payment reminder: %v\n", err)
-							}
-						}
-
-						reminder24h := tournament.StartTime.Add(-24 * time.Hour)
-						if reminder24h.After(time.Now()) {
-							err = r.notificationService.SendTournamentReminder24Hours(
-								user.TelegramID,
-								tournamentID,
-								tournament.Name,
-								false,
-								reminder24h,
-							)
-							if err != nil {
-								fmt.Printf("Failed to schedule 24h payment reminder: %v\n", err)
-							}
-						}
-
-						// Автоматическое удаление отключено
-						// autoDelete := tournament.StartTime.Add(-12 * time.Hour)
-						// if autoDelete.After(time.Now()) {
-						// 	err = r.notificationService.SendTournamentAutoDeleteUnpaid(
-						// 		user.TelegramID,
-						// 		tournamentID,
-						// 		tournament.Name,
-						// 		reg.ID,
-						// 		autoDelete,
-						// 	)
-						// 	if err != nil {
-						// 		fmt.Printf("Failed to schedule auto delete: %v\n", err)
-						// 	}
-						// }
-					}
-				}
+			// Обновляем статус события после обновления регистрации
+			if err := r.updateEventStatusAfterRegistration(ctx, eventID); err != nil {
+				fmt.Printf("Warning: failed to update event status after registration update: %v\n", err)
 			}
-			
-			return r.getRegistrationByID(ctx, reg.ID)
+
+			return r.getRegistrationByID(ctx, reg.UserID, reg.EventID)
+		} else {
+			// Старая логика для турниров и тренировок
+			switch reg.Status {
+			case domain.RegistrationStatusPending:
+				return nil, fmt.Errorf("user already has a pending registration for this event")
+			case domain.RegistrationStatusConfirmed:
+				return nil, fmt.Errorf("user is already registered for this event")
+			case domain.RegistrationStatusCancelledAfterPayment:
+				return nil, fmt.Errorf("user cancelled registration after payment. Use reactivation endpoint")
+			case domain.RegistrationStatusCancelledBeforePayment, domain.RegistrationStatusRefunded:
+				// Можем восстановить регистрацию
+				if err := r.validateAvailableSlots(ctx, eventID); err != nil {
+					return nil, err
+				}
+
+				// Определяем новый статус с использованием стратегии с учетом пользователя
+				newStatus := strategy.DetermineRegistrationStatusForUser(ctx, event, user)
+
+				patch := &domain.PatchRegistration{
+					Status: &newStatus,
+				}
+
+				err := r.registrationRepo.Patch(ctx, reg.UserID, reg.EventID, patch)
+				if err != nil {
+					return nil, fmt.Errorf("failed to update registration status: %w", err)
+				}
+
+				// Обновляем статус события после восстановления регистрации
+				if err := r.updateEventStatusAfterRegistration(ctx, eventID); err != nil {
+					fmt.Printf("Warning: failed to update event status after registration restore: %v\n", err)
+				}
+
+				return r.getRegistrationByID(ctx, reg.UserID, reg.EventID)
+			}
 		}
 	}
 
-	if err := r.validateAvailableSlots(ctx, tournamentID); err != nil {
+	// Валидируем регистрацию через стратегию
+	if err := strategy.ValidateRegistration(ctx, user, event); err != nil {
 		return nil, err
 	}
 
-	// Создаем новую регистрацию
-	// Для бесплатных турниров (price = 0) сразу устанавливаем статус ACTIVE
-	var status domain.RegistrationStatus
-	if tournament.Price == 0 {
-		status = domain.RegistrationStatusActive
-	} else {
-		status = domain.RegistrationStatusPending
+	// Определяем статус регистрации через стратегию с учетом пользователя
+	status := strategy.DetermineRegistrationStatusForUser(ctx, event, user)
+
+	// Проверяем доступные слоты только если статус регистрации занимает место
+	// Для игр INVITED статус не занимает места, поэтому проверка не нужна
+	// Для организаторов статус CONFIRMED занимает место, но они имеют приоритет
+	if status == domain.RegistrationStatusPending || (status == domain.RegistrationStatusConfirmed && user.ID != event.Organizer.ID) {
+		if err := r.validateAvailableSlots(ctx, eventID); err != nil {
+			return nil, err
+		}
 	}
 
-	createRegistration := &domain.CreateRegistration{
-		UserID:       user.ID,
-		TournamentID: tournamentID,
-		Status:       status,
+	// Создаем регистрацию
+	createReg := &domain.CreateRegistration{
+		UserID:  user.ID,
+		EventID: eventID,
+		Status:  status,
 	}
 
-	id, err := r.registrationRepo.Create(ctx, createRegistration)
+	err = r.registrationRepo.Create(ctx, createReg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create registration: %w", err)
 	}
 
-	// Отправляем уведомление об успешной регистрации
-	if r.notificationService != nil {
-		err = r.notificationService.SendTournamentRegistrationSuccess(
-			user.TelegramID,
-			tournamentID,
-			tournament.Name,
-			tournament.Price == 0,
-		)
-		if err != nil {
-			fmt.Printf("Failed to send registration success notification: %v\n", err)
-		}
+	// Обновляем статус события после создания регистрации
+	if err := r.updateEventStatusAfterRegistration(ctx, eventID); err != nil {
+		fmt.Printf("Warning: failed to update event status after registration: %v\n", err)
+	}
 
-		// Планируем напоминания в зависимости от статуса
-		if tournament.StartTime.After(time.Now()) {
-			switch status {
-			case domain.RegistrationStatusActive:
-				// Для бесплатных турниров - напоминания о турнире
-				// Напоминание за 48 часов
-				reminder48h := tournament.StartTime.Add(-48 * time.Hour)
-				if reminder48h.After(time.Now()) {
-					err = r.notificationService.SendTournamentFreeReminder48Hours(
-						user.TelegramID,
-						tournamentID,
-						tournament.Name,
-						reminder48h,
-					)
-					if err != nil {
-						fmt.Printf("Failed to schedule 48h free reminder: %v\n", err)
-					}
-				}
-			case domain.RegistrationStatusPending:
-				// Для платных турниров - напоминания об оплате
-				// Напоминание за 48 часов
-				reminder48h := tournament.StartTime.Add(-48 * time.Hour)
-				if reminder48h.After(time.Now()) {
-					err = r.notificationService.SendTournamentReminder48Hours(
-						user.TelegramID,
-						tournamentID,
-						tournament.Name,
-						false,
-						reminder48h,
-					)
-					if err != nil {
-						fmt.Printf("Failed to schedule 48h payment reminder: %v\n", err)
-					}
-				}
+	// Возвращаем созданную регистрацию
+	return r.getRegistrationByID(ctx, user.ID, eventID)
+}
 
-				reminder24h := tournament.StartTime.Add(-24 * time.Hour)
-				if reminder24h.After(time.Now()) {
-					err = r.notificationService.SendTournamentReminder24Hours(
-						user.TelegramID,
-						tournamentID,
-						tournament.Name,
-						false,
-						reminder24h,
-					)
-					if err != nil {
-						fmt.Printf("Failed to schedule 24h payment reminder: %v\n", err)
-					}
-				}
+// CancelEventRegistration - отмена регистрации на событие
+func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain.User, eventID string) (*domain.Registration, error) {
+	eventFilter := &domain.FilterEvent{ID: &eventID}
+	events, err := r.cases.Event.Filter(ctx, eventFilter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get event: %w", err)
+	}
 
-				// Автоматическое удаление отключено
-				// autoDelete := tournament.StartTime.Add(-12 * time.Hour)
-				// if autoDelete.After(time.Now()) {
-				// 	err = r.notificationService.SendTournamentAutoDeleteUnpaid(
-				// 		user.TelegramID,
-				// 		tournamentID,
-				// 		tournament.Name,
-				// 		id,
-				// 		autoDelete,
-				// 	)
-				// 	if err != nil {
-				// 		fmt.Printf("Failed to schedule auto delete: %v\n", err)
-				// 	}
-				// }
+	if len(events) == 0 {
+		return nil, fmt.Errorf("event not found")
+	}
+
+	event := events[0]
+
+	registration, err := r.findActiveRegistration(ctx, user.ID, eventID)
+	if err != nil {
+		return nil, err
+	}
+
+	if registration.Status == domain.RegistrationStatusCancelledBeforePayment ||
+		registration.Status == domain.RegistrationStatusCancelledAfterPayment ||
+		registration.Status == domain.RegistrationStatusRefunded {
+		return nil, fmt.Errorf("registration is already cancelled")
+	}
+
+	// Проверяем, есть ли оплата
+	hasPaid := false
+	if registration.Status == domain.RegistrationStatusConfirmed {
+		// Для подтвержденных регистраций проверяем наличие успешных платежей
+		payments, err := r.cases.Payment.GetPaymentsByUserAndEvent(ctx, user.ID, eventID)
+		if err == nil {
+			for _, payment := range payments {
+				if payment.Status == domain.PaymentStatusSucceeded {
+					hasPaid = true
+					break
+				}
 			}
 		}
 	}
 
-	return r.getRegistrationByID(ctx, id)
-}
+	// Определяем новый статус с использованием стратегии
+	strategy := GetEventStrategy(event.Type)
+	newStatus := strategy.HandleCancellation(ctx, registration, event, hasPaid)
 
-// PENDING -> CANCELED
-func (r *Registration) CancelBeforePayment(ctx context.Context, user *domain.User, tournamentID string) (*domain.Registration, error) {
-	tournament, err := r.getTournamentByID(ctx, tournamentID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get tournament: %w", err)
-	}
-
-	if err := r.validateTournamentNotEnded(tournament); err != nil {
-		return nil, err
-	}
-
-	registration, err := r.findActiveRegistration(ctx, user.ID, tournamentID)
-	if err != nil {
-		return nil, err
-	}
-
-	if registration.Status != domain.RegistrationStatusPending {
-		return nil, fmt.Errorf("can only cancel pending registrations before payment")
-	}
-
-	canceledStatus := domain.RegistrationStatusCanceled
 	patch := &domain.PatchRegistration{
-		Status: &canceledStatus,
+		Status: &newStatus,
 	}
 
-	err = r.registrationRepo.Patch(ctx, registration.ID, patch)
+	err = r.registrationRepo.Patch(ctx, registration.UserID, registration.EventID, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to cancel registration: %w", err)
 	}
 
-	// Отправляем уведомление об отмене регистрации
-	if r.notificationService != nil {
-		err = r.notificationService.SendTournamentRegistrationCanceled(
-			user.TelegramID,
-			tournamentID,
-			tournament.Name,
-		)
-		if err != nil {
-			fmt.Printf("Failed to send registration canceled notification: %v\n", err)
-		}
-
-		// Отменяем все связанные задачи уведомлений
-		err = r.notificationService.SendTournamentTasksCancel(
-			user.TelegramID,
-			tournamentID,
-		)
-		if err != nil {
-			fmt.Printf("Failed to cancel related tasks: %v\n", err)
-		}
+	// Обновляем статус события после отмены регистрации
+	if err := r.updateEventStatusAfterCancellation(ctx, eventID); err != nil {
+		fmt.Printf("Warning: failed to update event status after cancellation: %v\n", err)
 	}
 
-	return r.getRegistrationByID(ctx, registration.ID)
+	err = r.cases.Event.TryRegisterFromWaitlist(ctx, eventID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to try register from waitlist: %w", err)
+	}
+
+	return r.getRegistrationByID(ctx, registration.UserID, registration.EventID)
 }
 
-// ACTIVE -> CANCELED_BY_USER
-func (r *Registration) CancelAfterPayment(ctx context.Context, user *domain.User, tournamentID string) (*domain.Registration, error) {
-	tournament, err := r.getTournamentByID(ctx, tournamentID)
+// ReactivateRegistration - реактивация отмененной регистрации
+func (r *Registration) ReactivateRegistration(ctx context.Context, user *domain.User, eventID string) (*domain.Registration, error) {
+	// Получаем событие напрямую через репозиторий
+	eventFilter := &domain.FilterEvent{ID: &eventID}
+	events, err := r.cases.Event.Filter(ctx, eventFilter)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get tournament: %w", err)
+		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
 
-	if err := r.validateTournamentNotEnded(tournament); err != nil {
+	if len(events) == 0 {
+		return nil, fmt.Errorf("event not found")
+	}
+
+	event := events[0]
+
+	if err := r.validateEventNotEnded(event); err != nil {
 		return nil, err
 	}
 
-	registration, err := r.findActiveRegistration(ctx, user.ID, tournamentID)
+	if err := r.validateUserRank(user, event); err != nil {
+		return nil, err
+	}
+
+	registration, err := r.findActiveRegistration(ctx, user.ID, eventID)
 	if err != nil {
 		return nil, err
 	}
 
-	if registration.Status != domain.RegistrationStatusActive {
-		return nil, fmt.Errorf("can only cancel active (paid) registrations")
+	if registration.Status != domain.RegistrationStatusCancelledAfterPayment {
+		return nil, fmt.Errorf("can only reactivate registrations cancelled after payment")
 	}
 
-	canceledByUserStatus := domain.RegistrationStatusCanceledByUser
+	if err := r.validateAvailableSlots(ctx, eventID); err != nil {
+		return nil, err
+	}
+
+	confirmedStatus := domain.RegistrationStatusConfirmed
 	patch := &domain.PatchRegistration{
-		Status: &canceledByUserStatus,
+		Status: &confirmedStatus,
 	}
 
-	err = r.registrationRepo.Patch(ctx, registration.ID, patch)
-	if err != nil {
-		return nil, fmt.Errorf("failed to cancel registration: %w", err)
-	}
-
-	// Отправляем уведомление об отмене регистрации
-	if r.notificationService != nil {
-		err = r.notificationService.SendTournamentRegistrationCanceled(
-			user.TelegramID,
-			tournamentID,
-			tournament.Name,
-		)
-		if err != nil {
-			fmt.Printf("Failed to send registration canceled notification: %v\n", err)
-		}
-
-		// Отменяем все связанные задачи уведомлений
-		err = r.notificationService.SendTournamentTasksCancel(
-			user.TelegramID,
-			tournamentID,
-		)
-		if err != nil {
-			fmt.Printf("Failed to cancel related tasks: %v\n", err)
-		}
-	}
-
-	return r.getRegistrationByID(ctx, registration.ID)
-}
-
-// CANCELED_BY_USER -> ACTIVE
-func (r *Registration) ReactivateRegistration(ctx context.Context, user *domain.User, tournamentID string) (*domain.Registration, error) {
-	tournament, err := r.getTournamentByID(ctx, tournamentID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get tournament: %w", err)
-	}
-
-	if err := r.validateTournamentNotEnded(tournament); err != nil {
-		return nil, err
-	}
-
-	if err := r.validateUserRank(user, tournament); err != nil {
-		return nil, err
-	}
-
-	registration, err := r.findActiveRegistration(ctx, user.ID, tournamentID)
-	if err != nil {
-		return nil, err
-	}
-
-	if registration.Status != domain.RegistrationStatusCanceledByUser {
-		return nil, fmt.Errorf("can only reactivate registrations that were canceled by user after payment")
-	}
-
-	if err := r.validateAvailableSlots(ctx, tournamentID); err != nil {
-		return nil, err
-	}
-
-	activeStatus := domain.RegistrationStatusActive
-	patch := &domain.PatchRegistration{
-		Status: &activeStatus,
-	}
-
-	err = r.registrationRepo.Patch(ctx, registration.ID, patch)
+	err = r.registrationRepo.Patch(ctx, registration.UserID, registration.EventID, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to reactivate registration: %w", err)
 	}
 
-	// Планируем новые уведомления для восстановленной регистрации
-	if r.notificationService != nil && tournament.StartTime.After(time.Now()) {
-		reminder48h := tournament.StartTime.Add(-48 * time.Hour)
-		if reminder48h.After(time.Now()) {
-			err = r.notificationService.SendTournamentReminder48Hours(
-				user.TelegramID,
-				tournament.ID,
-				tournament.Name,
-				true,
-				reminder48h,
-			)
-			if err != nil {
-				fmt.Printf("Failed to schedule 48h reminder: %v\n", err)
-			}
-		}
-
-		reminder24h := tournament.StartTime.Add(-24 * time.Hour)
-		if reminder24h.After(time.Now()) {
-			err = r.notificationService.SendTournamentReminder24Hours(
-				user.TelegramID,
-				tournament.ID,
-				tournament.Name,
-				true,
-				reminder24h,
-			)
-			if err != nil {
-				fmt.Printf("Failed to schedule 24h reminder: %v\n", err)
-			}
-		}
+	// Обновляем статус события после реактивации регистрации
+	if err := r.updateEventStatusAfterRegistration(ctx, eventID); err != nil {
+		fmt.Printf("Warning: failed to update event status after reactivation: %v\n", err)
 	}
 
-	return r.getRegistrationByID(ctx, registration.ID)
+	return r.getRegistrationByID(ctx, registration.UserID, registration.EventID)
 }
 
-// PENDING -> ACTIVE
-func (r *Registration) ActivateRegistration(ctx context.Context, user *domain.User, tournamentID string) (*domain.Registration, error) {
-	// Получаем информацию о турнире
-	tournament, err := r.getTournamentByID(ctx, tournamentID)
+// ActivateRegistration - активация регистрации (PENDING -> CONFIRMED)
+func (r *Registration) ActivateRegistration(ctx context.Context, user *domain.User, eventID string) (*domain.Registration, error) {
+	// Получаем событие напрямую через репозиторий
+	eventFilter := &domain.FilterEvent{ID: &eventID}
+	events, err := r.cases.Event.Filter(ctx, eventFilter)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get tournament: %w", err)
+		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
 
-	// Проверяем, что турнир еще не закончился
-	if err := r.validateTournamentNotEnded(tournament); err != nil {
+	if len(events) == 0 {
+		return nil, fmt.Errorf("event not found")
+	}
+
+	event := events[0]
+
+	// Проверяем, что событие еще не закончилось
+	if err := r.validateEventNotEnded(event); err != nil {
 		return nil, err
 	}
 
-	registration, err := r.findActiveRegistration(ctx, user.ID, tournamentID)
+	registration, err := r.findActiveRegistration(ctx, user.ID, eventID)
 	if err != nil {
 		return nil, err
 	}
 
-	if registration.Status != domain.RegistrationStatusPending {
-		return nil, fmt.Errorf("can only activate pending registrations")
+	if registration.Status != domain.RegistrationStatusPending && registration.Status != domain.RegistrationStatusInvited {
+		return nil, fmt.Errorf("can only activate pending or invited registrations")
 	}
 
-	activeStatus := domain.RegistrationStatusActive
+	// Проверяем свободные места при переходе в CONFIRMED
+	// Для турниров PENDING уже занимает место, поэтому проверка не нужна
+	// Для игр INVITED не занимает место, поэтому нужна проверка
+	if registration.Status == domain.RegistrationStatusInvited {
+		if err := r.validateAvailableSlots(ctx, eventID); err != nil {
+			return nil, fmt.Errorf("cannot activate registration: %w", err)
+		}
+	}
+
+	confirmedStatus := domain.RegistrationStatusConfirmed
 	patch := &domain.PatchRegistration{
-		Status: &activeStatus,
+		Status: &confirmedStatus,
 	}
 
-	err = r.registrationRepo.Patch(ctx, registration.ID, patch)
+	err = r.registrationRepo.Patch(ctx, registration.UserID, registration.EventID, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to activate registration: %w", err)
 	}
 
-	return r.getRegistrationByID(ctx, registration.ID)
+	// Обновляем статус события после активации регистрации
+	if err := r.updateEventStatusAfterRegistration(ctx, eventID); err != nil {
+		fmt.Printf("Warning: failed to update event status after activation: %v\n", err)
+	}
+
+	return r.getRegistrationByID(ctx, registration.UserID, registration.EventID)
 }
 
-// Все реги пользователя
+// GetUserRegistrations - получение всех регистраций пользователя
 func (r *Registration) GetUserRegistrations(ctx context.Context, userID string) ([]*domain.Registration, error) {
 	filter := &domain.FilterRegistration{
 		UserID: &userID,
@@ -675,8 +464,8 @@ func (r *Registration) GetUserRegistrations(ctx context.Context, userID string) 
 	return r.registrationRepo.Filter(ctx, filter)
 }
 
-// для эндпоинта /registrations/my
-func (r *Registration) GetUserRegistrationsWithTournament(ctx context.Context, userID string) ([]*domain.RegistrationWithTournament, error) {
+// GetUserRegistrationsWithEvent - получение регистраций пользователя с событиями
+func (r *Registration) GetUserRegistrationsWithEvent(ctx context.Context, userID string) ([]*domain.RegistrationWithEvent, error) {
 	filter := &domain.FilterRegistration{
 		UserID: &userID,
 	}
@@ -686,51 +475,55 @@ func (r *Registration) GetUserRegistrationsWithTournament(ctx context.Context, u
 		return nil, err
 	}
 
-	result := make([]*domain.RegistrationWithTournament, 0, len(registrations))
+	result := make([]*domain.RegistrationWithEvent, 0, len(registrations))
 	for _, reg := range registrations {
-		regWithTournament := &domain.RegistrationWithTournament{
-			ID:           reg.ID,
-			UserID:       reg.UserID,
-			TournamentID: reg.TournamentID,
-			Date:         reg.Date,
-			Status:       reg.Status,
-			User:         reg.User,
+		regWithEvent := &domain.RegistrationWithEvent{
+			UserID:    reg.UserID,
+			EventID:   reg.EventID,
+			Status:    reg.Status,
+			CreatedAt: reg.CreatedAt,
+			UpdatedAt: reg.UpdatedAt,
+			User:      reg.User,
 		}
 
-		tournament, err := r.getTournamentByID(ctx, reg.TournamentID)
-		if err != nil {
+		// Получаем событие напрямую через репозиторий
+		eventFilter := &domain.FilterEvent{ID: &reg.EventID}
+		events, err := r.cases.Event.Filter(ctx, eventFilter)
+		if err != nil || len(events) == 0 {
 			continue
 		}
 
-		tournamentForReg := domain.TournamentForRegistration{
-			ID:             tournament.ID,
-			Name:           tournament.Name,
-			StartTime:      tournament.StartTime,
-			EndTime:        tournament.EndTime,
-			Price:          tournament.Price,
-			RankMin:        tournament.RankMin,
-			RankMax:        tournament.RankMax,
-			MaxUsers:       tournament.MaxUsers,
-			Description:    tournament.Description,
-			Court:          tournament.Court,
-			TournamentType: tournament.TournamentType,
-			Organizator:    tournament.Organizator,
-			Data:           tournament.Data,
-			IsFinished:     tournament.IsFinished,
+		event := events[0]
+
+		eventForReg := domain.EventForRegistration{
+			ID:          event.ID,
+			Name:        event.Name,
+			Description: event.Description,
+			StartTime:   event.StartTime,
+			EndTime:     event.EndTime,
+			RankMin:     event.RankMin,
+			RankMax:     event.RankMax,
+			Price:       event.Price,
+			MaxUsers:    event.MaxUsers,
+			Status:      event.Status,
+			Type:        event.Type,
+			Court:       event.Court,
+			Organizer:   event.Organizer,
+			ClubID:      event.ClubID,
+			Data:        event.Data,
 		}
 
-		regWithTournament.Tournament = &tournamentForReg
-
-		result = append(result, regWithTournament)
+		regWithEvent.Event = &eventForReg
+		result = append(result, regWithEvent)
 	}
 
 	return result, nil
 }
 
-// Все реги турнира
-func (r *Registration) GetTournamentRegistrations(ctx context.Context, tournamentID string) ([]*domain.Registration, error) {
+// GetEventRegistrations - получение всех регистраций на событие
+func (r *Registration) GetEventRegistrations(ctx context.Context, eventID string) ([]*domain.Registration, error) {
 	filter := &domain.FilterRegistration{
-		TournamentID: &tournamentID,
+		EventID: &eventID,
 	}
 
 	return r.registrationRepo.Filter(ctx, filter)
@@ -738,10 +531,10 @@ func (r *Registration) GetTournamentRegistrations(ctx context.Context, tournamen
 
 // Вспомогательные методы
 
-func (r *Registration) findActiveRegistration(ctx context.Context, userID, tournamentID string) (*domain.Registration, error) {
+func (r *Registration) findActiveRegistration(ctx context.Context, userID, eventID string) (*domain.Registration, error) {
 	filter := &domain.FilterRegistration{
-		UserID:       &userID,
-		TournamentID: &tournamentID,
+		UserID:  &userID,
+		EventID: &eventID,
 	}
 
 	registrations, err := r.registrationRepo.Filter(ctx, filter)
@@ -754,11 +547,14 @@ func (r *Registration) findActiveRegistration(ctx context.Context, userID, tourn
 		return reg, nil
 	}
 
-	return nil, fmt.Errorf("no registration found for this tournament")
+	return nil, fmt.Errorf("no registration found for this event")
 }
 
-func (r *Registration) getRegistrationByID(ctx context.Context, id string) (*domain.Registration, error) {
-	filter := &domain.FilterRegistration{ID: &id}
+func (r *Registration) getRegistrationByID(ctx context.Context, userID, eventID string) (*domain.Registration, error) {
+	filter := &domain.FilterRegistration{
+		UserID:  &userID,
+		EventID: &eventID,
+	}
 	registrations, err := r.registrationRepo.Filter(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get registration: %w", err)
@@ -771,73 +567,297 @@ func (r *Registration) getRegistrationByID(ctx context.Context, id string) (*dom
 	return registrations[0], nil
 }
 
-func (r *Registration) getTournamentByID(ctx context.Context, tournamentID string) (*domain.Tournament, error) {
-	filter := &domain.FilterTournament{ID: tournamentID}
-	tournaments, err := r.tournamentRepo.Filter(ctx, filter)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get tournament: %w", err)
-	}
-
-	if len(tournaments) == 0 {
-		return nil, fmt.Errorf("tournament not found")
-	}
-
-	return tournaments[0], nil
-}
-
-func (r *Registration) validateTournamentNotEnded(tournament *domain.Tournament) error {
+func (r *Registration) validateEventNotEnded(event *domain.Event) error {
 	now := time.Now()
-	if !tournament.EndTime.IsZero() && tournament.EndTime.Before(now) {
-		return fmt.Errorf("tournament has already ended")
+	if !event.EndTime.IsZero() && event.EndTime.Before(now) {
+		return fmt.Errorf("event has already ended")
 	}
-	if tournament.EndTime.IsZero() && tournament.StartTime.Add(24*time.Hour).Before(now) {
-		return fmt.Errorf("tournament has already ended")
-	}
-	return nil
-}
-
-func (r *Registration) validateUserRank(user *domain.User, tournament *domain.Tournament) error {
-	if user.Rank < tournament.RankMin || user.Rank > tournament.RankMax {
-		return fmt.Errorf("user rank %.1f is not within tournament range %.1f-%.1f", 
-			user.Rank, tournament.RankMin, tournament.RankMax)
+	if event.EndTime.IsZero() && event.StartTime.Add(24*time.Hour).Before(now) {
+		return fmt.Errorf("event has already ended")
 	}
 	return nil
 }
 
-func (r *Registration) validateAvailableSlots(ctx context.Context, tournamentID string) error {
-	tournament, err := r.getTournamentByID(ctx, tournamentID)
+func (r *Registration) validateUserRank(user *domain.User, event *domain.Event) error {
+	if user.Rank < event.RankMin || user.Rank > event.RankMax {
+		return fmt.Errorf("user rank %.1f does not fit event range %.1f-%.1f",
+			user.Rank, event.RankMin, event.RankMax)
+	}
+	return nil
+}
+
+func (r *Registration) validateAvailableSlots(ctx context.Context, eventID string) error {
+	eventFilter := &domain.FilterEvent{ID: &eventID}
+	events, err := r.cases.Event.Filter(ctx, eventFilter)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get event: %w", err)
 	}
+
+	if len(events) == 0 {
+		return fmt.Errorf("event not found")
+	}
+
+	event := events[0]
 
 	filter := &domain.FilterRegistration{
-		TournamentID: &tournamentID,
+		EventID: &eventID,
 	}
-	
+
 	registrations, err := r.registrationRepo.Filter(ctx, filter)
 	if err != nil {
-		return fmt.Errorf("failed to get tournament registrations: %w", err)
+		return fmt.Errorf("failed to get event registrations: %w", err)
 	}
 
 	activeCount := 0
 	for _, reg := range registrations {
-		if reg.Status == domain.RegistrationStatusPending || reg.Status == domain.RegistrationStatusActive {
-			activeCount++
+		// Для турниров: PENDING и CONFIRMED занимают места
+		// Для игр: только CONFIRMED занимает место, INVITED не занимает место
+		if event.Type == domain.EventTypeTournament {
+			if reg.Status == domain.RegistrationStatusPending || reg.Status == domain.RegistrationStatusConfirmed {
+				activeCount++
+			}
+		} else if event.Type == domain.EventTypeGame {
+			if reg.Status == domain.RegistrationStatusConfirmed {
+				activeCount++
+			}
+			// INVITED статус НЕ занимает место
+		} else {
+			// Для других типов используем старую логику
+			if reg.Status == domain.RegistrationStatusPending || reg.Status == domain.RegistrationStatusConfirmed {
+				activeCount++
+			}
 		}
 	}
 
-	if activeCount >= tournament.MaxUsers {
-		return fmt.Errorf("tournament is full (max %d users)", tournament.MaxUsers)
+	if activeCount >= event.MaxUsers {
+		return fmt.Errorf("event is full (maximum %d users)", event.MaxUsers)
 	}
 
 	return nil
 }
 
-// UpdateRegistrationStatus обновляет статус регистрации по ID
-func (r *Registration) UpdateRegistrationStatus(ctx context.Context, registrationID string, status domain.RegistrationStatus) error {
+// UpdateRegistrationStatus обновляет статус регистрации по составному ключу
+func (r *Registration) UpdateRegistrationStatus(ctx context.Context, userID, eventID string, status domain.RegistrationStatus) error {
 	patch := &domain.PatchRegistration{
 		Status: &status,
 	}
 
-	return r.registrationRepo.Patch(ctx, registrationID, patch)
-} 
+	return r.registrationRepo.Patch(ctx, userID, eventID, patch)
+}
+
+// FindPendingRegistration находит ожидающую регистрацию пользователя на событие
+func (r *Registration) FindPendingRegistration(ctx context.Context, userID, eventID string) (*domain.Registration, error) {
+	pendingStatus := domain.RegistrationStatusPending
+	filter := &domain.FilterRegistration{
+		UserID:  &userID,
+		EventID: &eventID,
+		Status:  &pendingStatus,
+	}
+
+	registrations, err := r.registrationRepo.Filter(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find registration: %w", err)
+	}
+
+	if len(registrations) == 0 {
+		return nil, fmt.Errorf("no pending registration found for this event")
+	}
+
+	return registrations[0], nil
+}
+
+// FindAwaitingRegistration находит регистрацию в статусе ожидания (PENDING для турниров, INVITED для игр)
+func (r *Registration) FindAwaitingRegistration(ctx context.Context, userID, eventID string) (*domain.Registration, error) {
+	filter := &domain.FilterRegistration{
+		UserID:  &userID,
+		EventID: &eventID,
+	}
+
+	registrations, err := r.registrationRepo.Filter(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find registration: %w", err)
+	}
+
+	// Ищем регистрацию в статусе ожидания
+	for _, reg := range registrations {
+		if reg.Status == domain.RegistrationStatusPending || reg.Status == domain.RegistrationStatusInvited {
+			return reg, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no awaiting registration found for this event")
+}
+
+// GetRegistrationsByUserAndEvent получает регистрации по пользователю и событию
+func (r *Registration) GetRegistrationsByUserAndEvent(ctx context.Context, userID, eventID string) ([]*domain.Registration, error) {
+	filter := &domain.FilterRegistration{
+		UserID:  &userID,
+		EventID: &eventID,
+	}
+
+	return r.registrationRepo.Filter(ctx, filter)
+}
+
+// GetEventParticipants получает участников события (активные регистрации)
+func (r *Registration) GetEventParticipants(ctx context.Context, eventID string) ([]*domain.Registration, error) {
+	filter := &domain.FilterRegistration{
+		EventID: &eventID,
+	}
+
+	registrations, err := r.registrationRepo.Filter(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	// Фильтруем только активные статусы
+	participants := make([]*domain.Registration, 0)
+	for _, reg := range registrations {
+		if reg.Status == domain.RegistrationStatusConfirmed ||
+			reg.Status == domain.RegistrationStatusPending ||
+			reg.Status == domain.RegistrationStatusInvited ||
+			reg.Status == domain.RegistrationStatusCancelledAfterPayment {
+			participants = append(participants, reg)
+		}
+	}
+
+	return participants, nil
+}
+
+// updateEventStatusAfterRegistration обновляет статус события после создания/активации регистрации
+func (r *Registration) updateEventStatusAfterRegistration(ctx context.Context, eventID string) error {
+	// Получаем событие
+	eventFilter := &domain.FilterEvent{ID: &eventID}
+	events, err := r.cases.Event.Filter(ctx, eventFilter)
+	if err != nil {
+		return fmt.Errorf("failed to get event: %w", err)
+	}
+
+	if len(events) == 0 {
+		return fmt.Errorf("event not found")
+	}
+
+	event := events[0]
+
+	// Только для событий в статусе registration или full
+	if event.Status != domain.EventStatusRegistration && event.Status != domain.EventStatusFull {
+		return nil
+	}
+
+	// Подсчитываем активные регистрации
+	activeCount, err := r.getActiveRegistrationsCount(ctx, eventID)
+	if err != nil {
+		return err
+	}
+
+	// Определяем нужный статус
+	var needStatus domain.EventStatus
+	if activeCount >= event.MaxUsers {
+		needStatus = domain.EventStatusFull
+	} else {
+		needStatus = domain.EventStatusRegistration
+	}
+
+	// Обновляем статус события только если он должен измениться
+	if event.Status != needStatus {
+		patch := &domain.PatchEvent{
+			Status: &needStatus,
+		}
+
+		err = r.cases.Event.eventRepo.Patch(ctx, eventID, patch)
+		if err != nil {
+			return fmt.Errorf("failed to update event status: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// updateEventStatusAfterCancellation обновляет статус события после отмены регистрации
+func (r *Registration) updateEventStatusAfterCancellation(ctx context.Context, eventID string) error {
+	// Получаем событие
+	eventFilter := &domain.FilterEvent{ID: &eventID}
+	events, err := r.cases.Event.Filter(ctx, eventFilter)
+	if err != nil {
+		return fmt.Errorf("failed to get event: %w", err)
+	}
+
+	if len(events) == 0 {
+		return fmt.Errorf("event not found")
+	}
+
+	event := events[0]
+
+	// Только если событие полное - можем освободить места
+	if event.Status != domain.EventStatusFull {
+		return nil
+	}
+
+	// Подсчитываем активные регистрации
+	activeCount, err := r.getActiveRegistrationsCount(ctx, eventID)
+	if err != nil {
+		return err
+	}
+
+	// Если появились места - открываем регистрацию
+	if activeCount < event.MaxUsers {
+		newStatus := domain.EventStatusRegistration
+		patch := &domain.PatchEvent{
+			Status: &newStatus,
+		}
+
+		err = r.cases.Event.eventRepo.Patch(ctx, eventID, patch)
+		if err != nil {
+			return fmt.Errorf("failed to update event status: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// getActiveRegistrationsCount подсчитывает количество активных регистраций
+func (r *Registration) getActiveRegistrationsCount(ctx context.Context, eventID string) (int, error) {
+	// Получаем событие для определения типа
+	eventFilter := &domain.FilterEvent{ID: &eventID}
+	events, err := r.cases.Event.Filter(ctx, eventFilter)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get event: %w", err)
+	}
+
+	if len(events) == 0 {
+		return 0, fmt.Errorf("event not found")
+	}
+
+	event := events[0]
+
+	filter := &domain.FilterRegistration{
+		EventID: &eventID,
+	}
+
+	registrations, err := r.registrationRepo.Filter(ctx, filter)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get event registrations: %w", err)
+	}
+
+	activeCount := 0
+	for _, reg := range registrations {
+		// Для турниров: PENDING и CONFIRMED занимают места
+		// Для игр: только CONFIRMED занимает место, INVITED не занимает место
+		if event.Type == domain.EventTypeTournament {
+			if reg.Status == domain.RegistrationStatusPending || reg.Status == domain.RegistrationStatusConfirmed {
+				activeCount++
+			}
+		} else if event.Type == domain.EventTypeGame {
+			if reg.Status == domain.RegistrationStatusConfirmed {
+				activeCount++
+			}
+			// INVITED статус НЕ занимает место
+		} else {
+			// Для других типов используем старую логику
+			if reg.Status == domain.RegistrationStatusPending || reg.Status == domain.RegistrationStatusConfirmed {
+				activeCount++
+			}
+		}
+	}
+
+	return activeCount, nil
+}

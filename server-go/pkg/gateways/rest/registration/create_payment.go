@@ -1,63 +1,91 @@
 package registration
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/ginerr"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/middlewares"
-	"github.com/shampsdev/go-telegram-template/pkg/usecase"
+	"github.com/shampsdev/go-telegram-template/pkg/repo"
 )
 
-type CreatePaymentRequest struct {
-	ReturnURL string `json:"returnUrl" binding:"required"`
+// PaymentResponse представляет ответ с ссылкой на платеж
+type PaymentResponse struct {
+	PaymentURL string `json:"payment_url"`
+	PaymentID  string `json:"payment_id"`
 }
 
-// CreatePayment godoc
-// @Summary Create payment for tournament registration
-// @Description Creates payment in YooKassa for existing PENDING registration. Returns existing payment if it's already in success/pending status. For free tournaments (price = 0), payment is not required.
-// @Tags registration
-// @Accept json
-// @Produce json
-// @Param tournament_id path string true "Tournament ID"
-// @Param request body CreatePaymentRequest true "Payment creation request"
-// @Success 200 {object} domain.Payment "Payment created or existing payment returned"
-// @Failure 400 {object} map[string]string "Invalid request data or tournament is free"
-// @Failure 401 {object} map[string]string "User not authorized"
-// @Failure 404 {object} map[string]string "No pending registration found"
-// @Failure 500 {object} map[string]string "Internal server error"
+// @Summary Create payment for registration
+// @Description Creates a payment for event registration and returns payment URL
+// @Tags registrations
 // @Security ApiKeyAuth
-// @Router /registrations/{tournament_id}/payment [post]
-func CreatePayment(paymentCase *usecase.Payment, userCase *usecase.User) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		user := middlewares.MustGetUser(c)
-		tournamentID := c.Param("tournament_id")
-		if tournamentID == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "tournament_id is required"})
-			return
-		}
-
-		var request CreatePaymentRequest
-		if err := c.ShouldBindJSON(&request); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body: " + err.Error()})
-			return
-		}
-
-		payment, err := paymentCase.CreateYooKassaPayment(c.Request.Context(), user, tournamentID, request.ReturnURL)
-		if err != nil {
-			switch {
-			case err.Error() == "no pending registration found for this tournament":
-				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			case err.Error() == "tournament not found":
-				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			case err.Error() == "tournament is free, no payment required":
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			default:
-				ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to create payment")
-			}
-			return
-		}
-
-		c.JSON(http.StatusOK, payment)
+// @Param event_id path string true "Event ID"
+// @Success 201 {object} PaymentResponse "Payment URL and ID"
+// @Failure 400 "Bad request"
+// @Failure 401 "Unauthorized"
+// @Failure 403 "Forbidden - no pending registration found"
+// @Failure 404 "Event not found"
+// @Failure 500 "Internal server error"
+// @Router /registrations/{event_id}/payment [post]
+func (h *Handler) createPayment(c *gin.Context) {
+	eventID := c.Param("event_id")
+	if eventID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "event_id is required"})
+		return
 	}
+
+	// Получаем пользователя из контекста
+	user := middlewares.MustGetUser(c)
+
+	// Получаем событие для проверки цены
+	event, err := h.cases.Event.GetEventByID(c, eventID)
+	if err != nil {
+		if err == repo.ErrNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "event not found"})
+			return
+		}
+		ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to get event")
+		return
+	}
+
+	// Проверяем, что это не игра (для игр платежи запрещены)
+	if event.Type == domain.EventTypeGame {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "payment is not allowed for games"})
+		return
+	}
+
+	// Проверяем, что событие платное
+	if event.Price == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "event is free, payment not required"})
+		return
+	}
+
+	// Ищем PENDING регистрацию пользователя для проверки
+	_, err = h.cases.Registration.FindPendingRegistration(c, user.ID, eventID)
+	if err != nil {
+		if err == repo.ErrNotFound {
+			c.JSON(http.StatusForbidden, gin.H{"error": "no pending registration found for this event"})
+			return
+		}
+		ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to find pending registration")
+		return
+	}
+
+	// Используем готовый метод для создания платежа через ЮKassa
+	// Он создает платеж и возвращает ссылку на оплату
+	// Формируем return URL для Telegram Web App
+	returnURL := fmt.Sprintf("https://t.me/%s/%s?startapp=%s", h.config.TG.BotUsername, h.config.TG.WebAppName, eventID)
+	payment, err := h.cases.Payment.CreateYooKassaPayment(c, user, eventID, returnURL)
+	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to create payment") {
+		return
+	}
+
+	response := PaymentResponse{
+		PaymentURL: payment.PaymentLink, // PaymentLink содержит URL для оплаты
+		PaymentID:  payment.ID,
+	}
+
+	c.JSON(http.StatusCreated, response)
 } 

@@ -19,34 +19,33 @@ func NewHandler(waitlistCase *usecase.Waitlist) *Handler {
 	}
 }
 
-// GetTournamentWaitlist получает список ожидания для турнира
-// @Summary Get tournament waitlist (Admin)
-// @Description Get waitlist users for a specific tournament. Available for any admin. Read-only access.
+// GetEventWaitlist получает вейтлист для события
+// @Summary Get event waitlist (Admin)
+// @Description Get waitlist for specific event. Available for any admin.
 // @Tags admin-waitlist
-// @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param tournamentId path string true "Tournament ID"
-// @Success 200 {array} domain.WaitlistUser
-// @Failure 400 {object} domain.ErrorResponse
-// @Failure 401 {object} domain.ErrorResponse
-// @Failure 500 {object} domain.ErrorResponse
-// @Router /admin/waitlist/tournament/{tournamentId} [get]
-func (h *Handler) GetTournamentWaitlist(c *gin.Context) {
-	tournamentID := c.Param("tournamentId")
-	if tournamentID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Tournament ID is required"})
+// @Param event_id path string true "Event ID"
+// @Success 200 {array} domain.WaitlistUser "List of waitlist users"
+// @Failure 400 {object} domain.ErrorResponse "Bad Request"
+// @Failure 401 {object} domain.ErrorResponse "Unauthorized"
+// @Failure 500 {object} domain.ErrorResponse "Internal Server Error"
+// @Router /admin/events/{event_id}/waitlist [get]
+func (h *Handler) GetEventWaitlist(c *gin.Context) {
+	eventID := c.Param("event_id")
+	if eventID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "event_id is required"})
 		return
 	}
 
-	waitlistUsers, err := h.waitlistCase.GetTournamentWaitlistUsers(c.Request.Context(), tournamentID)
-	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to get tournament waitlist") {
+	waitlist, err := h.waitlistCase.GetEventWaitlistUsers(c, eventID)
+	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to get waitlist") {
 		return
 	}
 
-	if waitlistUsers == nil {
-		waitlistUsers = []*domain.WaitlistUser{}
+	if waitlist == nil {
+		waitlist = []*domain.WaitlistUser{}
 	}
 
-	c.JSON(http.StatusOK, waitlistUsers)
+	c.JSON(http.StatusOK, waitlist)
 } 
