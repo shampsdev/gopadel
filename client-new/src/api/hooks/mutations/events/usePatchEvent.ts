@@ -1,16 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../../../../shared/stores/auth.store";
-import { deleteTournament } from "../../../tournaments";
+import type { PatchEvent } from "../../../../types/patch-tournament";
+import { patchEvent } from "../../../events";
 
-export const useDeleteTournament = () => {
+export const usePatchEvent = (eventId: string) => {
   const { token } = useAuthStore();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (tournamentId: string) =>
-      deleteTournament(token!, tournamentId),
-    mutationKey: ["tournaments"],
+    mutationFn: (event: PatchEvent) => patchEvent(token!, eventId, event),
+    mutationKey: ["events"],
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tournaments"] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
     },
     onError: (error) => {
       console.error(error);

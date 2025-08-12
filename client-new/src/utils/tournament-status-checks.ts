@@ -1,23 +1,22 @@
 import type { User } from "../types/user.type";
 import type { Waitlist } from "../types/waitlist.type";
-import type { Tournament as TournamentType } from "../types/tournament.type";
+import type { Event } from "../types/event.type";
+import { EventStatus } from "../types/event-status.type";
+import { RegistrationStatus } from "../types/registration-status";
 
-export const isTournamentFinished = (tournament: TournamentType) => {
-  return tournament.isFinished;
-};
-
-export const participatingAvailable = (tournament: TournamentType) => {
+export const isEventFinished = (event: Event) => {
   return (
-    tournament.maxUsers >
-    tournament.participants.filter(
-      (participant) =>
-        participant.status === "ACTIVE" || participant.status === "PENDING"
-    ).length
+    event.status === EventStatus.completed ||
+    event.status === EventStatus.cancelled
   );
 };
 
-export const isUserRegistered = (tournament: TournamentType, user: User) => {
-  return tournament.participants.some(
+export const participatingAvailable = (event: Event) => {
+  return event.status === EventStatus.registration;
+};
+
+export const isUserRegistered = (event: Event, user: User) => {
+  return event.participants?.some(
     (participant) => participant.user.id === user.id
   );
 };
@@ -26,46 +25,42 @@ export const isUserInWaitlist = (waitlist: Waitlist, user: User) => {
   return waitlist.some((waitlist) => waitlist.user.id === user.id);
 };
 
-export const isRankAllowed = (tournament: TournamentType, user: User) => {
+export const isRankAllowed = (event: Event, user: User) => {
   return (
-    tournament.rankMin !== null &&
-    tournament.rankMin !== undefined &&
-    tournament.rankMax !== null &&
-    tournament.rankMax !== undefined &&
+    event.rankMin !== null &&
+    event.rankMin !== undefined &&
+    event.rankMax !== null &&
+    event.rankMax !== undefined &&
     user.rank !== null &&
     user.rank !== undefined &&
-    tournament.rankMin <= user.rank &&
-    user.rank < tournament.rankMax
+    event.rankMin <= user.rank &&
+    user.rank < event.rankMax
   );
 };
 
 export const isUserRegisteredAndPaymentProceeded = (
-  tournament: TournamentType,
+  event: Event,
   user: User
 ) => {
-  return tournament.participants.some(
-    (participant) =>
-      participant.user.id === user.id && participant.status === "ACTIVE"
-  );
-};
-
-export const userHasRegisteredAndHasNotPaid = (
-  tournament: TournamentType,
-  user: User
-) => {
-  return tournament.participants.some(
-    (participant) =>
-      participant.user.id === user.id && participant.status === "PENDING"
-  );
-};
-
-export const isUserCancelledParticipating = (
-  tournament: TournamentType,
-  user: User
-) => {
-  return tournament.participants.some(
+  return event.participants?.some(
     (participant) =>
       participant.user.id === user.id &&
-      participant.status === "CANCELED_BY_USER"
+      participant.status === RegistrationStatus.CONFIRMED
+  );
+};
+
+export const userHasRegisteredAndHasNotPaid = (event: Event, user: User) => {
+  return event.participants?.some(
+    (participant) =>
+      participant.user.id === user.id &&
+      participant.status === RegistrationStatus.PENDING
+  );
+};
+
+export const isUserCancelledParticipating = (event: Event, user: User) => {
+  return event.participants?.some(
+    (participant) =>
+      participant.user.id === user.id &&
+      participant.status === RegistrationStatus.CANCELLED
   );
 };

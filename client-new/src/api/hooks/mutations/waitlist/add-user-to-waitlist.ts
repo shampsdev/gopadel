@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addUserToWaitlist } from "../../../tournaments";
+import { addUserToWaitlist } from "../../../events";
 import { useAuthStore } from "../../../../shared/stores/auth.store";
 
 export const useAddUserToWaitlist = () => {
@@ -7,11 +7,10 @@ export const useAddUserToWaitlist = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (tournamentId: string) =>
-      addUserToWaitlist(token!, tournamentId),
-    onSuccess: (_, tournamentId) => {
+    mutationFn: (eventId: string) => addUserToWaitlist(token!, eventId),
+    onSuccess: (_, eventId) => {
       queryClient.invalidateQueries({
-        queryKey: ["tournament-waitlist", tournamentId],
+        queryKey: ["event-waitlist", eventId],
       });
     },
     onError: (error) => {

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { removeUserFromWaitlist } from "../../../tournaments";
+import { removeUserFromWaitlist } from "../../../events";
 import { useAuthStore } from "../../../../shared/stores/auth.store";
 
 export const useRemoveUserFromWaitlist = () => {
@@ -7,11 +7,10 @@ export const useRemoveUserFromWaitlist = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (tournamentId: string) =>
-      removeUserFromWaitlist(token!, tournamentId),
-    onSuccess: (_, tournamentId) => {
+    mutationFn: (eventId: string) => removeUserFromWaitlist(token!, eventId),
+    onSuccess: (_, eventId) => {
       queryClient.invalidateQueries({
-        queryKey: ["tournament-waitlist", tournamentId],
+        queryKey: ["event-waitlist", eventId],
       });
     },
     onError: (error) => {

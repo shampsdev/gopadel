@@ -1,9 +1,9 @@
-import type { Tournament } from "../types/tournament.type";
+import type { Event } from "../types/event.type";
 
 export const checkOrganizerRight = (
   isAdmin: boolean,
   userId: string,
-  tournament: Tournament
+  event: Event
 ): boolean => {
-  return isAdmin && tournament.organizator.id === userId;
+  return isAdmin && event.organizer.id === userId;
 };

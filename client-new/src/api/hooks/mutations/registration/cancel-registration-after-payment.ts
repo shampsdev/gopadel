@@ -7,17 +7,17 @@ export const useCancelRegistrationAfterPayment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (tournamentId: string) =>
-      cancelRegistrationAfterPayment(token!, tournamentId),
-    onSuccess: (_, tournamentId) => {
+    mutationFn: (eventId: string) =>
+      cancelRegistrationAfterPayment(token!, eventId),
+    onSuccess: (_, eventId) => {
       queryClient.invalidateQueries({
         queryKey: ["my-registrations"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["tournaments"],
+        queryKey: ["events"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["tournament-waitlist", tournamentId],
+        queryKey: ["event-waitlist", eventId],
       });
     },
     onError: (error) => {

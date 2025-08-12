@@ -1,17 +1,19 @@
-import type { TournamentResult } from "./tournament-result.type";
+import type { EventStatus } from "./event-status.type";
 
-export interface PatchTournament {
+export interface PatchEvent {
+  clubId?: string;
   courtId?: string;
   description?: string;
   endTime?: string;
   maxUsers?: number;
   name?: string;
+  organizerId?: string;
   price?: number;
   rankMax?: number;
   rankMin?: number;
   startTime?: string;
-  tournamentType?: string;
+  status?: EventStatus;
   data?: {
-    result: TournamentResult;
+    [key: string]: any;
   };
 }

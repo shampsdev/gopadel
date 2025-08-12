@@ -1,14 +1,28 @@
-export interface FilterTournament {
+import type { EventStatus } from "./event-status.type";
+import type { EventType } from "./event-type.type";
+
+export interface FilterEvent {
+  clubId?: string;
+  filterByUserClubs?: string;
   id?: string;
   name?: string;
-  notEnded?: boolean;
+  notCompleted?: boolean;
   notFull?: boolean;
-  organizatorId?: string;
+  organizerId?: string;
+  statuses?: EventStatus[];
+  type?: EventType;
+}
+
+export interface FilterClub {
+  id?: string;
+  name?: string;
 }
 
 export interface FilterUser {
+  filterByUserClubs?: string;
   firstName?: string;
   id?: string;
   lastName?: string;
-  telegramId?: string;
+  telegramId?: number;
+  telegramUsername?: string;
 }

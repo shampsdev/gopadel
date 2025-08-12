@@ -2,9 +2,9 @@ import { Link, useNavigate, useParams } from "react-router";
 import { Icons } from "../../assets/icons";
 import { getRankTitle } from "../../utils/rank-title";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
-import { useGetTournaments } from "../../api/hooks/useGetTournaments";
+import { useGetEvents } from "../../api/hooks/useGetEvents";
 import { useState } from "react";
-import { useGetTournamentWaitlist } from "../../api/hooks/useGetTournamentWaitlist";
+import { useGetEventWaitlist } from "../../api/hooks/useGetEventWaitlist";
 import { TournamentPlayers } from "../../components/widgets/tournament-players";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { TournamentStatusActions } from "../../components/widgets/tournament-status-actions";
@@ -17,6 +17,10 @@ import { Prize } from "../../components/widgets/prize";
 import { getPrizeString } from "../../utils/get-prize-string";
 import { checkOrganizerRight } from "../../utils/check-organizer-right";
 import { LinksWrapper } from "../../components/helpers/links-wrapper";
+import { RegistrationStatus } from "../../types/registration-status";
+import type { Waitlist } from "../../types/waitlist.type";
+import { EventStatus } from "../../types/event-status.type";
+import type { Tournament as TournamentType } from "../../types/tournament.type";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -25,10 +29,10 @@ export const Tournament = () => {
   const navigate = useNavigate();
   const [isCopied, setIsCopied] = useState(false);
 
-  const { data: tournament, isLoading } = useGetTournaments({
+  const { data: events, isLoading } = useGetEvents({
     id: id!,
-  });
-  const { data: waitlist } = useGetTournamentWaitlist(id!);
+  }) as { data: TournamentType[] | undefined; isLoading: boolean };
+  const { data: waitlist } = useGetEventWaitlist(id!);
   const { data: isAdmin } = useIsAdmin();
 
   const getPersonWord = (count: number) => {
@@ -39,9 +43,9 @@ export const Tournament = () => {
 
   if (isLoading) return <Preloader />;
 
-  if (!tournament?.[0] || !user || !waitlist) return <></>;
+  if (!events?.[0] || !user || !waitlist) return <></>;
 
-  if (!tournament?.[0])
+  if (!events?.[0])
     return (
       <div className="flex flex-col gap-8 pb-[100px]">
         <div className="flex flex-col gap-7 px-[12px]">
@@ -53,22 +57,25 @@ export const Tournament = () => {
   return (
     <div className="flex flex-col gap-8 pb-[200px]">
       <div className="flex flex-col gap-7 px-[12px]">
-        <h1 className="text-[24px] font-medium">{tournament?.[0]?.name}</h1>
+        <h1 className="text-[24px] font-medium">{events?.[0]?.name}</h1>
 
         <div className="flex flex-col">
           {!checkOrganizerRight(
             isAdmin?.admin || false,
             user?.id,
-            tournament?.[0]
+            events?.[0]
           ) &&
-            !tournament?.[0].isFinished && <Prize variant="not-finished" />}
+            !(events?.[0].status === EventStatus.completed) && (
+              <Prize variant="not-finished" />
+            )}
 
           {checkOrganizerRight(
             isAdmin?.admin || false,
             user?.id,
-            tournament?.[0]
+            events?.[0]
           ) &&
-            !tournament?.[0].isFinished && (
+            events?.[0].status !== EventStatus.completed &&
+            events?.[0].status !== EventStatus.cancelled && (
               <>
                 <div className="py-5 border-b border-[#DADCE0]">
                   <div
@@ -106,17 +113,17 @@ export const Tournament = () => {
                 <div className="text-[#868D98] text-[12px]">
                   Ваш результат:{" "}
                   <span className="text-black">
-                    {(!tournament?.[0].isFinished ||
-                      !tournament?.[0].participants.find(
+                    {(events?.[0].status !== EventStatus.completed ||
+                      !events?.[0].participants?.find(
                         (participant) => participant.userId === user?.id
                       )) &&
                       "-"}
-                    {tournament?.[0].isFinished &&
-                      tournament?.[0].participants.find(
+                    {events?.[0].status === EventStatus.completed &&
+                      events?.[0].participants?.find(
                         (participant) => participant.userId === user?.id
                       ) &&
                       getPrizeString(
-                        tournament?.[0].data?.result.leaderboard.find(
+                        events?.[0].data?.result?.leaderboard.find(
                           (place) => place.userId === user?.id
                         )?.place
                       )}
@@ -132,37 +139,28 @@ export const Tournament = () => {
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-col gap-[2px]  text-[14px] text-[#5D6674] ">
                 <p className="text-[#000000] text-[16px]">
-                  {tournament?.[0].startTime &&
-                    new Date(tournament[0].startTime).toLocaleDateString(
-                      "ru-RU",
-                      {
-                        day: "2-digit",
-                        month: "long",
-                        timeZone: "Europe/Moscow",
-                        weekday: "long",
-                      }
-                    )}
+                  {events?.[0].startTime &&
+                    new Date(events[0].startTime).toLocaleDateString("ru-RU", {
+                      day: "2-digit",
+                      month: "long",
+                      timeZone: "Europe/Moscow",
+                      weekday: "long",
+                    })}
                 </p>
                 <div className="text-[14px] text-[#868D98] ">
-                  {tournament?.[0].startTime &&
-                    new Date(tournament[0].startTime).toLocaleTimeString(
-                      "ru-RU",
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        timeZone: "Europe/Moscow",
-                      }
-                    )}
+                  {events?.[0].startTime &&
+                    new Date(events[0].startTime).toLocaleTimeString("ru-RU", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: "Europe/Moscow",
+                    })}
                   {" - "}
-                  {tournament?.[0].endTime &&
-                    new Date(tournament[0].endTime).toLocaleTimeString(
-                      "ru-RU",
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        timeZone: "Europe/Moscow",
-                      }
-                    )}
+                  {events?.[0].endTime &&
+                    new Date(events[0].endTime).toLocaleTimeString("ru-RU", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: "Europe/Moscow",
+                    })}
                 </div>
               </div>
 
@@ -175,9 +173,9 @@ export const Tournament = () => {
           <div className="py-5 border-b border-[#DADCE0]">
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-col gap-[2px]">
-                <p className="text-[16px] ">{tournament?.[0].court.name}</p>
+                <p className="text-[16px] ">{events?.[0].court.name}</p>
                 <p className="text-[14px] text-[#868D98]">
-                  {tournament?.[0].court.address}
+                  {events?.[0].court.address}
                 </p>
               </div>
 
@@ -193,18 +191,18 @@ export const Tournament = () => {
                 <div className="text-[16px] gap-1 text-[#868D98] flex flex-row items-start">
                   <p>Тип:</p>
                   <p className="text-black">
-                    {tournament?.[0].tournamentType.toLowerCase()}
+                    {events?.[0].data?.tournament?.type.toLowerCase()}
                   </p>
                 </div>
                 <div className="text-[16px] text-[#868D98] gap-1 flex flex-row items-start">
                   <p>Ранг:</p>
                   <p className="text-black">
-                    {getRankTitle(tournament?.[0].rankMin || 0) ===
-                    getRankTitle(tournament?.[0].rankMax || 0)
-                      ? getRankTitle(tournament?.[0].rankMin || 0)
+                    {getRankTitle(events?.[0].rankMin || 0) ===
+                    getRankTitle(events?.[0].rankMax || 0)
+                      ? getRankTitle(events?.[0].rankMin || 0)
                       : `${getRankTitle(
-                          tournament?.[0].rankMin || 0
-                        )} - ${getRankTitle(tournament?.[0].rankMax || 0)}`}
+                          events?.[0].rankMin || 0
+                        )} - ${getRankTitle(events?.[0].rankMax || 0)}`}
                   </p>
                 </div>
               </div>
@@ -223,7 +221,7 @@ export const Tournament = () => {
 
               <div className="flex flex-row gap-[6px] ">
                 <div className="flex flex-col">
-                  {tournament?.[0].price === 0 ? (
+                  {events?.[0].price === 0 ? (
                     <div className="text-[20px] text-[#77BE14]">бесплатно</div>
                   ) : (
                     <div
@@ -242,20 +240,20 @@ export const Tournament = () => {
                       >
                         {user.loyalty.discount > 0
                           ? Math.round(
-                              tournament?.[0].price *
+                              events?.[0].price *
                                 (1 - user.loyalty.discount / 100)
                             )
-                          : tournament?.[0].price}
+                          : events?.[0].price}
                       </span>{" "}
                       ₽
                     </div>
                   )}
                   <p className="text-[12px] text-[#868D98]">участие</p>
                 </div>
-                {user.loyalty.discount > 0 && tournament?.[0].price > 0 && (
+                {user.loyalty.discount > 0 && events?.[0].price > 0 && (
                   <div className="text-[14px]  text-[#F34338] line-through">
                     <span className="font-semibold text-[14px] ">
-                      {tournament?.[0].price}
+                      {events?.[0].price}
                     </span>{" "}
                     <span className="opacity-40">₽</span>
                   </div>
@@ -264,11 +262,11 @@ export const Tournament = () => {
             </div>
           </div>
 
-          {tournament?.[0].description.length > 0 && (
+          {events?.[0].description.length > 0 && (
             <div className="flex flex-col pt-[20px] gap-[8px]">
               <div className="text-[16px] font-medium">Описание турнира</div>
               <div className="text-[14px] text-[#5D6674]">
-                <LinksWrapper text={tournament?.[0].description} />
+                <LinksWrapper text={events?.[0].description} />
               </div>
             </div>
           )}
@@ -280,53 +278,56 @@ export const Tournament = () => {
           <div className="flex flex-row gap-[7px] items-center">
             <p>Участники</p>
 
-            {tournament &&
-              tournament?.[0].participants.length <
-                tournament?.[0].maxUsers && (
+            {events?.[0] &&
+              events?.[0].participants?.length &&
+              events?.[0].participants?.length < events?.[0].maxUsers && (
                 <p className="text-[14px] text-[#000000]">
                   {
-                    tournament?.[0].participants.filter(
+                    events?.[0].participants?.filter(
                       (participant) =>
-                        participant.status === "ACTIVE" ||
-                        participant.status === "PENDING"
+                        participant.status === RegistrationStatus.CONFIRMED ||
+                        participant.status === RegistrationStatus.PENDING
                     ).length
                   }{" "}
-                  / {tournament?.[0].maxUsers}
+                  / {events?.[0].maxUsers}
                 </p>
               )}
 
-            {tournament &&
-              tournament?.[0].participants.filter(
+            {events?.[0] &&
+              events?.[0].participants?.length &&
+              events?.[0].participants?.filter(
                 (participant) =>
-                  participant.status === "ACTIVE" ||
-                  participant.status === "PENDING"
-              ).length >= tournament?.[0].maxUsers && (
+                  participant.status === RegistrationStatus.CONFIRMED ||
+                  participant.status === RegistrationStatus.PENDING
+              ).length >= events?.[0].maxUsers && (
                 <p className="text-[14px] text-[#F34338]">
                   {
-                    tournament?.[0].participants.filter(
+                    events?.[0].participants?.filter(
                       (participant) =>
-                        participant.status === "ACTIVE" ||
-                        participant.status === "PENDING"
+                        participant.status === RegistrationStatus.CONFIRMED ||
+                        participant.status === RegistrationStatus.PENDING
                     ).length
                   }
-                  / {tournament?.[0].maxUsers}
+                  / {events?.[0].maxUsers}
                 </p>
               )}
           </div>
 
-          {tournament?.[0].participants.length > 0 && (
-            <Link to={`players`}>
-              <div className="bg-[#F8F8FA] rounded-[20px] py-[6px] px-[14px] text-[12px] text-[#5D6674]">
-                смотреть все
-              </div>
-            </Link>
-          )}
+          {events?.[0] &&
+            events?.[0].participants?.length &&
+            events?.[0].participants?.length > 0 && (
+              <Link to={`players`}>
+                <div className="bg-[#F8F8FA] rounded-[20px] py-[6px] px-[14px] text-[12px] text-[#5D6674]">
+                  смотреть все
+                </div>
+              </Link>
+            )}
         </div>
 
         <div className="px-[12px]">
           <TournamentPlayers
             tournamentId={id!}
-            registrations={tournament?.[0].participants}
+            registrations={events?.[0].participants}
           />
         </div>
 
@@ -353,16 +354,15 @@ export const Tournament = () => {
           <div className="flex flex-row flex-wrap items-center gap-1 text-[#5D6674]">
             Организатор:
             <p className="text-black font-medium">
-              {tournament?.[0].organizator.firstName}{" "}
-              {tournament?.[0].organizator.lastName}
+              {events?.[0].organizer.firstName} {events?.[0].organizer.lastName}
             </p>
           </div>
 
           <div
             onClick={() => {
-              if (tournament[0].organizator.telegramUsername) {
+              if (events?.[0].organizer.telegramUsername) {
                 openTelegramLink(
-                  `https://t.me/${tournament[0].organizator.telegramUsername}`
+                  `https://t.me/${events?.[0].organizer.telegramUsername}`
                 );
               }
             }}
@@ -385,7 +385,7 @@ export const Tournament = () => {
           <div
             onClick={() => {
               navigator.clipboard.writeText(
-                `https://t.me/${BOT_NAME}/app?startapp=tour-${id}`
+                `https://t.me/${BOT_NAME}/app?startapp=${id}`
               );
               setIsCopied(true);
               setTimeout(() => {
@@ -400,9 +400,9 @@ export const Tournament = () => {
       </div>
 
       <TournamentStatusActions
-        tournament={tournament?.[0]}
+        tournament={events?.[0]}
         user={user}
-        waitlist={waitlist || []}
+        waitlist={(waitlist as Waitlist) || []}
       />
     </div>
   );

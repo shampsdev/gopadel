@@ -6,6 +6,7 @@ import { Icons } from "../../assets/icons";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { BOT_NAME } from "../../shared/constants/api";
+import { RegistrationStatus } from "../../types/registration-status";
 
 interface TurnamentPlayers {
   tournamentId: string;
@@ -61,7 +62,7 @@ export const TournamentPlayers = ({
           <div
             onClick={() => {
               openTelegramLink(
-                `https://t.me/share/url?url=https://t.me/${BOT_NAME}/app?startapp=tour-${tournamentId}`
+                `https://t.me/share/url?url=https://t.me/${BOT_NAME}/app?startapp=${tournamentId}`
               );
             }}
             className="flex flex-col items-center cursor-pointer relative"
@@ -90,20 +91,23 @@ export const TournamentPlayers = ({
                   key={`${registration.user?.id}-${index}`}
                   className={twMerge(
                     "flex flex-col items-center cursor-pointer relative",
-                    registration.status === "PENDING" && "opacity-50",
-                    registration.status === "CANCELED_BY_USER" && "opacity-75"
+                    registration.status === RegistrationStatus.PENDING &&
+                      "opacity-50",
+                    registration.status ===
+                      RegistrationStatus.CANCELLED_BEFORE_PAYMENT &&
+                      "opacity-75"
                   )}
                   onClick={() => {
                     console.log("registration.user.id", registration.user.id);
                     goToUserProfile(registration.user.id);
                   }}
                 >
-                  {registration.status === "ACTIVE" && (
+                  {registration.status === RegistrationStatus.CONFIRMED && (
                     <div className="absolute bg-[#AFFF3F] top-0 right-0 w-[24px] z-10 h-[24px] rounded-full flex items-center justify-center">
                       {Icons.Success("black")}
                     </div>
                   )}
-                  {registration.status === "CANCELED_BY_USER" && (
+                  {registration.status === RegistrationStatus.CANCELLED && (
                     <div className="absolute bg-[#F34338] top-0 right-0 w-[24px] z-10 h-[24px] rounded-full flex items-center justify-center">
                       {Icons.Success("black")}
                     </div>

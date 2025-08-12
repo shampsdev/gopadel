@@ -1,26 +1,25 @@
 import type { Court } from "./court.type";
+import type { EventStatus } from "./event-status.type";
+import type { EventType } from "./event-type.type";
 import type { Registration } from "./registration.type";
-import type { TournamentResult } from "./tournament-result.type";
 import type { User } from "./user.type";
 
-export interface Tournament {
-  date: string;
-  playersCapacity: number;
+export interface Event {
+  clubId: string;
   court: Court;
-  isFinished: boolean;
+  data?: any;
   description: string;
   endTime: string;
   id: string;
   maxUsers: number;
   name: string;
-  organizator: User;
-  participants: Registration[];
+  organizer: User;
+  participants?: Registration[];
   price: number;
   rankMax: number;
   rankMin: number;
   startTime: string;
-  tournamentType: string;
-  data?: {
-    result: TournamentResult;
-  };
+  status: EventStatus;
+  type: EventType;
+  updatedAt: string;
 }

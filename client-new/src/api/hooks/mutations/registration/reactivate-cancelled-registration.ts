@@ -7,17 +7,17 @@ export const useReactivateCancelledRegistration = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (tournamentId: string) =>
-      reactivateCancelledRegistration(token!, tournamentId),
-    onSuccess: (_, tournamentId) => {
+    mutationFn: (eventId: string) =>
+      reactivateCancelledRegistration(token!, eventId),
+    onSuccess: (_, eventId) => {
       queryClient.invalidateQueries({
         queryKey: ["my-registrations"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["tournament-waitlist", tournamentId],
+        queryKey: ["event-waitlist", eventId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["tournaments"],
+        queryKey: ["events"],
       });
     },
     onError: (error) => {

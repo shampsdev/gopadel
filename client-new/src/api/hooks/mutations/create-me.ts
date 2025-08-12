@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { createMe } from "../../../api/user";
 import { useAuthStore } from "../../../shared/stores/auth.store";
 
-const useCreateMe = () => {
+export const useCreateMe = () => {
   const { token, setUser } = useAuthStore();
 
   return useMutation({
@@ -12,5 +12,3 @@ const useCreateMe = () => {
     },
   });
 };
-
-export default useCreateMe;

@@ -14,15 +14,16 @@ import {
 import { Button } from "../../components/ui/button";
 import { RankSelector } from "../../components/ui/froms/rank-selector";
 import { ranks } from "../../shared/constants/ranking";
-import type { CreateTournament as CreateTournamentType } from "../../types/create-tournament";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { useGetCourts } from "../../api/hooks/useGetCourts";
 import { useGetMyClubs } from "../../api/hooks/useGetMyClubs";
-import { useCreateTournament } from "../../api/hooks/mutations/tournament/useCreateTournament";
 import { useNavigate } from "react-router";
 import { useIsAdmin } from "../../api/hooks/useIsAdmin";
 import { Preloader } from "../../components/widgets/preloader";
 import AboutImage from "../../assets/about.png";
+import type { CreateTournament as CreateTournamentType } from "../../types/create-event.type";
+import { EventType } from "../../types/event-type.type";
+import { useCreateEvent } from "../../api/hooks/mutations/events/useCreateEvent";
 
 export const CreateTournament = () => {
   const { user } = useAuthStore();
@@ -52,8 +53,8 @@ export const CreateTournament = () => {
 
   const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
 
-  const { mutateAsync: createTournament, isPending: isCreatingTournament } =
-    useCreateTournament();
+  const { mutateAsync: createEvent, isPending: isCreatingEvent } =
+    useCreateEvent();
 
   const handleRankMinChange = (rankTitle: string) => {
     setRankMinInput(rankTitle);
@@ -149,16 +150,17 @@ export const CreateTournament = () => {
       endTime: end,
       maxUsers: maxUsers ?? 0,
       name: title ?? "",
-      organizatorId: user?.id ?? "",
+      organizerId: user?.id ?? "",
       price: price ?? 0,
       rankMax: ranks.find((r) => r.title === rankMaxInput)?.to ?? 0,
       rankMin: ranks.find((r) => r.title === rankMinInput)?.from ?? 0,
       startTime: start,
-      tournamentType: type ?? "",
+      type: EventType.tournament,
+      data: { tournament: { type: type ?? "" } },
     };
 
     try {
-      const tournament = await createTournament(tournamentData);
+      const tournament = await createEvent(tournamentData);
       if (tournament?.id) {
         navigate(`/tournament/${tournament?.id}`);
       } else {
@@ -369,7 +371,7 @@ export const CreateTournament = () => {
 
       <div className="mx-auto">
         <Button
-          disabled={isCreatingTournament}
+          disabled={isCreatingEvent}
           onClick={() => {
             if (isFormValid()) {
               handleCreateTournament();

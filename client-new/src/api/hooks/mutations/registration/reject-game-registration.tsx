@@ -1,23 +1,22 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { registerToTournament } from "../../../registrations";
+import { rejectRegistration } from "../../../registrations";
 import { useAuthStore } from "../../../../shared/stores/auth.store";
 
-export const useRegisterToTournament = () => {
+export const useRejectGameRegistration = () => {
   const { token } = useAuthStore();
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: (tournamentId: string) =>
-      registerToTournament(token!, tournamentId),
-    onSuccess: (_, tournamentId) => {
+    mutationFn: ({ eventId, userId }: { eventId: string; userId: string }) =>
+      rejectRegistration(token!, eventId, userId),
+    onSuccess: (_, { eventId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["waitlist", eventId],
+      });
       queryClient.invalidateQueries({
         queryKey: ["my-registrations"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["tournaments"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["tournament-waitlist", tournamentId],
+        queryKey: ["events"],
       });
     },
     onError: (error) => {

@@ -34,7 +34,7 @@ const NavbarItem = ({
       )}
     >
       {variant === "default" ? icon : activeIcon}
-      {variant === "active" && <p>{title}</p>}
+      <p>{title}</p>
     </div>
   );
 };
@@ -62,12 +62,12 @@ export const HomeNavbar = () => {
       activeIcon: Icons.Padel("#000"),
       link: "../games",
     },
-    {
-      title: "Тренировки",
-      icon: Icons.Target(),
-      activeIcon: Icons.Target("#000"),
-      link: "../training",
-    },
+    // {
+    //   title: "Тренировки",
+    //   icon: Icons.Target(),
+    //   activeIcon: Icons.Target("#000"),
+    //   link: "../training",
+    // },
   ];
 
   const handleFilterChange = (link: string) => {

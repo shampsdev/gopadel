@@ -1,12 +1,15 @@
-import { CompetitionCard } from "../../components/widgets/competition-card";
-import { useGetTournaments } from "../../api/hooks/useGetTournaments";
-import type { Tournament } from "../../types/tournament.type";
-import type { FilterTournament } from "../../types/filter.type";
+import { EventCard } from "../../components/widgets/event-card";
+import { useGetEvents } from "../../api/hooks/useGetEvents";
+import type { Event } from "../../types/event.type";
+import type { FilterEvent } from "../../types/filter.type";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
 import { Preloader } from "../../components/widgets/preloader";
+import { RegistrationStatus } from "../../types/registration-status";
+import { EventType } from "../../types/event-type.type";
+import { EventStatus } from "../../types/event-status.type";
 
 export const Tournaments = () => {
   const location = useLocation();
@@ -35,12 +38,14 @@ export const Tournaments = () => {
     navigate(`${location.pathname}?${newSearchParams.toString()}`);
   };
 
-  const filter: FilterTournament = {
+  const filter: FilterEvent = {
     notFull: showOnlyAvailable || undefined,
-    notEnded: true,
+    type: EventType.tournament,
+    notCompleted: true,
+    statuses: [EventStatus.registration, EventStatus.full],
   };
 
-  const { data: tournaments, isLoading } = useGetTournaments(filter);
+  const { data: events, isLoading } = useGetEvents(filter);
 
   if (isLoading) return <Preloader />;
 
@@ -70,39 +75,36 @@ export const Tournaments = () => {
       </div>
 
       <div className="flex flex-col gap-4 pb-[100px] mt-4">
-        {tournaments?.map((competition: Tournament) => (
-          <Link key={competition.id} to={`/tournament/${competition.id}`}>
-            <CompetitionCard
-              title={competition.name}
-              key={competition.id}
-              rankMin={competition.rankMin}
-              rankMax={competition.rankMax}
-              organizerName={`${competition.organizator.firstName} ${competition.organizator.lastName}`}
-              date={new Date(competition.startTime).toLocaleDateString(
-                "ru-RU",
-                {
-                  day: "numeric",
-                  month: "long",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  timeZone: "Europe/Moscow",
-                }
-              )}
-              locationTitle={competition.court.name}
-              address={competition.court.address}
-              type={competition.tournamentType}
-              cost={competition.price}
-              playersCapacity={competition.maxUsers}
-              playersAmount={
-                competition.participants?.filter(
-                  (participant) =>
-                    participant.status === "ACTIVE" ||
-                    participant.status === "PENDING"
-                ).length || 0
-              }
-              participating={false}
-            />
-          </Link>
+        {events?.map((event: Event) => (
+          <EventCard
+            eventType={event.type}
+            key={event.id}
+            id={event.id}
+            title={event.name}
+            rankMin={event.rankMin}
+            rankMax={event.rankMax}
+            organizerName={`${event.organizer.firstName} ${event.organizer.lastName}`}
+            date={new Date(event.startTime).toLocaleDateString("ru-RU", {
+              day: "numeric",
+              month: "long",
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone: "Europe/Moscow",
+            })}
+            locationTitle={event.court.name}
+            address={event.court.address}
+            type={event.type}
+            cost={event.price}
+            playersCapacity={event.maxUsers}
+            playersAmount={
+              event.participants?.filter(
+                (participant) =>
+                  participant.status === RegistrationStatus.CONFIRMED ||
+                  participant.status === RegistrationStatus.PENDING
+              ).length || 0
+            }
+            participating={false}
+          />
         ))}
       </div>
     </>

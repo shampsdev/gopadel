@@ -7,7 +7,7 @@ import { MainLayout } from "../pages/main/layout";
 import { AnimatedOutlet } from "../components/helpers/animated-outlet";
 import { Players } from "../pages/home/players";
 import { Tournaments } from "../pages/home/tournaments";
-import { Competitions } from "../pages/home/competitions";
+import { Events } from "../pages/home/events";
 import { Tournament } from "../pages/tournament/tournament";
 import { MyProfile } from "../pages/profile/my-profile/my-profile";
 import { TournamentPlayers } from "../pages/tournament/tournament-players";
@@ -16,7 +16,6 @@ import { CreateTournament } from "../pages/new-event/create-tournament";
 import { CreateGame } from "../pages/new-event/create-game";
 import { EditProfile } from "../pages/profile/my-profile/edit";
 import { UserProfile } from "../pages/profile/user-profile";
-import { TournamentsHistory } from "../pages/profile/my-profile/tournaments-history";
 import { Loyalty } from "../pages/loyalty";
 import { StartDataChecker } from "../components/helpers/startdata-checker";
 import { TournamentWaitlist } from "../pages/tournament/tournament-waitlist";
@@ -26,6 +25,13 @@ import { Trainings } from "../pages/home/trainings";
 import { TournamentEdit } from "../pages/tournament/edit/tournament-edit";
 import { TournamentLeaderboardEdit } from "../pages/tournament/edit/tournament-leaderboard-edit";
 import { TournamentLeaderboard } from "../pages/tournament/edit/tournament-leaderboard";
+import { Game } from "../pages/game/game";
+import { GamePlayers } from "../pages/game/game-players";
+import { GameEdit } from "../pages/game/edit/game-edit";
+import { GameLeaderboardEdit } from "../pages/game/edit/game-leaderboard-edit";
+import { EventsHistory } from "../pages/profile/my-profile/events-history";
+import { GameLeaderboard } from "../pages/game/edit/game-leaderboard";
+import { GameWaitlist } from "../pages/game/game-waitlist";
 
 const authRoutes: RouteObject[] = [
   {
@@ -84,7 +90,7 @@ export const routes: RouteObject[] = [
                 children: [
                   {
                     path: "",
-                    element: <Competitions />,
+                    element: <Events />,
                   },
                   {
                     path: "tournaments",
@@ -111,7 +117,7 @@ export const routes: RouteObject[] = [
                   { path: "", element: <MyProfile /> },
                   { path: "edit", element: <EditProfile /> },
                   { path: ":id", element: <UserProfile /> },
-                  { path: "tournaments", element: <TournamentsHistory /> },
+                  { path: "events", element: <EventsHistory /> },
                 ],
               },
               {
@@ -146,6 +152,42 @@ export const routes: RouteObject[] = [
                       },
                       { path: "players", element: <TournamentPlayers /> },
                       { path: "waitlist", element: <TournamentWaitlist /> },
+                    ],
+                  },
+                ],
+              },
+              {
+                path: "game",
+                children: [
+                  {
+                    path: ":id",
+
+                    children: [
+                      {
+                        path: "",
+                        children: [
+                          { path: "", element: <Game /> },
+                          {
+                            path: "edit",
+                            children: [
+                              {
+                                path: "",
+                                element: <GameEdit />,
+                              },
+                              {
+                                path: "leaderboard",
+                                element: <GameLeaderboardEdit />,
+                              },
+                            ],
+                          },
+                          {
+                            path: "leaderboard",
+                            element: <GameLeaderboard />,
+                          },
+                        ],
+                      },
+                      { path: "players", element: <GamePlayers /> },
+                      { path: "waitlist", element: <GameWaitlist /> },
                     ],
                   },
                 ],
