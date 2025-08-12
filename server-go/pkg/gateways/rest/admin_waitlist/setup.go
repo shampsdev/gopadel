@@ -8,13 +8,13 @@ import (
 
 func Setup(r *gin.RouterGroup, useCases usecase.Cases) {
 	handler := NewHandler(useCases.Waitlist)
-
-	adminWaitlistGroup := r.Group("/admin/waitlist")
+	
+	adminEventsGroup := r.Group("/admin/events")
 	{
 		// Все эндпоинты требуют JWT авторизации
-		adminWaitlistGroup.Use(middlewares.RequireAdminJWT(useCases.AdminUser))
+		adminEventsGroup.Use(middlewares.RequireAdminJWT(useCases.AdminUser))
 		
-		// GET /admin/waitlist/tournament/:tournamentId - получить список ожидания турнира (любой админ, только чтение)
-		adminWaitlistGroup.GET("/tournament/:tournamentId", handler.GetTournamentWaitlist)
+		// GET /admin/events/:event_id/waitlist - получить вейтлист события (любой админ)
+		adminEventsGroup.GET("/:event_id/waitlist", handler.GetEventWaitlist)
 	}
 } 

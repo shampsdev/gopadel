@@ -71,7 +71,6 @@ func (h *Handler) CreateClub(c *gin.Context) {
 		return
 	}
 
-	// Возвращаем созданный клуб
 	filter := &domain.FilterClub{ID: &createData.ID}
 	clubs, err := h.clubCase.AdminFilter(ctx, filter)
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to get created club") {
@@ -125,7 +124,6 @@ func (h *Handler) PatchClub(c *gin.Context) {
 		return
 	}
 
-	// Возвращаем обновленный клуб
 	filter := &domain.FilterClub{ID: &clubID}
 	clubs, err := h.clubCase.AdminFilter(ctx, filter)
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to get updated club") {

@@ -26,8 +26,8 @@ func NewWaitlistRepo(db *pgxpool.Pool) *WaitlistRepo {
 
 func (r *WaitlistRepo) Create(ctx context.Context, waitlist *domain.CreateWaitlist) (int, error) {
 	s := r.psql.Insert(`"waitlists"`).
-		Columns("user_id", "tournament_id").
-		Values(waitlist.UserID, waitlist.TournamentID).
+		Columns("user_id", "event_id").
+		Values(waitlist.UserID, waitlist.EventID).
 		Suffix("RETURNING id")
 
 	sql, args, err := s.ToSql()
@@ -42,7 +42,7 @@ func (r *WaitlistRepo) Create(ctx context.Context, waitlist *domain.CreateWaitli
 
 func (r *WaitlistRepo) Filter(ctx context.Context, filter *domain.FilterWaitlist) ([]*domain.Waitlist, error) {
 	s := r.psql.Select(
-		`"w"."id"`, `"w"."user_id"`, `"w"."tournament_id"`, `"w"."date"`,
+		`"w"."id"`, `"w"."user_id"`, `"w"."event_id"`, `"w"."date"`,
 		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, `"u"."avatar"`,
 		`"u"."bio"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."playing_position"`, `"u"."padel_profiles"`, `"u"."is_registered"`,
 	).
@@ -57,8 +57,8 @@ func (r *WaitlistRepo) Filter(ctx context.Context, filter *domain.FilterWaitlist
 		s = s.Where(sq.Eq{`"w"."user_id"`: *filter.UserID})
 	}
 
-	if filter.TournamentID != nil {
-		s = s.Where(sq.Eq{`"w"."tournament_id"`: *filter.TournamentID})
+	if filter.EventID != nil {
+		s = s.Where(sq.Eq{`"w"."event_id"`: *filter.EventID})
 	}
 
 	s = s.OrderBy(`"w"."date" ASC`)
@@ -92,7 +92,7 @@ func (r *WaitlistRepo) Filter(ctx context.Context, filter *domain.FilterWaitlist
 		err := rows.Scan(
 			&waitlist.ID,
 			&waitlist.UserID,
-			&waitlist.TournamentID,
+			&waitlist.EventID,
 			&waitlist.Date,
 			&user.ID,
 			&user.TelegramID,

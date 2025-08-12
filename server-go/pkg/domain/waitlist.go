@@ -3,11 +3,11 @@ package domain
 import "time"
 
 type Waitlist struct {
-	ID           int       `json:"id"`
-	UserID       string    `json:"userId"`
-	TournamentID string    `json:"tournamentId"`
-	Date         time.Time `json:"date"`
-	User         *User     `json:"user,omitempty"`
+	ID      int       `json:"id"`
+	UserID  string    `json:"userId"`
+	EventID string    `json:"eventId"`
+	Date    time.Time `json:"date"`
+	User    *User     `json:"user,omitempty"`
 }
 
 type WaitlistUser struct {
@@ -16,12 +16,12 @@ type WaitlistUser struct {
 }
 
 type CreateWaitlist struct {
-	UserID       string `json:"userId" binding:"required"`
-	TournamentID string `json:"tournamentId" binding:"required"`
+	UserID  string `json:"userId" binding:"required"`
+	EventID string `json:"eventId" binding:"required"`
 }
 
 type FilterWaitlist struct {
-	ID           *int    `json:"id,omitempty"`
-	UserID       *string `json:"userId,omitempty"`
-	TournamentID *string `json:"tournamentId,omitempty"`
+	ID      *int    `json:"id,omitempty"`
+	UserID  *string `json:"userId,omitempty"`
+	EventID *string `json:"eventId,omitempty"`
 } 

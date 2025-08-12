@@ -33,6 +33,46 @@ db-migrate-down: migrate-install ## Migrate down
 	$(MIGRATE) -database $(DB_URL) -path migrations down
 
 
+##@ Tests
+test: ## Run all tests
+	go test ./tests/...
+
+test-events: ## Run events tests only
+	go test ./tests/events
+
+test-registrations: ## Run registrations tests only
+	go test ./tests/registrations
+
+test-permissions: ## Run permissions tests only
+	go test ./tests/events -run TestCreateGamePermissions
+	go test ./tests/events -run TestCreateTournamentPermissions
+	go test ./tests/events -run TestUpdateGamePermissions
+	go test ./tests/events -run TestCreateTrainingPermissions
+
+test-deletion: ## Run deletion tests only
+	go test ./tests/events -run TestEventDeletion
+
+test-game-registration: ## Run game registration tests only
+	go test ./tests/registrations -run TestGameRegistrationFlow
+
+test-tournament-registration: ## Run tournament registration tests only
+	go test ./tests/registrations -run TestTournamentRegistrationFlow
+
+test-verbose: ## Run all tests with verbose output
+	go test -v ./tests/...
+
+test-short: ## Run tests with short flag (skip long-running tests)
+	go test -short ./tests/...
+
+test-coverage: ## Run tests with coverage report
+	go test -coverprofile=coverage.out ./tests/...
+	go tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage report generated: coverage.html"
+
+test-clean: ## Clean test coverage files
+	rm -f coverage.out coverage.html
+
+
 ##@ Tools
 GOLANGCI_LINT = $(shell pwd)/bin/golangci-lint
 golangci-lint-install:

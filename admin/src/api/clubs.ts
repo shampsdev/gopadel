@@ -1,45 +1,43 @@
 import { api } from './api';
+import type { Club, CreateClub, PatchClub } from '../shared/types';
 
-export interface Club {
-  id: string;
-  name: string;
-  description?: string;
-  createdAt: string;
-  userCount?: number;
-}
+// Реэкспорт для удобства использования в компонентах
+export type { Club, CreateClub, PatchClub };
 
-export interface CreateClub {
-  id: string;
-  name: string;
-  description?: string;
-}
-
-export interface PatchClub {
+// Модель фильтра клубов
+export interface FilterClub {
   id?: string;
   name?: string;
-  description?: string;
+  isPrivate?: boolean;
+  url?: string;
 }
 
 export const clubsApi = {
-  // Получить все клубы
+  // Получение списка клубов с фильтрацией
+  filter: async (filter: FilterClub): Promise<Club[]> => {
+    const response = await api.post<Club[]>('/admin/clubs/filter', filter);
+    return response.data;
+  },
+
+  // Получение всех клубов
   getAll: async (): Promise<Club[]> => {
-    const response = await api.get('/admin/clubs');
+    const response = await api.get<Club[]>('/admin/clubs');
     return response.data;
   },
 
-  // Создать новый клуб
+  // Создание клуба
   create: async (data: CreateClub): Promise<Club> => {
-    const response = await api.post('/admin/clubs', data);
+    const response = await api.post<Club>('/admin/clubs', data);
     return response.data;
   },
 
-  // Обновить клуб
+  // Обновление клуба
   patch: async (id: string, data: PatchClub): Promise<Club> => {
-    const response = await api.patch(`/admin/clubs/${id}`, data);
+    const response = await api.patch<Club>(`/admin/clubs/${id}`, data);
     return response.data;
   },
 
-  // Удалить клуб
+  // Удаление клуба
   delete: async (id: string): Promise<void> => {
     await api.delete(`/admin/clubs/${id}`);
   },

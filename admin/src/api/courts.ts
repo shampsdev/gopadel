@@ -1,20 +1,8 @@
 import { api } from './api';
+import type { Court, CreateCourt, PatchCourt } from '../shared/types';
 
-export interface Court {
-  id: string;
-  name: string;
-  address: string;
-}
-
-export interface CreateCourt {
-  name: string;
-  address: string;
-}
-
-export interface PatchCourt {
-  name?: string;
-  address?: string;
-}
+// Реэкспорт для удобства использования в компонентах
+export type { Court, CreateCourt, PatchCourt };
 
 export const courtsApi = {
   async getAll(): Promise<Court[]> {

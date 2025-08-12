@@ -1,163 +1,152 @@
 import { api } from './api';
+import type { 
+  User, 
+  Event, 
+  RegistrationStatus, 
+  Registration, 
+  Payment, 
+  EventType 
+} from '../shared/types';
 
-export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  telegramUsername: string;
-  telegramId: number;
-  rank: number;
-  city: string;
-}
+// Реэкспорт для удобства использования в компонентах
+export type { User, Event, RegistrationStatus, Registration, Payment, EventType };
 
-export interface Tournament {
-  id: string;
-  name: string;
-  startTime: string;
-  endTime: string;
-  price: number;
-  rankMin: number;
-  rankMax: number;
-  maxUsers: number;
-  description: string;
-  court: {
-    id: string;
-    name: string;
-    address: string;
-  };
-  tournamentType: string;
-  organizator: User;
-}
-
-export type RegistrationStatus = 'PENDING' | 'ACTIVE' | 'CANCELED' | 'CANCELED_BY_USER';
-
-export interface RegistrationWithPayments {
-  id: string;
-  userId: string;
-  tournamentId: string;
-  date: string;
-  status: RegistrationStatus;
-  user?: {
-    id: string;
-    telegramId: number;
-    telegramUsername?: string;
-    firstName: string;
-    lastName: string;
-    avatar?: string;
-    rank: number;
-    city?: string;
-    isRegistered: boolean;
-  };
-  tournament?: {
-    id: string;
-    name: string;
-    startTime: string;
-    endTime?: string;
-    price: number;
-    rankMin: number;
-    rankMax: number;
-    maxUsers: number;
-    description?: string;
-    tournamentType: string;
-    court: {
-      id: string;
-      name: string;
-      address: string;
-    };
-    organizator: {
-      id: string;
-      telegramId: number;
-      telegramUsername?: string;
-      firstName: string;
-      lastName: string;
-      avatar?: string;
-      rank: number;
-    };
-  };
+// Расширенная модель регистрации с платежами (из swagger.json)
+export interface RegistrationWithPayments extends Registration {
   payments?: Payment[];
 }
 
-export interface Payment {
-  id: string;
-  paymentId: string;
-  date: string;
-  amount: number;
-  status: string;
-  paymentLink: string;
-  confirmationToken: string;
-  registrationId: string;
-}
-
-export interface AdminFilterRegistration {
-  id?: string;
-  userId?: string;
-  tournamentId?: string;
-  status?: RegistrationStatus;
-  userTelegramId?: number;
-  userTelegramUsername?: string;
-  userFirstName?: string;
-  tournamentName?: string;
-}
-
-export interface TournamentOption {
+// Модель опции события для выпадающих списков
+export interface EventOption {
   id: string;
   name: string;
-  startTime?: string;
+  type: EventType;
+  startTime: string;
   endTime?: string;
 }
 
+// Модель опции турнира для выпадающих списков
+export interface TournamentOption {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime?: string;
+}
+
+// Модель опции пользователя для выпадающих списков
 export interface UserOption {
   id: string;
+  telegramId: number;
+  telegramUsername?: string;
   firstName: string;
   lastName: string;
-  telegramUsername?: string;
-  telegramId: number;
+  avatar?: string;
+  rank: number;
 }
 
-export interface FilterUser {
-  id?: string;
-  telegramId?: number;
-  firstName?: string;
-  lastName?: string;
-}
-
+// Модель запроса поиска пользователей
 export interface UserSearchRequest {
-  telegramUsername: string;
+  telegramUsername?: string;
+  firstName?: string;
+  telegramId?: number;
 }
 
+// Модель фильтра админских регистраций (из swagger.json)
+export interface AdminFilterRegistration {
+  eventId?: string;
+  eventName?: string;
+  status?: RegistrationStatus;
+  userFirstName?: string;
+  userId?: string;
+  userTelegramId?: number;
+  userTelegramUsername?: string;
+}
+
+// Модель для обновления статуса регистрации (из swagger.json)
+export interface RegistrationStatusUpdate {
+  status: RegistrationStatus;
+}
+
+// Статусы для игр
+export const gameStatusOptions = [
+  { value: 'INVITED' as RegistrationStatus, label: 'Приглашён', color: 'text-blue-300', bgColor: 'bg-blue-900/30' },
+  { value: 'CONFIRMED' as RegistrationStatus, label: 'Подтверждено', color: 'text-green-300', bgColor: 'bg-green-900/30' },
+  { value: 'CANCELLED' as RegistrationStatus, label: 'Отменена', color: 'text-red-300', bgColor: 'bg-red-900/30' },
+  { value: 'LEFT' as RegistrationStatus, label: 'Покинул', color: 'text-gray-300', bgColor: 'bg-gray-900/30' },
+];
+
+// Статусы для турниров
+export const tournamentStatusOptions = [
+  { value: 'PENDING' as RegistrationStatus, label: 'Ожидание', color: 'text-yellow-300', bgColor: 'bg-yellow-900/30' },
+  { value: 'CANCELLED_BEFORE_PAYMENT' as RegistrationStatus, label: 'Отменена до оплаты', color: 'text-red-300', bgColor: 'bg-red-900/30' },
+  { value: 'CONFIRMED' as RegistrationStatus, label: 'Подтверждено', color: 'text-green-300', bgColor: 'bg-green-900/30' },
+  { value: 'REFUNDED' as RegistrationStatus, label: 'Возврат', color: 'text-purple-300', bgColor: 'bg-purple-900/30' },
+];
+
+// Все статусы для отображения в фильтрах
+export const allStatusOptions = [
+  { value: 'PENDING' as RegistrationStatus, label: 'Ожидание', color: 'text-yellow-300', bgColor: 'bg-yellow-900/30' },
+  { value: 'INVITED' as RegistrationStatus, label: 'Приглашён', color: 'text-blue-300', bgColor: 'bg-blue-900/30' },
+  { value: 'CONFIRMED' as RegistrationStatus, label: 'Подтверждено', color: 'text-green-300', bgColor: 'bg-green-900/30' },
+  { value: 'CANCELLED_BEFORE_PAYMENT' as RegistrationStatus, label: 'Отменена до оплаты', color: 'text-red-300', bgColor: 'bg-red-900/30' },
+  { value: 'REFUNDED' as RegistrationStatus, label: 'Возврат', color: 'text-purple-300', bgColor: 'bg-purple-900/30' },
+  { value: 'CANCELLED' as RegistrationStatus, label: 'Отменена', color: 'text-red-300', bgColor: 'bg-red-900/30' },
+  { value: 'LEFT' as RegistrationStatus, label: 'Покинул', color: 'text-gray-300', bgColor: 'bg-gray-900/30' },
+];
+
+export const paymentStatusOptions = [
+  { value: 'pending', label: 'Ожидает', color: 'text-yellow-400', icon: 'Clock' },
+  { value: 'succeeded', label: 'Успешно', color: 'text-green-400', icon: 'CheckCircle' },
+  { value: 'canceled', label: 'Отменено', color: 'text-red-400', icon: 'XCircle' },
+  { value: 'refunded', label: 'Возврат', color: 'text-purple-400', icon: 'RotateCcw' },
+];
+
+// API согласно swagger.json
 export const registrationsApi = {
+  // Получение регистраций с фильтрацией (из swagger.json)
   filter: async (filter: AdminFilterRegistration): Promise<RegistrationWithPayments[]> => {
     const response = await api.post<RegistrationWithPayments[]>('/admin/registrations/filter', filter);
     return response.data;
   },
 
-  getAll: async (): Promise<RegistrationWithPayments[]> => {
-    const response = await api.post<RegistrationWithPayments[]>('/admin/registrations/filter', {});
+  // Обновление статуса регистрации (из swagger.json)
+  updateStatus: async (userId: string, eventId: string, statusUpdate: RegistrationStatusUpdate): Promise<RegistrationWithPayments> => {
+    const response = await api.patch<RegistrationWithPayments>(`/admin/registrations/${userId}/${eventId}/status`, statusUpdate);
     return response.data;
   },
 
-  getById: async (id: string): Promise<RegistrationWithPayments> => {
-    const response = await api.get<RegistrationWithPayments>(`/admin/registrations/${id}`);
-    return response.data;
-  },
-
-  updateStatus: async (id: string, status: RegistrationStatus): Promise<RegistrationWithPayments> => {
-    const response = await api.patch<RegistrationWithPayments>(`/admin/registrations/${id}/status`, { status });
-    return response.data;
+  getEventOptions: async (): Promise<EventOption[]> => {
+    const response = await api.post<Event[]>('/admin/events/filter', {});
+    return response.data.map((event) => ({
+      id: event.id,
+      name: event.name,
+      type: event.type,
+      startTime: event.startTime,
+      endTime: event.endTime,
+    }));
   },
 
   getTournamentOptions: async (): Promise<TournamentOption[]> => {
-    const response = await api.get<TournamentOption[]>('/admin/registrations/tournaments');
-    return response.data;
+    // Получаем все события (игры и турниры)
+    const response = await api.post<Event[]>('/admin/events/filter', {});
+    return response.data.map((event) => ({
+      id: event.id,
+      name: event.name,
+      startTime: event.startTime,
+      endTime: event.endTime,
+    }));
   },
 
+  // Поиск пользователей через admin/users API
   getUserOptions: async (telegramUsername: string): Promise<UserOption[]> => {
-    const response = await api.post<UserOption[]>('/admin/registrations/users', { telegramUsername });
+    const response = await api.post<UserOption[]>('/admin/users/filter', { 
+      telegramUsername: telegramUsername 
+    });
     return response.data;
   },
 
   searchUsers: async (request: UserSearchRequest): Promise<UserOption[]> => {
-    const response = await api.post('/admin/registrations/users', request);
+    const response = await api.post('/admin/users/filter', request);
     return response.data;
   },
 }; 

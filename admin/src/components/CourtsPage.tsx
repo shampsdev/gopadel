@@ -137,7 +137,7 @@ export const CourtsPage: React.FC = () => {
 
   // Обработчик изменения полей
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev: any) => ({
       ...prev,
       [field]: value,
     }));

@@ -29,6 +29,6 @@ func GetMe(userCase *usecase.User) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusCreated, userProfile)
+		c.JSON(http.StatusOK, userProfile)
 	}
 }

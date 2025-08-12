@@ -7,23 +7,21 @@ import (
 )
 
 func Setup(r *gin.RouterGroup, useCases usecase.Cases) {
-	handler := NewHandler(useCases.Registration, useCases.Tournament, useCases.User)
+	handler := NewHandler(useCases.Registration)
 	
 	adminRegistrationsGroup := r.Group("/admin/registrations")
 	{
 		// Все эндпоинты требуют JWT авторизации
 		adminRegistrationsGroup.Use(middlewares.RequireAdminJWT(useCases.AdminUser))
 		
-		// Эндпоинты для чтения данных (любой админ)
+		// POST /admin/registrations/filter - получить список регистраций с фильтрацией (любой админ)
 		adminRegistrationsGroup.POST("/filter", handler.FilterRegistrations)
-		adminRegistrationsGroup.GET("/:id", handler.GetRegistration)
-		adminRegistrationsGroup.GET("/tournaments", handler.GetTournamentOptions)
-		adminRegistrationsGroup.POST("/users", handler.GetUserOptions)
 		
-		// Эндпоинты для изменения данных требуют права суперпользователя
+		// Эндпоинты для изменения статусов требуют права суперпользователя
 		superUserGroup := adminRegistrationsGroup.Group("")
 		superUserGroup.Use(middlewares.RequireAdminSuperuser())
 		
-		superUserGroup.PATCH("/:id/status", handler.UpdateRegistrationStatus)
+		// PATCH /admin/registrations/:user_id/:event_id/status - обновить статус регистрации (только суперпользователь)
+		superUserGroup.PATCH("/:user_id/:event_id/status", handler.UpdateRegistrationStatus)
 	}
 } 

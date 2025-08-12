@@ -1,25 +1,5 @@
 definitions:
-  domain.AdminFilterRegistration:
-    properties:
-      id:
-        type: string
-      status:
-        $ref: '#/definitions/domain.RegistrationStatus'
-      tournamentId:
-        type: string
-      tournamentName:
-        type: string
-      userFirstName:
-        type: string
-      userId:
-        type: string
-      userTelegramId:
-        description: Дополнительные поля для удобства фильтрации
-        type: integer
-      userTelegramUsername:
-        type: string
-    type: object
-  domain.AdminFilterTournament:
+  domain.AdminFilterEvent:
     properties:
       clubId:
         type: string
@@ -29,14 +9,36 @@ definitions:
         type: string
       name:
         type: string
-      organizatorFirstName:
+      organizerFirstName:
         type: string
-      organizatorId:
+      organizerId:
         type: string
-      organizatorTelegramId:
+      organizerTelegramId:
         description: Дополнительные поля для удобства фильтрации
         type: integer
-      tournamentType:
+      statuses:
+        items:
+          $ref: '#/definitions/domain.EventStatus'
+        type: array
+      type:
+        $ref: '#/definitions/domain.EventType'
+    type: object
+  domain.AdminFilterRegistration:
+    properties:
+      eventId:
+        type: string
+      eventName:
+        type: string
+      status:
+        $ref: '#/definitions/domain.RegistrationStatus'
+      userFirstName:
+        type: string
+      userId:
+        type: string
+      userTelegramId:
+        description: Дополнительные поля для удобства фильтрации
+        type: integer
+      userTelegramUsername:
         type: string
     type: object
   domain.AdminLogin:
@@ -72,7 +74,7 @@ definitions:
     - new_password
     - old_password
     type: object
-  domain.AdminPatchTournament:
+  domain.AdminPatchEvent:
     properties:
       clubId:
         type: string
@@ -84,13 +86,11 @@ definitions:
         type: string
       endTime:
         type: string
-      isFinished:
-        type: boolean
       maxUsers:
         type: integer
       name:
         type: string
-      organizatorId:
+      organizerId:
         type: string
       price:
         type: integer
@@ -100,8 +100,10 @@ definitions:
         type: number
       startTime:
         type: string
-      tournamentType:
-        type: string
+      status:
+        $ref: '#/definitions/domain.EventStatus'
+      type:
+        $ref: '#/definitions/domain.EventType'
     type: object
   domain.AdminPatchUser:
     properties:
@@ -162,7 +164,13 @@ definitions:
         type: string
       id:
         type: string
+      isPrivate:
+        type: boolean
       name:
+        type: string
+      updatedAt:
+        type: string
+      url:
         type: string
     type: object
   domain.Court:
@@ -203,7 +211,11 @@ definitions:
         type: string
       id:
         type: string
+      isPrivate:
+        type: boolean
       name:
+        type: string
+      url:
         type: string
     required:
     - id
@@ -219,18 +231,7 @@ definitions:
     - address
     - name
     type: object
-  domain.CreateLoyalty:
-    properties:
-      description:
-        type: string
-      discount:
-        type: integer
-      name:
-        type: string
-      requirements:
-        type: string
-    type: object
-  domain.CreateTournament:
+  domain.CreateEvent:
     properties:
       clubId:
         type: string
@@ -243,12 +244,14 @@ definitions:
       endTime:
         type: string
       maxUsers:
+        minimum: 2
         type: integer
       name:
         type: string
-      organizatorId:
+      organizerId:
         type: string
       price:
+        minimum: 0
         type: integer
       rankMax:
         minimum: 0
@@ -258,22 +261,137 @@ definitions:
         type: number
       startTime:
         type: string
-      tournamentType:
-        type: string
+      type:
+        $ref: '#/definitions/domain.EventType'
     required:
-    - clubId
     - courtId
+    - endTime
     - maxUsers
     - name
-    - organizatorId
     - startTime
-    - tournamentType
+    - type
+    type: object
+  domain.CreateLoyalty:
+    properties:
+      description:
+        type: string
+      discount:
+        type: integer
+      name:
+        type: string
+      requirements:
+        type: string
     type: object
   domain.ErrorResponse:
     properties:
       error:
         type: string
     type: object
+  domain.Event:
+    properties:
+      clubId:
+        type: string
+      court:
+        $ref: '#/definitions/domain.Court'
+      createdAt:
+        type: string
+      data:
+        type: object
+      description:
+        type: string
+      endTime:
+        type: string
+      id:
+        type: string
+      maxUsers:
+        type: integer
+      name:
+        type: string
+      organizer:
+        $ref: '#/definitions/domain.User'
+      participants:
+        items:
+          $ref: '#/definitions/domain.Registration'
+        type: array
+      price:
+        type: integer
+      rankMax:
+        type: number
+      rankMin:
+        type: number
+      startTime:
+        type: string
+      status:
+        $ref: '#/definitions/domain.EventStatus'
+      type:
+        $ref: '#/definitions/domain.EventType'
+      updatedAt:
+        type: string
+    type: object
+  domain.EventForRegistration:
+    properties:
+      clubId:
+        type: string
+      court:
+        $ref: '#/definitions/domain.Court'
+      data:
+        type: object
+      description:
+        type: string
+      endTime:
+        type: string
+      id:
+        type: string
+      maxUsers:
+        type: integer
+      name:
+        type: string
+      organizer:
+        $ref: '#/definitions/domain.User'
+      price:
+        type: integer
+      rankMax:
+        type: number
+      rankMin:
+        type: number
+      startTime:
+        type: string
+      status:
+        $ref: '#/definitions/domain.EventStatus'
+      type:
+        $ref: '#/definitions/domain.EventType'
+    type: object
+  domain.EventStatus:
+    enum:
+    - registration
+    - full
+    - completed
+    - cancelled
+    type: string
+    x-enum-comments:
+      EventStatusCancelled: Событие отменено
+      EventStatusCompleted: Событие завершено
+      EventStatusFull: Набор закрыт (все места заняты)
+      EventStatusRegistration: Регистрация открыта
+    x-enum-varnames:
+    - EventStatusRegistration
+    - EventStatusFull
+    - EventStatusCompleted
+    - EventStatusCancelled
+  domain.EventType:
+    enum:
+    - game
+    - tournament
+    - training
+    type: string
+    x-enum-comments:
+      EventTypeGame: Обычная игра
+      EventTypeTournament: Турнир
+      EventTypeTraining: Тренировка
+    x-enum-varnames:
+    - EventTypeGame
+    - EventTypeTournament
+    - EventTypeTraining
   domain.FilterAdminUser:
     properties:
       first_name:
@@ -295,26 +413,38 @@ definitions:
     properties:
       id:
         type: string
+      isPrivate:
+        type: boolean
       name:
         type: string
+      url:
+        type: string
     type: object
-  domain.FilterTournament:
+  domain.FilterEvent:
     properties:
+      clubId:
+        type: string
       filterByUserClubs:
-        description: user ID to filter by user's clubs
+        description: user ID для фильтрации по клубам пользователя
         type: string
       id:
         type: string
       name:
         type: string
-      notEnded:
-        description: default true
+      notCompleted:
+        description: true если событие не завершено
         type: boolean
       notFull:
-        description: true if tournament is not full
+        description: true если событие не заполнено
         type: boolean
-      organizatorId:
+      organizerId:
         type: string
+      statuses:
+        items:
+          $ref: '#/definitions/domain.EventStatus'
+        type: array
+      type:
+        $ref: '#/definitions/domain.EventType'
     type: object
   domain.FilterUser:
     properties:
@@ -370,7 +500,11 @@ definitions:
     properties:
       description:
         type: string
+      isPrivate:
+        type: boolean
       name:
+        type: string
+      url:
         type: string
     type: object
   domain.PatchCourt:
@@ -380,18 +514,7 @@ definitions:
       name:
         type: string
     type: object
-  domain.PatchLoyalty:
-    properties:
-      description:
-        type: string
-      discount:
-        type: integer
-      name:
-        type: string
-      requirements:
-        type: string
-    type: object
-  domain.PatchTournament:
+  domain.PatchEvent:
     properties:
       clubId:
         type: string
@@ -415,7 +538,20 @@ definitions:
         type: number
       startTime:
         type: string
-      tournamentType:
+      status:
+        $ref: '#/definitions/domain.EventStatus'
+      type:
+        $ref: '#/definitions/domain.EventType'
+    type: object
+  domain.PatchLoyalty:
+    properties:
+      description:
+        type: string
+      discount:
+        type: integer
+      name:
+        type: string
+      requirements:
         type: string
     type: object
   domain.PatchUser:
@@ -453,6 +589,8 @@ definitions:
         type: string
       date:
         type: string
+      eventId:
+        type: string
       id:
         type: string
       paymentId:
@@ -461,10 +599,10 @@ definitions:
         type: string
       registration:
         $ref: '#/definitions/domain.Registration'
-      registrationId:
-        type: string
       status:
         $ref: '#/definitions/domain.PaymentStatus'
+      userId:
+        type: string
     type: object
   domain.PaymentStatus:
     enum:
@@ -490,13 +628,15 @@ definitions:
     - PlayingPositionBoth
   domain.Registration:
     properties:
-      date:
+      createdAt:
         type: string
-      id:
+      event:
+        $ref: '#/definitions/domain.EventForRegistration'
+      eventId:
         type: string
       status:
         $ref: '#/definitions/domain.RegistrationStatus'
-      tournamentId:
+      updatedAt:
         type: string
       user:
         $ref: '#/definitions/domain.User'
@@ -506,20 +646,68 @@ definitions:
   domain.RegistrationStatus:
     enum:
     - PENDING
-    - ACTIVE
-    - CANCELED
-    - CANCELED_BY_USER
+    - INVITED
+    - CONFIRMED
+    - CANCELLED_BEFORE_PAYMENT
+    - CANCELLED_AFTER_PAYMENT
+    - REFUNDED
+    - CANCELLED
+    - LEFT
     type: string
+    x-enum-comments:
+      RegistrationStatusCancelled: заявка отклонена (оргом) или отменена (участником)
+        до подтверждения
+      RegistrationStatusCancelledAfterPayment: не используется в играх (можно удалить,
+        если не нужен)
+      RegistrationStatusCancelledBeforePayment: не используется в играх (можно удалить,
+        если не нужен)
+      RegistrationStatusConfirmed: участник принят в игру
+      RegistrationStatusInvited: приглашение в игру отправлено, ожидает подтверждения
+        (не занимает место)
+      RegistrationStatusLeft: участник вышел после подтверждения
+      RegistrationStatusPending: заявка отправлена, ожидает подтверждения (используется
+        в турнирах, занимает место)
+      RegistrationStatusRefunded: не используется в играх (можно удалить)
     x-enum-varnames:
     - RegistrationStatusPending
-    - RegistrationStatusActive
-    - RegistrationStatusCanceled
-    - RegistrationStatusCanceledByUser
+    - RegistrationStatusInvited
+    - RegistrationStatusConfirmed
+    - RegistrationStatusCancelledBeforePayment
+    - RegistrationStatusCancelledAfterPayment
+    - RegistrationStatusRefunded
+    - RegistrationStatusCancelled
+    - RegistrationStatusLeft
+  domain.RegistrationStatusUpdate:
+    properties:
+      status:
+        $ref: '#/definitions/domain.RegistrationStatus'
+    required:
+    - status
+    type: object
+  domain.RegistrationWithEvent:
+    properties:
+      createdAt:
+        type: string
+      event:
+        $ref: '#/definitions/domain.EventForRegistration'
+      eventId:
+        type: string
+      status:
+        $ref: '#/definitions/domain.RegistrationStatus'
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      userId:
+        type: string
+    type: object
   domain.RegistrationWithPayments:
     properties:
-      date:
+      createdAt:
         type: string
-      id:
+      event:
+        $ref: '#/definitions/domain.EventForRegistration'
+      eventId:
         type: string
       payments:
         items:
@@ -527,98 +715,11 @@ definitions:
         type: array
       status:
         $ref: '#/definitions/domain.RegistrationStatus'
-      tournament:
-        $ref: '#/definitions/domain.TournamentForRegistration'
-      tournamentId:
+      updatedAt:
         type: string
       user:
         $ref: '#/definitions/domain.User'
       userId:
-        type: string
-    type: object
-  domain.RegistrationWithTournament:
-    properties:
-      date:
-        type: string
-      id:
-        type: string
-      status:
-        $ref: '#/definitions/domain.RegistrationStatus'
-      tournament:
-        $ref: '#/definitions/domain.TournamentForRegistration'
-      tournamentId:
-        type: string
-      user:
-        $ref: '#/definitions/domain.User'
-      userId:
-        type: string
-    type: object
-  domain.Tournament:
-    properties:
-      clubId:
-        type: string
-      court:
-        $ref: '#/definitions/domain.Court'
-      data:
-        type: object
-      description:
-        type: string
-      endTime:
-        type: string
-      id:
-        type: string
-      isFinished:
-        type: boolean
-      maxUsers:
-        type: integer
-      name:
-        type: string
-      organizator:
-        $ref: '#/definitions/domain.User'
-      participants:
-        items:
-          $ref: '#/definitions/domain.Registration'
-        type: array
-      price:
-        type: integer
-      rankMax:
-        type: number
-      rankMin:
-        type: number
-      startTime:
-        type: string
-      tournamentType:
-        type: string
-    type: object
-  domain.TournamentForRegistration:
-    properties:
-      court:
-        $ref: '#/definitions/domain.Court'
-      data:
-        type: object
-      description:
-        type: string
-      endTime:
-        type: string
-      id:
-        type: string
-      isFinished:
-        type: boolean
-      maxUsers:
-        type: integer
-      name:
-        type: string
-      organizator:
-        $ref: '#/definitions/domain.User'
-      price:
-        type: integer
-      rankMax:
-        type: number
-      rankMin:
-        type: number
-      startTime:
-        type: string
-      tournamentType:
         type: string
     type: object
   domain.User:
@@ -652,6 +753,19 @@ definitions:
       telegramUsername:
         type: string
     type: object
+  domain.Waitlist:
+    properties:
+      date:
+        type: string
+      eventId:
+        type: string
+      id:
+        type: integer
+      user:
+        $ref: '#/definitions/domain.User'
+      userId:
+        type: string
+    type: object
   domain.WaitlistUser:
     properties:
       date:
@@ -665,12 +779,12 @@ definitions:
         example: https://example.com/image.jpg
         type: string
     type: object
-  registration.CreatePaymentRequest:
+  registration.PaymentResponse:
     properties:
-      returnUrl:
+      payment_id:
         type: string
-    required:
-    - returnUrl
+      payment_url:
+        type: string
     type: object
   webhook.WebhookEvent:
     properties:
@@ -1237,6 +1351,197 @@ paths:
       summary: Update court (Admin)
       tags:
       - admin-courts
+  /admin/events:
+    post:
+      consumes:
+      - application/json
+      description: Create a new event. Available for any admin.
+      parameters:
+      - description: Event data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateEvent'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create event (Admin)
+      tags:
+      - admin-events
+  /admin/events/{event_id}/waitlist:
+    get:
+      description: Get waitlist for specific event. Available for any admin.
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of waitlist users
+          schema:
+            items:
+              $ref: '#/definitions/domain.WaitlistUser'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get event waitlist (Admin)
+      tags:
+      - admin-waitlist
+  /admin/events/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing event. Available for any admin.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Event deleted successfully
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete event (Admin)
+      tags:
+      - admin-events
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing event. Available for any admin.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Event update data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AdminPatchEvent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update event (Admin)
+      tags:
+      - admin-events
+  /admin/events/filter:
+    post:
+      consumes:
+      - application/json
+      description: Get filtered list of events with extended admin filters. Available
+        for any admin.
+      parameters:
+      - description: Event filter
+        in: body
+        name: filter
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AdminFilterEvent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Event'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Filter events (Admin)
+      tags:
+      - admin-events
   /admin/filter:
     post:
       consumes:
@@ -1420,64 +1725,28 @@ paths:
       summary: Update loyalty level (Admin)
       tags:
       - admin-loyalties
-  /admin/registrations/{id}:
-    get:
-      description: Get registration with payments and tournament info. Available for
-        any admin.
-      parameters:
-      - description: Registration ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.RegistrationWithPayments'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get registration (Admin)
-      tags:
-      - admin-registrations
-  /admin/registrations/{id}/status:
+  /admin/registrations/{user_id}/{event_id}/status:
     patch:
       consumes:
       - application/json
       description: Update registration status. Available only for superuser.
       parameters:
-      - description: Registration ID
+      - description: User ID
         in: path
-        name: id
+        name: user_id
         required: true
         type: string
-      - description: Status update data
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      - description: New status
         in: body
-        name: body
+        name: status
         required: true
         schema:
-          properties:
-            status:
-              type: string
-          type: object
+          $ref: '#/definitions/domain.RegistrationStatusUpdate'
       produces:
       - application/json
       responses:
@@ -1514,8 +1783,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Get filtered list of registrations with payments and tournament
-        info. Available for any admin.
+      description: Get filtered list of registrations with payment info. Available
+        for any admin.
       parameters:
       - description: Registration filter
         in: body
@@ -1549,238 +1818,6 @@ paths:
       summary: Filter registrations (Admin)
       tags:
       - admin-registrations
-  /admin/registrations/tournaments:
-    get:
-      description: Get list of tournaments for filtering. Available for any admin.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              properties:
-                id:
-                  type: string
-                name:
-                  type: string
-              type: object
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get tournament options (Admin)
-      tags:
-      - admin-registrations
-  /admin/registrations/users:
-    post:
-      consumes:
-      - application/json
-      description: Get list of users for filtering by telegram username only. Available
-        for any admin.
-      parameters:
-      - description: User filter (telegram username only)
-        in: body
-        name: filter
-        required: true
-        schema:
-          properties:
-            telegramUsername:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              properties:
-                firstName:
-                  type: string
-                id:
-                  type: string
-                lastName:
-                  type: string
-                telegramUsername:
-                  type: string
-              type: object
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get user options (Admin)
-      tags:
-      - admin-registrations
-  /admin/tournaments:
-    post:
-      consumes:
-      - application/json
-      description: Create a new tournament. Available for any admin.
-      parameters:
-      - description: Tournament data
-        in: body
-        name: tournament
-        required: true
-        schema:
-          $ref: '#/definitions/domain.CreateTournament'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/domain.Tournament'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Create tournament (Admin)
-      tags:
-      - admin-tournaments
-  /admin/tournaments/{id}:
-    delete:
-      description: Delete tournament. Available for any admin.
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.MessageResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Delete tournament (Admin)
-      tags:
-      - admin-tournaments
-    patch:
-      consumes:
-      - application/json
-      description: Update tournament data. Available for any admin.
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Tournament update data
-        in: body
-        name: tournament
-        required: true
-        schema:
-          $ref: '#/definitions/domain.AdminPatchTournament'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.Tournament'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Update tournament (Admin)
-      tags:
-      - admin-tournaments
-  /admin/tournaments/filter:
-    post:
-      consumes:
-      - application/json
-      description: Get all tournaments with advanced filtering. Available for any
-        admin.
-      parameters:
-      - description: Filter criteria
-        in: body
-        name: filter
-        schema:
-          $ref: '#/definitions/domain.AdminFilterTournament'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/domain.Tournament'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get all tournaments (Admin)
-      tags:
-      - admin-tournaments
   /admin/users/{id}:
     patch:
       consumes:
@@ -1868,44 +1905,6 @@ paths:
       summary: Filter users (Admin)
       tags:
       - admin-users
-  /admin/waitlist/tournament/{tournamentId}:
-    get:
-      consumes:
-      - application/json
-      description: Get waitlist users for a specific tournament. Available for any
-        admin. Read-only access.
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: tournamentId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/domain.WaitlistUser'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/domain.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get tournament waitlist (Admin)
-      tags:
-      - admin-waitlist
   /api/v1/yookassa_webhook:
     post:
       consumes:
@@ -1948,14 +1947,14 @@ paths:
       summary: YooKassa webhook for payment notifications
       tags:
       - webhook
-  /clubs/{club_id}/join:
+  /clubs/{url}/join:
     post:
       consumes:
       - application/json
       parameters:
-      - description: Club ID
+      - description: Club URL
         in: path
-        name: club_id
+        name: url
         required: true
         type: string
       produces:
@@ -2068,6 +2067,215 @@ paths:
       summary: Get all courts
       tags:
       - courts
+  /events:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Event data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateEvent'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created event
+          schema:
+            $ref: '#/definitions/domain.Event'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Create new event
+      tags:
+      - events
+  /events/{event_id}:
+    delete:
+      description: Deletes an event with access rights verification
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Event successfully deleted
+        "400":
+          description: Bad request
+        "403":
+          description: Insufficient permissions
+        "404":
+          description: Event not found
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Delete event
+      tags:
+      - events
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      - description: Event update data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/domain.PatchEvent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated event
+          schema:
+            $ref: '#/definitions/domain.Event'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Update existing event
+      tags:
+      - events
+  /events/{event_id}/waitlist:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated waitlist after removal
+          schema:
+            items:
+              $ref: '#/definitions/domain.WaitlistUser'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Remove current user from event waitlist
+      tags:
+      - events
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of waitlist users
+          schema:
+            items:
+              $ref: '#/definitions/domain.WaitlistUser'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Get event waitlist
+      tags:
+      - events
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Waitlist entry created
+          schema:
+            $ref: '#/definitions/domain.Waitlist'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Add current user to event waitlist
+      tags:
+      - events
+  /events/filter:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Filter parameters
+        in: body
+        name: filter
+        schema:
+          $ref: '#/definitions/domain.FilterEvent'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of events
+          schema:
+            items:
+              $ref: '#/definitions/domain.Event'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Filter events
+      tags:
+      - events
   /images/upload/avatar:
     post:
       consumes:
@@ -2118,660 +2326,241 @@ paths:
       summary: Get all loyalty programs
       tags:
       - loyalties
-  /registrations/{tournament_id}:
+  /registrations/{event_id}:
     post:
-      consumes:
-      - application/json
-      description: Creates new registration or updates existing CANCELED status to
-        PENDING. For free tournaments, status is set to ACTIVE immediately.
+      description: Creates a new registration for an event with PENDING status
       parameters:
-      - description: Tournament ID
+      - description: Event ID
         in: path
-        name: tournament_id
+        name: event_id
         required: true
         type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Registration created or updated
-          schema:
-            $ref: '#/definitions/domain.Registration'
-        "400":
-          description: Invalid request data
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: User not authorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Tournament not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "409":
-          description: Conflict (already registered or tournament full)
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Register for tournament
-      tags:
-      - registration
-  /registrations/{tournament_id}/cancel:
-    post:
-      consumes:
-      - application/json
-      description: Cancels registration with PENDING status (before payment)
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: tournament_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Registration canceled
-          schema:
-            $ref: '#/definitions/domain.Registration'
-        "400":
-          description: Invalid request data
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: User not authorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Registration not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Cancel registration before payment
-      tags:
-      - registration
-  /registrations/{tournament_id}/cancel-paid:
-    post:
-      consumes:
-      - application/json
-      description: Cancels registration with ACTIVE status (after payment)
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: tournament_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Registration canceled
-          schema:
-            $ref: '#/definitions/domain.Registration'
-        "400":
-          description: Invalid request data
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: User not authorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Registration not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Cancel registration after payment
-      tags:
-      - registration
-  /registrations/{tournament_id}/payment:
-    post:
-      consumes:
-      - application/json
-      description: Creates payment in YooKassa for existing PENDING registration.
-        Returns existing payment if it's already in success/pending status. For free
-        tournaments (price = 0), payment is not required.
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: tournament_id
-        required: true
-        type: string
-      - description: Payment creation request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/registration.CreatePaymentRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Payment created or existing payment returned
-          schema:
-            $ref: '#/definitions/domain.Payment'
-        "400":
-          description: Invalid request data or tournament is free
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: User not authorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: No pending registration found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create payment for tournament registration
-      tags:
-      - registration
-  /registrations/{tournament_id}/reactivate:
-    post:
-      consumes:
-      - application/json
-      description: Reactivates registration from CANCELED_BY_USER status to ACTIVE
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: tournament_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Registration reactivated
-          schema:
-            $ref: '#/definitions/domain.Registration'
-        "400":
-          description: Invalid request data
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: User not authorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Registration not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "409":
-          description: Tournament is full
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Reactivate canceled registration
-      tags:
-      - registration
-  /registrations/my:
-    get:
-      consumes:
-      - application/json
-      description: Returns all registrations for the current user with tournament
-        information
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of registrations with tournament details
-          schema:
-            items:
-              $ref: '#/definitions/domain.RegistrationWithTournament'
-            type: array
-        "401":
-          description: User not authorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get my registrations
-      tags:
-      - registration
-  /tournaments:
-    post:
-      consumes:
-      - application/json
-      description: Creates a new tournament. Requires telegram admin rights.
-      parameters:
-      - description: Tournament data
-        in: body
-        name: tournament
-        required: true
-        schema:
-          $ref: '#/definitions/domain.CreateTournament'
-      produces:
-      - application/json
       responses:
         "201":
-          description: Created tournament
+          description: Created registration
           schema:
-            $ref: '#/definitions/domain.Tournament'
+            $ref: '#/definitions/domain.Registration'
         "400":
-          description: Invalid request data
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: User not authorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "403":
-          description: Telegram admin rights required
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create tournament
-      tags:
-      - tournaments
-  /tournaments/{tournament_id}:
-    delete:
-      consumes:
-      - application/json
-      description: Deletes a tournament. Only the tournament organizer can delete
-        their tournament.
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: tournament_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: Tournament deleted successfully
-        "400":
-          description: Invalid request data
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: User not authorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "403":
-          description: Not tournament organizer or admin rights required
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Tournament not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete tournament
-      tags:
-      - tournaments
-    patch:
-      consumes:
-      - application/json
-      description: Updates tournament data. Only the tournament organizer can update
-        their tournament.
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: tournament_id
-        required: true
-        type: string
-      - description: Tournament update data
-        in: body
-        name: tournament
-        required: true
-        schema:
-          $ref: '#/definitions/domain.PatchTournament'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Updated tournament
-          schema:
-            $ref: '#/definitions/domain.Tournament'
-        "400":
-          description: Invalid request data
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: User not authorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "403":
-          description: Not tournament organizer or admin rights required
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Tournament not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Update tournament
-      tags:
-      - tournaments
-  /tournaments/{tournament_id}/waitlist:
-    delete:
-      consumes:
-      - application/json
-      description: Remove authenticated user from tournament waitlist
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: tournament_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Tournament waitlist users after removal
-          schema:
-            items:
-              $ref: '#/definitions/domain.WaitlistUser'
-            type: array
-        "400":
-          description: Invalid tournament ID
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: User not authorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Tournament not found or user not in waitlist
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Remove user from tournament waitlist
-      tags:
-      - tournaments
-    get:
-      consumes:
-      - application/json
-      description: Get list of users in tournament waitlist
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: tournament_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Tournament waitlist users
-          schema:
-            items:
-              $ref: '#/definitions/domain.WaitlistUser'
-            type: array
-        "400":
-          description: Invalid tournament ID
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Tournament not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get tournament waitlist
-      tags:
-      - tournaments
-    post:
-      consumes:
-      - application/json
-      description: Add authenticated user to tournament waitlist. Checks that tournament
-        has not ended.
-      parameters:
-      - description: Tournament ID
-        in: path
-        name: tournament_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Tournament waitlist users after adding
-          schema:
-            items:
-              $ref: '#/definitions/domain.WaitlistUser'
-            type: array
-        "400":
-          description: Invalid tournament ID or tournament has ended
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: User not authorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Tournament not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "409":
-          description: User already in waitlist
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Add user to tournament waitlist
-      tags:
-      - tournaments
-  /tournaments/filter:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Tournament filter
-        in: body
-        name: filter
-        required: true
-        schema:
-          $ref: '#/definitions/domain.FilterTournament'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of tournaments
-          schema:
-            items:
-              $ref: '#/definitions/domain.Tournament'
-            type: array
-        "400":
-          description: Bad Request
+          description: Bad request
         "401":
           description: Unauthorized
+        "403":
+          description: Forbidden - user already registered or validation failed
+        "404":
+          description: Event not found
         "500":
-          description: Internal Server Error
+          description: Internal server error
       security:
       - ApiKeyAuth: []
-      summary: Filter tournaments
+      summary: Create event registration
       tags:
-      - tournaments
-  /users/{user_id}/tournaments:
-    get:
-      consumes:
-      - application/json
+      - registrations
+  /registrations/{event_id}/{user_id}/approve:
+    put:
+      description: Approve a pending registration (organizer only)
       parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
       - description: User ID
         in: path
         name: user_id
         required: true
         type: string
+      responses:
+        "200":
+          description: Approved registration
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - only organizer can approve
+        "404":
+          description: Registration not found
+        "500":
+          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Approve registration
+      tags:
+      - registrations
+  /registrations/{event_id}/{user_id}/reject:
+    put:
+      description: Reject a pending registration (organizer only)
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Rejected registration
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - only organizer can reject
+        "404":
+          description: Registration not found
+        "500":
+          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Reject registration
+      tags:
+      - registrations
+  /registrations/{event_id}/cancel:
+    post:
+      description: Cancels a registration with PENDING status (before payment)
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Cancelled registration
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - no pending registration or cannot cancel
+        "404":
+          description: Event not found
+        "500":
+          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Cancel event registration before payment
+      tags:
+      - registrations
+  /registrations/{event_id}/cancel-paid:
+    post:
+      description: Cancels a confirmed registration (after payment)
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Cancelled registration
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - no confirmed registration or cannot cancel
+        "404":
+          description: Event not found
+        "500":
+          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Cancel paid event registration
+      tags:
+      - registrations
+  /registrations/{event_id}/payment:
+    post:
+      description: Creates a payment for event registration and returns payment URL
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      responses:
+        "201":
+          description: Payment URL and ID
+          schema:
+            $ref: '#/definitions/registration.PaymentResponse'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - no pending registration found
+        "404":
+          description: Event not found
+        "500":
+          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Create payment for registration
+      tags:
+      - registrations
+  /registrations/{event_id}/reactivate:
+    post:
+      description: Reactivates a cancelled registration if event has available slots
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Reactivated registration
+          schema:
+            $ref: '#/definitions/domain.Registration'
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - no cancelled registration or cannot reactivate
+        "404":
+          description: Event not found
+        "500":
+          description: Internal server error
+      security:
+      - ApiKeyAuth: []
+      summary: Reactivate cancelled registration
+      tags:
+      - registrations
+  /registrations/my:
+    get:
+      consumes:
+      - application/json
       produces:
       - application/json
       responses:
         "200":
-          description: List of tournaments where user participated
+          description: List of user's registrations with event details
           schema:
             items:
-              $ref: '#/definitions/domain.Tournament'
+              $ref: '#/definitions/domain.RegistrationWithEvent'
             type: array
-        "400":
-          description: Bad Request
         "401":
           description: Unauthorized
         "500":
           description: Internal Server Error
       security:
       - ApiKeyAuth: []
-      summary: Get tournaments by user ID
+      summary: Get my registrations
       tags:
-      - users
+      - registrations
   /users/filter:
     post:
       consumes:
