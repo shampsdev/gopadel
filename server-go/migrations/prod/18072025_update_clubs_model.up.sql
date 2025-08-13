@@ -8,10 +8,10 @@ CREATE TRIGGER update_clubs_updated_at BEFORE UPDATE ON "clubs" FOR EACH ROW EXE
 
 INSERT INTO "clubs" ("id", "url", "name", "description", "is_private") VALUES
 ('46BG2RAXPF', 'yandex', 'Yandex', 'Private Yandex club', true),
-('SVO4ZGOIDA', 'global', 'Global', 'GoPadel League global club', false);
+('9UGJELP8SVO', 'global', 'Global', 'GoPadel League global club', false);
 
 UPDATE "clubs_users"
-SET "club_id" = 'SVO4ZGOIDA'
+SET "club_id" = '9UGJELP8SVO'
 WHERE "club_id" = 'global';
 
 UPDATE "clubs_users"
@@ -19,7 +19,7 @@ SET "club_id" = '46BG2RAXPF'
 WHERE "club_id" = 'yandex';
 
 UPDATE "event"
-SET "club_id" = 'SVO4ZGOIDA'
+SET "club_id" = '9UGJELP8SVO'
 WHERE "club_id" = 'global';
 
 UPDATE "event"
