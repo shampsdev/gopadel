@@ -123,7 +123,7 @@ func (r *EventRepo) Filter(ctx context.Context, filter *domain.FilterEvent) ([]*
 			Where(sq.Eq{`"cu"."user_id"`: *filter.FilterByUserClubs})
 	}
 
-	s = s.OrderBy(`"e"."start_time" DESC`)
+	s = s.OrderBy(`"e"."start_time" ASC`)
 
 	sql, args, err := s.ToSql()
 	if err != nil {
@@ -168,10 +168,10 @@ func (r *EventRepo) GetEventsByUserID(ctx context.Context, userID string) ([]*do
 		Join(`"courts" AS c ON "e"."court_id" = "c"."id"`).
 		Join(`"users" AS u ON "e"."organizer_id" = "u"."id"`).
 		LeftJoin(`"registrations" AS r ON "e"."id" = "r"."event_id"`).
-		Join(`"registrations" AS ur ON "e"."id" = "ur"."event_id" AND "ur"."user_id" = ?`, userID).
-		GroupBy(`"e"."id"`, `"c"."id"`, `"u"."id"`)
+			Join(`"registrations" AS ur ON "e"."id" = "ur"."event_id" AND "ur"."user_id" = ?`, userID).
+	GroupBy(`"e"."id"`, `"c"."id"`, `"u"."id"`)
 
-	s = s.OrderBy(`"e"."start_time" DESC`)
+	s = s.OrderBy(`"e"."start_time" ASC`)
 
 	sql, args, err := s.ToSql()
 	if err != nil {
@@ -366,7 +366,7 @@ func (r *EventRepo) AdminFilter(ctx context.Context, filter *domain.AdminFilterE
 			Where(sq.ILike{`"cl"."name"`: "%" + *filter.ClubName + "%"})
 	}
 
-	s = s.OrderBy(`"e"."start_time" DESC`)
+	s = s.OrderBy(`"e"."start_time" ASC`)
 
 	sql, args, err := s.ToSql()
 	if err != nil {
