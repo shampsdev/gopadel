@@ -9,7 +9,7 @@ import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Plus, Edit, Trash2, Save, X, Gamepad2, Calendar, MapPin, UserCheck, Clock, Users, Target } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Gamepad2, Calendar, MapPin, UserCheck, Clock, Users, Target, CheckCircle, XCircle } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { ru } from 'date-fns/locale/ru';
 import "react-datepicker/dist/react-datepicker.css";
@@ -53,6 +53,7 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
     name: '',
     clubId: '',
     organizerId: '',
+    status: '' as EventStatus | '',
   });
   const [formData, setFormData] = useState({
     name: '',
@@ -82,6 +83,38 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
     { value: 'mexicano', label: 'Мексиканка' },
     { value: 'training', label: 'Тренировка' },
     { value: 'custom', label: 'Ввести вручную' }
+  ];
+
+  // Статусы событий для фильтрации
+  const statusOptions = [
+    { 
+      value: 'registration' as EventStatus, 
+      label: 'Регистрация открыта', 
+      color: 'text-green-400', 
+      bgColor: 'bg-green-900/30',
+      icon: Clock 
+    },
+    { 
+      value: 'full' as EventStatus, 
+      label: 'Набор закрыт', 
+      color: 'text-yellow-400', 
+      bgColor: 'bg-yellow-900/30',
+      icon: Users 
+    },
+    { 
+      value: 'completed' as EventStatus, 
+      label: 'Завершено', 
+      color: 'text-blue-400', 
+      bgColor: 'bg-blue-900/30',
+      icon: CheckCircle 
+    },
+    { 
+      value: 'cancelled' as EventStatus, 
+      label: 'Отменено', 
+      color: 'text-red-400', 
+      bgColor: 'bg-red-900/30',
+      icon: XCircle 
+    },
   ];
 
   const getGameTypeFromData = (data: any) => {
@@ -114,6 +147,17 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
     loadData();
   }, []);
 
+  // Добавляем эффект для отслеживания изменения статуса фильтра
+  useEffect(() => {
+    if (filters.status === 'completed') {
+      // Если выбран статус "завершено", делаем специальный запрос
+      loadCompletedGames();
+    } else if (filters.status !== '') {
+      // Если выбран другой статус, фильтруем на клиенте
+      loadGames();
+    }
+  }, [filters.status]);
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -133,11 +177,33 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
 
   const loadGames = async () => {
     try {
-      const data = await eventsApi.filter({ type: 'game' });
-      setGames(data);
+      // По умолчанию исключаем завершенные игры
+      const data = await eventsApi.filter({ 
+        type: 'game',
+        status: undefined // Будем фильтровать завершенные на клиенте
+      });
+      // Фильтруем завершенные игры на клиенте
+      setGames(data.filter(game => game.status !== 'completed'));
     } catch (error: unknown) {
       toast.error('Ошибка при загрузке игр');
       console.error('Error loading games:', error);
+    }
+  };
+
+  // Добавляем функцию для загрузки только завершенных игр
+  const loadCompletedGames = async () => {
+    setLoading(true);
+    try {
+      const data = await eventsApi.filter({ 
+        type: 'game',
+        status: 'completed'
+      });
+      setGames(data);
+    } catch (error: unknown) {
+      toast.error('Ошибка при загрузке завершенных игр');
+      console.error('Error loading completed games:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -473,8 +539,9 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
     const nameMatch = !filters.name || game.name.toLowerCase().includes(filters.name.toLowerCase());
     const clubMatch = !filters.clubId || game.clubId === filters.clubId;
     const organizatorMatch = !filters.organizerId || game.organizer?.id === filters.organizerId;
+    const statusMatch = !filters.status || game.status === filters.status;
     
-    return nameMatch && clubMatch && organizatorMatch;
+    return nameMatch && clubMatch && organizatorMatch && statusMatch;
   });
 
   if (loading) {
@@ -933,7 +1000,7 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
           <CardContent className="pt-0">
             {/* Фильтры */}
             <div className="space-y-3 mb-4 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div>
                   <Label className="text-zinc-300 text-sm">Поиск по названию</Label>
                   <Input
@@ -974,6 +1041,27 @@ export const GamesPage: React.FC<GamesPageProps> = ({ onNavigateToRegistrations 
                       {admins.map((admin) => (
                         <SelectItem key={admin.id} value={admin.user_id}>
                           {admin.user?.firstName} {admin.user?.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-zinc-300 text-sm">Статус</Label>
+                  <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value as EventStatus | '' }))}>
+                    <SelectTrigger className="bg-zinc-700 border-zinc-600 text-white mt-1">
+                      <SelectValue placeholder="Все статусы">
+                        {filters.status ? statusOptions.find(s => s.value === filters.status)?.label || filters.status : 'Все статусы'}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                      <SelectItem value="">Все статусы</SelectItem>
+                      {statusOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex items-center space-x-2 text-white">
+                            <option.icon className={`h-4 w-4 ${option.color}`} />
+                            <span>{option.label}</span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
