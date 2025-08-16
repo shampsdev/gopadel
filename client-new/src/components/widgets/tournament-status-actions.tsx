@@ -158,9 +158,9 @@ export const TournamentStatusActions = ({
                     eventId: tournament.id,
                     returnUrl: `https://t.me/${BOT_NAME}/app?startapp=${tournament.id}`,
                   });
-                  if (payment?.paymentLink) {
+                  if (payment?.payment_url) {
                     postEvent("web_app_open_link", {
-                      url: payment.paymentLink,
+                      url: payment.payment_url,
                     });
                   }
                 }}
@@ -258,9 +258,9 @@ export const TournamentStatusActions = ({
                   eventId: tournament.id,
                   returnUrl: `https://t.me/${BOT_NAME}/app?startapp=${tournament.id}`,
                 });
-                if (payment?.paymentLink) {
+                if (payment?.payment_url) {
                   postEvent("web_app_open_link", {
-                    url: payment.paymentLink,
+                    url: payment.payment_url,
                   });
                 }
               }}
