@@ -25,7 +25,9 @@ export const isUserInWaitlist = (waitlist: Waitlist, user: User) => {
   return waitlist.some((waitlist) => waitlist.user.id === user.id);
 };
 
-export const isRankAllowed = (event: Event, user: User) => {
+export const isRankAllowed = (event?: Event, user?: User) => {
+  if (!event || !user) return false;
+
   return (
     event.rankMin !== null &&
     event.rankMin !== undefined &&
@@ -61,6 +63,6 @@ export const isUserCancelledParticipating = (event: Event, user: User) => {
   return event.participants?.some(
     (participant) =>
       participant.user.id === user.id &&
-      participant.status === RegistrationStatus.CANCELLED
+      participant.status === RegistrationStatus.CANCELLED_AFTER_PAYMENT
   );
 };

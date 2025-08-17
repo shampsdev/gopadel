@@ -60,12 +60,6 @@ export const Tournament = () => {
     <div className="flex flex-col pb-[200px]">
       <h1 className="text-[24px] font-medium">{events?.[0]?.name}</h1>
 
-      <TournamentStatusActions
-        tournament={events?.[0]}
-        user={user}
-        waitlist={(waitlist as Waitlist) || []}
-      />
-
       <div className="flex flex-col gap-[4px] mt-[12px]">
         <TournamentStatusWarning
           tournament={events?.[0]}
@@ -353,6 +347,11 @@ export const Tournament = () => {
           </div>
         </div>
       </div>
+      <TournamentStatusActions
+        tournament={events?.[0]}
+        user={user}
+        waitlist={(waitlist as Waitlist) || []}
+      />
     </div>
   );
 };
