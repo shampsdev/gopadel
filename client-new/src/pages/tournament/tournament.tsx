@@ -21,6 +21,8 @@ import { RegistrationStatus } from "../../types/registration-status";
 import type { Waitlist } from "../../types/waitlist.type";
 import { EventStatus } from "../../types/event-status.type";
 import type { Tournament as TournamentType } from "../../types/tournament.type";
+import { EventStatusView } from "../../components/ui/event-status-view";
+import { TournamentStatusWarning } from "../../components/widgets/tournament-status-warning";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -55,49 +57,47 @@ export const Tournament = () => {
     );
 
   return (
-    <div className="flex flex-col gap-8 pb-[200px]">
-      <div className="flex flex-col gap-7 px-[12px]">
-        <h1 className="text-[24px] font-medium">{events?.[0]?.name}</h1>
+    <div className="flex flex-col pb-[200px]">
+      <h1 className="text-[24px] font-medium">{events?.[0]?.name}</h1>
 
-        <div className="flex flex-col">
-          {!checkOrganizerRight(
-            isAdmin?.admin || false,
-            user?.id,
-            events?.[0]
-          ) &&
-            !(events?.[0].status === EventStatus.completed) && (
-              <Prize variant="not-finished" />
-            )}
+      <TournamentStatusActions
+        tournament={events?.[0]}
+        user={user}
+        waitlist={(waitlist as Waitlist) || []}
+      />
 
-          {checkOrganizerRight(
-            isAdmin?.admin || false,
-            user?.id,
-            events?.[0]
-          ) &&
-            events?.[0].status !== EventStatus.completed &&
-            events?.[0].status !== EventStatus.cancelled && (
-              <>
-                <div className="py-5 border-b border-[#DADCE0]">
-                  <div
-                    onClick={async () => {
-                      navigate(`/tournament/${id}/edit`);
-                    }}
-                    className="flex flex-row justify-between items-center gap-[18px]"
-                  >
-                    <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#AFFF3F] rounded-full">
-                      {Icons.Edit("black", "18", "18")}
-                    </div>
+      <div className="flex flex-col gap-[4px] mt-[12px]">
+        <TournamentStatusWarning
+          tournament={events?.[0]}
+          user={user}
+          waitlist={(waitlist as Waitlist) || []}
+        />
+        <div className="flex flex-row gap-[4px]">
+          <div className="flex text-[14px] flex-col bg-black text-white rounded-[16px] px-[16px] py-[10px]">
+            <p className="opacity-[75%]">турнир</p>
+            <p>{events?.[0].data?.tournament?.type}</p>
+          </div>
 
-                    <p className="text-black text-[16px] flex-grow">
-                      Изменить турнир
-                    </p>
+          <div className="bg-[#F8F8FA] px-[16px] py-[10px] flex-1 rounded-[16px] text-[14px] flex items-center justify-start">
+            {getRankTitle(events?.[0].rankMin || 0) ===
+            getRankTitle(events?.[0].rankMax || 0)
+              ? getRankTitle(events?.[0].rankMin || 0)
+              : `${getRankTitle(events?.[0].rankMin || 0)} - ${getRankTitle(
+                  events?.[0].rankMax || 0
+                )}`}
+          </div>
+        </div>
+      </div>
 
-                    {Icons.ArrowRight("#A4A9B4", "24", "24")}
-                  </div>
-                </div>
-              </>
-            )}
-          <div className="py-5 border-b border-[#DADCE0]">
+      {!checkOrganizerRight(isAdmin?.admin || false, user?.id, events?.[0]) ? (
+        !(events?.[0].status === EventStatus.completed) && (
+          <div className="mt-[16px]">
+            <Prize variant="not-finished" />
+          </div>
+        )
+      ) : (
+        <div className="flex flex-col mt-[12px]">
+          <div className="py-5 ">
             <div
               onClick={async () => {
                 navigate(`/tournament/${id}/leaderboard`);
@@ -133,148 +133,103 @@ export const Tournament = () => {
 
               {Icons.ArrowRight("#A4A9B4", "24", "24")}
             </div>
-          </div>
 
-          <div className="py-5 border-b border-[#DADCE0]">
-            <div className="flex flex-row justify-between items-center">
-              <div className="flex flex-col gap-[2px]  text-[14px] text-[#5D6674] ">
-                <p className="text-[#000000] text-[16px]">
-                  {events?.[0].startTime &&
-                    new Date(events[0].startTime).toLocaleDateString("ru-RU", {
-                      day: "2-digit",
-                      month: "long",
-                      timeZone: "Europe/Moscow",
-                      weekday: "long",
-                    })}
-                </p>
-                <div className="text-[14px] text-[#868D98] ">
-                  {events?.[0].startTime &&
-                    new Date(events[0].startTime).toLocaleTimeString("ru-RU", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      timeZone: "Europe/Moscow",
-                    })}
-                  {" - "}
-                  {events?.[0].endTime &&
-                    new Date(events[0].endTime).toLocaleTimeString("ru-RU", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      timeZone: "Europe/Moscow",
-                    })}
+            {events?.[0].description.length > 0 && (
+              <div className="flex flex-col pt-[20px] gap-[8px]">
+                <div className="text-[16px] font-medium">Описание турнира</div>
+                <div className="text-[14px] text-[#5D6674]">
+                  <LinksWrapper text={events?.[0].description} />
                 </div>
               </div>
-
-              <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] rounded-full bg-[#F8F8FA]">
-                {Icons.Calendar("black", "18", "18")}
-              </div>
-            </div>
+            )}
           </div>
+        </div>
+      )}
 
-          <div className="py-5 border-b border-[#DADCE0]">
-            <div className="flex flex-row justify-between items-center">
-              <div className="flex flex-col gap-[2px]">
-                <p className="text-[16px] ">{events?.[0].court.name}</p>
-                <p className="text-[14px] text-[#868D98]">
-                  {events?.[0].court.address}
-                </p>
-              </div>
-
-              <div className="w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#F8F8FA] rounded-full flex flex-col justify-center items-center">
-                {Icons.Location("black", "18", "18")}
-              </div>
-            </div>
+      <div className="flex flex-col gap-[12px] mt-[16px]">
+        <div className="flex flex-row gap-[12px] items-center">
+          <div className="bg-[#F8F8FA] rounded-full p-[12px]">
+            {Icons.Calendar("black", "18", "18")}
           </div>
-
-          <div className="pt-5 pb-5 border-b border-[#DADCE0]">
-            <div className="flex flex-row justify-between items-center">
-              <div className="flex flex-col gap-[2px]">
-                <div className="text-[16px] gap-1 text-[#868D98] flex flex-row items-start">
-                  <p>Тип:</p>
-                  <p className="text-black">
-                    {events?.[0].data?.tournament?.type.toLowerCase()}
-                  </p>
-                </div>
-                <div className="text-[16px] text-[#868D98] gap-1 flex flex-row items-start">
-                  <p>Ранг:</p>
-                  <p className="text-black">
-                    {getRankTitle(events?.[0].rankMin || 0) ===
-                    getRankTitle(events?.[0].rankMax || 0)
-                      ? getRankTitle(events?.[0].rankMin || 0)
-                      : `${getRankTitle(
-                          events?.[0].rankMin || 0
-                        )} - ${getRankTitle(events?.[0].rankMax || 0)}`}
-                  </p>
-                </div>
-              </div>
-
-              <div className="w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#F8F8FA] rounded-full flex flex-col justify-center items-center">
-                {Icons.Star("black", "18", "18")}
-              </div>
-            </div>
+          <div className="flex flex-col gap-[2px] flex-1">
+            <p>
+              {" "}
+              {events?.[0].startTime &&
+                new Date(events[0].startTime).toLocaleDateString("ru-RU", {
+                  day: "2-digit",
+                  month: "long",
+                  timeZone: "Europe/Moscow",
+                  weekday: "long",
+                })}
+            </p>
+            <p className="text-[14px] text-[#868D98]">
+              {events?.[0].startTime &&
+                new Date(events[0].startTime).toLocaleTimeString("ru-RU", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  timeZone: "Europe/Moscow",
+                })}
+              {" - "}
+              {events?.[0].endTime &&
+                new Date(events[0].endTime).toLocaleTimeString("ru-RU", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  timeZone: "Europe/Moscow",
+                })}
+            </p>
           </div>
+          <EventStatusView status={events?.[0].status} />
+        </div>
 
-          <div className="py-5 ">
-            <div className="flex flex-row-reverse justify-between items-center">
-              <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] rounded-full bg-[#F8F8FA]">
-                {Icons.CreditCard("black", "18", "18")}
-              </div>
+        <div className="flex flex-row gap-[12px] items-center">
+          <div className="bg-[#F8F8FA] rounded-full p-[12px]">
+            {Icons.Location("black", "18", "18")}
+          </div>
+          <div className="flex flex-col gap-[2px] flex-1">
+            <p>{events?.[0].court.name}</p>
+            <p className="text-[14px] text-[#868D98]">
+              {events?.[0].court.address}
+            </p>
+          </div>
+        </div>
 
-              <div className="flex flex-row gap-[6px] ">
-                <div className="flex flex-col">
-                  {events?.[0].price === 0 ? (
-                    <div className="text-[20px] text-[#77BE14]">бесплатно</div>
-                  ) : (
-                    <div
-                      className={twMerge(
-                        "text-[20px] ",
-                        user.loyalty.discount > 0
-                          ? "text-[#77BE14]"
-                          : "text-[#5D6674]"
-                      )}
-                    >
-                      <span
-                        className={twMerge(
-                          "text-black font-semibold text-[20px]",
-                          user.loyalty.discount > 0 && "text-[#77BE14]"
-                        )}
-                      >
-                        {user.loyalty.discount > 0
-                          ? Math.round(
-                              events?.[0].price *
-                                (1 - user.loyalty.discount / 100)
-                            )
-                          : events?.[0].price}
-                      </span>{" "}
-                      ₽
-                    </div>
-                  )}
-                  <p className="text-[12px] text-[#868D98]">участие</p>
-                </div>
-                {user.loyalty.discount > 0 && events?.[0].price > 0 && (
-                  <div className="text-[14px]  text-[#F34338] line-through">
-                    <span className="font-semibold text-[14px] ">
-                      {events?.[0].price}
-                    </span>{" "}
-                    <span className="opacity-40">₽</span>
-                  </div>
+        <div className="flex flex-row gap-[12px] items-center">
+          <div className="bg-[#F8F8FA] rounded-full p-[12px]">
+            {Icons.CreditCard("black", "18", "18")}
+          </div>
+          <div className="flex flex-col gap-[2px] flex-1">
+            {events?.[0].price === 0 ? (
+              <div className="text-[20px] text-[#77BE14]">бесплатно</div>
+            ) : (
+              <div
+                className={twMerge(
+                  "text-[20px] ",
+                  user.loyalty.discount > 0
+                    ? "text-[#77BE14]"
+                    : "text-[#5D6674]"
                 )}
+              >
+                <span
+                  className={twMerge(
+                    "text-black font-semibold text-[20px]",
+                    user.loyalty.discount > 0 && "text-[#77BE14]"
+                  )}
+                >
+                  {user.loyalty.discount > 0
+                    ? Math.round(
+                        events?.[0].price * (1 - user.loyalty.discount / 100)
+                      )
+                    : events?.[0].price}
+                </span>{" "}
+                ₽
               </div>
-            </div>
+            )}
           </div>
-
-          {events?.[0].description.length > 0 && (
-            <div className="flex flex-col pt-[20px] gap-[8px]">
-              <div className="text-[16px] font-medium">Описание турнира</div>
-              <div className="text-[14px] text-[#5D6674]">
-                <LinksWrapper text={events?.[0].description} />
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-row justify-between items-center px-[12px]">
+      <div className="flex flex-col gap-6 mt-[24px]">
+        <div className="flex flex-row justify-between items-center px-[8px]">
           <div className="flex flex-row gap-[7px] items-center">
             <p>Участники</p>
 
@@ -324,7 +279,7 @@ export const Tournament = () => {
             )}
         </div>
 
-        <div className="px-[12px]">
+        <div className="px-[8px]">
           <TournamentPlayers
             tournamentId={id!}
             registrations={events?.[0].participants}
@@ -398,12 +353,6 @@ export const Tournament = () => {
           </div>
         </div>
       </div>
-
-      <TournamentStatusActions
-        tournament={events?.[0]}
-        user={user}
-        waitlist={(waitlist as Waitlist) || []}
-      />
     </div>
   );
 };
