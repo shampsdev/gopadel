@@ -28,7 +28,9 @@ export const EventStatusView = ({ status }: { status: EventStatus }) => {
     case EventStatus.cancelled:
       return (
         <div>
-          <div className={twMerge(defaultStyle, "bg-[#F34338]")}>отменено</div>
+          <div className={twMerge(defaultStyle, "bg-[#FF5053] text-white")}>
+            отменено
+          </div>
         </div>
       );
     default:

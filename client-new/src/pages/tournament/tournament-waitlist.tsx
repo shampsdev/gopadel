@@ -26,11 +26,11 @@ export const TournamentWaitlist = () => {
         <div className="flex flex-col gap-[20px] justify-around">
           {waitlist.map((waitlistItem, index) => {
             return (
-              <Link to={`/profile/${waitlistItem.user.id}`}>
-                <div
-                  key={waitlistItem.user.id}
-                  className="flex flex-row items-center gap-[21px]"
-                >
+              <Link
+                key={waitlistItem.user.id}
+                to={`/profile/${waitlistItem.user.id}`}
+              >
+                <div className="flex flex-row items-center gap-[21px]">
                   <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
                     <img
                       className="object-cover w-full h-full"
@@ -50,7 +50,7 @@ export const TournamentWaitlist = () => {
                           {getRankTitle(waitlistItem.user.rank)}
                         </p>
                       </div>
-                      <div className="text-[#A4A9B4] text-[14px] p-[8px] bg-[#F8F8FA] rounded-full">
+                      <div className="text-[#A4A9B4] text-[14px] p-[8px] bg-[#F8F8FA] rounded-full flex-shrink-0 w-[32px] h-[32px] flex items-center justify-center">
                         {index + 1}
                       </div>
                     </div>

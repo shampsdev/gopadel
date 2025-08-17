@@ -23,6 +23,8 @@ import { EventStatus } from "../../types/event-status.type";
 import type { Tournament as TournamentType } from "../../types/tournament.type";
 import { EventStatusView } from "../../components/ui/event-status-view";
 import { TournamentStatusWarning } from "../../components/widgets/tournament-status-warning";
+import { usePatchEvent } from "../../api/hooks/mutations/events/usePatchEvent";
+import { useModalStore } from "../../shared/stores/modal.store";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -37,6 +39,13 @@ export const Tournament = () => {
   const { data: waitlist } = useGetEventWaitlist(id!);
   const { data: isAdmin } = useIsAdmin();
 
+  const { openModal } = useModalStore();
+  const { mutateAsync: patchEvent, isPending: isUpdatingEvent } = usePatchEvent(
+    id!
+  );
+
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
+
   const getPersonWord = (count: number) => {
     if (count === 1) return "человек";
     if (count >= 2 && count <= 4) return "человека";
@@ -47,6 +56,7 @@ export const Tournament = () => {
 
   if (!events?.[0] || !user || !waitlist) return <></>;
 
+  if (isUpdatingEvent) return <Preloader />;
   if (!events?.[0])
     return (
       <div className="flex flex-col gap-8 pb-[100px]">
@@ -58,7 +68,53 @@ export const Tournament = () => {
 
   return (
     <div className="flex flex-col pb-[200px]">
-      <h1 className="text-[24px] font-medium">{events?.[0]?.name}</h1>
+      <div className="flex flex-row justify-between relative">
+        <h1 className="text-[24px] font-medium">{events?.[0]?.name}</h1>
+        <button onClick={() => setIsActionsOpen(!isActionsOpen)}>
+          {Icons.Actions()}
+        </button>
+        <div
+          className={twMerge(
+            "flex flex-col absolute z-100 bg-white rounded-[18px] p-[16px] right-0 top-[30px] shadow-xl transition-all duration-200 ease-out transform-gpu",
+            isActionsOpen
+              ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+              : "opacity-0 -translate-y-1 scale-95 pointer-events-none"
+          )}
+        >
+          <div
+            onClick={() => {
+              navigate(`/tournament/${id}/edit`);
+            }}
+            className="flex-row flex gap-[16px] py-[8px] px-[16px]"
+          >
+            <div>{Icons.Edit()}</div>
+            <p>Редактировать</p>
+          </div>
+
+          {events?.[0].status !== EventStatus.cancelled && (
+            <div
+              onClick={async () => {
+                setIsActionsOpen(false);
+                openModal({
+                  title: "Уверены, что хотите отменить событие?",
+                  subtitle:
+                    "Восстановить заполненную информацию будет невозможно",
+                  declineButtonText: "Назад",
+                  acceptButtonText: "Отменить событие",
+                  declineButtonOnClick: () => {},
+                  acceptButtonOnClick: async () => {
+                    await patchEvent({ status: EventStatus.cancelled });
+                  },
+                });
+              }}
+              className="flex-row flex gap-[16px] text-[#F34338] py-[8px] px-[16px]"
+            >
+              <div>{Icons.Delete()}</div>
+              <p>Отменить событие</p>
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="flex flex-col gap-[4px] mt-[12px]">
         <TournamentStatusWarning
@@ -282,7 +338,7 @@ export const Tournament = () => {
 
         {waitlist && waitlist.length > 0 && (
           <Link to={`/tournament/${id}/waitlist`}>
-            <div className="flex flex-row items-center gap-[18px] py-[17px] px-[16px] rounded-[30px] bg-[#F8F8FA]">
+            <div className="flex flex-row items-center  gap-[18px] py-[17px] px-[16px] rounded-[30px] bg-[#F8F8FA]">
               <div className="flex w-[42px] h-[42px] min-w-[42px] min-h-[42px] justify-center items-center bg-[#AFFF3F] rounded-full">
                 {Icons.Clock("black", "18", "18")}
               </div>
@@ -298,7 +354,7 @@ export const Tournament = () => {
         )}
       </div>
 
-      <div className="flex flex-col gap-3 ">
+      <div className="flex flex-col gap-3 mt-[24px]">
         <div className="flex flex-row justify-between pl-[28px] py-[16px] border-[EBEDF0] border-[1px] rounded-[30px] pr-[16px]">
           <div className="flex flex-row flex-wrap items-center gap-1 text-[#5D6674]">
             Организатор:

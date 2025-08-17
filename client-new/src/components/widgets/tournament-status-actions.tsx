@@ -4,12 +4,10 @@ import { useCreatePaymentForTournamentRegistration } from "../../api/hooks/mutat
 import { useReactivateCancelledRegistration } from "../../api/hooks/mutations/registration/reactivate-cancelled-registration";
 import { useAddUserToWaitlist } from "../../api/hooks/mutations/waitlist/add-user-to-waitlist";
 import { useRemoveUserFromWaitlist } from "../../api/hooks/mutations/waitlist/remove-user-from-waitlist";
-import { Icons } from "../../assets/icons";
 import type { User } from "../../types/user.type";
 import type { Waitlist } from "../../types/waitlist.type";
 import {
   isRankAllowed,
-  isEventFinished,
   isUserRegistered,
   participatingAvailable,
   userHasRegisteredAndHasNotPaid,
@@ -224,7 +222,10 @@ export const TournamentStatusActions = ({
       );
     }
 
-    if (isRankAllowed(tournament, user)) {
+    if (
+      isRankAllowed(tournament, user) &&
+      tournament.status !== EventStatus.cancelled
+    ) {
       if (isUserInWaitlist(waitlist, user)) {
         return (
           <div className="flex flex-col text-center gap-[18px]">
