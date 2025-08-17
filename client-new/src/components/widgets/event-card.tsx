@@ -120,12 +120,14 @@ export const EventCard = ({
           <div className="flex flex-row gap-[6px] ">
             <div className="flex flex-col">
               {cost === 0 && (
-                <div className="text-[20px] text-[#77BE14]">бесплатно</div>
+                <div className="text-[22px] font-semibold text-[#77BE14]">
+                  бесплатно
+                </div>
               )}
               {cost > 0 && (
                 <div
                   className={twMerge(
-                    "text-[20px] ",
+                    "text-[22px] ",
                     user.loyalty.discount > 0 &&
                       eventType === EventType.tournament
                       ? "text-[#77BE14]"
@@ -134,10 +136,10 @@ export const EventCard = ({
                 >
                   <span
                     className={twMerge(
-                      "text-black font-semibold text-[20px]",
+                      "text-black font-semibold text-[22px]",
                       user.loyalty.discount > 0 &&
                         eventType === EventType.tournament &&
-                        "text-[#77BE14]"
+                        "text-[#afca88]"
                     )}
                   >
                     {user.loyalty.discount > 0
@@ -147,13 +149,12 @@ export const EventCard = ({
                   ₽
                 </div>
               )}
-              <p className="text-[12px] text-[#868D98]">участие</p>
             </div>
             {user.loyalty.discount > 0 &&
               cost > 0 &&
               eventType === EventType.tournament && (
-                <div className="text-[14px]  text-[#F34338] line-through">
-                  <span className="font-semibold text-[14px] ">{cost}</span>{" "}
+                <div className="text-[14px] text-[#F34338] line-through">
+                  <span className="font-medium text-[14px] ">{cost}</span>{" "}
                   <span className="opacity-40">₽</span>
                 </div>
               )}
