@@ -70,50 +70,59 @@ export const Tournament = () => {
     <div className="flex flex-col pb-[200px]">
       <div className="flex flex-row justify-between relative">
         <h1 className="text-[24px] font-medium">{events?.[0]?.name}</h1>
-        <button onClick={() => setIsActionsOpen(!isActionsOpen)}>
-          {Icons.Actions()}
-        </button>
-        <div
-          className={twMerge(
-            "flex flex-col absolute z-100 bg-white rounded-[18px] p-[16px] right-0 top-[30px] shadow-xl transition-all duration-200 ease-out transform-gpu",
-            isActionsOpen
-              ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
-              : "opacity-0 -translate-y-1 scale-95 pointer-events-none"
-          )}
-        >
-          <div
-            onClick={() => {
-              navigate(`/tournament/${id}/edit`);
-            }}
-            className="flex-row flex gap-[16px] py-[8px] px-[16px]"
-          >
-            <div>{Icons.Edit()}</div>
-            <p>Редактировать</p>
-          </div>
-
-          {events?.[0].status !== EventStatus.cancelled && (
+        {checkOrganizerRight(
+          isAdmin?.admin || false,
+          user?.id,
+          events?.[0]
+        ) && (
+          <>
+            {" "}
+            <button onClick={() => setIsActionsOpen(!isActionsOpen)}>
+              {Icons.Actions()}
+            </button>
             <div
-              onClick={async () => {
-                setIsActionsOpen(false);
-                openModal({
-                  title: "Уверены, что хотите отменить событие?",
-                  subtitle:
-                    "Восстановить заполненную информацию будет невозможно",
-                  declineButtonText: "Назад",
-                  acceptButtonText: "Отменить событие",
-                  declineButtonOnClick: () => {},
-                  acceptButtonOnClick: async () => {
-                    await patchEvent({ status: EventStatus.cancelled });
-                  },
-                });
-              }}
-              className="flex-row flex gap-[16px] text-[#F34338] py-[8px] px-[16px]"
+              className={twMerge(
+                "flex flex-col absolute z-100 bg-white rounded-[18px] p-[16px] right-0 top-[30px] shadow-xl transition-all duration-200 ease-out transform-gpu",
+                isActionsOpen
+                  ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+                  : "opacity-0 -translate-y-1 scale-95 pointer-events-none"
+              )}
             >
-              <div>{Icons.Delete()}</div>
-              <p>Отменить событие</p>
+              <div
+                onClick={() => {
+                  navigate(`/tournament/${id}/edit`);
+                }}
+                className="flex-row flex gap-[16px] py-[8px] px-[16px]"
+              >
+                <div>{Icons.Edit()}</div>
+                <p>Редактировать</p>
+              </div>
+
+              {events?.[0].status !== EventStatus.cancelled && (
+                <div
+                  onClick={async () => {
+                    setIsActionsOpen(false);
+                    openModal({
+                      title: "Уверены, что хотите отменить событие?",
+                      subtitle:
+                        "Восстановить заполненную информацию будет невозможно",
+                      declineButtonText: "Назад",
+                      acceptButtonText: "Отменить событие",
+                      declineButtonOnClick: () => {},
+                      acceptButtonOnClick: async () => {
+                        await patchEvent({ status: EventStatus.cancelled });
+                      },
+                    });
+                  }}
+                  className="flex-row flex gap-[16px] text-[#F34338] py-[8px] px-[16px]"
+                >
+                  <div>{Icons.Delete()}</div>
+                  <p>Отменить событие</p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       <div className="flex flex-col gap-[4px] mt-[12px]">
@@ -123,7 +132,7 @@ export const Tournament = () => {
           waitlist={(waitlist as Waitlist) || []}
         />
         <div className="flex flex-row gap-[4px]">
-          <div className="flex text-[14px] flex-col bg-black text-white rounded-[16px] px-[16px] py-[10px]">
+          <div className="flex min-w-[25%] text-[14px] flex-col bg-black text-white rounded-[16px] px-[16px] py-[10px]">
             <p className="opacity-[75%]">турнир</p>
             <p>{events?.[0].data?.tournament?.type}</p>
           </div>

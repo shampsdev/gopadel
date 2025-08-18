@@ -24,6 +24,7 @@ import { usePatchEvent } from "../../api/hooks/mutations/events/usePatchEvent";
 import { EventStatusView } from "../../components/ui/event-status-view";
 import { GameStatusActions } from "../../components/widgets/game-status-actions";
 import { GamePlayers } from "../../components/widgets/game-players";
+import { GameStatusWarning } from "../../components/widgets/game-status-warning";
 
 export const Game = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -70,60 +71,69 @@ export const Game = () => {
     <div className="flex flex-col pb-[200px]">
       <div className="flex flex-row justify-between relative">
         <h1 className="text-[24px] font-medium">{events?.[0]?.name}</h1>
-        <button onClick={() => setIsActionsOpen(!isActionsOpen)}>
-          {Icons.Actions()}
-        </button>
-        <div
-          className={twMerge(
-            "flex flex-col absolute z-100 bg-white rounded-[18px] p-[16px] right-0 top-[30px] shadow-xl transition-all duration-200 ease-out transform-gpu",
-            isActionsOpen
-              ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
-              : "opacity-0 -translate-y-1 scale-95 pointer-events-none"
-          )}
-        >
-          <div
-            onClick={() => {
-              navigate(`/tournament/${id}/edit`);
-            }}
-            className="flex-row flex gap-[16px] py-[8px] px-[16px]"
-          >
-            <div>{Icons.Edit()}</div>
-            <p>Редактировать</p>
-          </div>
-
-          {events?.[0].status !== EventStatus.cancelled && (
+        {checkOrganizerRight(
+          isAdmin?.admin || false,
+          user?.id,
+          events?.[0]
+        ) && (
+          <>
+            {" "}
+            <button onClick={() => setIsActionsOpen(!isActionsOpen)}>
+              {Icons.Actions()}
+            </button>
             <div
-              onClick={async () => {
-                setIsActionsOpen(false);
-                openModal({
-                  title: "Уверены, что хотите отменить событие?",
-                  subtitle:
-                    "Восстановить заполненную информацию будет невозможно",
-                  declineButtonText: "Назад",
-                  acceptButtonText: "Отменить событие",
-                  declineButtonOnClick: () => {},
-                  acceptButtonOnClick: async () => {
-                    await patchEvent({ status: EventStatus.cancelled });
-                  },
-                });
-              }}
-              className="flex-row flex gap-[16px] text-[#F34338] py-[8px] px-[16px]"
+              className={twMerge(
+                "flex flex-col absolute z-100 bg-white rounded-[18px] p-[16px] right-0 top-[30px] shadow-xl transition-all duration-200 ease-out transform-gpu",
+                isActionsOpen
+                  ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+                  : "opacity-0 -translate-y-1 scale-95 pointer-events-none"
+              )}
             >
-              <div>{Icons.Delete()}</div>
-              <p>Отменить событие</p>
+              <div
+                onClick={() => {
+                  navigate(`/game/${id}/edit`);
+                }}
+                className="flex-row flex gap-[16px] py-[8px] px-[16px]"
+              >
+                <div>{Icons.Edit()}</div>
+                <p>Редактировать</p>
+              </div>
+
+              {events?.[0].status !== EventStatus.cancelled && (
+                <div
+                  onClick={async () => {
+                    setIsActionsOpen(false);
+                    openModal({
+                      title: "Уверены, что хотите отменить событие?",
+                      subtitle:
+                        "Восстановить заполненную информацию будет невозможно",
+                      declineButtonText: "Назад",
+                      acceptButtonText: "Отменить событие",
+                      declineButtonOnClick: () => {},
+                      acceptButtonOnClick: async () => {
+                        await patchEvent({ status: EventStatus.cancelled });
+                      },
+                    });
+                  }}
+                  className="flex-row flex gap-[16px] text-[#F34338] py-[8px] px-[16px]"
+                >
+                  <div>{Icons.Delete()}</div>
+                  <p>Отменить событие</p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       <div className="flex flex-col gap-[4px] mt-[12px]">
-        {/* <TournamentStatusWarning
-          tournament={events?.[0]}
+        <GameStatusWarning
+          game={events?.[0]}
           user={user}
           waitlist={(waitlist as Waitlist) || []}
-        /> */}
+        />
         <div className="flex flex-row gap-[4px]">
-          <div className="flex text-[14px] flex-col bg-black text-white rounded-[16px] px-[16px] py-[10px]">
+          <div className="flex min-w-[25%] text-[14px] flex-col bg-black text-white rounded-[16px] px-[16px] py-[10px]">
             <p className="opacity-[75%]">игра</p>
             <p>{events?.[0].data?.game?.type}</p>
           </div>
@@ -290,8 +300,7 @@ export const Game = () => {
                   {
                     events?.[0].participants?.filter(
                       (participant) =>
-                        participant.status === RegistrationStatus.CONFIRMED ||
-                        participant.status === RegistrationStatus.PENDING
+                        participant.status === RegistrationStatus.CONFIRMED
                     ).length
                   }{" "}
                   / {events?.[0].maxUsers}
@@ -302,15 +311,13 @@ export const Game = () => {
               events?.[0].participants?.length &&
               events?.[0].participants?.filter(
                 (participant) =>
-                  participant.status === RegistrationStatus.CONFIRMED ||
-                  participant.status === RegistrationStatus.PENDING
+                  participant.status === RegistrationStatus.CONFIRMED
               ).length >= events?.[0].maxUsers && (
                 <p className="text-[14px] text-[#F34338]">
                   {
                     events?.[0].participants?.filter(
                       (participant) =>
-                        participant.status === RegistrationStatus.CONFIRMED ||
-                        participant.status === RegistrationStatus.PENDING
+                        participant.status === RegistrationStatus.CONFIRMED
                     ).length
                   }
                   / {events?.[0].maxUsers}
@@ -330,25 +337,45 @@ export const Game = () => {
         </div>
 
         <div className="px-[8px]">
-          <GamePlayers gameId={id!} registrations={events?.[0].participants} />
+          <GamePlayers
+            gameId={id!}
+            registrations={events?.[0].participants?.filter(
+              (participant) =>
+                participant.status === RegistrationStatus.CONFIRMED
+            )}
+          />
         </div>
 
-        {waitlist && waitlist.length > 0 && (
-          <Link to={`/tournament/${id}/waitlist`}>
-            <div className="flex flex-row items-center  gap-[18px] py-[17px] px-[16px] rounded-[30px] bg-[#F8F8FA]">
-              <div className="flex w-[42px] h-[42px] min-w-[42px] min-h-[42px] justify-center items-center bg-[#AFFF3F] rounded-full">
-                {Icons.Clock("black", "18", "18")}
+        {events?.[0].participants &&
+          events?.[0].participants.filter(
+            (participant) => participant.status === RegistrationStatus.INVITED
+          ).length > 0 && (
+            <Link to={`/game/${id}/waitlist`}>
+              <div className="flex flex-row items-center  gap-[18px] py-[17px] px-[16px] rounded-[30px] bg-[#F8F8FA]">
+                <div className="flex w-[42px] h-[42px] min-w-[42px] min-h-[42px] justify-center items-center bg-[#AFFF3F] rounded-full">
+                  {Icons.Clock("black", "18", "18")}
+                </div>
+                <div className="flex flex-col gap-[2px] flex-grow">
+                  <p>Список ожидания</p>
+                  <p>
+                    {
+                      events?.[0].participants?.filter(
+                        (participant) =>
+                          participant.status === RegistrationStatus.INVITED
+                      ).length
+                    }{" "}
+                    {getPersonWord(
+                      events?.[0].participants?.filter(
+                        (participant) =>
+                          participant.status === RegistrationStatus.INVITED
+                      ).length || 0
+                    )}
+                  </p>
+                </div>
+                <div>{Icons.ArrowRight("black")}</div>
               </div>
-              <div className="flex flex-col gap-[2px] flex-grow">
-                <p>Список ожидания</p>
-                <p>
-                  {waitlist?.length} {getPersonWord(waitlist?.length || 0)}
-                </p>
-              </div>
-              <div>{Icons.ArrowRight("black")}</div>
-            </div>
-          </Link>
-        )}
+            </Link>
+          )}
       </div>
 
       <div className="flex flex-col gap-3 mt-[24px]">

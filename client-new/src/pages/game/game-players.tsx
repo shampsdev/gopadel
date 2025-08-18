@@ -54,9 +54,7 @@ export const GamePlayers = () => {
             events[0].participants
               ?.filter(
                 (participant) =>
-                  participant.status === RegistrationStatus.CONFIRMED ||
-                  participant.status === RegistrationStatus.LEFT ||
-                  participant.status === RegistrationStatus.INVITED
+                  participant.status === RegistrationStatus.CONFIRMED
               )
               ?.map((userRegistration) => {
                 return (

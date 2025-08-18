@@ -95,15 +95,6 @@ export const GameStatusActions = ({
         return (
           <>
             <div className="flex flex-col text-center gap-[18px]">
-              <div>
-                Для&nbsp;возврата средств обращайтесь к&nbsp;
-                <span
-                  onClick={() => openTelegramLink("https://t.me/Alievskey")}
-                  className="text-[#1599DB] text-[14px] cursor-pointer w-[70%] text-center"
-                >
-                  @Alievskey
-                </span>
-              </div>
               <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
                 <Button
                   onClick={async () => {
@@ -121,7 +112,6 @@ export const GameStatusActions = ({
       if (isUserApproved(game, user)) {
         return (
           <div className="flex flex-col text-center gap-[18px]">
-            <div>Вы зарегистрированы</div>
             <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
               <Button
                 className="bg-[#FF5053] text-white"
@@ -163,13 +153,6 @@ export const GameStatusActions = ({
         );
       }
 
-      if (!isRankAllowed(game, user)) {
-        return (
-          <div className="flex flex-col text-center gap-[18px]">
-            <div>Ваш ранг не соответствует заявленному для&nbsp;этой игры</div>
-          </div>
-        );
-      }
       return <></>;
     }
   }
@@ -205,7 +188,6 @@ export const GameStatusActions = ({
       if (isUserInWaitlist(waitlist, user)) {
         return (
           <div className="flex flex-col text-center gap-[18px]">
-            <div>Вы в&nbsp;листе ожидания</div>
             <div className="mb-10 fixed bottom-8  right-0 left-0 flex flex-row gap-4 justify-center">
               <Button
                 className="bg-[#FF5053] text-white"
@@ -222,9 +204,6 @@ export const GameStatusActions = ({
       if (!isUserInWaitlist(waitlist, user)) {
         return (
           <div className="flex flex-col text-center gap-[18px]">
-            <div>
-              Сейчас мест нет, но вы можете записаться в&nbsp;лист ожидания
-            </div>
             <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
               <Button
                 onClick={async () => {
@@ -240,13 +219,6 @@ export const GameStatusActions = ({
       return <></>;
     }
 
-    if (!isRankAllowed(game, user)) {
-      return (
-        <div className="flex flex-col text-center gap-[18px]">
-          <div>Ваш ранг не соответствует заявленному для&nbsp;этой игры</div>
-        </div>
-      );
-    }
     return <></>;
   }
 
