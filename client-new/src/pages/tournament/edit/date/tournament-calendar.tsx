@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { Icons } from "../../../../assets/icons";
 import { useTelegramBackButton } from "../../../../shared/hooks/useTelegramBackButton";
 import { useTournamentEditStore } from "../../../../shared/stores/tournament-edit.store";
@@ -13,6 +13,7 @@ interface Day {
 }
 
 export const TournamentCalendar = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
@@ -170,9 +171,11 @@ export const TournamentCalendar = () => {
       <div className="flex flex-col gap-6">
         {/* Заголовок с кнопками навигации */}
         <div className="flex flex-row justify-between px-[8px] items-center">
-          <p className="text-[24px] font-medium">
-            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-          </p>
+          <Link to={`/tournament/${id}/edit/year-month-pick`}>
+            <p className="text-[24px] font-medium">
+              {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+            </p>
+          </Link>
           <div className="flex flex-row gap-[7px]">
             <div
               className="rotate-180 cursor-pointer"

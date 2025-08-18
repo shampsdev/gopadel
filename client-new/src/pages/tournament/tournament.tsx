@@ -55,6 +55,10 @@ export const Tournament = () => {
     return "человек";
   };
 
+  useEffect(() => {
+    resetStore();
+  }, []);
+
   if (isLoading) return <Preloader />;
 
   if (!events?.[0] || !user || !waitlist) return <></>;
@@ -68,10 +72,6 @@ export const Tournament = () => {
         </div>
       </div>
     );
-
-  useEffect(() => {
-    resetStore();
-  }, []);
 
   return (
     <div className="flex flex-col pb-[200px]">

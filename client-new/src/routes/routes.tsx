@@ -33,6 +33,7 @@ import { EventsHistory } from "../pages/profile/my-profile/events-history";
 import { GameLeaderboard } from "../pages/game/edit/game-leaderboard";
 import { GameWaitlist } from "../pages/game/game-waitlist";
 import { TournamentCalendar } from "../pages/tournament/edit/date/tournament-calendar";
+import { TournamentYearMonthPick } from "../pages/tournament/edit/date/tournament-year-month-pick";
 
 const authRoutes: RouteObject[] = [
   {
@@ -141,6 +142,10 @@ export const routes: RouteObject[] = [
                               {
                                 path: "calendar",
                                 element: <TournamentCalendar />,
+                              },
+                              {
+                                path: "year-month-pick",
+                                element: <TournamentYearMonthPick />,
                               },
                               {
                                 path: "leaderboard",
