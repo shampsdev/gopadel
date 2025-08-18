@@ -3,7 +3,7 @@ import { Icons } from "../../assets/icons";
 import { getRankTitle } from "../../utils/rank-title";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { useGetEvents } from "../../api/hooks/useGetEvents";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetEventWaitlist } from "../../api/hooks/useGetEventWaitlist";
 import { TournamentPlayers } from "../../components/widgets/tournament-players";
 import { useAuthStore } from "../../shared/stores/auth.store";
@@ -25,6 +25,7 @@ import { EventStatusView } from "../../components/ui/event-status-view";
 import { TournamentStatusWarning } from "../../components/widgets/tournament-status-warning";
 import { usePatchEvent } from "../../api/hooks/mutations/events/usePatchEvent";
 import { useModalStore } from "../../shared/stores/modal.store";
+import { useTournamentEditStore } from "../../shared/stores/tournament-edit.store";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -43,6 +44,8 @@ export const Tournament = () => {
   const { mutateAsync: patchEvent, isPending: isUpdatingEvent } = usePatchEvent(
     id!
   );
+
+  const { resetStore } = useTournamentEditStore();
 
   const [isActionsOpen, setIsActionsOpen] = useState(false);
 
@@ -65,6 +68,10 @@ export const Tournament = () => {
         </div>
       </div>
     );
+
+  useEffect(() => {
+    resetStore();
+  }, []);
 
   return (
     <div className="flex flex-col pb-[200px]">

@@ -32,6 +32,7 @@ import { GameLeaderboardEdit } from "../pages/game/edit/game-leaderboard-edit";
 import { EventsHistory } from "../pages/profile/my-profile/events-history";
 import { GameLeaderboard } from "../pages/game/edit/game-leaderboard";
 import { GameWaitlist } from "../pages/game/game-waitlist";
+import { TournamentCalendar } from "../pages/tournament/edit/date/tournament-calendar";
 
 const authRoutes: RouteObject[] = [
   {
@@ -125,7 +126,6 @@ export const routes: RouteObject[] = [
                 children: [
                   {
                     path: ":id",
-
                     children: [
                       {
                         path: "",
@@ -137,6 +137,10 @@ export const routes: RouteObject[] = [
                               {
                                 path: "",
                                 element: <TournamentEdit />,
+                              },
+                              {
+                                path: "calendar",
+                                element: <TournamentCalendar />,
                               },
                               {
                                 path: "leaderboard",
