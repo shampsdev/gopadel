@@ -56,12 +56,16 @@ export const TournamentStatusWarning = ({
           </div>
         )}
 
-        {tournament?.status === EventStatus.full && (
-          <div>
-            Сейчас мест нет,&nbsp;но&nbsp;вы можете записаться в&nbsp;лист
-            ожидания
-          </div>
-        )}
+        {tournament?.status === EventStatus.full &&
+          !(
+            !isRankAllowed(tournament, user) &&
+            userStatus !== RegistrationStatus.CANCELLED_AFTER_PAYMENT
+          ) && (
+            <div>
+              Сейчас мест нет,&nbsp;но&nbsp;вы можете записаться в&nbsp;лист
+              ожидания
+            </div>
+          )}
 
         {!isRankAllowed(tournament, user) &&
           userStatus !== RegistrationStatus.CANCELLED_AFTER_PAYMENT && (

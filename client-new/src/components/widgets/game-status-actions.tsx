@@ -17,7 +17,6 @@ import {
 } from "../../utils/game-status-checks";
 import { Button } from "../ui/button";
 import { useModalStore } from "../../shared/stores/modal.store";
-import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { useRegisterToEvent } from "../../api/hooks/mutations/registration/register-to-event";
 import { EventStatus } from "../../types/event-status.type";
 import type { Game } from "../../types/game.type";

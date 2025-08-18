@@ -8,7 +8,7 @@ import { Button } from "../../../components/ui/button";
 import { CourtSelector } from "../../../components/ui/froms/court-selector";
 import { EventStatusSelector } from "../../../components/ui/froms/event-status-selector";
 import { Input } from "../../../components/ui/froms/input";
-import { RankSelector } from "../../../components/ui/froms/rank-selector";
+import { LevelSelector } from "../../../components/ui/froms/level-selector";
 import { Textarea } from "../../../components/ui/froms/textarea";
 import { Preloader } from "../../../components/widgets/preloader";
 import { ranks } from "../../../shared/constants/ranking";
@@ -116,13 +116,13 @@ export const TournamentEdit = () => {
     }
   }, [event]);
 
-  const handleRankMinChange = (rankTitle: string) => {
-    setRankMinInput(rankTitle);
-    const selectedRank = ranks.find((r) => r.title === rankTitle);
+  const handleRankMinValueChange = (value: number) => {
+    setRankMin(value);
+    const selectedRank = ranks.find((r) => r.from === value);
     if (selectedRank) {
-      setRankMin(selectedRank.from);
+      setRankMinInput(selectedRank.title);
       setRankMinError(false);
-      if (rankMax !== null && selectedRank.from > rankMax) {
+      if (rankMax !== null && value > rankMax) {
         setRankMaxError(true);
       } else {
         setRankMaxError(false);
@@ -130,14 +130,14 @@ export const TournamentEdit = () => {
     }
   };
 
-  const handleRankMaxChange = (rankTitle: string) => {
-    setRankMaxInput(rankTitle);
-    const selectedRank = ranks.find((r) => r.title === rankTitle);
+  const handleRankMaxValueChange = (value: number) => {
+    setRankMax(value);
+    const selectedRank = ranks.find((r) => r.from === value);
     if (selectedRank) {
-      setRankMax(selectedRank.from);
+      setRankMaxInput(selectedRank.title);
       setRankMaxError(false);
       // Проверяем, что минимальный ранг не больше максимального
-      if (rankMin !== null && selectedRank.from < rankMin) {
+      if (rankMin !== null && value < rankMin) {
         setRankMinError(true);
       } else {
         setRankMinError(false);
@@ -378,17 +378,18 @@ export const TournamentEdit = () => {
             onChangeFunction={setStatus}
             hasError={status === null}
           />
-          <RankSelector
-            title="Минимальный ранг"
-            value={rankMinInput}
-            onChangeFunction={handleRankMinChange}
-            hasError={rankMin === null || rankMinError}
-          />
-          <RankSelector
-            title="Максимальный ранг"
-            value={rankMaxInput}
-            onChangeFunction={handleRankMaxChange}
-            hasError={rankMax === null || rankMaxError}
+          <LevelSelector
+            title="Уровень турнира"
+            minValue={rankMin}
+            maxValue={rankMax}
+            onChangeMinValue={handleRankMinValueChange}
+            onChangeMaxValue={handleRankMaxValueChange}
+            hasError={
+              rankMin === null ||
+              rankMinError ||
+              rankMax === null ||
+              rankMaxError
+            }
           />
           <Input
             title={"Стоимость участия"}
