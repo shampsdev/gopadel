@@ -556,4 +556,20 @@ export const Icons = {
       </svg>
     );
   },
+  RequiredFieldStar: (color?: string, width?: string, height?: string) => {
+    return (
+      <svg
+        width={width || "6"}
+        height={height || "7"}
+        viewBox="0 0 6 7"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M4.93994 5.1333L3.18213 3.91016L3.36523 6.01953H2.19336L2.37646 3.90283L0.618652 5.1333L0.0473633 4.08594L1.98096 3.19971L0.0473633 2.30615L0.618652 1.24414L2.37646 2.50391L2.19336 0.35791H3.36523L3.18213 2.50391L4.93994 1.24414L5.51123 2.30615L3.58496 3.19971L5.51123 4.08594L4.93994 5.1333Z"
+          fill={color ? color : "#F34338"}
+        />
+      </svg>
+    );
+  },
 };

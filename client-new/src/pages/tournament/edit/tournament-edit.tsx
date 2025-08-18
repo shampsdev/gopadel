@@ -6,6 +6,7 @@ import { useGetEvents } from "../../../api/hooks/useGetEvents";
 import { useIsAdmin } from "../../../api/hooks/useIsAdmin";
 import { Button } from "../../../components/ui/button";
 import { CourtSelector } from "../../../components/ui/froms/court-selector";
+import { DateSelector } from "../../../components/ui/froms/date-selector";
 import { EventStatusSelector } from "../../../components/ui/froms/event-status-selector";
 import { Input } from "../../../components/ui/froms/input";
 import { LevelSelector } from "../../../components/ui/froms/level-selector";
@@ -23,6 +24,7 @@ import {
 import AboutImage from "../../../assets/about.png";
 import type { PatchEvent } from "../../../types/patch-tournament";
 import { EventStatus } from "../../../types/event-status.type";
+import { Icons } from "../../../assets/icons";
 
 export const TournamentEdit = () => {
   const { id } = useParams();
@@ -32,6 +34,7 @@ export const TournamentEdit = () => {
   const [description, setDescription] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [dateError, setDateError] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const [time, setTime] = useState<string>("");
   const [timeError, setTimeError] = useState<boolean>(false);
@@ -85,6 +88,7 @@ export const TournamentEdit = () => {
       });
 
       setDate(formattedDate);
+      setSelectedDate(new Date(event.startTime));
       setTime(`${startTime}-${endTime}`);
       setClubName(event.court?.name || "");
       setClubAddress(event.court?.address || "");
@@ -272,9 +276,9 @@ export const TournamentEdit = () => {
     <div className="flex flex-col gap-[40px] pb-[200px]">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2 px-[12px]">
-          <p className="text-[24px] font-medium">Редактировать турнир</p>
-          <p className="text-[#5D6674] text-[16px]">
-            Измените информацию о событии
+          <p className="text-[24px] font-medium">Редактирование турнира</p>
+          <p className="text-[##56674] text-[16px]">
+            Добавьте информацию о событии
           </p>
         </div>
 
@@ -294,6 +298,35 @@ export const TournamentEdit = () => {
             placeholder={""}
             hasError={false}
           />
+
+          <div className="flex flex-row px-[16px] justify-between">
+            <div className="flex flex-row gap-[2px]">
+              <p className="text-[#868D98] font-medium">Дата</p>
+              <div className="mt-[4px]">{Icons.RequiredFieldStar()}</div>
+            </div>
+            <div className="flex flex-row gap-[8px] items-center text-[#868D98]">
+              <p>открыть календарь</p>
+              <div>{Icons.Calendar("#868D98", "16", "16")}</div>
+            </div>
+          </div>
+
+          <DateSelector
+            selectedDate={selectedDate}
+            onDateChange={(newDate) => {
+              setSelectedDate(newDate);
+              const formattedDate = newDate
+                .toLocaleDateString("ru-RU", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "2-digit",
+                })
+                .replace(/\//g, ".");
+              setDate(formattedDate);
+              setDateError(false);
+            }}
+            className="mb-4"
+          />
+
           <Input
             onChangeFunction={(value) => {
               const formatted = formatDateInput(value);
@@ -301,6 +334,14 @@ export const TournamentEdit = () => {
 
               if (validateDateFormat(formatted)) {
                 setDateError(false);
+                // Обновляем selectedDate при ручном вводе даты
+                const [day, month, year] = formatted.split(".");
+                const newDate = new Date(
+                  2000 + parseInt(year),
+                  parseInt(month) - 1,
+                  parseInt(day)
+                );
+                setSelectedDate(newDate);
               } else {
                 setDateError(formatted.length > 0);
               }
