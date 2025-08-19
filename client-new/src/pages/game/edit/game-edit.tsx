@@ -8,8 +8,7 @@ import { Button } from "../../../components/ui/button";
 import { CourtSelector } from "../../../components/ui/froms/court-selector";
 import { EventStatusSelector } from "../../../components/ui/froms/event-status-selector";
 import { Input } from "../../../components/ui/froms/input";
-import { PlayerCountSelector } from "../../../components/ui/froms/player-count-selector";
-import { RankSelector } from "../../../components/ui/froms/rank-selector";
+
 import { Textarea } from "../../../components/ui/froms/textarea";
 import { Preloader } from "../../../components/widgets/preloader";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
@@ -18,6 +17,7 @@ import { validateTimeFormat } from "../../../utils/date-format";
 import AboutImage from "../../../assets/about.png";
 import { DateSelector } from "../../../components/ui/froms/date-selector";
 import { Icons } from "../../../assets/icons";
+import { LevelSelector } from "../../../components/ui/froms/level-selector";
 
 export const GameEdit = () => {
   const { id } = useParams();
@@ -43,24 +43,25 @@ export const GameEdit = () => {
     setType,
     courtId,
     setCourtId,
-    rankMinInput,
-    rankMaxInput,
+    rankMin,
+    rankMax,
     rankMinError,
     rankMaxError,
-    handleRankMinChange,
-    handleRankMaxChange,
+    setRankMinValue,
+    setRankMaxValue,
     price,
     priceInput,
     setPriceInput,
     handlePriceBlur,
     maxUsers,
-    setMaxUsers,
+    maxUsersInput,
+    setMaxUsersInput,
+    handleMaxUsersBlur,
     status,
     setStatus,
     isFormValid,
     getGameData,
     loadFromEvent,
-    resetStore,
     loadedFromEvent,
   } = useGameEditStore();
 
@@ -79,7 +80,7 @@ export const GameEdit = () => {
     if (event && !loadedFromEvent) {
       loadFromEvent(event);
     }
-  }, [event, loadFromEvent, resetStore]);
+  }, [event, loadFromEvent, loadedFromEvent]);
 
   const handleUpdateGame = async () => {
     const gameData = getGameData();
@@ -238,17 +239,18 @@ export const GameEdit = () => {
             onChangeFunction={setStatus}
             hasError={status === null}
           />
-          <RankSelector
-            title="Минимальный ранг"
-            value={rankMinInput}
-            onChangeFunction={handleRankMinChange}
-            hasError={rankMinError}
-          />
-          <RankSelector
-            title="Максимальный ранг"
-            value={rankMaxInput}
-            onChangeFunction={handleRankMaxChange}
-            hasError={rankMaxError}
+          <LevelSelector
+            title="Уровень турнира"
+            minValue={rankMin}
+            maxValue={rankMax}
+            onChangeMinValue={setRankMinValue}
+            onChangeMaxValue={setRankMaxValue}
+            hasError={
+              rankMin === null ||
+              rankMinError ||
+              rankMax === null ||
+              rankMaxError
+            }
           />
           <Input
             title={"Стоимость участия"}
@@ -259,15 +261,15 @@ export const GameEdit = () => {
             onChangeFunction={setPriceInput}
             onBlur={handlePriceBlur}
           />
-          <div className="flex flex-col gap-[8px]">
-            <p className="text-[15px] font-semibold text-[#A4A9B4] ml-2">
-              Максимальное количество участников
-            </p>
-            <PlayerCountSelector
-              selectedCount={maxUsers}
-              onCountChange={setMaxUsers}
-            />
-          </div>
+          <Input
+            title={"Максимальное количество участников"}
+            value={maxUsersInput}
+            maxLength={3}
+            placeholder={"0"}
+            hasError={maxUsers === null}
+            onChangeFunction={setMaxUsersInput}
+            onBlur={handleMaxUsersBlur}
+          />
         </div>
       </div>
 

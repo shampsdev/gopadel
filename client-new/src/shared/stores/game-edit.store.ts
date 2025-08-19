@@ -40,6 +40,7 @@ interface GameEditState {
   price: number;
   priceInput: string;
   maxUsers: number;
+  maxUsersInput: string;
   status: EventStatus | null;
 
   // Методы
@@ -58,13 +59,14 @@ interface GameEditState {
   setType: (type: string) => void;
   setCourtId: (id: string) => void;
 
-  handleRankMinChange: (rankTitle: string) => void;
-  handleRankMaxChange: (rankTitle: string) => void;
+  setRankMinValue: (value: number) => void;
+  setRankMaxValue: (value: number) => void;
 
   setPriceInput: (price: string) => void;
   handlePriceBlur: () => void;
 
-  setMaxUsers: (count: number) => void;
+  setMaxUsersInput: (users: string) => void;
+  handleMaxUsersBlur: () => void;
 
   setStatus: (status: EventStatus | null) => void;
 
@@ -105,6 +107,7 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
   price: 0,
   priceInput: "",
   maxUsers: 0,
+  maxUsersInput: "",
   status: null,
   loadedFromEvent: false,
 
@@ -161,14 +164,17 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
   setType: (type) => set({ type }),
   setCourtId: (courtId) => set({ courtId }),
 
-  handleRankMinChange: (rankTitle) => {
-    set({ rankMinInput: rankTitle });
-    const selectedRank = ranks.find((r) => r.title === rankTitle);
+  setRankMinValue: (value) => {
+    set({ rankMin: value });
+    const selectedRank = ranks.find((r) => r.from === value);
     if (selectedRank) {
-      set({ rankMin: selectedRank.from, rankMinError: false });
+      set({
+        rankMinInput: selectedRank.title,
+        rankMinError: false,
+      });
 
       const { rankMax } = get();
-      if (rankMax !== null && selectedRank.from > rankMax) {
+      if (rankMax !== null && value > rankMax) {
         set({ rankMaxError: true });
       } else {
         set({ rankMaxError: false });
@@ -176,14 +182,17 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
     }
   },
 
-  handleRankMaxChange: (rankTitle) => {
-    set({ rankMaxInput: rankTitle });
-    const selectedRank = ranks.find((r) => r.title === rankTitle);
+  setRankMaxValue: (value) => {
+    set({ rankMax: value });
+    const selectedRank = ranks.find((r) => r.from === value);
     if (selectedRank) {
-      set({ rankMax: selectedRank.from, rankMaxError: false });
+      set({
+        rankMaxInput: selectedRank.title,
+        rankMaxError: false,
+      });
 
       const { rankMin } = get();
-      if (rankMin !== null && selectedRank.from < rankMin) {
+      if (rankMin !== null && value < rankMin) {
         set({ rankMinError: true });
       } else {
         set({ rankMinError: false });
@@ -220,7 +229,34 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
     }
   },
 
-  setMaxUsers: (count) => set({ maxUsers: count }),
+  setMaxUsersInput: (raw) => {
+    const sanitized = raw.replace(/[^\d]/g, "");
+
+    set({ maxUsersInput: sanitized });
+
+    if (sanitized) {
+      set({ maxUsers: parseInt(sanitized) });
+    } else {
+      set({ maxUsers: 0 });
+    }
+  },
+
+  handleMaxUsersBlur: () => {
+    const { maxUsersInput } = get();
+    // При потере фокуса форматируем число
+    if (maxUsersInput && /^\d+$/.test(maxUsersInput)) {
+      const num = parseInt(maxUsersInput);
+      set({
+        maxUsers: num,
+        maxUsersInput: String(num),
+      });
+    } else {
+      set({
+        maxUsers: 0,
+        maxUsersInput: "",
+      });
+    }
+  },
 
   setStatus: (status) => set({ status }),
 
@@ -246,6 +282,7 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
       price: 0,
       priceInput: "",
       maxUsers: 0,
+      maxUsersInput: "",
       status: null,
       loadedFromEvent: false,
     });
@@ -317,6 +354,7 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
       price: event.price,
       priceInput: event.price.toString(),
       maxUsers: event.maxUsers,
+      maxUsersInput: event.maxUsers.toString(),
       status: event.status || EventStatus.registration,
     });
   },
