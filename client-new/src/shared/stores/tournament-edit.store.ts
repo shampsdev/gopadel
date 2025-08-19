@@ -23,8 +23,7 @@ interface TournamentEditState {
   timeError: boolean;
 
   // Место проведения
-  clubName: string;
-  clubAddress: string;
+  clubId: string | null;
   type: string;
   courtId: string;
 
@@ -54,10 +53,9 @@ interface TournamentEditState {
   setTime: (time: string) => void;
   setTimeError: (error: boolean) => void;
 
-  setClubName: (name: string) => void;
-  setClubAddress: (address: string) => void;
   setType: (type: string) => void;
   setCourtId: (id: string) => void;
+  setClubId: (id: string) => void;
 
   setRankMinValue: (value: number) => void;
   setRankMaxValue: (value: number) => void;
@@ -91,8 +89,7 @@ export const useTournamentEditStore = create<TournamentEditState>(
     timeError: false,
 
     // Место проведения
-    clubName: "",
-    clubAddress: "",
+    clubId: "",
     type: "",
     courtId: "",
     // Уровень
@@ -159,10 +156,9 @@ export const useTournamentEditStore = create<TournamentEditState>(
 
     setTimeError: (error) => set({ timeError: error }),
 
-    setClubName: (clubName) => set({ clubName }),
-    setClubAddress: (clubAddress) => set({ clubAddress }),
     setType: (type) => set({ type }),
     setCourtId: (courtId) => set({ courtId }),
+    setClubId: (clubId) => set({ clubId }),
 
     setRankMinValue: (value) => {
       set({ rankMin: value });
@@ -269,8 +265,7 @@ export const useTournamentEditStore = create<TournamentEditState>(
         selectedDate: null,
         time: "",
         timeError: false,
-        clubName: "",
-        clubAddress: "",
+        clubId: null,
         type: "",
         courtId: "",
         rankMin: null,
@@ -323,8 +318,7 @@ export const useTournamentEditStore = create<TournamentEditState>(
         date: formattedDate,
         selectedDate: new Date(event.startTime),
         time: `${startTime}-${endTime}`,
-        clubName: event.court?.name || "",
-        clubAddress: event.court?.address || "",
+        clubId: event.club?.id || null,
         type: event.type || "",
         courtId: event.court?.id || "",
       });
@@ -367,8 +361,7 @@ export const useTournamentEditStore = create<TournamentEditState>(
         state.time &&
         validateDateFormat(state.date) &&
         validateTimeFormat(state.time) &&
-        state.clubName &&
-        state.clubAddress &&
+        state.clubId &&
         state.type &&
         state.courtId &&
         state.status !== null &&

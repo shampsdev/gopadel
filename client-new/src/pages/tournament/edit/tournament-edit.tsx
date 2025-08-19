@@ -16,11 +16,10 @@ import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButt
 import { useTournamentEditStore } from "../../../shared/stores/tournament-edit.store";
 import AboutImage from "../../../assets/about.png";
 import { Icons } from "../../../assets/icons";
-import {
-  validateDateFormat,
-  validateTimeFormat,
-} from "../../../utils/date-format";
+import { validateDateFormat } from "../../../utils/date-format";
 import { TimeSelector } from "../../../components/ui/froms/time-selector";
+import { ClubSelector } from "../../../components/ui/froms/club-selector";
+import { useGetMyClubs } from "../../../api/hooks/useGetMyClubs";
 
 export const TournamentEdit = () => {
   const { id } = useParams();
@@ -41,15 +40,12 @@ export const TournamentEdit = () => {
     time,
     timeError,
     setTime,
-    setTimeError,
-    clubName,
-    setClubName,
-    clubAddress,
-    setClubAddress,
     type,
     setType,
     courtId,
     setCourtId,
+    clubId,
+    setClubId,
     rankMin,
     rankMax,
     rankMinError,
@@ -74,7 +70,7 @@ export const TournamentEdit = () => {
   } = useTournamentEditStore();
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
-
+  const { data: myClubs = [], isLoading: clubsLoading } = useGetMyClubs();
   const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
 
   const { mutateAsync: patchEvent, isPending: isUpdatingEvent } = usePatchEvent(
@@ -110,7 +106,8 @@ export const TournamentEdit = () => {
     console.log(selectedDate);
   }, []);
 
-  if (isAdminLoading || courtsLoading || eventLoading) return <Preloader />;
+  if (isAdminLoading || courtsLoading || eventLoading || clubsLoading)
+    return <Preloader />;
 
   if (!isAdmin?.admin) {
     return (
@@ -216,7 +213,7 @@ export const TournamentEdit = () => {
             placeholder={"дд.мм.гг"}
             hasError={dateError}
           />
-          <div className="flex flex-row gap-[16px]">
+          <div className="flex flex-row justify-between gap-[16px]">
             <TimeSelector
               title={"Начало"}
               value={time.split("-")[0] || ""}
@@ -239,20 +236,16 @@ export const TournamentEdit = () => {
             />
           </div>
 
-          <Input
-            onChangeFunction={setClubName}
-            title={"Место"}
-            value={clubName}
-            maxLength={100}
-            hasError={!clubName}
+          <ClubSelector
+            title="Клуб"
+            value={clubId ?? ""}
+            onChangeFunction={(id) => {
+              setClubId(id);
+            }}
+            hasError={!clubId}
+            clubs={myClubs ?? []}
           />
-          <Input
-            onChangeFunction={setClubAddress}
-            title={"Адрес"}
-            value={clubAddress}
-            maxLength={240}
-            hasError={!clubAddress}
-          />
+
           <Input
             onChangeFunction={setType}
             title={"Тип"}
