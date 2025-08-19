@@ -72,18 +72,17 @@ export const LevelSelector = ({
     <div>
       {/* Верхняя часть с заголовком и значением */}
       <div
-        className={`rounded-[14px] border ${
+        className={`rounded-[14px] ${
           hasError ? "border-red-500" : "border-[#EBEDF0]"
         }`}
       >
         <div className="px-[20px] py-[16px]">
-          <div className="text-[#A4A9B4] text-[15px] mb-1">{title}</div>
-          <div className="text-[18px]">{displayText}</div>
+          <div className="text-[#A4A9B4] text-[15px]">{title}</div>
         </div>
       </div>
 
       {/* Список уровней */}
-      <div className="mt-2 pl-4">
+      <div className="pl-4">
         {ranks.map((rank, index) => {
           const isSelected =
             minValue !== null &&

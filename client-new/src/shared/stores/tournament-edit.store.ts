@@ -66,6 +66,9 @@ interface TournamentEditState {
   setMaxUsersInput: (users: string) => void;
   handleMaxUsersBlur: () => void;
 
+  typeFieldOpen: boolean;
+  setTypeFieldOpen: (open: boolean) => void;
+
   setStatus: (status: EventStatus | null) => void;
 
   resetStore: () => void;
@@ -80,6 +83,7 @@ export const useTournamentEditStore = create<TournamentEditState>(
     // Основная информация
     title: "",
     description: "",
+    typeFieldOpen: false,
 
     // Дата и время
     date: "",
@@ -256,10 +260,13 @@ export const useTournamentEditStore = create<TournamentEditState>(
 
     setStatus: (status) => set({ status }),
 
+    setTypeFieldOpen: (open) => set({ typeFieldOpen: open }),
+
     resetStore: () => {
       set({
         title: "",
         description: "",
+        typeFieldOpen: false,
         date: "",
         dateError: false,
         selectedDate: null,

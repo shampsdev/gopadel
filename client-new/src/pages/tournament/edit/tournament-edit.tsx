@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { usePatchEvent } from "../../../api/hooks/mutations/events/usePatchEvent";
 import { useGetCourts } from "../../../api/hooks/useGetCourts";
@@ -67,6 +67,8 @@ export const TournamentEdit = () => {
     loadFromEvent,
     resetStore,
     loadedFromEvent,
+    typeFieldOpen,
+    setTypeFieldOpen,
   } = useTournamentEditStore();
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
@@ -195,24 +197,9 @@ export const TournamentEdit = () => {
           <DateSelector
             selectedDate={selectedDate}
             onDateChange={setDateFromCalendar}
-            className="mb-4"
+            className=""
           />
 
-          <Input
-            onChangeFunction={setDate}
-            onBlur={() => {
-              if (!validateDateFormat(date)) {
-                setDateError(true);
-              } else {
-                setDateError(false);
-              }
-            }}
-            title={"Дата"}
-            value={date}
-            maxLength={8}
-            placeholder={"дд.мм.гг"}
-            hasError={dateError}
-          />
           <div className="flex flex-row justify-between gap-[16px]">
             <TimeSelector
               title={"Начало"}
@@ -246,13 +233,6 @@ export const TournamentEdit = () => {
             clubs={myClubs ?? []}
           />
 
-          <Input
-            onChangeFunction={setType}
-            title={"Тип"}
-            value={type}
-            maxLength={100}
-            hasError={!type}
-          />
           <CourtSelector
             title="Корт"
             value={courtId}
@@ -262,14 +242,69 @@ export const TournamentEdit = () => {
             hasError={!courtId}
             courts={courts ?? []}
           />
-          <EventStatusSelector
-            title="Статус события"
-            value={status}
-            onChangeFunction={setStatus}
-            hasError={status === null}
-          />
+
+          <div className="flex flex-col gap-[8px] mt-[16px]">
+            <div className="text-[#868D98] text-[15px] px-[16px] font-medium ">
+              Тип
+            </div>
+            <div className="flex flex-row gap-[4px] text-center">
+              <div
+                className={
+                  "w-full  py-[12px] rounded-[12px] text-[14px] cursor-pointer " +
+                  (typeFieldOpen || type !== "американо"
+                    ? "bg-[#F8F8FA]"
+                    : "bg-[#AFFF3F]")
+                }
+                onClick={() => {
+                  setTypeFieldOpen(false);
+                  setType("американо");
+                }}
+              >
+                американо
+              </div>
+              <div
+                className={
+                  "w-full  py-[12px] rounded-[12px] text-[14px] cursor-pointer " +
+                  (typeFieldOpen || type !== "мексикано"
+                    ? "bg-[#F8F8FA]"
+                    : "bg-[#AFFF3F]")
+                }
+                onClick={() => {
+                  setTypeFieldOpen(false);
+                  setType("мексикано");
+                }}
+              >
+                мексикано
+              </div>
+            </div>
+            <div className="flex flex-row gap-[4px] text-center">
+              <div
+                className={
+                  "w-full  py-[12px] text-[14px] cursor-pointer " +
+                  (typeFieldOpen
+                    ? "bg-[#AFFF3F] rounded-[12px]"
+                    : "bg-[#F8F8FA] rounded-[12px]")
+                }
+                onClick={() => setTypeFieldOpen(true)}
+              >
+                что-нибудь ещё
+              </div>
+              <div className="w-full bg-white py-[12px]"></div>
+            </div>
+          </div>
+
+          {typeFieldOpen && (
+            <Input
+              onChangeFunction={setType}
+              title={"Тип"}
+              value={type}
+              maxLength={100}
+              hasError={!type}
+            />
+          )}
+
           <LevelSelector
-            title="Уровень турнира"
+            title="Уровень игроков"
             minValue={rankMin}
             maxValue={rankMax}
             onChangeMinValue={setRankMinValue}
@@ -281,6 +316,8 @@ export const TournamentEdit = () => {
               rankMaxError
             }
           />
+
+          <div className="flex flex-col gap-[8px] mt-[16px]"></div>
           <Input
             title={"Стоимость участия"}
             value={priceInput}
@@ -300,6 +337,27 @@ export const TournamentEdit = () => {
             onBlur={handleMaxUsersBlur}
           />
         </div>
+
+        <div className="flex flex-row gap-[4px]">
+          <div
+            className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
+            onClick={() => setMaxUsersInput("8")}
+          >
+            8
+          </div>
+          <div
+            className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
+            onClick={() => setMaxUsersInput("16")}
+          >
+            16
+          </div>
+          <div
+            className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
+            onClick={() => setMaxUsersInput("24")}
+          >
+            24
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col fixed bottom-[80px]  right-0 left-0 gap-4 w-full">
@@ -311,7 +369,7 @@ export const TournamentEdit = () => {
             }
           }}
           className={
-            !isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4]" : " mx-auto"
+            !isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4] mx-auto" : " mx-auto"
           }
         >
           Сохранить изменения
