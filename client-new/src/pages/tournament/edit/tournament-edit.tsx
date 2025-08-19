@@ -20,6 +20,7 @@ import {
   validateDateFormat,
   validateTimeFormat,
 } from "../../../utils/date-format";
+import { TimeSelector } from "../../../components/ui/froms/time-selector";
 
 export const TournamentEdit = () => {
   const { id } = useParams();
@@ -215,21 +216,29 @@ export const TournamentEdit = () => {
             placeholder={"дд.мм.гг"}
             hasError={dateError}
           />
-          <Input
-            onChangeFunction={setTime}
-            onBlur={() => {
-              if (!validateTimeFormat(time)) {
-                setTimeError(true);
-              } else {
-                setTimeError(false);
-              }
-            }}
-            title={"Время"}
-            value={time}
-            maxLength={11}
-            placeholder={"чч:мм-чч:мм"}
-            hasError={timeError}
-          />
+          <div className="flex flex-row gap-[16px]">
+            <TimeSelector
+              title={"Начало"}
+              value={time.split("-")[0] || ""}
+              onChangeFunction={(startTime: string) => {
+                const endTime = time.split("-")[1] || "";
+                const newTime = endTime ? `${startTime}-${endTime}` : startTime;
+                setTime(newTime);
+              }}
+              hasError={timeError}
+            />
+            <TimeSelector
+              title={"Окончание"}
+              value={time.split("-")[1] || ""}
+              onChangeFunction={(endTime: string) => {
+                const startTime = time.split("-")[0] || "";
+                const newTime = startTime ? `${startTime}-${endTime}` : endTime;
+                setTime(newTime);
+              }}
+              hasError={timeError}
+            />
+          </div>
+
           <Input
             onChangeFunction={setClubName}
             title={"Место"}

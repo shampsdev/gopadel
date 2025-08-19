@@ -10,6 +10,7 @@ import { EventStatusSelector } from "../../../components/ui/froms/event-status-s
 import { Input } from "../../../components/ui/froms/input";
 
 import { Textarea } from "../../../components/ui/froms/textarea";
+import { TimeSelector } from "../../../components/ui/froms/time-selector";
 import { Preloader } from "../../../components/widgets/preloader";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
 import { useGameEditStore } from "../../../shared/stores/game-edit.store";
@@ -187,21 +188,28 @@ export const GameEdit = () => {
             onDateChange={setDateFromCalendar}
             className="mb-4"
           />
-          <Input
-            onChangeFunction={setTime}
-            onBlur={() => {
-              if (!validateTimeFormat(time)) {
-                setTimeError(true);
-              } else {
-                setTimeError(false);
-              }
-            }}
-            title={"Время"}
-            value={time}
-            maxLength={11}
-            placeholder={"чч:мм-чч:мм"}
-            hasError={timeError}
-          />
+          <div className="flex flex-row gap-[16px]">
+            <TimeSelector
+              title={"Начало"}
+              value={time.split("-")[0] || ""}
+              onChangeFunction={(startTime: string) => {
+                const endTime = time.split("-")[1] || "";
+                const newTime = endTime ? `${startTime}-${endTime}` : startTime;
+                setTime(newTime);
+              }}
+              hasError={timeError}
+            />
+            <TimeSelector
+              title={"Окончание"}
+              value={time.split("-")[1] || ""}
+              onChangeFunction={(endTime: string) => {
+                const startTime = time.split("-")[0] || "";
+                const newTime = startTime ? `${startTime}-${endTime}` : endTime;
+                setTime(newTime);
+              }}
+              hasError={timeError}
+            />
+          </div>
 
           <Input
             onChangeFunction={setClubName}
