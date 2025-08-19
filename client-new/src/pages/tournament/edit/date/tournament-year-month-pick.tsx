@@ -22,7 +22,7 @@ export const TournamentYearMonthPick = () => {
 
   // Генерируем список годов (текущий год -2 и +7 лет вперед)
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 10 }, (_, i) => currentYear - 2 + i);
+  const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
 
   // Ссылка на контейнер карусели годов
   const yearsCarouselRef = useRef<HTMLDivElement>(null);
@@ -90,7 +90,7 @@ export const TournamentYearMonthPick = () => {
     setDateFromCalendar(newDate);
 
     // Возвращаемся на календарь
-    navigate(`/tournament/${id}/edit/calendar`);
+    navigate(-1);
   };
 
   // Прокручиваем к выбранному году при первом рендере
@@ -108,7 +108,9 @@ export const TournamentYearMonthPick = () => {
       <div className="flex flex-col gap-6">
         {/* Выбор года */}
         <div className="flex flex-col gap-4">
-          <h2 className="text-[20px] text-[#868D98] px-4">Выберите год</h2>
+          <h2 className="text-[15px] font-medium text-[#868D98] px-4">
+            Выберите год
+          </h2>
 
           <div
             ref={yearsCarouselRef}
@@ -137,14 +139,16 @@ export const TournamentYearMonthPick = () => {
 
         {/* Выбор месяца */}
         <div className="flex flex-col gap-4 mt-4">
-          <h2 className="text-[20px] text-[#868D98] px-4">Выберите месяц</h2>
+          <h2 className="text-[15px] font-medium text-[#868D98] px-4">
+            Выберите месяц
+          </h2>
 
-          <div className="grid grid-cols-3 gap-4 px-4">
+          <div className="grid grid-cols-3 gap-[4px] px-4">
             {monthNames.map((month, index) => (
               <div
                 key={index}
                 className={`
-                  py-4 px-6 text-center rounded-[12px] ${
+                  py-4  text-center rounded-[12px] ${
                     selectedMonth === index
                       ? "bg-[#CDFF45] text-black"
                       : "bg-[#F8F8FA] text-black"
@@ -159,16 +163,14 @@ export const TournamentYearMonthPick = () => {
         </div>
 
         {/* Отображение выбранной даты */}
-        <div className="flex justify-center mt-6">
-          <div className="text-[18px] py-4 px-8 rounded-full bg-[#F8F8FA]">
-            {monthNames[selectedMonth]}, {selectedYear}
+        <div className="flex flex-row gap-[8px] px-[8px] mt-[24px] justify-end">
+          <div className="text-[16px] items-center justify-center rounded-[30px] py-[17px] bg-[#F8F8FA] flex-1">
+            <div className="mx-auto text-center text-[#5D6674] text-[16px]">
+              {monthNames[selectedMonth]}, {selectedYear}
+            </div>
           </div>
-        </div>
-
-        {/* Кнопка "Готово" */}
-        <div className="flex flex-col fixed bottom-[80px] right-0 left-0 gap-4 w-full">
-          <Button onClick={handleDone} className="mx-auto">
-            Готово
+          <Button onClick={handleDone}>
+            <p>Готово</p>
           </Button>
         </div>
       </div>

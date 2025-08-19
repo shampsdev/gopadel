@@ -215,18 +215,16 @@ export const TournamentCalendar = () => {
           ))}
         </div>
 
-        {/* Выбранная дата */}
-        {selectedDate && (
-          <div className="flex flex-row px-[16px] justify-between mt-4">
-            <div className="text-[#868D98]">Выбрано:</div>
-            <div>{formatSelectedDate()}</div>
-          </div>
-        )}
-
-        {/* Кнопка "Готово" */}
-        <div className="flex flex-col fixed bottom-[80px] right-0 left-0 gap-4 w-full">
-          <Button onClick={() => navigate(-1)} className="mx-auto">
-            Готово
+        <div className="flex flex-row gap-[8px] px-[8px] mt-[24px] items-end justify-end w-full">
+          {selectedDate && (
+            <div className="text-[16px] items-center justify-center rounded-[30px] py-[17px] bg-[#F8F8FA] flex-1">
+              <div className="mx-auto text-center text-[#5D6674] text-[16px]">
+                {formatSelectedDate()}
+              </div>
+            </div>
+          )}
+          <Button onClick={() => navigate(-1)}>
+            <p>Готово</p>
           </Button>
         </div>
       </div>
