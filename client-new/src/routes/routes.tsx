@@ -34,6 +34,8 @@ import { GameLeaderboard } from "../pages/game/edit/game-leaderboard";
 import { GameWaitlist } from "../pages/game/game-waitlist";
 import { TournamentCalendar } from "../pages/tournament/edit/date/tournament-calendar";
 import { TournamentYearMonthPick } from "../pages/tournament/edit/date/tournament-year-month-pick";
+import { GameCalendar } from "../pages/game/edit/date/game-calendar";
+import { GameYearMonthPick } from "../pages/game/edit/date/game-year-month-picker";
 
 const authRoutes: RouteObject[] = [
   {
@@ -182,6 +184,14 @@ export const routes: RouteObject[] = [
                               {
                                 path: "",
                                 element: <GameEdit />,
+                              },
+                              {
+                                path: "calendar",
+                                element: <GameCalendar />,
+                              },
+                              {
+                                path: "year-month-pick",
+                                element: <GameYearMonthPick />,
                               },
                               {
                                 path: "leaderboard",

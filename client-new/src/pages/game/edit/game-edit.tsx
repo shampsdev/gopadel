@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { usePatchEvent } from "../../../api/hooks/mutations/events/usePatchEvent";
 import { useGetCourts } from "../../../api/hooks/useGetCourts";
@@ -12,41 +12,57 @@ import { PlayerCountSelector } from "../../../components/ui/froms/player-count-s
 import { RankSelector } from "../../../components/ui/froms/rank-selector";
 import { Textarea } from "../../../components/ui/froms/textarea";
 import { Preloader } from "../../../components/widgets/preloader";
-import { ranks } from "../../../shared/constants/ranking";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
-import {
-  validateDateFormat,
-  validateTimeFormat,
-  createStartAndEndTime,
-  formatDateInput,
-  formatTimeInput,
-} from "../../../utils/date-format";
+import { useGameEditStore } from "../../../shared/stores/game-edit.store";
+import { validateTimeFormat } from "../../../utils/date-format";
 import AboutImage from "../../../assets/about.png";
-import type { PatchEvent } from "../../../types/patch-tournament";
-import { EventStatus } from "../../../types/event-status.type";
+import { DateSelector } from "../../../components/ui/froms/date-selector";
+import { Icons } from "../../../assets/icons";
 
 export const GameEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [date, setDate] = useState<string>("");
-  const [dateError, setDateError] = useState<boolean>(false);
 
-  const [time, setTime] = useState<string>("");
-  const [timeError, setTimeError] = useState<boolean>(false);
-  const [clubName, setClubName] = useState<string>("");
-  const [clubAddress, setClubAddress] = useState<string>("");
-
-  const [type, setType] = useState<string>("");
-  const [courtId, setCourtId] = useState<string>("");
-  const [rankMin, setRankMin] = useState<number | null>(null);
-  const [rankMax, setRankMax] = useState<number | null>(null);
-  const [rankMinInput, setRankMinInput] = useState<string>("");
-  const [rankMaxInput, setRankMaxInput] = useState<string>("");
-  const [rankMinError, setRankMinError] = useState<boolean>(false);
-  const [rankMaxError, setRankMaxError] = useState<boolean>(false);
+  const {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    selectedDate,
+    setDateFromCalendar,
+    time,
+    timeError,
+    setTime,
+    setTimeError,
+    clubName,
+    setClubName,
+    clubAddress,
+    setClubAddress,
+    type,
+    setType,
+    courtId,
+    setCourtId,
+    rankMinInput,
+    rankMaxInput,
+    rankMinError,
+    rankMaxError,
+    handleRankMinChange,
+    handleRankMaxChange,
+    price,
+    priceInput,
+    setPriceInput,
+    handlePriceBlur,
+    maxUsers,
+    setMaxUsers,
+    status,
+    setStatus,
+    isFormValid,
+    getGameData,
+    loadFromEvent,
+    resetStore,
+    loadedFromEvent,
+  } = useGameEditStore();
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
 
@@ -60,165 +76,23 @@ export const GameEdit = () => {
   const event = events?.[0];
 
   useEffect(() => {
-    if (event) {
-      setTitle(event.name || "");
-      setDescription(event.description || "");
-
-      const startDate = new Date(event.startTime);
-      const endDate = new Date(event.endTime);
-
-      const formattedDate = startDate
-        .toLocaleDateString("ru-RU", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "2-digit",
-        })
-        .replace(/\//g, ".");
-
-      const startTime = startDate.toLocaleTimeString("ru-RU", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-      const endTime = endDate.toLocaleTimeString("ru-RU", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-      setDate(formattedDate);
-      setTime(`${startTime}-${endTime}`);
-      setClubName(event.court?.name || "");
-      setClubAddress(event.court?.address || "");
-      setType(event.data?.game?.type || "");
-      setCourtId(event.court?.id || "");
-
-      const minRank = ranks.find(
-        (r) => event.rankMin >= r.from && event.rankMin <= r.to
-      );
-      const maxRank = ranks.find(
-        (r) => event.rankMax >= r.from && event.rankMax <= r.to
-      );
-
-      if (minRank) {
-        setRankMinInput(minRank.title);
-        setRankMin(minRank.from);
-      }
-
-      if (maxRank) {
-        setRankMaxInput(maxRank.title);
-        setRankMax(maxRank.from);
-      }
-
-      setPrice(event.price);
-      setPriceInput(event.price.toString());
-      setMaxUsers(event.maxUsers);
-      setStatus(event.status || EventStatus.registration);
+    if (event && !loadedFromEvent) {
+      loadFromEvent(event);
     }
-  }, [event]);
+  }, [event, loadFromEvent, resetStore]);
 
-  const handleRankMinChange = (rankTitle: string) => {
-    setRankMinInput(rankTitle);
-    const selectedRank = ranks.find((r) => r.title === rankTitle);
-    if (selectedRank) {
-      setRankMin(selectedRank.from);
-      setRankMinError(false);
-      if (rankMax !== null && selectedRank.from > rankMax) {
-        setRankMaxError(true);
-      } else {
-        setRankMaxError(false);
-      }
-    }
-  };
+  const handleUpdateGame = async () => {
+    const gameData = getGameData();
 
-  const handleRankMaxChange = (rankTitle: string) => {
-    setRankMaxInput(rankTitle);
-    const selectedRank = ranks.find((r) => r.title === rankTitle);
-    if (selectedRank) {
-      setRankMax(selectedRank.from);
-      setRankMaxError(false);
-      // Проверяем, что минимальный ранг не больше максимального
-      if (rankMin !== null && selectedRank.from < rankMin) {
-        setRankMinError(true);
-      } else {
-        setRankMinError(false);
-      }
-    }
-  };
-
-  const [price, setPrice] = useState<number>(0);
-  const [priceInput, setPriceInput] = useState<string>("");
-  const [maxUsers, setMaxUsers] = useState<number>(0);
-  const [status, setStatus] = useState<EventStatus | null>(null);
-
-  const isFormValid = () => {
-    return (
-      title &&
-      date &&
-      time &&
-      validateDateFormat(date) &&
-      validateTimeFormat(time) &&
-      clubName &&
-      clubAddress &&
-      type &&
-      courtId &&
-      status !== null &&
-      rankMin !== null &&
-      rankMin >= 0 &&
-      rankMax !== null &&
-      rankMax >= 0 &&
-      rankMax >= rankMin &&
-      price !== null &&
-      price >= 0 &&
-      maxUsers !== null &&
-      maxUsers > 0
-    );
-  };
-
-  const handleUpdateTournament = async () => {
-    if (!date || !time) {
+    if (!gameData) {
       return;
     }
-
-    if (!validateDateFormat(date)) {
-      return;
-    }
-
-    if (!validateTimeFormat(time)) {
-      return;
-    }
-
-    if (!courtId) {
-      return;
-    }
-
-    const { startTime: start, endTime: end } = createStartAndEndTime(
-      date,
-      time
-    );
-
-    if (!start || !end) {
-      return;
-    }
-
-    const patchEventData: PatchEvent = {
-      courtId: courtId,
-      description: description,
-      endTime: end,
-      maxUsers: maxUsers,
-      name: title,
-      price: price,
-      rankMax: ranks.find((r) => r.title === rankMaxInput)?.to ?? 0,
-      rankMin: ranks.find((r) => r.title === rankMinInput)?.from ?? 0,
-      startTime: start,
-      status: status || undefined,
-      data: { game: { type: type } },
-    };
 
     try {
-      await patchEvent(patchEventData);
+      await patchEvent(gameData);
       navigate(-1);
     } catch (error) {
-      alert("Ошибка при обновлении турнира");
+      alert("Ошибка при обновлении игры");
       console.error(error);
     }
   };
@@ -293,41 +167,27 @@ export const GameEdit = () => {
             placeholder={""}
             hasError={false}
           />
-          <Input
-            onChangeFunction={(value) => {
-              const formatted = formatDateInput(value);
-              setDate(formatted);
+          <div className="flex flex-row px-[16px] justify-between">
+            <div className="flex flex-row gap-[2px]">
+              <p className="text-[#868D98] font-medium">Дата</p>
+              <div className="mt-[4px]">{Icons.RequiredFieldStar()}</div>
+            </div>
+            <div
+              className="flex flex-row gap-[8px] items-center text-[#868D98]"
+              onClick={() => navigate(`calendar`)}
+            >
+              <p>открыть календарь</p>
+              <div>{Icons.Calendar("#868D98", "16", "16")}</div>
+            </div>
+          </div>
 
-              if (validateDateFormat(formatted)) {
-                setDateError(false);
-              } else {
-                setDateError(formatted.length > 0);
-              }
-            }}
-            onBlur={() => {
-              if (!validateDateFormat(date)) {
-                setDateError(true);
-              } else {
-                setDateError(false);
-              }
-            }}
-            title={"Дата"}
-            value={date}
-            maxLength={8}
-            placeholder={"дд.мм.гг"}
-            hasError={dateError}
+          <DateSelector
+            selectedDate={selectedDate}
+            onDateChange={setDateFromCalendar}
+            className="mb-4"
           />
           <Input
-            onChangeFunction={(value) => {
-              const formatted = formatTimeInput(value);
-              setTime(formatted);
-
-              if (validateTimeFormat(formatted)) {
-                setTimeError(false);
-              } else {
-                setTimeError(formatted.length > 0);
-              }
-            }}
+            onChangeFunction={setTime}
             onBlur={() => {
               if (!validateTimeFormat(time)) {
                 setTimeError(true);
@@ -382,13 +242,13 @@ export const GameEdit = () => {
             title="Минимальный ранг"
             value={rankMinInput}
             onChangeFunction={handleRankMinChange}
-            hasError={rankMin === null || rankMinError}
+            hasError={rankMinError}
           />
           <RankSelector
             title="Максимальный ранг"
             value={rankMaxInput}
             onChangeFunction={handleRankMaxChange}
-            hasError={rankMax === null || rankMaxError}
+            hasError={rankMaxError}
           />
           <Input
             title={"Стоимость участия"}
@@ -396,27 +256,8 @@ export const GameEdit = () => {
             maxLength={10}
             placeholder={"0"}
             hasError={price === null}
-            onChangeFunction={(raw) => {
-              const sanitized = raw.replace(/[^\d]/g, "");
-
-              setPriceInput(sanitized);
-
-              if (sanitized) {
-                setPrice(parseInt(sanitized));
-              } else {
-                setPrice(0);
-              }
-            }}
-            onBlur={() => {
-              if (priceInput && /^\d+$/.test(priceInput)) {
-                const num = parseInt(priceInput);
-                setPrice(num);
-                setPriceInput(String(num));
-              } else {
-                setPrice(0);
-                setPriceInput("");
-              }
-            }}
+            onChangeFunction={setPriceInput}
+            onBlur={handlePriceBlur}
           />
           <div className="flex flex-col gap-[8px]">
             <p className="text-[15px] font-semibold text-[#A4A9B4] ml-2">
@@ -435,7 +276,7 @@ export const GameEdit = () => {
           disabled={isUpdatingEvent}
           onClick={() => {
             if (isFormValid()) {
-              handleUpdateTournament();
+              handleUpdateGame();
             }
           }}
           className={
