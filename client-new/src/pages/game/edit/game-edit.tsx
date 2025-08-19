@@ -6,7 +6,6 @@ import { useGetEvents } from "../../../api/hooks/useGetEvents";
 import { useIsAdmin } from "../../../api/hooks/useIsAdmin";
 import { Button } from "../../../components/ui/button";
 import { CourtSelector } from "../../../components/ui/froms/court-selector";
-import { EventStatusSelector } from "../../../components/ui/froms/event-status-selector";
 import { Input } from "../../../components/ui/froms/input";
 
 import { Textarea } from "../../../components/ui/froms/textarea";
@@ -14,7 +13,7 @@ import { TimeSelector } from "../../../components/ui/froms/time-selector";
 import { Preloader } from "../../../components/widgets/preloader";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
 import { useGameEditStore } from "../../../shared/stores/game-edit.store";
-import { validateTimeFormat } from "../../../utils/date-format";
+
 import AboutImage from "../../../assets/about.png";
 import { DateSelector } from "../../../components/ui/froms/date-selector";
 import { Icons } from "../../../assets/icons";
@@ -35,11 +34,6 @@ export const GameEdit = () => {
     time,
     timeError,
     setTime,
-    setTimeError,
-    clubName,
-    setClubName,
-    clubAddress,
-    setClubAddress,
     type,
     setType,
     courtId,
@@ -58,12 +52,14 @@ export const GameEdit = () => {
     maxUsersInput,
     setMaxUsersInput,
     handleMaxUsersBlur,
-    status,
-    setStatus,
     isFormValid,
     getGameData,
     loadFromEvent,
     loadedFromEvent,
+    duration,
+    setDuration,
+    typeFieldOpen,
+    setTypeFieldOpen,
   } = useGameEditStore();
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
@@ -186,52 +182,114 @@ export const GameEdit = () => {
           <DateSelector
             selectedDate={selectedDate}
             onDateChange={setDateFromCalendar}
-            className="mb-4"
           />
-          <div className="flex flex-row gap-[16px]">
-            <TimeSelector
-              title={"Начало"}
-              value={time.split("-")[0] || ""}
-              onChangeFunction={(startTime: string) => {
-                const endTime = time.split("-")[1] || "";
-                const newTime = endTime ? `${startTime}-${endTime}` : startTime;
-                setTime(newTime);
-              }}
-              hasError={timeError}
-            />
-            <TimeSelector
-              title={"Окончание"}
-              value={time.split("-")[1] || ""}
-              onChangeFunction={(endTime: string) => {
-                const startTime = time.split("-")[0] || "";
-                const newTime = startTime ? `${startTime}-${endTime}` : endTime;
-                setTime(newTime);
-              }}
-              hasError={timeError}
-            />
+          <TimeSelector
+            title={"Начало"}
+            value={time.split("-")[0] || ""}
+            onChangeFunction={(startTime: string) => {
+              // Устанавливаем только время начала, время окончания будет рассчитано на основе duration
+              setTime(startTime);
+            }}
+            hasError={timeError}
+          />
+          <div className="text-[#868D98] font-medium px-[16px]">
+            {"Продолжительность (в часах)"}
+          </div>
+          <div className="flex flex-row gap-[4px]">
+            <div
+              className={
+                "text-center py-[16px] w-full " +
+                (duration === 1
+                  ? "bg-[#AFFF3F] rounded-[12px]"
+                  : "bg-[#F8F8FA] rounded-[12px]")
+              }
+              onClick={() => setDuration(1)}
+            >
+              1
+            </div>
+            <div
+              className={
+                "text-center py-[16px] w-full " +
+                (duration === 1.5
+                  ? "bg-[#AFFF3F] rounded-[12px]"
+                  : "bg-[#F8F8FA] rounded-[12px]")
+              }
+              onClick={() => setDuration(1.5)}
+            >
+              1,5
+            </div>
+            <div
+              className={
+                "text-center py-[16px] w-full " +
+                (duration === 2
+                  ? "bg-[#AFFF3F] rounded-[12px]"
+                  : "bg-[#F8F8FA] rounded-[12px]")
+              }
+              onClick={() => setDuration(2)}
+            >
+              2
+            </div>
           </div>
 
-          <Input
-            onChangeFunction={setClubName}
-            title={"Место"}
-            value={clubName}
-            maxLength={100}
-            hasError={!clubName}
-          />
-          <Input
-            onChangeFunction={setClubAddress}
-            title={"Адрес"}
-            value={clubAddress}
-            maxLength={240}
-            hasError={!clubAddress}
-          />
-          <Input
-            onChangeFunction={setType}
-            title={"Тип"}
-            value={type}
-            maxLength={100}
-            hasError={!type}
-          />
+          <div className="flex flex-col gap-[8px] mt-[16px]">
+            <div className="text-[#868D98] text-[15px] px-[16px] font-medium ">
+              Тип
+            </div>
+            <div className="flex flex-row gap-[4px] text-center">
+              <div
+                className={
+                  "w-full  py-[12px] rounded-[12px] text-[14px] cursor-pointer " +
+                  (typeFieldOpen || type !== "американо"
+                    ? "bg-[#F8F8FA]"
+                    : "bg-[#AFFF3F]")
+                }
+                onClick={() => {
+                  setTypeFieldOpen(false);
+                  setType("американо");
+                }}
+              >
+                американо
+              </div>
+              <div
+                className={
+                  "w-full  py-[12px] rounded-[12px] text-[14px] cursor-pointer " +
+                  (typeFieldOpen || type !== "мексикано"
+                    ? "bg-[#F8F8FA]"
+                    : "bg-[#AFFF3F]")
+                }
+                onClick={() => {
+                  setTypeFieldOpen(false);
+                  setType("мексикано");
+                }}
+              >
+                мексикано
+              </div>
+            </div>
+            <div className="flex flex-row gap-[4px] text-center">
+              <div
+                className={
+                  "w-full  py-[12px] text-[14px] cursor-pointer " +
+                  (typeFieldOpen
+                    ? "bg-[#AFFF3F] rounded-[12px]"
+                    : "bg-[#F8F8FA] rounded-[12px]")
+                }
+                onClick={() => setTypeFieldOpen(true)}
+              >
+                что-нибудь ещё
+              </div>
+              <div className="w-full bg-white py-[12px]"></div>
+            </div>
+          </div>
+
+          {typeFieldOpen && (
+            <Input
+              onChangeFunction={setType}
+              title={"Тип"}
+              value={type}
+              maxLength={100}
+              hasError={!type}
+            />
+          )}
           <CourtSelector
             title="Корт"
             value={courtId}
@@ -240,12 +298,6 @@ export const GameEdit = () => {
             }}
             hasError={!courtId}
             courts={courts ?? []}
-          />
-          <EventStatusSelector
-            title="Статус события"
-            value={status}
-            onChangeFunction={setStatus}
-            hasError={status === null}
           />
           <LevelSelector
             title="Уровень турнира"
@@ -260,6 +312,7 @@ export const GameEdit = () => {
               rankMaxError
             }
           />
+          <div className="flex flex-col gap-[8px] mt-[16px]"></div>
           <Input
             title={"Стоимость участия"}
             value={priceInput}
@@ -278,6 +331,26 @@ export const GameEdit = () => {
             onChangeFunction={setMaxUsersInput}
             onBlur={handleMaxUsersBlur}
           />
+          <div className="flex flex-row gap-[4px]">
+            <div
+              className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
+              onClick={() => setMaxUsersInput("8")}
+            >
+              8
+            </div>
+            <div
+              className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
+              onClick={() => setMaxUsersInput("16")}
+            >
+              16
+            </div>
+            <div
+              className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
+              onClick={() => setMaxUsersInput("24")}
+            >
+              24
+            </div>
+          </div>
         </div>
       </div>
 

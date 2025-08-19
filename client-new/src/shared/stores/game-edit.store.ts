@@ -1,11 +1,9 @@
 import { create } from "zustand";
-import { EventStatus } from "../../types/event-status.type";
 import { ranks } from "../constants/ranking";
 import {
   formatDateInput,
   formatTimeInput,
   validateDateFormat,
-  validateTimeFormat,
 } from "../../utils/date-format";
 import { createStartAndEndTime } from "../../utils/date-format";
 import type { PatchEvent } from "../../types/patch-tournament";
@@ -15,6 +13,9 @@ interface GameEditState {
   title: string;
   description: string;
 
+  duration: number;
+  setDuration: (duration: number) => void;
+
   // Дата и время
   date: string;
   dateError: boolean;
@@ -22,13 +23,12 @@ interface GameEditState {
   time: string;
   timeError: boolean;
 
-  // Место проведения
-  clubName: string;
-  clubAddress: string;
   type: string;
   courtId: string;
 
   // Уровень
+  typeFieldOpen: boolean;
+  setTypeFieldOpen: (open: boolean) => void;
   rankMin: number | null;
   rankMax: number | null;
   rankMinInput: string;
@@ -41,7 +41,6 @@ interface GameEditState {
   priceInput: string;
   maxUsers: number;
   maxUsersInput: string;
-  status: EventStatus | null;
 
   // Методы
   setTitle: (title: string) => void;
@@ -54,11 +53,8 @@ interface GameEditState {
   setTime: (time: string) => void;
   setTimeError: (error: boolean) => void;
 
-  setClubName: (name: string) => void;
-  setClubAddress: (address: string) => void;
   setType: (type: string) => void;
   setCourtId: (id: string) => void;
-
   setRankMinValue: (value: number) => void;
   setRankMaxValue: (value: number) => void;
 
@@ -67,8 +63,6 @@ interface GameEditState {
 
   setMaxUsersInput: (users: string) => void;
   handleMaxUsersBlur: () => void;
-
-  setStatus: (status: EventStatus | null) => void;
 
   resetStore: () => void;
   loadFromEvent: (event: any) => void;
@@ -89,11 +83,10 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
   time: "",
   timeError: false,
 
-  // Место проведения
-  clubName: "",
-  clubAddress: "",
   type: "",
   courtId: "",
+
+  duration: 1,
 
   // Уровень
   rankMin: null,
@@ -108,8 +101,9 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
   priceInput: "",
   maxUsers: 0,
   maxUsersInput: "",
-  status: null,
   loadedFromEvent: false,
+
+  typeFieldOpen: false,
 
   // Методы
   setTitle: (title) => set({ title }),
@@ -151,18 +145,30 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
 
   setTime: (value) => {
     const formatted = formatTimeInput(value);
+
+    // Проверяем, что время имеет формат HH:MM
+    const timeRegex = /^(\d{1,2}):(\d{2})$/;
+    const isValidFormat = timeRegex.test(formatted);
+
+    // Если формат валидный, проверяем значения часов и минут
+    let isValidTime = false;
+    if (isValidFormat) {
+      const [hours, minutes] = formatted.split(":").map(Number);
+      isValidTime = hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
+    }
+
     set({
       time: formatted,
-      timeError: formatted.length > 0 && !validateTimeFormat(formatted),
+      timeError: formatted.length > 0 && !isValidTime,
     });
   },
 
   setTimeError: (error) => set({ timeError: error }),
 
-  setClubName: (clubName) => set({ clubName }),
-  setClubAddress: (clubAddress) => set({ clubAddress }),
   setType: (type) => set({ type }),
   setCourtId: (courtId) => set({ courtId }),
+
+  setDuration: (duration) => set({ duration }),
 
   setRankMinValue: (value) => {
     set({ rankMin: value });
@@ -258,7 +264,7 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
     }
   },
 
-  setStatus: (status) => set({ status }),
+  setTypeFieldOpen: (open) => set({ typeFieldOpen: open }),
 
   resetStore: () => {
     set({
@@ -269,8 +275,6 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
       selectedDate: null,
       time: "",
       timeError: false,
-      clubName: "",
-      clubAddress: "",
       type: "",
       courtId: "",
       rankMin: null,
@@ -283,7 +287,7 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
       priceInput: "",
       maxUsers: 0,
       maxUsersInput: "",
-      status: null,
+      typeFieldOpen: false,
       loadedFromEvent: false,
     });
   },
@@ -323,8 +327,6 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
       date: formattedDate,
       selectedDate: new Date(event.startTime),
       time: `${startTime}-${endTime}`,
-      clubName: event.court?.name || "",
-      clubAddress: event.court?.address || "",
       type: event.data?.game?.type || "",
       courtId: event.court?.id || "",
     });
@@ -355,23 +357,25 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
       priceInput: event.price.toString(),
       maxUsers: event.maxUsers,
       maxUsersInput: event.maxUsers.toString(),
-      status: event.status || EventStatus.registration,
     });
   },
 
   isFormValid: () => {
     const state = get();
+
+    // Проверяем время начала (должно быть в формате HH:MM)
+    const timeRegex = /^(\d{1,2}):(\d{2})$/;
+    const startTimeStr = state.time.split("-")[0] || "";
+    const isTimeValid = timeRegex.test(startTimeStr);
+
     return !!(
       state.title &&
       state.date &&
       state.time &&
       validateDateFormat(state.date) &&
-      validateTimeFormat(state.time) &&
-      state.clubName &&
-      state.clubAddress &&
+      isTimeValid && // Проверяем только формат времени начала
       state.type &&
       state.courtId &&
-      state.status !== null &&
       state.rankMin !== null &&
       state.rankMin >= 0 &&
       state.rankMax !== null &&
@@ -395,7 +399,21 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
       return null;
     }
 
-    if (!validateTimeFormat(state.time)) {
+    // Проверяем, что время начала имеет корректный формат HH:MM
+    const timeRegex = /^(\d{1,2}):(\d{2})$/;
+    const startTimeInput = state.time.split("-")[0] || "";
+    if (!timeRegex.test(startTimeInput)) {
+      return null;
+    }
+
+    // Проверяем значения часов и минут
+    const [inputHours, inputMinutes] = startTimeInput.split(":").map(Number);
+    if (
+      inputHours < 0 ||
+      inputHours > 23 ||
+      inputMinutes < 0 ||
+      inputMinutes > 59
+    ) {
       return null;
     }
 
@@ -403,9 +421,36 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
       return null;
     }
 
+    // Используем уже проверенное время начала
+    const startTimeStr = startTimeInput;
+
+    // Рассчитываем время окончания на основе времени начала и продолжительности
+    const [startHour, startMinute] = startTimeStr.split(":").map(Number);
+
+    // Рассчитываем часы и минуты для времени окончания
+    const durationHours = Math.floor(state.duration);
+    const durationMinutes = Math.round((state.duration % 1) * 60);
+
+    let endHour = startHour + durationHours;
+    let endMinute = startMinute + durationMinutes;
+
+    // Корректируем минуты и часы, если минуты >= 60
+    if (endMinute >= 60) {
+      endHour += 1;
+      endMinute -= 60;
+    }
+
+    // Форматируем время окончания
+    const endTimeStr = `${String(endHour).padStart(2, "0")}:${String(
+      endMinute
+    ).padStart(2, "0")}`;
+
+    // Создаем полное время в формате "hh:mm-hh:mm"
+    const fullTime = `${startTimeStr}-${endTimeStr}`;
+
     const { startTime: start, endTime: end } = createStartAndEndTime(
       state.date,
-      state.time
+      fullTime
     );
 
     if (!start || !end) {
@@ -422,7 +467,6 @@ export const useGameEditStore = create<GameEditState>((set, get) => ({
       rankMax: ranks.find((r) => r.title === state.rankMaxInput)?.to ?? 0,
       rankMin: ranks.find((r) => r.title === state.rankMinInput)?.from ?? 0,
       startTime: start,
-      status: state.status || EventStatus.registration,
       data: { game: { type: state.type } },
     };
   },
