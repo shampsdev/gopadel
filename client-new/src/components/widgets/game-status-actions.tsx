@@ -183,41 +183,6 @@ export const GameStatusActions = ({
       );
     }
 
-    if (isRankAllowed(game, user)) {
-      if (isUserInWaitlist(waitlist, user)) {
-        return (
-          <div className="flex flex-col text-center gap-[18px]">
-            <div className="mb-10 fixed bottom-8  right-0 left-0 flex flex-row gap-4 justify-center">
-              <Button
-                className="bg-[#FF5053] text-white"
-                onClick={async () => {
-                  await removeUserFromWaitlist(game.id);
-                }}
-              >
-                Покинуть лист ожидания
-              </Button>
-            </div>
-          </div>
-        );
-      }
-      if (!isUserInWaitlist(waitlist, user)) {
-        return (
-          <div className="flex flex-col text-center gap-[18px]">
-            <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
-              <Button
-                onClick={async () => {
-                  await addUserToWaitlist(game.id);
-                }}
-              >
-                В лист ожидания
-              </Button>
-            </div>
-          </div>
-        );
-      }
-      return <></>;
-    }
-
     return <></>;
   }
 
