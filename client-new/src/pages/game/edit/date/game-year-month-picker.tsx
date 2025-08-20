@@ -5,7 +5,8 @@ import { useGameEditStore } from "../../../../shared/stores/game-edit.store";
 import { Button } from "../../../../components/ui/button";
 
 export const GameYearMonthPick = () => {
-  const { id } = useParams();
+  // Параметр id не используется
+  useParams();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 

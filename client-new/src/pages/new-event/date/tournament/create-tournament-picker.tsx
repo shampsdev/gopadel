@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router"; // Удален неиспользуемый импорт useParams
 import { useTelegramBackButton } from "../../../../shared/hooks/useTelegramBackButton";
 import { Button } from "../../../../components/ui/button";
 import { useCreateTournamentStore } from "../../../../shared/stores/create-tournament.store";

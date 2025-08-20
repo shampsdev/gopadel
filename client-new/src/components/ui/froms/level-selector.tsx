@@ -18,17 +18,6 @@ export const LevelSelector = ({
   onChangeMaxValue,
   hasError = false,
 }: LevelSelectorProps) => {
-  // Находим текущие выбранные ранги
-  const minRank = ranks.find((r) => r.from === minValue);
-  const maxRank = ranks.find((r) => r.from === maxValue);
-
-  const displayText =
-    minRank && maxRank
-      ? minRank === maxRank
-        ? minRank.title
-        : `${minRank.title} - ${maxRank.title}`
-      : "Выберите уровень";
-
   // Функция обработки клика по уровню
   const handleLevelClick = (rank: (typeof ranks)[0]) => {
     if (minValue === null || maxValue === null) {

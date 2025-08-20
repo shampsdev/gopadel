@@ -14,7 +14,8 @@ interface Day {
 }
 
 export const CreateGameCalendar = () => {
-  const { id } = useParams();
+  // Параметр id не используется
+  useParams();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 

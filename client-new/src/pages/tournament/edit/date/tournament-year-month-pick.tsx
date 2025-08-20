@@ -5,7 +5,8 @@ import { useTournamentEditStore } from "../../../../shared/stores/tournament-edi
 import { Button } from "../../../../components/ui/button";
 
 export const TournamentYearMonthPick = () => {
-  const { id } = useParams();
+  // Параметр id не используется
+  useParams();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 

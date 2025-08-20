@@ -1,20 +1,14 @@
-import { useState } from "react";
+// Удален неиспользуемый импорт useState
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Input } from "../../components/ui/froms/input";
 import { Textarea } from "../../components/ui/froms/textarea";
 import { CourtSelector } from "../../components/ui/froms/court-selector";
-import { ClubSelector } from "../../components/ui/froms/club-selector";
-import { PlayerCountSelector } from "../../components/ui/froms/player-count-selector";
-import {
-  formatDateInput,
-  validateDateFormat,
-  formatTimeInput,
-  validateTimeFormat,
-  createStartAndEndTime,
-} from "../../utils/date-format";
+// Удален неиспользуемый импорт ClubSelector
+// Удален неиспользуемый импорт PlayerCountSelector
+// Удалены неиспользуемые импорты из date-format
 import { Button } from "../../components/ui/button";
-import { RankSelector } from "../../components/ui/froms/rank-selector";
-import { ranks } from "../../shared/constants/ranking";
+// Удален неиспользуемый импорт RankSelector
+// Удален неиспользуемый импорт ranks
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { useGetCourts } from "../../api/hooks/useGetCourts";
 import { useGetMyClubs } from "../../api/hooks/useGetMyClubs";
@@ -66,8 +60,9 @@ export const CreateGame = () => {
     handleMaxUsersBlur,
     isFormValid,
     getGameData,
-    loadFromEvent,
-    loadedFromEvent,
+    // Удалены неиспользуемые переменные
+    // loadFromEvent,
+    // loadedFromEvent,
     duration,
     setDuration,
     typeFieldOpen,
@@ -75,7 +70,7 @@ export const CreateGame = () => {
   } = useCreateGameStore();
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
-  const { data: myClubs = [], isLoading: clubsLoading } = useGetMyClubs();
+  const { isLoading: clubsLoading } = useGetMyClubs(); // Удалена неиспользуемая переменная myClubs
 
   const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
 

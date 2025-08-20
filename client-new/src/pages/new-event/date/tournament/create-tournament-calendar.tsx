@@ -13,7 +13,8 @@ interface Day {
 }
 
 export const CreateTournamentCalendar = () => {
-  const { id } = useParams();
+  // Параметр id не используется
+  useParams();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
