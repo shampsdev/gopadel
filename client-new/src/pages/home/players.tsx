@@ -40,6 +40,7 @@ export const Players = () => {
         {filteredUsers?.map((player) => (
           <Link key={player.id} to={`/profile/${player.id}`}>
             <PlayerCard
+              loyaltyId={player.loyalty?.id || 0}
               avatar={player.avatar}
               firstName={player.firstName}
               lastName={player.lastName}

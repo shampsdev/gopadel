@@ -2,7 +2,16 @@ import { Icons } from "../../assets/icons";
 import type { PlayingPosition } from "../../types/playing-position.type";
 import { getRankTitle } from "../../utils/rank-title";
 
+import NoLoyalty from "../../assets/loyalty/no_loyalty.svg";
+import PadelActive from "../../assets/loyalty/gopadel_active.svg";
+import PadelFriend from "../../assets/loyalty/friend.svg";
+import Aksakal from "../../assets/loyalty/aksakal.svg";
+import Ambassador from "../../assets/loyalty/ambassador.svg";
+import Partner from "../../assets/loyalty/partner.svg";
+import Maekenas from "../../assets/loyalty/maekenas.svg";
+
 interface PlayerCardProps {
+  loyaltyId: number;
   avatar: string;
   firstName: string;
   lastName: string;
@@ -13,6 +22,7 @@ interface PlayerCardProps {
 }
 
 export const PlayerCard = ({
+  loyaltyId,
   avatar,
   firstName,
   lastName,
@@ -26,10 +36,55 @@ export const PlayerCard = ({
       <div className="flex flex-row items-center relative gap-[10px]">
         <div className="w-[68px] h-[68px] relative rounded-full">
           {avatar.length > 0 && (
-            <img
-              src={avatar}
-              className="object-cover w-full h-full rounded-full"
-            />
+            <div className="">
+              <img
+                src={avatar}
+                className="object-cover w-full h-full rounded-full aspect-square"
+              />
+
+              {loyaltyId === 1 && (
+                <img
+                  className="absolute bottom-0 right-0 w-[26px] h-[26px] rounded-full p-[4px] bg-[#041124]"
+                  src={NoLoyalty}
+                />
+              )}
+              {loyaltyId === 2 && (
+                <img
+                  className="absolute bottom-0 right-0 w-[26px] h-[26px] rounded-full p-[4px] bg-[#041124]"
+                  src={PadelActive}
+                />
+              )}
+              {loyaltyId === 3 && (
+                <img
+                  className="absolute bottom-0 right-0 w-[26px] h-[26px] rounded-full p-[4px] bg-[#041124]"
+                  src={PadelFriend}
+                />
+              )}
+              {loyaltyId === 4 && (
+                <img
+                  className="absolute bottom-0 right-0 w-[26px] h-[26px] rounded-full p-[4px] bg-[#041124]"
+                  src={Aksakal}
+                />
+              )}
+              {loyaltyId === 5 && (
+                <img
+                  className="absolute bottom-0 right-0 w-[26px] h-[26px] rounded-full p-[4px] bg-[#041124]"
+                  src={Ambassador}
+                />
+              )}
+              {loyaltyId === 8 && (
+                <img
+                  className="absolute bottom-0 right-0 w-[26px] h-[26px] rounded-full p-[4px] bg-[#041124]"
+                  src={Partner}
+                />
+              )}
+              {loyaltyId === 7 && (
+                <img
+                  className="absolute bottom-0 right-0 w-[26px] h-[26px] rounded-full p-[4px] bg-[#041124]"
+                  src={Maekenas}
+                />
+              )}
+            </div>
           )}
         </div>
 
