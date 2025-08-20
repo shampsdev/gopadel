@@ -340,7 +340,7 @@ export const CreateTournament = () => {
             !isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4] mx-auto" : " mx-auto"
           }
         >
-          Сохранить изменения
+          Создать турнир
         </Button>
       </div>
     </div>
