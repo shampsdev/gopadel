@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router";
 import { usePatchEvent } from "../../../api/hooks/mutations/events/usePatchEvent";
 import { useGetCourts } from "../../../api/hooks/useGetCourts";
 import { useGetEvents } from "../../../api/hooks/useGetEvents";
-import { useIsAdmin } from "../../../api/hooks/useIsAdmin";
 import { Button } from "../../../components/ui/button";
 import { CourtSelector } from "../../../components/ui/froms/court-selector";
 import { Input } from "../../../components/ui/froms/input";

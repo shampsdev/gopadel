@@ -4,7 +4,6 @@ import { useGetEvents } from "../../../api/hooks/useGetEvents";
 import { Preloader } from "../../../components/widgets/preloader";
 import GoldMedal from "../../../assets/gold-medal.png";
 import SilverMedal from "../../../assets/silver-medal.png";
-import { useIsAdmin } from "../../../api/hooks/useIsAdmin";
 import { Button } from "../../../components/ui/button";
 import { getRankTitle } from "../../../utils/rank-title";
 import BronzeMedal from "../../../assets/bronze-medal.png";
@@ -23,9 +22,8 @@ export const GameLeaderboard = () => {
     data: Tournament[] | undefined;
     isLoading: boolean;
   };
-  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
 
-  if (isLoading || isAdminLoading) return <Preloader />;
+  if (isLoading) return <Preloader />;
 
   if (events) {
     return (

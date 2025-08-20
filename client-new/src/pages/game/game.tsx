@@ -10,7 +10,6 @@ import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { twMerge } from "tailwind-merge";
 import { Preloader } from "../../components/widgets/preloader";
 import { BOT_NAME } from "../../shared/constants/api";
-import { useIsAdmin } from "../../api/hooks/useIsAdmin";
 import { Prize } from "../../components/widgets/prize";
 import { checkGameOrganizerRight } from "../../utils/check-organizer-right";
 import { LinksWrapper } from "../../components/helpers/links-wrapper";
@@ -44,7 +43,6 @@ export const Game = () => {
     isLoading: boolean;
   };
   const { data: waitlist } = useGetEventWaitlist(id!);
-  const { data: isAdmin } = useIsAdmin();
 
   const [isActionsOpen, setIsActionsOpen] = useState(false);
 
@@ -423,11 +421,7 @@ export const Game = () => {
           </div>
         </div>
       </div>
-      <GameStatusActions
-        game={events?.[0]}
-        user={user}
-        waitlist={(waitlist as Waitlist) || []}
-      />
+      <GameStatusActions game={events?.[0]} user={user} />
     </div>
   );
 };

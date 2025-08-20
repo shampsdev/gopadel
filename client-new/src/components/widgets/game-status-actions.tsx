@@ -1,17 +1,13 @@
 import { useCancelRegistrationAfterPayment } from "../../api/hooks/mutations/registration/cancel-registration-after-payment";
 import { useReactivateCancelledRegistration } from "../../api/hooks/mutations/registration/reactivate-cancelled-registration";
-import { useAddUserToWaitlist } from "../../api/hooks/mutations/waitlist/add-user-to-waitlist";
-import { useRemoveUserFromWaitlist } from "../../api/hooks/mutations/waitlist/remove-user-from-waitlist";
 import { Icons } from "../../assets/icons";
 import type { User } from "../../types/user.type";
-import type { Waitlist } from "../../types/waitlist.type";
 import {
   isRankAllowed,
   isEventFinished,
   isUserRegistered,
   participatingAvailable,
   isUserCancelledParticipating,
-  isUserInWaitlist,
   isUserApproved,
   isUserInvited,
 } from "../../utils/game-status-checks";
@@ -24,17 +20,10 @@ import type { Game } from "../../types/game.type";
 interface GameStatusActionsProps {
   game: Game;
   user: User;
-  waitlist: Waitlist;
 }
 
-export const GameStatusActions = ({
-  game,
-  user,
-  waitlist,
-}: GameStatusActionsProps) => {
+export const GameStatusActions = ({ game, user }: GameStatusActionsProps) => {
   const { openModal } = useModalStore();
-  const { mutateAsync: addUserToWaitlist } = useAddUserToWaitlist();
-  const { mutateAsync: removeUserFromWaitlist } = useRemoveUserFromWaitlist();
   const { mutateAsync: registerToEvent } = useRegisterToEvent();
   const { mutateAsync: reactivateCancelledRegistration } =
     useReactivateCancelledRegistration();
