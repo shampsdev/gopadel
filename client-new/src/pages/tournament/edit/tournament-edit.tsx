@@ -279,7 +279,7 @@ export const TournamentEdit = () => {
                 }
                 onClick={() => setTypeFieldOpen(true)}
               >
-                что-нибудь ещё
+                свой тип
               </div>
               <div className="w-full bg-white py-[12px]"></div>
             </div>
@@ -333,21 +333,21 @@ export const TournamentEdit = () => {
         <div className="flex flex-row gap-[4px]">
           <div
             className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
+            onClick={() => setMaxUsersInput("2")}
+          >
+            2
+          </div>
+          <div
+            className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
+            onClick={() => setMaxUsersInput("4")}
+          >
+            4
+          </div>
+          <div
+            className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
             onClick={() => setMaxUsersInput("8")}
           >
             8
-          </div>
-          <div
-            className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
-            onClick={() => setMaxUsersInput("16")}
-          >
-            16
-          </div>
-          <div
-            className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
-            onClick={() => setMaxUsersInput("24")}
-          >
-            24
           </div>
         </div>
       </div>
