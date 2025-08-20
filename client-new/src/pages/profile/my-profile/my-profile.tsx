@@ -6,6 +6,13 @@ import { Link } from "react-router";
 import { formatBirthDate } from "../../../utils/date-format";
 import { formatUrl, getDisplayName } from "../../../utils/format-url";
 import { useEffect, useState } from "react";
+import NoLoyalty from "../../../assets/loyalty/no_loyalty.svg";
+import PadelActive from "../../../assets/loyalty/gopadel_active.svg";
+import PadelFriend from "../../../assets/loyalty/friend.svg";
+import Aksakal from "../../../assets/loyalty/aksakal.svg";
+import Ambassador from "../../../assets/loyalty/ambassador.svg";
+import Partner from "../../../assets/loyalty/partner.svg";
+import Maekenas from "../../../assets/loyalty/maekenas.svg";
 
 export const MyProfile = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -84,7 +91,7 @@ export const MyProfile = () => {
           marginTop: 50,
         }}
       >
-        <div className="relative z-[2] flex flex-col gap-6 px-[16px] pt-[20px]">
+        <div className="relative z-[2] flex flex-col gap-4 px-[16px] pt-[20px]">
           {/* Блок никнейма внутри общего контента */}
           <div className="px-[16px] flex flex-row items-center gap-7 ">
             <div className="w-[64px] h-[64px] rounded-full overflow-hidden ring-2 ring-white/80">
@@ -94,16 +101,22 @@ export const MyProfile = () => {
                 alt="avatar"
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <p className="font-medium text-[18px]">
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p className="text-[17px] font-normal text-[#4B5563]">
-                @{user?.telegramUsername}
-              </p>
+            <div className="flex flex-col justify-between gap-[15px]">
+              <div className="flex flex-col gap-[4px]">
+                <p className="font-medium text-[18px] text-black">
+                  {user?.firstName} {user?.lastName}
+                </p>
+                <p className="text-[14px] font-normal text-black">
+                  @{user?.telegramUsername}
+                </p>
+              </div>
+              <div className="flex flex-row text-[#5D6674] text-[14px] items-center gap-[6px]">
+                <div>{Icons.Location("#A4A9B4", "16", "16")}</div>
+                <div>{user?.city}</div>
+              </div>
             </div>
           </div>
-          <div className="flex flex-col gap-[8px]">
+          <div className="flex flex-col gap-[8px] mt-[8px]">
             <div className="flex flex-row gap-[8px]">
               <div className="flex flex-col flex-1 bg-[#AFFF3F] px-[24px] rounded-[24px] py-[16px]">
                 <div className="text-[14px] text-[#5D6674]">Уровень</div>
@@ -148,6 +161,28 @@ export const MyProfile = () => {
               </div>
             </div>
           </div>
+          <div className="py-5 px-[16px] border-[#DADCE0]">
+            <Link to="../loyalty">
+              <div className="flex flex-row justify-between items-center gap-[18px]">
+                <div className="w-[42px] h-[42px] p-[8px] bg-[#041124] rounded-full flex flex-col items-center justify-center">
+                  {user?.loyalty.id === 1 && <img src={NoLoyalty} />}
+                  {user?.loyalty.id === 2 && <img src={PadelActive} />}
+                  {user?.loyalty.id === 3 && <img src={PadelFriend} />}
+                  {user?.loyalty.id === 4 && <img src={Aksakal} />}
+                  {user?.loyalty.id === 5 && <img src={Ambassador} />}
+                  {user?.loyalty.id === 8 && <img src={Partner} />}
+                  {user?.loyalty.id === 7 && <img src={Maekenas} />}
+                </div>
+                <div className="flex flex-col gap-[2px] flex-grow">
+                  <p className="text-[16px]">{user?.loyalty.name}</p>
+                  <p className="text-[14px] text-[#868D98]">
+                    Уровень лояльности
+                  </p>
+                </div>
+                <div>{Icons.ArrowRight("#A4A9B4")}</div>
+              </div>
+            </Link>
+          </div>
           <Link to="events">
             <div className="flex flex-row justify-between gap-[18px] items-center bg-[#F8F8FA] rounded-[30px] p-[16px]">
               <div className="flex flex-col items-center justify-center w-[42px] h-[42px] bg-[#AFFF3F] rounded-full">
@@ -159,49 +194,8 @@ export const MyProfile = () => {
           </Link>
 
           <div className="flex flex-col px-[12px] space-y-0">
-            {user?.city && (
-              <div className="pb-5 border-b border-[#DADCE0]">
-                <div className="flex flex-row justify-between">
-                  <p className="text-[#868D98] text-[16px]">Город</p>
-                  <p className="text-[16px]">{user?.city}</p>
-                </div>
-              </div>
-            )}
-            <div className="py-5 border-b border-[#DADCE0]">
-              <div className="flex flex-row justify-between">
-                <p className="text-[#868D98] text-[16px]">Ранг</p>
-                <p className="text-[16px]">{getRankTitle(user?.rank ?? 0)}</p>
-              </div>
-            </div>
-            <div className="py-5 border-b border-[#DADCE0]">
-              <div className="flex flex-row justify-between">
-                <p className="text-[#868D98] text-[16px]">Квадрат игры</p>
-                <p className="text-[16px]">
-                  {user?.playingPosition === "" && "Не выбрано"}
-                  {user?.playingPosition === "left" && "Левый"}
-                  {user?.playingPosition === "right" && "Правый"}
-                  {user?.playingPosition === "both" && "В обоих"}
-                </p>
-              </div>
-            </div>
-            <div className="py-5 border-b border-[#DADCE0]">
-              <Link to="../loyalty">
-                <div className="flex flex-row justify-between items-center gap-[18px]">
-                  <div className="w-[42px] h-[42px] bg-[#AFFF3F] rounded-full flex flex-col items-center justify-center">
-                    {Icons.SharpStar()}
-                  </div>
-                  <div className="flex flex-col gap-[2px] flex-grow">
-                    <p className="text-[16px]">{user?.loyalty.name}</p>
-                    <p className="text-[14px] text-[#868D98]">
-                      Уровень лояльности
-                    </p>
-                  </div>
-                  <div>{Icons.ArrowRight("#A4A9B4")}</div>
-                </div>
-              </Link>
-            </div>
             {user?.padelProfiles && user?.padelProfiles.length > 0 && (
-              <div className="py-5 border-b border-[#DADCE0]">
+              <div className="py-5 border-b border-[#DADCE0] border-t">
                 <div className="flex flex-col gap-[10px]">
                   <p className="text-[#868D98] text-[16px]">Профили по падел</p>
                   <div className="flex flex-col gap-2">

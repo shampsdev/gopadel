@@ -16,6 +16,7 @@ interface AccordionItemProps {
   isOpen: boolean;
   onToggle: () => void;
   id: number;
+  activeId: number;
 }
 
 const AccordionItem = ({
@@ -25,10 +26,15 @@ const AccordionItem = ({
   isOpen,
   onToggle,
   id,
+  activeId,
 }: AccordionItemProps) => {
   return (
     <div className="flex flex-col">
-      <div className="bg-[#F8F8FA] rounded-[30px]">
+      <div
+        className={`rounded-[30px] ${
+          id === activeId ? "bg-[#041124] text-white" : "bg-[#F8F8FA] "
+        }`}
+      >
         <div
           className="flex flex-row justify-between items-center gap-[18px] py-[16px] pl-[16px] pr-[20px] cursor-pointer"
           onClick={onToggle}
@@ -71,7 +77,13 @@ const AccordionItem = ({
   );
 };
 
-export const LoyaltyAccordion = ({ loyalties }: { loyalties: Loyalty[] }) => {
+export const LoyaltyAccordion = ({
+  loyalties,
+  activeId,
+}: {
+  loyalties: Loyalty[];
+  activeId?: number;
+}) => {
   const [openItems, setOpenItems] = useState<number[]>([]);
 
   const toggleItem = (index: number) => {
@@ -102,6 +114,7 @@ export const LoyaltyAccordion = ({ loyalties }: { loyalties: Loyalty[] }) => {
           isOpen={openItems.includes(index)}
           onToggle={() => toggleItem(index)}
           description={item.description}
+          activeId={activeId ?? 0}
         />
       ))}
     </div>

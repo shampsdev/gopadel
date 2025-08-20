@@ -1,9 +1,11 @@
 import { LoyaltyAccordion } from "../components/ui/loyalty-accordion";
 import { useGetLoyalties } from "../api/hooks/useGetLoyalties";
 import { useTelegramBackButton } from "../shared/hooks/useTelegramBackButton";
+import { useGetMe } from "../api/hooks/useGetMe";
 
 export const Loyalty = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
+  const { data: user } = useGetMe();
   const { data: loyalties, isLoading } = useGetLoyalties();
   return (
     <div className="flex flex-col gap-9 pb-[100px]">
@@ -19,7 +21,10 @@ export const Loyalty = () => {
         {isLoading ? (
           <div className="flex justify-center items-center h-full"></div>
         ) : (
-          <LoyaltyAccordion loyalties={loyalties ?? []} />
+          <LoyaltyAccordion
+            loyalties={loyalties ?? []}
+            activeId={user?.loyalty.id}
+          />
         )}
       </div>
     </div>
