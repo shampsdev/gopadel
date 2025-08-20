@@ -9,6 +9,7 @@ import {
 } from "../../utils/date-format";
 import { createStartAndEndTime } from "../../utils/date-format";
 import type { PatchEvent } from "../../types/patch-tournament";
+import type { Event } from "../../types/event.type";
 
 interface TournamentEditState {
   // Основная информация
@@ -290,7 +291,7 @@ export const useTournamentEditStore = create<TournamentEditState>(
       });
     },
 
-    loadFromEvent: (event) => {
+    loadFromEvent: (event: Event) => {
       if (!event) return;
 
       set({ loadedFromEvent: true });
@@ -299,6 +300,8 @@ export const useTournamentEditStore = create<TournamentEditState>(
         title: event.name || "",
         description: event.description || "",
       });
+
+      set({ clubId: event.clubId || null });
 
       const startDate = new Date(event.startTime);
       const endDate = new Date(event.endTime);
@@ -325,7 +328,7 @@ export const useTournamentEditStore = create<TournamentEditState>(
         date: formattedDate,
         selectedDate: new Date(event.startTime),
         time: `${startTime}-${endTime}`,
-        clubId: event.club?.id || null,
+        clubId: event.clubId || null,
         type: event.type || "",
         courtId: event.court?.id || "",
       });
