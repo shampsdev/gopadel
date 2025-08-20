@@ -2,7 +2,6 @@ import { useGetMyRegistrations } from "../../../api/hooks/useGetMyRegistrations"
 import { EventHistoryCard } from "../../../components/widgets/event-history-card";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
 import { Preloader } from "../../../components/widgets/preloader";
-import { EventStatus } from "../../../types/event-status.type";
 
 export const EventsHistory = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -43,7 +42,7 @@ export const EventsHistory = () => {
             type={registration.event.type}
             name={registration.event.name}
             status={registration.status}
-            isFinished={registration.event.status === EventStatus.completed}
+            eventStatus={registration.event.status}
             place={
               registration.event.data?.result?.leaderboard.find(
                 (place) => place.userId === registration.userId

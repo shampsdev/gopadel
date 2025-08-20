@@ -13,9 +13,7 @@ import { useAuthStore } from "../../shared/stores/auth.store";
 import { useGetCourts } from "../../api/hooks/useGetCourts";
 import { useGetMyClubs } from "../../api/hooks/useGetMyClubs";
 import { useNavigate } from "react-router";
-import { useIsAdmin } from "../../api/hooks/useIsAdmin";
 import { Preloader } from "../../components/widgets/preloader";
-import AboutImage from "../../assets/about.png";
 import type { CreateGame as CreateGameType } from "../../types/create-event.type";
 import { EventType } from "../../types/event-type.type";
 import { useCreateEvent } from "../../api/hooks/mutations/events/useCreateEvent";
@@ -24,7 +22,6 @@ import { Icons } from "../../assets/icons";
 import { DateSelector } from "../../components/ui/froms/date-selector";
 import { LevelSelector } from "../../components/ui/froms/level-selector";
 import { TimeSelector } from "../../components/ui/froms/time-selector";
-import { checkGameOrganizerRight } from "../../utils/check-organizer-right";
 
 export const CreateGame = () => {
   const { user } = useAuthStore();
@@ -73,8 +70,6 @@ export const CreateGame = () => {
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
   const { isLoading: clubsLoading } = useGetMyClubs(); // Удалена неиспользуемая переменная myClubs
 
-  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
-
   const { mutateAsync: createEvent, isPending: isCreatingEvent } =
     useCreateEvent();
 
@@ -103,7 +98,7 @@ export const CreateGame = () => {
     }
   };
 
-  if (isAdminLoading || courtsLoading || clubsLoading) return <Preloader />;
+  if (courtsLoading || clubsLoading) return <Preloader />;
 
   return (
     <div className="flex flex-col gap-[40px] pb-[200px]">
