@@ -572,4 +572,37 @@ export const Icons = {
       </svg>
     );
   },
+  DisabledPosition: (color?: string, width?: string, height?: string) => {
+    return (
+      <svg
+        width={width || "8"}
+        height={height || "8"}
+        viewBox="0 0 8 8"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="4" cy="4" r="4" fill={color ? color : "#EBEDF0"} />
+      </svg>
+    );
+  },
+  ActivePosition: (color?: string, width?: string, height?: string) => {
+    return (
+      <svg
+        width={width || "20"}
+        height={height || "20"}
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="10" cy="10" r="4" fill={color ? color : "#041124"} />
+        <circle
+          cx="10"
+          cy="10"
+          r="9"
+          stroke={color ? color : "#041124"}
+          stroke-width="2"
+        />
+      </svg>
+    );
+  },
 };
