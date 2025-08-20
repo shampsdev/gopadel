@@ -4,15 +4,9 @@ import { useGetEvents } from "../../api/hooks/useGetEvents";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Preloader } from "../../components/widgets/preloader";
 import { RegistrationStatus } from "../../types/registration-status";
-import { useGetEventWaitlist } from "../../api/hooks/useGetEventWaitlist";
-import { Button } from "../../components/ui/button";
 import { useRejectGameRegistration } from "../../api/hooks/mutations/registration/reject-game-registration";
 import { useApproveGameRegistration } from "../../api/hooks/mutations/registration/approve-game-registration";
-import {
-  checkGameOrganizerRight,
-  checkOrganizerRight,
-} from "../../utils/check-organizer-right";
-import { useIsAdmin } from "../../api/hooks/useIsAdmin";
+import { checkGameOrganizerRight } from "../../utils/check-organizer-right";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { Icons } from "../../assets/icons";
 
@@ -21,17 +15,12 @@ export const GameWaitlist = () => {
   const { id } = useParams();
 
   const { data: events, isLoading } = useGetEvents({ id: id });
-  const { data: waitlist, isLoading: waitlistLoading } = useGetEventWaitlist(
-    id!
-  );
   const { user } = useAuthStore();
 
   const { mutate: approveRegistration } = useApproveGameRegistration();
   const { mutate: rejectRegistration } = useRejectGameRegistration();
 
-  const { data: isAdmin } = useIsAdmin();
-
-  if (isLoading || waitlistLoading) return <Preloader />;
+  if (isLoading) return <Preloader />;
 
   if (events) {
     return (
