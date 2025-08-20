@@ -363,7 +363,7 @@ export const GameEdit = () => {
             }
           }}
           className={
-            !isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4]" : " mx-auto"
+            !isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4] mx-auto" : " mx-auto"
           }
         >
           Сохранить изменения
