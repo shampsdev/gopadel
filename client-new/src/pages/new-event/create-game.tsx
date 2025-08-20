@@ -24,6 +24,7 @@ import { Icons } from "../../assets/icons";
 import { DateSelector } from "../../components/ui/froms/date-selector";
 import { LevelSelector } from "../../components/ui/froms/level-selector";
 import { TimeSelector } from "../../components/ui/froms/time-selector";
+import { checkGameOrganizerRight } from "../../utils/check-organizer-right";
 
 export const CreateGame = () => {
   const { user } = useAuthStore();
@@ -103,27 +104,6 @@ export const CreateGame = () => {
   };
 
   if (isAdminLoading || courtsLoading || clubsLoading) return <Preloader />;
-
-  if (!isAdmin?.admin) {
-    return (
-      <div className="flex flex-col h-screen w-full">
-        <div className="flex-1 flex flex-col text-center items-center justify-center gap-11">
-          <img src={AboutImage} className="object-cover w-[70%]" />
-          <div className="flex flex-col gap-4">
-            <div className="font-semibold text-[20px]">Функция недоступна</div>
-            <div className="text-[#868D98]">
-              Создание турниров доступно только администраторам
-            </div>
-          </div>
-        </div>
-        <div className="mt-auto pb-10">
-          <Button className="mx-auto" onClick={() => navigate("/")}>
-            Назад
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-[40px] pb-[200px]">

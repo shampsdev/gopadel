@@ -18,6 +18,8 @@ import AboutImage from "../../../assets/about.png";
 import { DateSelector } from "../../../components/ui/froms/date-selector";
 import { Icons } from "../../../assets/icons";
 import { LevelSelector } from "../../../components/ui/froms/level-selector";
+import { checkGameOrganizerRight } from "../../../utils/check-organizer-right";
+import { useAuthStore } from "../../../shared/stores/auth.store";
 
 export const GameEdit = () => {
   const { id } = useParams();
@@ -64,7 +66,7 @@ export const GameEdit = () => {
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
 
-  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
+  const { user } = useAuthStore();
 
   const { mutateAsync: patchEvent, isPending: isUpdatingEvent } = usePatchEvent(
     id!
@@ -95,9 +97,9 @@ export const GameEdit = () => {
     }
   };
 
-  if (isAdminLoading || courtsLoading || eventLoading) return <Preloader />;
+  if (courtsLoading || eventLoading || !event) return <Preloader />;
 
-  if (!isAdmin?.admin) {
+  if (!checkGameOrganizerRight(user?.id || "", event!)) {
     return (
       <div className="flex flex-col h-screen w-full">
         <div className="flex-1 flex flex-col text-center items-center justify-center gap-11">
@@ -105,7 +107,7 @@ export const GameEdit = () => {
           <div className="flex flex-col gap-4">
             <div className="font-semibold text-[20px]">Функция недоступна</div>
             <div className="text-[#868D98]">
-              Редактирование турниров доступно только администраторам
+              Редактирование игр доступно только организаторам
             </div>
           </div>
         </div>
@@ -124,9 +126,9 @@ export const GameEdit = () => {
         <div className="flex-1 flex flex-col text-center items-center justify-center gap-11">
           <img src={AboutImage} className="object-cover w-[70%]" />
           <div className="flex flex-col gap-4">
-            <div className="font-semibold text-[20px]">Турнир не найден</div>
+            <div className="font-semibold text-[20px]">Игра не найдена</div>
             <div className="text-[#868D98]">
-              Запрашиваемый турнир не существует
+              Запрашиваемая игра не существует
             </div>
           </div>
         </div>

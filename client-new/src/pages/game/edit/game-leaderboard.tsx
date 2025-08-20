@@ -10,7 +10,7 @@ import { getRankTitle } from "../../../utils/rank-title";
 import BronzeMedal from "../../../assets/bronze-medal.png";
 import { twMerge } from "tailwind-merge";
 import { useAuthStore } from "../../../shared/stores/auth.store";
-import { checkOrganizerRight } from "../../../utils/check-organizer-right";
+import { checkGameOrganizerRight } from "../../../utils/check-organizer-right";
 import { EventStatus } from "../../../types/event-status.type";
 import type { Tournament } from "../../../types/tournament.type";
 
@@ -244,11 +244,7 @@ export const GameLeaderboard = () => {
           </div>
         )}
 
-        {checkOrganizerRight(
-          isAdmin?.admin || false,
-          user?.id || "",
-          events?.[0]
-        ) && (
+        {checkGameOrganizerRight(user?.id || "", events?.[0]) && (
           <Link to={`/game/${id}/edit/leaderboard`}>
             <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
               <Button>Внести результаты</Button>

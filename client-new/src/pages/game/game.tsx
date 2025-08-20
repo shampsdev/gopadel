@@ -12,7 +12,7 @@ import { Preloader } from "../../components/widgets/preloader";
 import { BOT_NAME } from "../../shared/constants/api";
 import { useIsAdmin } from "../../api/hooks/useIsAdmin";
 import { Prize } from "../../components/widgets/prize";
-import { checkOrganizerRight } from "../../utils/check-organizer-right";
+import { checkGameOrganizerRight } from "../../utils/check-organizer-right";
 import { LinksWrapper } from "../../components/helpers/links-wrapper";
 import { RegistrationStatus } from "../../types/registration-status";
 import type { Waitlist } from "../../types/waitlist.type";
@@ -71,11 +71,7 @@ export const Game = () => {
     <div className="flex flex-col pb-[200px]">
       <div className="flex flex-row justify-between relative">
         <h1 className="text-[24px] font-medium">{events?.[0]?.name}</h1>
-        {checkOrganizerRight(
-          isAdmin?.admin || false,
-          user?.id,
-          events?.[0]
-        ) && (
+        {checkGameOrganizerRight(user?.id || "", events?.[0]) && (
           <>
             {" "}
             <button onClick={() => setIsActionsOpen(!isActionsOpen)}>
@@ -149,7 +145,7 @@ export const Game = () => {
         </div>
       </div>
 
-      {!checkOrganizerRight(isAdmin?.admin || false, user?.id, events?.[0]) ? (
+      {!checkGameOrganizerRight(user?.id || "", events?.[0]) ? (
         !(events?.[0].status === EventStatus.completed) && (
           <div className="mt-[16px]">
             <Prize variant="not-finished" />
