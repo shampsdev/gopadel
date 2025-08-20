@@ -1,19 +1,9 @@
-import { useState } from "react";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Input } from "../../components/ui/froms/input";
 import { Textarea } from "../../components/ui/froms/textarea";
 import { CourtSelector } from "../../components/ui/froms/court-selector";
 import { ClubSelector } from "../../components/ui/froms/club-selector";
-import {
-  formatDateInput,
-  validateDateFormat,
-  formatTimeInput,
-  validateTimeFormat,
-  createStartAndEndTime,
-} from "../../utils/date-format";
 import { Button } from "../../components/ui/button";
-import { RankSelector } from "../../components/ui/froms/rank-selector";
-import { ranks } from "../../shared/constants/ranking";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { useGetCourts } from "../../api/hooks/useGetCourts";
 import { useGetMyClubs } from "../../api/hooks/useGetMyClubs";
@@ -24,29 +14,53 @@ import AboutImage from "../../assets/about.png";
 import type { CreateTournament as CreateTournamentType } from "../../types/create-event.type";
 import { EventType } from "../../types/event-type.type";
 import { useCreateEvent } from "../../api/hooks/mutations/events/useCreateEvent";
+import { Icons } from "../../assets/icons";
+import { DateSelector } from "../../components/ui/froms/date-selector";
+import { LevelSelector } from "../../components/ui/froms/level-selector";
+import { TimeSelector } from "../../components/ui/froms/time-selector";
+import { useCreateTournamentStore } from "../../shared/stores/create-tournament.store";
+import { EventStatus } from "../../types/event-status.type";
 
 export const CreateTournament = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
-  const [title, setTitle] = useState<string | null>(null);
-  const [description, setDescription] = useState<string>("");
-  const [date, setDate] = useState<string | null>(null);
-  const [dateError, setDateError] = useState<boolean>(true);
-
-  const [time, setTime] = useState<string | null>(null);
-  const [timeError, setTimeError] = useState<boolean>(true);
-
-  const [type, setType] = useState<string | null>(null);
-  const [courtId, setCourtId] = useState<string>("");
-  const [clubId, setClubId] = useState<string>("");
-  const [rankMin, setRankMin] = useState<number | null>(null);
-  const [rankMax, setRankMax] = useState<number | null>(null);
-  const [rankMinInput, setRankMinInput] = useState<string>("");
-  const [rankMaxInput, setRankMaxInput] = useState<string>("");
-  const [rankMinError, setRankMinError] = useState<boolean>(false);
-  const [rankMaxError, setRankMaxError] = useState<boolean>(false);
+  const {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    selectedDate,
+    setDateFromCalendar,
+    time,
+    timeError,
+    setTime,
+    type,
+    setType,
+    courtId,
+    setCourtId,
+    clubId,
+    setClubId,
+    rankMin,
+    rankMax,
+    rankMinError,
+    rankMaxError,
+    setRankMinValue,
+    setRankMaxValue,
+    price,
+    priceInput,
+    setPriceInput,
+    handlePriceBlur,
+    maxUsers,
+    maxUsersInput,
+    setMaxUsersInput,
+    handleMaxUsersBlur,
+    isFormValid,
+    getTournamentData,
+    typeFieldOpen,
+    setTypeFieldOpen,
+  } = useCreateTournamentStore();
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
   const { data: myClubs = [], isLoading: clubsLoading } = useGetMyClubs();
@@ -56,111 +70,22 @@ export const CreateTournament = () => {
   const { mutateAsync: createEvent, isPending: isCreatingEvent } =
     useCreateEvent();
 
-  const handleRankMinChange = (rankTitle: string) => {
-    setRankMinInput(rankTitle);
-    const selectedRank = ranks.find((r) => r.title === rankTitle);
-    if (selectedRank) {
-      setRankMin(selectedRank.from);
-      setRankMinError(false);
-      // Проверяем, что максимальный ранг не меньше минимального
-      if (rankMax !== null && selectedRank.from > rankMax) {
-        setRankMaxError(true);
-      } else {
-        setRankMaxError(false);
-      }
-    }
-  };
-
-  const handleRankMaxChange = (rankTitle: string) => {
-    setRankMaxInput(rankTitle);
-    const selectedRank = ranks.find((r) => r.title === rankTitle);
-    if (selectedRank) {
-      setRankMax(selectedRank.from);
-      setRankMaxError(false);
-      // Проверяем, что минимальный ранг не больше максимального
-      if (rankMin !== null && selectedRank.from < rankMin) {
-        setRankMinError(true);
-      } else {
-        setRankMinError(false);
-      }
-    }
-  };
-
-  const [price, setPrice] = useState<number | null>(null);
-  const [priceInput, setPriceInput] = useState<string>("");
-  const [maxUsers, setMaxUsers] = useState<number | null>(null);
-  const [maxUsersInput, setMaxUsersInput] = useState<string>("");
-
-  const isFormValid = () => {
-    return (
-      title &&
-      date &&
-      time &&
-      validateDateFormat(date) &&
-      validateTimeFormat(time) &&
-      type &&
-      courtId &&
-      clubId &&
-      rankMin !== null &&
-      rankMin >= 0 &&
-      rankMax !== null &&
-      rankMax >= 0 &&
-      rankMax >= rankMin &&
-      price !== null &&
-      price >= 0 &&
-      maxUsers !== null &&
-      maxUsers > 0
-    );
-  };
-
   const handleCreateTournament = async () => {
-    if (!date || !time) {
+    const tournamentData = getTournamentData();
+
+    if (!tournamentData) {
       return;
     }
-
-    if (!validateDateFormat(date)) {
-      return;
-    }
-
-    if (!validateTimeFormat(time)) {
-      return;
-    }
-
-    if (!courtId) {
-      return;
-    }
-
-    if (!clubId) {
-      return;
-    }
-
-    const { startTime: start, endTime: end } = createStartAndEndTime(
-      date,
-      time
-    );
-
-    if (!start || !end) {
-      return;
-    }
-
-    const tournamentData: CreateTournamentType = {
-      courtId: courtId,
-      clubId: clubId,
-      description: description,
-      endTime: end,
-      maxUsers: maxUsers ?? 0,
-      name: title ?? "",
-      organizerId: user?.id ?? "",
-      price: price ?? 0,
-      rankMax: ranks.find((r) => r.title === rankMaxInput)?.to ?? 0,
-      rankMin: ranks.find((r) => r.title === rankMinInput)?.from ?? 0,
-      startTime: start,
-      type: EventType.tournament,
-      data: { tournament: { type: type ?? "" } },
-    };
 
     try {
-      const tournament = await createEvent(tournamentData);
+      const tournament = await createEvent({
+        ...tournamentData,
+        organizerId: user?.id ?? "",
+        type: EventType.tournament,
+        status: EventStatus.registration,
+        clubId: clubId,
+      } as CreateTournamentType);
+
       if (tournament?.id) {
         navigate(`/tournament/${tournament?.id}`);
       } else {
@@ -197,11 +122,11 @@ export const CreateTournament = () => {
   }
 
   return (
-    <div className="flex flex-col gap-[40px] pb-[100px]">
+    <div className="flex flex-col gap-[40px] pb-[200px]">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2 px-[12px]">
           <p className="text-[24px] font-medium">Новый турнир</p>
-          <p className="text-[#5D6674] text-[16px]">
+          <p className="text-[##56674] text-[16px]">
             Добавьте информацию о событии
           </p>
         </div>
@@ -210,7 +135,7 @@ export const CreateTournament = () => {
           <Input
             onChangeFunction={setTitle}
             title={"Название"}
-            value={title ?? ""}
+            value={title}
             maxLength={100}
             hasError={!title}
           />
@@ -222,71 +147,60 @@ export const CreateTournament = () => {
             placeholder={""}
             hasError={false}
           />
-          <Input
-            onChangeFunction={(value) => {
-              const formatted = formatDateInput(value);
-              setDate(formatted);
 
-              if (validateDateFormat(formatted)) {
-                setDateError(false);
-              } else {
-                setDateError(formatted.length > 0);
-              }
-            }}
-            onBlur={() => {
-              if (!validateDateFormat(date ?? "")) {
-                setDateError(true);
-              } else {
-                setDateError(false);
-              }
-            }}
-            title={"Дата"}
-            value={date ?? ""}
-            maxLength={8}
-            placeholder={"дд.мм.гг"}
-            hasError={dateError}
-          />
-          <Input
-            onChangeFunction={(value) => {
-              const formatted = formatTimeInput(value);
-              setTime(formatted);
+          <div className="flex flex-row px-[16px] justify-between">
+            <div className="flex flex-row gap-[2px]">
+              <p className="text-[#868D98] font-medium">Дата</p>
+              <div className="mt-[4px]">{Icons.RequiredFieldStar()}</div>
+            </div>
+            <div
+              className="flex flex-row gap-[8px] items-center text-[#868D98]"
+              onClick={() => navigate(`calendar`)}
+            >
+              <p>открыть календарь</p>
+              <div>{Icons.Calendar("#868D98", "16", "16")}</div>
+            </div>
+          </div>
 
-              if (validateTimeFormat(formatted)) {
-                setTimeError(false);
-              } else {
-                setTimeError(formatted.length > 0);
-              }
-            }}
-            onBlur={() => {
-              if (!validateTimeFormat(time ?? "")) {
-                setTimeError(true);
-              } else {
-                setTimeError(false);
-              }
-            }}
-            title={"Время"}
-            value={time ?? ""}
-            maxLength={11}
-            placeholder={"чч:мм-чч:мм"}
-            hasError={timeError}
+          <DateSelector
+            selectedDate={selectedDate}
+            onDateChange={setDateFromCalendar}
+            className=""
           />
 
-          <Input
-            onChangeFunction={setType}
-            title={"Тип"}
-            value={type ?? ""}
-            maxLength={100}
-            hasError={!type}
-          />
+          <div className="flex flex-row justify-between gap-[16px]">
+            <TimeSelector
+              title={"Начало"}
+              value={time.split("-")[0] || ""}
+              onChangeFunction={(startTime: string) => {
+                const endTime = time.split("-")[1] || "";
+                const newTime = endTime ? `${startTime}-${endTime}` : startTime;
+                setTime(newTime);
+              }}
+              hasError={timeError}
+            />
+            <TimeSelector
+              title={"Окончание"}
+              value={time.split("-")[1] || ""}
+              onChangeFunction={(endTime: string) => {
+                const startTime = time.split("-")[0] || "";
+                const newTime = startTime ? `${startTime}-${endTime}` : endTime;
+                setTime(newTime);
+              }}
+              hasError={timeError}
+            />
+          </div>
+
           <ClubSelector
             title="Клуб"
-            value={clubId}
+            value={clubId ?? ""}
             onChangeFunction={(id) => {
               setClubId(id);
             }}
             hasError={!clubId}
             clubs={myClubs ?? []}
           />
+
           <CourtSelector
             title="Корт"
             value={courtId}
@@ -296,46 +210,90 @@ export const CreateTournament = () => {
             hasError={!courtId}
             courts={courts ?? []}
           />
-          <RankSelector
-            title="Минимальный ранг"
-            value={rankMinInput}
-            onChangeFunction={handleRankMinChange}
-            hasError={rankMin === null || rankMinError}
+
+          <div className="flex flex-col gap-[8px] mt-[16px]">
+            <div className="text-[#868D98] text-[15px] px-[16px] font-medium ">
+              Тип
+            </div>
+            <div className="flex flex-row gap-[4px] text-center">
+              <div
+                className={
+                  "w-full  py-[12px] rounded-[12px] text-[14px] cursor-pointer " +
+                  (typeFieldOpen || type !== "американо"
+                    ? "bg-[#F8F8FA]"
+                    : "bg-[#AFFF3F]")
+                }
+                onClick={() => {
+                  setTypeFieldOpen(false);
+                  setType("американо");
+                }}
+              >
+                американо
+              </div>
+              <div
+                className={
+                  "w-full  py-[12px] rounded-[12px] text-[14px] cursor-pointer " +
+                  (typeFieldOpen || type !== "мексикано"
+                    ? "bg-[#F8F8FA]"
+                    : "bg-[#AFFF3F]")
+                }
+                onClick={() => {
+                  setTypeFieldOpen(false);
+                  setType("мексикано");
+                }}
+              >
+                мексикано
+              </div>
+            </div>
+            <div className="flex flex-row gap-[4px] text-center">
+              <div
+                className={
+                  "w-full  py-[12px] text-[14px] cursor-pointer " +
+                  (typeFieldOpen
+                    ? "bg-[#AFFF3F] rounded-[12px]"
+                    : "bg-[#F8F8FA] rounded-[12px]")
+                }
+                onClick={() => setTypeFieldOpen(true)}
+              >
+                что-нибудь ещё
+              </div>
+              <div className="w-full bg-white py-[12px]"></div>
+            </div>
+          </div>
+
+          {typeFieldOpen && (
+            <Input
+              onChangeFunction={setType}
+              title={"Тип"}
+              value={type}
+              maxLength={100}
+              hasError={!type}
+            />
+          )}
+
+          <LevelSelector
+            title="Уровень игроков"
+            minValue={rankMin}
+            maxValue={rankMax}
+            onChangeMinValue={setRankMinValue}
+            onChangeMaxValue={setRankMaxValue}
+            hasError={
+              rankMin === null ||
+              rankMinError ||
+              rankMax === null ||
+              rankMaxError
+            }
           />
-          <RankSelector
-            title="Максимальный ранг"
-            value={rankMaxInput}
-            onChangeFunction={handleRankMaxChange}
-            hasError={rankMax === null || rankMaxError}
-          />
+
+          <div className="flex flex-col gap-[8px] mt-[16px]"></div>
           <Input
             title={"Стоимость участия"}
             value={priceInput}
             maxLength={10}
             placeholder={"0"}
             hasError={price === null}
-            onChangeFunction={(raw) => {
-              const sanitized = raw.replace(/[^\d]/g, "");
-
-              setPriceInput(sanitized);
-
-              if (sanitized) {
-                setPrice(parseInt(sanitized));
-              } else {
-                setPrice(null);
-              }
-            }}
-            onBlur={() => {
-              // При потере фокуса форматируем число
-              if (priceInput && /^\d+$/.test(priceInput)) {
-                const num = parseInt(priceInput);
-                setPrice(num);
-                setPriceInput(String(num));
-              } else {
-                setPrice(null);
-                setPriceInput("");
-              }
-            }}
+            onChangeFunction={setPriceInput}
+            onBlur={handlePriceBlur}
           />
           <Input
             title={"Максимальное количество участников"}
@@ -343,33 +301,34 @@ export const CreateTournament = () => {
             maxLength={3}
             placeholder={"0"}
             hasError={maxUsers === null}
-            onChangeFunction={(raw) => {
-              const sanitized = raw.replace(/[^\d]/g, "");
-
-              setMaxUsersInput(sanitized);
-
-              if (sanitized) {
-                setMaxUsers(parseInt(sanitized));
-              } else {
-                setMaxUsers(null);
-              }
-            }}
-            onBlur={() => {
-              // При потере фокуса форматируем число
-              if (maxUsersInput && /^\d+$/.test(maxUsersInput)) {
-                const num = parseInt(maxUsersInput);
-                setMaxUsers(num);
-                setMaxUsersInput(String(num));
-              } else {
-                setMaxUsers(null);
-                setMaxUsersInput("");
-              }
-            }}
+            onChangeFunction={setMaxUsersInput}
+            onBlur={handleMaxUsersBlur}
           />
+        </div>
+
+        <div className="flex flex-row gap-[4px]">
+          <div
+            className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
+            onClick={() => setMaxUsersInput("8")}
+          >
+            8
+          </div>
+          <div
+            className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
+            onClick={() => setMaxUsersInput("16")}
+          >
+            16
+          </div>
+          <div
+            className="px-[24px] py-[16px] rounded-[12px] font-medium text-[18px] bg-[#F8F8FA]"
+            onClick={() => setMaxUsersInput("24")}
+          >
+            24
+          </div>
         </div>
       </div>
 
-      <div className="mx-auto">
+      <div className="flex flex-col fixed bottom-[80px]  right-0 left-0 gap-4 w-full">
         <Button
           disabled={isCreatingEvent}
           onClick={() => {
@@ -377,9 +336,11 @@ export const CreateTournament = () => {
               handleCreateTournament();
             }
           }}
-          className={!isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4]" : ""}
+          className={
+            !isFormValid() ? "bg-[#F8F8FA] text-[#A4A9B4] mx-auto" : " mx-auto"
+          }
         >
-          Создать турнир
+          Сохранить изменения
         </Button>
       </div>
     </div>

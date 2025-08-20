@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { usePatchEvent } from "../../../api/hooks/mutations/events/usePatchEvent";
 import { useGetCourts } from "../../../api/hooks/useGetCourts";
@@ -7,7 +7,6 @@ import { useIsAdmin } from "../../../api/hooks/useIsAdmin";
 import { Button } from "../../../components/ui/button";
 import { CourtSelector } from "../../../components/ui/froms/court-selector";
 import { DateSelector } from "../../../components/ui/froms/date-selector";
-import { EventStatusSelector } from "../../../components/ui/froms/event-status-selector";
 import { Input } from "../../../components/ui/froms/input";
 import { LevelSelector } from "../../../components/ui/froms/level-selector";
 import { Textarea } from "../../../components/ui/froms/textarea";
@@ -16,7 +15,6 @@ import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButt
 import { useTournamentEditStore } from "../../../shared/stores/tournament-edit.store";
 import AboutImage from "../../../assets/about.png";
 import { Icons } from "../../../assets/icons";
-import { validateDateFormat } from "../../../utils/date-format";
 import { TimeSelector } from "../../../components/ui/froms/time-selector";
 import { ClubSelector } from "../../../components/ui/froms/club-selector";
 import { useGetMyClubs } from "../../../api/hooks/useGetMyClubs";
@@ -31,12 +29,8 @@ export const TournamentEdit = () => {
     setTitle,
     description,
     setDescription,
-    date,
-    dateError,
     selectedDate,
-    setDate,
     setDateFromCalendar,
-    setDateError,
     time,
     timeError,
     setTime,
@@ -60,8 +54,6 @@ export const TournamentEdit = () => {
     maxUsersInput,
     setMaxUsersInput,
     handleMaxUsersBlur,
-    status,
-    setStatus,
     isFormValid,
     getTournamentData,
     loadFromEvent,

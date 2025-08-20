@@ -36,6 +36,8 @@ import { TournamentCalendar } from "../pages/tournament/edit/date/tournament-cal
 import { TournamentYearMonthPick } from "../pages/tournament/edit/date/tournament-year-month-pick";
 import { GameCalendar } from "../pages/game/edit/date/game-calendar";
 import { GameYearMonthPick } from "../pages/game/edit/date/game-year-month-picker";
+import { CreateTournamentCalendar } from "../pages/new-event/date/tournament/create-tournament-calendar";
+import { CreateTournamentYearMonthPick } from "../pages/new-event/date/tournament/create-tournament-picker";
 
 const authRoutes: RouteObject[] = [
   {
@@ -215,7 +217,23 @@ export const routes: RouteObject[] = [
                 path: "new-event",
                 children: [
                   { path: "", element: <NewEvent /> },
-                  { path: "tournament", element: <CreateTournament /> },
+                  {
+                    path: "tournament",
+                    children: [
+                      {
+                        path: "",
+                        element: <CreateTournament />,
+                      },
+                      {
+                        path: "calendar",
+                        element: <CreateTournamentCalendar />,
+                      },
+                      {
+                        path: "year-month-pick",
+                        element: <CreateTournamentYearMonthPick />,
+                      },
+                    ],
+                  },
                   { path: "game", element: <CreateGame /> },
                 ],
               },

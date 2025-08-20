@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router";
 import { Icons } from "../../assets/icons";
+import { useCreateTournamentStore } from "../../shared/stores/create-tournament.store";
 
 export const NewEvent = () => {
   const navigate = useNavigate();
+  const { resetStore } = useCreateTournamentStore();
   return (
     <div className="flex flex-col gap-9">
       <div className="flex flex-col gap-2">
@@ -14,6 +16,7 @@ export const NewEvent = () => {
         <div
           className="flex w-full flex-row items-center just gap-[18px] px-[16px] py-[16px] rounded-[30px] bg-[#F8F8FA]"
           onClick={() => {
+            resetStore();
             navigate("tournament");
           }}
         >
