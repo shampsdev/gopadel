@@ -127,21 +127,17 @@ export const GameStatusActions = ({ game, user }: GameStatusActionsProps) => {
     }
 
     if (!isUserRegistered(game, user)) {
-      if (isRankAllowed(game, user)) {
-        return (
-          <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
-            <Button
-              onClick={async () => {
-                await registerToEvent(game.id);
-              }}
-            >
-              Зарегистрироваться
-            </Button>
-          </div>
-        );
-      }
-
-      return <></>;
+      return (
+        <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
+          <Button
+            onClick={async () => {
+              await registerToEvent(game.id);
+            }}
+          >
+            Зарегистрироваться
+          </Button>
+        </div>
+      );
     }
   }
 

@@ -4,7 +4,6 @@ import type { User } from "../../types/user.type";
 import type { Waitlist } from "../../types/waitlist.type";
 import { RegistrationStatus } from "../../types/registration-status";
 import { EventStatus } from "../../types/event-status.type";
-import { isRankAllowed } from "../../utils/tournament-status-checks";
 import type { Game } from "../../types/game.type";
 
 export const GameStatusWarning = ({
@@ -21,12 +20,7 @@ export const GameStatusWarning = ({
     (participant) => participant.userId === user?.id
   )?.status as RegistrationStatus | undefined;
 
-  const rankNotAllowed =
-    !isRankAllowed(game, user) &&
-    userStatus !== RegistrationStatus.CANCELLED_AFTER_PAYMENT &&
-    userStatus !== RegistrationStatus.CONFIRMED;
-
-  if (userStatus || (!userStatus && rankNotAllowed)) {
+  if (userStatus) {
     return (
       <div
         className={twMerge(
@@ -47,12 +41,6 @@ export const GameStatusWarning = ({
               ожидания
             </div>
           )}
-
-        {!userStatus && rankNotAllowed && (
-          <div>
-            Ваш уровень не&nbsp;соответствует заявленному для&nbsp;этой игры
-          </div>
-        )}
 
         {userStatus === RegistrationStatus.CANCELLED && (
           <div>
