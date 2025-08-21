@@ -369,7 +369,6 @@ export const useCreateGameStore = create<CreateGameState>((set, get) => ({
     const isTimeValid = timeRegex.test(startTimeStr);
 
     return !!(
-      state.title &&
       state.date &&
       state.time &&
       validateDateFormat(state.date) &&
@@ -462,7 +461,6 @@ export const useCreateGameStore = create<CreateGameState>((set, get) => ({
       description: state.description,
       endTime: end,
       maxUsers: state.maxUsers,
-      name: state.title,
       price: state.price,
       rankMax: ranks.find((r) => r.title === state.rankMaxInput)?.to ?? 0,
       rankMin: ranks.find((r) => r.title === state.rankMinInput)?.from ?? 0,

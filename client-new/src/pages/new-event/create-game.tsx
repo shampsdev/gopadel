@@ -29,8 +29,6 @@ export const CreateGame = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
   const {
-    title,
-    setTitle,
     description,
     setDescription,
     selectedDate,
@@ -58,9 +56,6 @@ export const CreateGame = () => {
     handleMaxUsersBlur,
     isFormValid,
     getGameData,
-    // Удалены неиспользуемые переменные
-    // loadFromEvent,
-    // loadedFromEvent,
     duration,
     setDuration,
     typeFieldOpen,
@@ -83,6 +78,7 @@ export const CreateGame = () => {
     try {
       const game = await createEvent({
         ...gameData,
+        name: `${user?.firstName} ${user?.lastName} собирает игру`,
         organizerId: user?.id ?? "",
         type: EventType.game,
       } as CreateGameType);
@@ -111,13 +107,6 @@ export const CreateGame = () => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Input
-            onChangeFunction={setTitle}
-            title={"Название"}
-            value={title}
-            maxLength={100}
-            hasError={!title}
-          />
           <Textarea
             onChangeFunction={setDescription}
             title={"Описание"}

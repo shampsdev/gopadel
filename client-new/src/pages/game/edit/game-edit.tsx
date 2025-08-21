@@ -27,7 +27,6 @@ export const GameEdit = () => {
 
   const {
     title,
-    setTitle,
     description,
     setDescription,
     selectedDate,
@@ -151,13 +150,10 @@ export const GameEdit = () => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Input
-            onChangeFunction={setTitle}
-            title={"Название"}
-            value={title}
-            maxLength={100}
-            hasError={!title}
-          />
+          <div className="flex flex-col gap-[6px]">
+            <p className="text-[#868D98] font-medium">Название</p>
+            <p>{title}</p>
+          </div>
           <Textarea
             onChangeFunction={setDescription}
             title={"Описание"}
