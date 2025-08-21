@@ -59,7 +59,7 @@ export const GamePlayers = ({ registrations, gameId }: GamePlayers) => {
           <div
             onClick={() => {
               openTelegramLink(
-                `https://t.me/share/url?url=https://t.me/${BOT_NAME}/app?startapp=${gameId}`
+                `https://t.me/share/url?url=Приглашаю на игру в падел, заходи в приложение, чтобы присоединиться: https://t.me/${BOT_NAME}/app?startapp=${gameId}`
               );
             }}
             className="flex flex-col items-center cursor-pointer relative"
