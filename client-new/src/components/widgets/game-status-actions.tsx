@@ -3,7 +3,6 @@ import { useReactivateCancelledRegistration } from "../../api/hooks/mutations/re
 import { Icons } from "../../assets/icons";
 import type { User } from "../../types/user.type";
 import {
-  isRankAllowed,
   isEventFinished,
   isUserRegistered,
   participatingAvailable,
