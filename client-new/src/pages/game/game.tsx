@@ -127,12 +127,7 @@ export const Game = () => {
           waitlist={(waitlist as Waitlist) || []}
         />
         <div className="flex flex-row gap-[4px]">
-          <div className="flex min-w-[25%] text-[14px] flex-col bg-black text-white rounded-[16px] px-[16px] py-[10px]">
-            <p className="opacity-[75%]">игра</p>
-            <p>{events?.[0].data?.game?.type}</p>
-          </div>
-
-          <div className="bg-[#F8F8FA] px-[16px] py-[10px] flex-1 rounded-[16px] text-[14px] flex items-center justify-start">
+          <div className="bg-[#F8F8FA] px-[16px] py-[12px] flex-1 rounded-[16px] text-[14px] flex items-center justify-start">
             {getRankTitle(events?.[0].rankMin || 0) ===
             getRankTitle(events?.[0].rankMax || 0)
               ? getRankTitle(events?.[0].rankMin || 0)

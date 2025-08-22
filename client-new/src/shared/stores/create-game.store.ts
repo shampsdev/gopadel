@@ -7,6 +7,7 @@ import {
 } from "../../utils/date-format";
 import { createStartAndEndTime } from "../../utils/date-format";
 import type { PatchEvent } from "../../types/patch-tournament";
+import type { Event } from "../../types/event.type";
 
 interface CreateGameState {
   // Основная информация
@@ -65,7 +66,7 @@ interface CreateGameState {
   handleMaxUsersBlur: () => void;
 
   resetStore: () => void;
-  loadFromEvent: (event: any) => void;
+  loadFromEvent: (event: Event) => void;
   loadedFromEvent: boolean;
   isFormValid: () => boolean;
   getGameData: () => PatchEvent | null;
@@ -373,7 +374,6 @@ export const useCreateGameStore = create<CreateGameState>((set, get) => ({
       state.time &&
       validateDateFormat(state.date) &&
       isTimeValid && // Проверяем только формат времени начала
-      state.type &&
       state.courtId &&
       state.rankMin !== null &&
       state.rankMin >= 0 &&
@@ -465,7 +465,7 @@ export const useCreateGameStore = create<CreateGameState>((set, get) => ({
       rankMax: ranks.find((r) => r.title === state.rankMaxInput)?.to ?? 0,
       rankMin: ranks.find((r) => r.title === state.rankMinInput)?.from ?? 0,
       startTime: start,
-      data: { game: { type: state.type } },
+      data: { game: { type: "игра" } },
     };
   },
 }));

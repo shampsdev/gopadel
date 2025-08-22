@@ -34,8 +34,6 @@ export const GameEdit = () => {
     time,
     timeError,
     setTime,
-    type,
-    setType,
     courtId,
     setCourtId,
     rankMin,
@@ -58,8 +56,6 @@ export const GameEdit = () => {
     loadedFromEvent,
     duration,
     setDuration,
-    typeFieldOpen,
-    setTypeFieldOpen,
   } = useGameEditStore();
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
@@ -228,65 +224,6 @@ export const GameEdit = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-[8px] mt-[16px]">
-            <div className="text-[#868D98] text-[15px] px-[16px] font-medium ">
-              Тип
-            </div>
-            <div className="flex flex-row gap-[4px] text-center">
-              <div
-                className={
-                  "w-full  py-[12px] rounded-[12px] text-[14px] cursor-pointer " +
-                  (typeFieldOpen || type !== "американо"
-                    ? "bg-[#F8F8FA]"
-                    : "bg-[#AFFF3F]")
-                }
-                onClick={() => {
-                  setTypeFieldOpen(false);
-                  setType("американо");
-                }}
-              >
-                американо
-              </div>
-              <div
-                className={
-                  "w-full  py-[12px] rounded-[12px] text-[14px] cursor-pointer " +
-                  (typeFieldOpen || type !== "мексикано"
-                    ? "bg-[#F8F8FA]"
-                    : "bg-[#AFFF3F]")
-                }
-                onClick={() => {
-                  setTypeFieldOpen(false);
-                  setType("мексикано");
-                }}
-              >
-                мексикано
-              </div>
-            </div>
-            <div className="flex flex-row gap-[4px] text-center">
-              <div
-                className={
-                  "w-full  py-[12px] text-[14px] cursor-pointer " +
-                  (typeFieldOpen
-                    ? "bg-[#AFFF3F] rounded-[12px]"
-                    : "bg-[#F8F8FA] rounded-[12px]")
-                }
-                onClick={() => setTypeFieldOpen(true)}
-              >
-                свой тип
-              </div>
-              <div className="w-full bg-white py-[12px]"></div>
-            </div>
-          </div>
-
-          {typeFieldOpen && (
-            <Input
-              onChangeFunction={setType}
-              title={"Тип"}
-              value={type}
-              maxLength={100}
-              hasError={!type}
-            />
-          )}
           <CourtSelector
             title="Корт"
             value={courtId}
@@ -297,7 +234,7 @@ export const GameEdit = () => {
             courts={courts ?? []}
           />
           <LevelSelector
-            title="Уровень турнира"
+            title="Уровень игры"
             minValue={rankMin}
             maxValue={rankMax}
             onChangeMinValue={setRankMinValue}
