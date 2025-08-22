@@ -55,6 +55,24 @@ type GameEventStrategy struct {
 	BaseEventStrategy
 }
 
+// ValidateRegistration для игр - ранг игрока игнорируется
+func (g *GameEventStrategy) ValidateRegistration(ctx context.Context, user *domain.User, event *domain.Event) error {
+	if event.Status == domain.EventStatusCompleted {
+		return errors.New("event is already completed")
+	}
+	
+	if event.Status == domain.EventStatusCancelled {
+		return errors.New("event is cancelled")
+	}
+	
+	if event.Status == domain.EventStatusFull {
+		return errors.New("all spots for this event are taken")
+	}
+	
+	// Для игр не проверяем ранг - любой может подавать заявки
+	return nil
+}
+
 func (g *GameEventStrategy) DetermineRegistrationStatus(ctx context.Context, event *domain.Event) domain.RegistrationStatus {
 	// Эта функция будет переопределена в RegisterForEvent для проверки организатора
 	// Для игр по умолчанию INVITED - приглашение, которое не занимает место до подтверждения
