@@ -76,19 +76,28 @@ export const Games = () => {
       <div className="flex flex-col gap-4 pb-[100px] mt-4">
         {events?.map((event: Event) => (
           <EventCard
+            status={event.status}
             key={event.id}
             id={event.id}
             title={event.name}
             rankMin={event.rankMin}
             rankMax={event.rankMax}
             organizerName={`${event.organizer.firstName} ${event.organizer.lastName}`}
-            date={new Date(event.startTime).toLocaleDateString("ru-RU", {
-              day: "numeric",
-              month: "long",
-              hour: "2-digit",
-              minute: "2-digit",
-              timeZone: "Europe/Moscow",
-            })}
+            date={(() => {
+              const d = new Date(event.startTime);
+              const day = d.toLocaleDateString("ru-RU", {
+                day: "2-digit",
+                month: "2-digit",
+                timeZone: "Europe/Moscow",
+              });
+              const time = d.toLocaleTimeString("ru-RU", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+                timeZone: "Europe/Moscow",
+              });
+              return `${day} ${time}`;
+            })()}
             locationTitle={event.court.name}
             address={event.court.address}
             eventType={event.type}

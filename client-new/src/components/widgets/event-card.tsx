@@ -6,6 +6,8 @@ import { Preloader } from "./preloader";
 import { Link } from "react-router";
 import { getLinkToEvent } from "../../utils/get-link-to-event";
 import { EventType } from "../../types/event-type.type";
+import type { EventStatus } from "../../types/event-status.type";
+import { EventStatusView } from "../ui/event-status-view";
 
 export interface EventCardProps {
   className?: string;
@@ -23,6 +25,7 @@ export interface EventCardProps {
   playersCapacity: number;
   playersAmount: number;
   participating?: boolean;
+  status: EventStatus;
 }
 
 export const EventCard = ({
@@ -41,6 +44,7 @@ export const EventCard = ({
   playersAmount,
   title,
   participating,
+  status,
 }: EventCardProps) => {
   const { data: user } = useGetMe();
 
@@ -50,64 +54,64 @@ export const EventCard = ({
     <Link to={getLinkToEvent(id, eventType as EventType)}>
       <div
         className={twMerge(
-          "py-5 px-7 flex flex-col gap-9 border-[#EBEDF0] border-[1px] rounded-[24px] bg-white",
+          "py-5 px-7 flex flex-col gap-5 border-[#EBEDF0] border-[1px] rounded-[24px] bg-white",
           className,
           playersAmount === playersCapacity ? "bg-[#F8F8FA]" : ""
         )}
       >
         <div className="flex flex-col gap-5">
-          <div className="flex flex-row justify-between">
-            <div className="flex flex-col gap-1 flex-1">
-              <p className="text-[20px]">{title}</p>
-              <div className="flex flex-row flex-wrap items-center gap-1 text-[#868D98]">
-                Организатор: <p className="text-[#5D6674]">{organizerName}</p>
-              </div>
+          <div className="flex flex-col gap-[12px]">
+            <div className="flex flex-row gap-[12px] items-center">
+              <EventStatusView status={status} />
+
+              <span className="inline-block w-[6px] h-[6px] rounded-full bg-black"></span>
+              <p className="font-medium text-[14px]">{date.split(" ")[0]}</p>
+
+              <span className="inline-block w-[6px] h-[6px] rounded-full bg-black"></span>
+              <p className="font-medium text-[14px]">{date.split(" ")[1]}</p>
             </div>
 
-            <div>
-              <div className="bg-[#E7FFC6] rounded-full p-[10px]">
-                {eventType === EventType.tournament && Icons.Medal("#77BE14")}
-
-                {eventType === EventType.game && Icons.Padel("#77BE14")}
+            <div className="flex flex-row justify-between">
+              <div className="flex flex-col gap-1 flex-1">
+                <p className="text-[20px]">{title}</p>
+                <div className="flex flex-row flex-wrap items-center gap-1 text-[#868D98]">
+                  Организатор: <p className="text-[#5D6674]">{organizerName}</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 text-[#868D98]">
-            <div className="flex flex-row items-start gap-3">
-              <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
-                {Icons.Calendar()}
-              </div>
-              <p>{date}</p>
-            </div>
-
-            <div className="flex flex-row items-start gap-3">
-              <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
-                {Icons.Location()}
-              </div>
-              <div className="flex flex-col ">
-                <p>{locationTitle}</p>
-                <p>{address}</p>
+          <div className="flex flex-col gap-[4px]">
+            <div className="flex flex-row gap-[14px] bg-[#041124] py-[16px] px-[16px] rounded-[16px] text-white text-[14px] items-center">
+              <div className="w-[18px] h-[18px]">{Icons.Location("white")}</div>
+              <div className="flex flex-col flex-1 min-w-0">
+                <p className="truncate">{locationTitle}</p>
+                <p className="truncate">{address}</p>
               </div>
             </div>
-
-            <div className="flex flex-row items-start gap-3">
-              <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
-                {Icons.Cup()}
+            <div className="flex flex-row gap-[4px] items-center text-[14px]">
+              <div className="rounded-[16px] px-[16px] py-[12px] items-center flex flex-row gap-[12px] bg-[#AFFF3F]">
+                <div className="w-[18px] h-[18px]">
+                  {eventType === EventType.tournament && Icons.Medal("#000000")}
+                  {eventType === EventType.game && Icons.Padel("#000000")}
+                </div>
+                <p>{eventType === EventType.tournament ? "турнир" : "игра"}</p>
               </div>
-              <p>Тип: {type}</p>
+
+              <div className="flex-1 flex-shrink-0 rounded-[16px] px-[16px] py-[12px] items-center flex flex-row gap-[12px] bg-[#B4B7FF]">
+                <div className="w-[18px] h-[18px]">{Icons.Cup("#000000")}</div>
+                <p>{type}</p>
+              </div>
             </div>
-
-            <div className="flex flex-row items-start gap-3">
-              <div className="flex-shrink-0 w-[18px] h-[18px] pt-[4px] flex items-center justify-center">
-                {Icons.Star()}
+            <div className="flex flex-row gap-[14px] border-[#EBEDF0] border-[1px] py-[16px] px-[16px] rounded-[16px] text-black text-[14px] items-center">
+              <div className="w-[18px] h-[18px]">{Icons.Star("#000000")}</div>
+              <div className="flex flex-col flex-1 min-w-0">
+                <p>
+                  {getRankTitle(rankMin) === getRankTitle(rankMax)
+                    ? getRankTitle(rankMin)
+                    : `${getRankTitle(rankMin)} - ${getRankTitle(rankMax)}`}
+                </p>
               </div>
-              <p>
-                {" "}
-                {getRankTitle(rankMin) === getRankTitle(rankMax)
-                  ? getRankTitle(rankMin)
-                  : `${getRankTitle(rankMin)} - ${getRankTitle(rankMax)}`}
-              </p>
             </div>
           </div>
         </div>
@@ -116,12 +120,14 @@ export const EventCard = ({
           <div className="flex flex-row gap-[6px] ">
             <div className="flex flex-col">
               {cost === 0 && (
-                <div className="text-[20px] text-[#77BE14]">бесплатно</div>
+                <div className="text-[22px] font-semibold text-[#77BE14]">
+                  бесплатно
+                </div>
               )}
               {cost > 0 && (
                 <div
                   className={twMerge(
-                    "text-[20px] ",
+                    "text-[22px] ",
                     user.loyalty.discount > 0 &&
                       eventType === EventType.tournament
                       ? "text-[#77BE14]"
@@ -130,10 +136,10 @@ export const EventCard = ({
                 >
                   <span
                     className={twMerge(
-                      "text-black font-semibold text-[20px]",
+                      "text-black font-semibold text-[22px]",
                       user.loyalty.discount > 0 &&
                         eventType === EventType.tournament &&
-                        "text-[#77BE14]"
+                        "text-[#afca88]"
                     )}
                   >
                     {user.loyalty.discount > 0
@@ -143,13 +149,12 @@ export const EventCard = ({
                   ₽
                 </div>
               )}
-              <p className="text-[12px] text-[#868D98]">участие</p>
             </div>
             {user.loyalty.discount > 0 &&
               cost > 0 &&
               eventType === EventType.tournament && (
-                <div className="text-[14px]  text-[#F34338] line-through">
-                  <span className="font-semibold text-[14px] ">{cost}</span>{" "}
+                <div className="text-[14px] text-[#F34338] line-through">
+                  <span className="font-medium text-[14px] ">{cost}</span>{" "}
                   <span className="opacity-40">₽</span>
                 </div>
               )}

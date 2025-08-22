@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Club } from "../../../types/club.type";
+import { Icons } from "../../../assets/icons";
 
 interface ClubSelectorProps {
   title: string;
@@ -31,8 +32,9 @@ export const ClubSelector = ({
           }`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <legend className="px-2 text-[15px] font-semibold transition-all duration-100">
-          {title}
+        <legend className="px-2 text-[15px] font-semibold transition-all duration-100 flex flex-row gap-[2px]">
+          <p>{title}</p>
+          <div className="mt-[4px]">{Icons.RequiredFieldStar()}</div>
         </legend>
         <div className="flex justify-between items-center pb-[12px] py-[3px] px-[16px]">
           <span className={selectedClub ? "text-black" : "text-[#A4A9B4]"}>

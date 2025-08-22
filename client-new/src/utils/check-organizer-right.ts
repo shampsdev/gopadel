@@ -7,3 +7,7 @@ export const checkOrganizerRight = (
 ): boolean => {
   return isAdmin && event.organizer.id === userId;
 };
+
+export const checkGameOrganizerRight = (userId: string, event: Event) => {
+  return event.organizer.id === userId;
+};

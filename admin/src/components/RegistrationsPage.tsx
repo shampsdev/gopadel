@@ -1,36 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Avatar, AvatarFallback } from './ui/avatar';
-import { ScrollArea } from './ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Label } from './ui/label';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Avatar, AvatarFallback } from "./ui/avatar";
+import { ScrollArea } from "./ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Label } from "./ui/label";
 
-import { 
-  Filter, 
-  RefreshCw, 
-  ChevronLeft, 
-  ChevronRight,
-  Calendar,
-  Trophy,
-  CreditCard,
-  Edit3,
-  Save,
-  X
-} from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useToastContext } from '../contexts/ToastContext';
-import { RegistrationModal } from './RegistrationModal';
-import { registrationsApi } from '../api/registrations';
-import type { 
-  RegistrationWithPayments as Registration, 
-  AdminFilterRegistration as FilterRegistration, 
-  TournamentOption, 
+import { useAuth } from "../contexts/AuthContext";
+import { useToastContext } from "../contexts/ToastContext";
+import { RegistrationModal } from "./RegistrationModal";
+import { registrationsApi } from "../api/registrations";
+import type {
+  RegistrationWithPayments as Registration,
+  AdminFilterRegistration as FilterRegistration,
+  TournamentOption,
   UserOption,
-  RegistrationStatus
-} from '../api/registrations';
-import { allStatusOptions, gameStatusOptions, tournamentStatusOptions } from '../api/registrations';
+  RegistrationStatus,
+} from "../api/registrations";
+import {
+  allStatusOptions,
+  gameStatusOptions,
+  tournamentStatusOptions,
+} from "../api/registrations";
 
 const REGISTRATIONS_PER_PAGE = 10;
 
@@ -39,27 +37,33 @@ interface RegistrationsPageProps {
   eventName?: string;
 }
 
-export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: initialEventId }) => {
+export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({
+  eventId: initialEventId,
+}) => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(false);
   const [tournaments, setTournaments] = useState<TournamentOption[]>([]);
   const [users, setUsers] = useState<UserOption[]>([]);
-  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [userSearchTerm, setUserSearchTerm] = useState("");
   const [showUserResults, setShowUserResults] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
+  const [selectedRegistration, setSelectedRegistration] =
+    useState<Registration | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStatusId, setEditingStatusId] = useState<string | null>(null);
-  const [newStatus, setNewStatus] = useState<RegistrationStatus>('PENDING');
+  const [newStatus, setNewStatus] = useState<RegistrationStatus>("PENDING");
   const [updatingStatus, setUpdatingStatus] = useState(false);
-  
+
   // Фильтры
-  const [selectedEvent, setSelectedEvent] = useState<string>(initialEventId || '');
-  const [selectedUser, setSelectedUser] = useState<string>('');
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
-  
+  const [selectedEvent, setSelectedEvent] = useState<string>(
+    initialEventId || ""
+  );
+  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+
   const { user } = useAuth();
-  const { error: showErrorToast, success: showSuccessToast } = useToastContext();
+  const { error: showErrorToast, success: showSuccessToast } =
+    useToastContext();
 
   const canEditStatus = user?.is_superuser || false;
 
@@ -85,10 +89,12 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
       const eventsData = await registrationsApi.getTournamentOptions();
       setTournaments(eventsData);
     } catch (error: unknown) {
-      const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error 
-        : undefined;
-      showErrorToast(errorMessage || 'Ошибка при загрузке событий');
+      const errorMessage =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { error?: string } } }).response
+              ?.data?.error
+          : undefined;
+      showErrorToast(errorMessage || "Ошибка при загрузке событий");
     }
   };
 
@@ -97,12 +103,14 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
       setUsers([]);
       return;
     }
-    
+
     try {
-      const usersData = await registrationsApi.searchUsers({ telegramUsername: searchTerm });
+      const usersData = await registrationsApi.searchUsers({
+        telegramUsername: searchTerm,
+      });
       setUsers(usersData);
     } catch (error: unknown) {
-      console.error('Ошибка поиска пользователей:', error);
+      console.error("Ошибка поиска пользователей:", error);
       setUsers([]);
     }
   };
@@ -115,38 +123,40 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
     setLoading(true);
     try {
       const filter: FilterRegistration = {};
-      
+
       if (selectedEvent) {
         filter.eventId = selectedEvent;
       }
-      
+
       if (selectedUser) {
         filter.userId = selectedUser;
       }
-      
+
       if (selectedStatus) {
         filter.status = selectedStatus as RegistrationStatus;
       }
-      
+
       const data = await registrationsApi.filter(filter);
       setRegistrations(data);
       setCurrentPage(1);
     } catch (error: unknown) {
-      const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error 
-        : undefined;
-      showErrorToast(errorMessage || 'Ошибка при загрузке регистраций');
-      console.error('Error loading registrations:', error);
+      const errorMessage =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { error?: string } } }).response
+              ?.data?.error
+          : undefined;
+      showErrorToast(errorMessage || "Ошибка при загрузке регистраций");
+      console.error("Error loading registrations:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleRefresh = () => {
-    setSelectedEvent('');
-    setSelectedUser('');
-    setSelectedStatus('');
-    setUserSearchTerm('');
+    setSelectedEvent("");
+    setSelectedUser("");
+    setSelectedStatus("");
+    setUserSearchTerm("");
     setUsers([]);
     setRegistrations([]);
     setCurrentPage(1);
@@ -160,7 +170,9 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
 
   const handleUserSelect = (user: UserOption) => {
     setSelectedUser(user.id);
-    setUserSearchTerm(`${user.firstName} ${user.lastName} (@${user.telegramUsername})`);
+    setUserSearchTerm(
+      `${user.firstName} ${user.lastName} (@${user.telegramUsername})`
+    );
     setShowUserResults(false);
   };
 
@@ -182,9 +194,9 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
   };
 
   const getAvailableStatuses = (eventType?: string) => {
-    if (eventType === 'game') {
+    if (eventType === "game") {
       return gameStatusOptions;
-    } else if (eventType === 'tournament') {
+    } else if (eventType === "tournament") {
       return tournamentStatusOptions;
     }
     return allStatusOptions;
@@ -204,21 +216,24 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
         registration.eventId,
         { status: newStatus }
       );
-      
+
       // Обновляем локальное состояние
-      setRegistrations(prev => 
-        prev.map(reg => 
-          reg.userId === updatedRegistration.userId && reg.eventId === updatedRegistration.eventId
+      setRegistrations((prev) =>
+        prev.map((reg) =>
+          reg.userId === updatedRegistration.userId &&
+          reg.eventId === updatedRegistration.eventId
             ? updatedRegistration
             : reg
         )
       );
-      
+
       setEditingStatusId(null);
-      showSuccessToast('Статус регистрации обновлен');
+      showSuccessToast("Статус регистрации обновлен");
     } catch (error: any) {
-      console.error('Ошибка обновления статуса:', error);
-      showErrorToast(error.response?.data?.error || 'Ошибка при обновлении статуса');
+      console.error("Ошибка обновления статуса:", error);
+      showErrorToast(
+        error.response?.data?.error || "Ошибка при обновлении статуса"
+      );
     } finally {
       setUpdatingStatus(false);
     }
@@ -226,20 +241,22 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
 
   const handleCancelEdit = () => {
     setEditingStatusId(null);
-    setNewStatus('PENDING');
+    setNewStatus("PENDING");
   };
 
   const getStatusConfig = (status: RegistrationStatus) => {
-    return allStatusOptions.find(s => s.value === status) || allStatusOptions[0];
+    return (
+      allStatusOptions.find((s) => s.value === status) || allStatusOptions[0]
+    );
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ru-RU', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("ru-RU", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -261,14 +278,14 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
-      if (!target.closest('.user-search-container')) {
+      if (!target.closest(".user-search-container")) {
         setShowUserResults(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -290,8 +307,8 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                 <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                   <SelectValue placeholder="Выберите событие" />
                 </SelectTrigger>
-                                 <SelectContent className="bg-zinc-800 border-zinc-700">
-                    <SelectItem value="">Все события</SelectItem>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  <SelectItem value="">Все события</SelectItem>
                   {tournaments.map((event) => (
                     <SelectItem key={event.id} value={event.id}>
                       {event.name}
@@ -311,7 +328,7 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                   onChange={(e) => handleUserSearch(e.target.value)}
                   className="bg-zinc-800 border-zinc-700 text-white placeholder-zinc-500"
                 />
-                
+
                 {showUserResults && users.length > 0 && (
                   <div className="absolute top-full left-0 right-0 z-50 bg-zinc-800 border border-zinc-700 rounded-md mt-1 max-h-60 overflow-y-auto">
                     {users.map((user) => (
@@ -340,8 +357,8 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                 <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                   <SelectValue placeholder="Выберите статус" />
                 </SelectTrigger>
-                                 <SelectContent className="bg-zinc-800 border-zinc-700">
-                    <SelectItem value="">Все статусы</SelectItem>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  <SelectItem value="">Все статусы</SelectItem>
                   {allStatusOptions.map((status) => (
                     <SelectItem key={status.value} value={status.value}>
                       <span className={status.color}>{status.label}</span>
@@ -381,8 +398,12 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
           ) : registrations.length === 0 ? (
             <div className="text-center py-8">
               <Calendar className="h-16 w-16 text-zinc-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-white mb-2">Регистрации не найдены</h3>
-              <p className="text-zinc-400">Выберите фильтры для поиска регистраций</p>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Регистрации не найдены
+              </h3>
+              <p className="text-zinc-400">
+                Выберите фильтры для поиска регистраций
+              </p>
             </div>
           ) : (
             <ScrollArea className="h-full">
@@ -390,33 +411,57 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                 <table className="w-full">
                   <thead className="bg-zinc-800/50 border-b border-zinc-700">
                     <tr>
-                      <th className="text-left py-3 px-4 text-zinc-300 font-medium">Пользователь</th>
-                      <th className="text-left py-3 px-4 text-zinc-300 font-medium">Событие</th>
-                      <th className="text-left py-3 px-4 text-zinc-300 font-medium">Статус</th>
-                      <th className="text-left py-3 px-4 text-zinc-300 font-medium">Платежи</th>
-                      <th className="text-left py-3 px-4 text-zinc-300 font-medium">Дата регистрации</th>
-                      {canEditStatus && <th className="text-right py-3 px-4 text-zinc-300 font-medium">Действия</th>}
+                      <th className="text-left py-3 px-4 text-zinc-300 font-medium">
+                        Пользователь
+                      </th>
+                      <th className="text-left py-3 px-4 text-zinc-300 font-medium">
+                        Событие
+                      </th>
+                      <th className="text-left py-3 px-4 text-zinc-300 font-medium">
+                        Статус
+                      </th>
+                      <th className="text-left py-3 px-4 text-zinc-300 font-medium">
+                        Платежи
+                      </th>
+                      <th className="text-left py-3 px-4 text-zinc-300 font-medium">
+                        Дата регистрации
+                      </th>
+                      {canEditStatus && (
+                        <th className="text-right py-3 px-4 text-zinc-300 font-medium">
+                          Действия
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
                     {currentRegistrations.map((registration, index) => {
                       const key = getRegistrationKey(registration);
                       const isEditing = editingStatusId === key;
-                      
+
                       return (
-                        <tr key={`${key}-${index}`} className="border-b border-zinc-800 hover:bg-zinc-800/50">
+                        <tr
+                          key={`${key}-${index}`}
+                          className="border-b border-zinc-800 hover:bg-zinc-800/50"
+                        >
                           <td className="py-3 px-4">
                             <div className="flex items-center space-x-3">
                               <Avatar className="h-8 w-8">
                                 <AvatarFallback className="bg-zinc-700 text-white text-xs">
-                                  {registration.user && getInitials(registration.user.firstName, registration.user.lastName)}
+                                  {registration.user &&
+                                    getInitials(
+                                      registration.user.firstName,
+                                      registration.user.lastName
+                                    )}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
                                 <p className="text-white font-medium">
-                                  {registration.user?.firstName} {registration.user?.lastName}
+                                  {registration.user?.firstName}{" "}
+                                  {registration.user?.lastName}
                                 </p>
-                                <p className="text-sm text-zinc-400">@{registration.user?.telegramUsername}</p>
+                                <p className="text-sm text-zinc-400">
+                                  @{registration.user?.telegramUsername}
+                                </p>
                               </div>
                             </div>
                           </td>
@@ -424,9 +469,12 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                             <div className="flex items-center space-x-2">
                               <Trophy className="h-4 w-4 text-yellow-500" />
                               <div>
-                                <p className="text-white font-medium">{registration.event?.name}</p>
+                                <p className="text-white font-medium">
+                                  {registration.event?.name}
+                                </p>
                                 <p className="text-sm text-zinc-400">
-                                  {registration.event && formatDate(registration.event.startTime)}
+                                  {registration.event &&
+                                    formatDate(registration.event.startTime)}
                                 </p>
                               </div>
                             </div>
@@ -434,21 +482,30 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                           <td className="py-3 px-4">
                             {isEditing ? (
                               <div className="flex items-center space-x-2">
-                                                                 <Select 
-                                   value={newStatus} 
-                                   onValueChange={(value) => setNewStatus(value as RegistrationStatus)}
-                                 >
-                                   <SelectTrigger className="bg-zinc-700 border-zinc-600 text-white w-40">
-                                     <SelectValue />
-                                   </SelectTrigger>
-                                   <SelectContent className="bg-zinc-800 border-zinc-700">
-                                     {getAvailableStatuses(registration.event?.type).map((status) => (
-                                       <SelectItem key={status.value} value={status.value}>
-                                         <span className={status.color}>{status.label}</span>
-                                       </SelectItem>
-                                     ))}
-                                   </SelectContent>
-                                 </Select>
+                                <Select
+                                  value={newStatus}
+                                  onValueChange={(value) =>
+                                    setNewStatus(value as RegistrationStatus)
+                                  }
+                                >
+                                  <SelectTrigger className="bg-zinc-700 border-zinc-600 text-white w-40">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                                    {getAvailableStatuses(
+                                      registration.event?.type
+                                    ).map((status) => (
+                                      <SelectItem
+                                        key={status.value}
+                                        value={status.value}
+                                      >
+                                        <span className={status.color}>
+                                          {status.label}
+                                        </span>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                                 <Button
                                   onClick={() => handleSaveStatus(registration)}
                                   disabled={updatingStatus}
@@ -469,12 +526,20 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                               </div>
                             ) : (
                               <div className="flex items-center space-x-2">
-                                <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusConfig(registration.status).bgColor} ${getStatusConfig(registration.status).color}`}>
+                                <div
+                                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                    getStatusConfig(registration.status).bgColor
+                                  } ${
+                                    getStatusConfig(registration.status).color
+                                  }`}
+                                >
                                   {getStatusConfig(registration.status).label}
                                 </div>
                                 {canEditStatus && (
                                   <Button
-                                    onClick={() => handleEditStatus(registration)}
+                                    onClick={() =>
+                                      handleEditStatus(registration)
+                                    }
                                     size="sm"
                                     variant="ghost"
                                     className="h-6 w-6 p-0 hover:bg-zinc-700"
@@ -487,23 +552,32 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center space-x-2">
-                              {registration.payments && registration.payments.length > 0 ? (
+                              {registration.payments &&
+                              registration.payments.length > 0 ? (
                                 <Button
-                                  onClick={() => handleViewPayments(registration)}
+                                  onClick={() =>
+                                    handleViewPayments(registration)
+                                  }
                                   size="sm"
                                   variant="outline"
                                   className="flex items-center space-x-2 bg-green-600/20 border-green-600 text-green-300 hover:bg-green-600/30 hover:border-green-500"
                                 >
                                   <CreditCard className="h-4 w-4" />
-                                  <span>Платежи ({registration.payments.length})</span>
+                                  <span>
+                                    Платежи ({registration.payments.length})
+                                  </span>
                                 </Button>
                               ) : (
-                                <span className="text-zinc-500 text-sm">Нет платежей</span>
+                                <span className="text-zinc-500 text-sm">
+                                  Нет платежей
+                                </span>
                               )}
                             </div>
                           </td>
                           <td className="py-3 px-4">
-                            <p className="text-zinc-300">{formatDate(registration.createdAt)}</p>
+                            <p className="text-zinc-300">
+                              {formatDate(registration.createdAt)}
+                            </p>
                           </td>
                           {canEditStatus && (
                             <td className="py-3 px-4 text-right">
@@ -533,9 +607,11 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
               <p className="text-sm text-zinc-400">
-                Показано {startIndex + 1}-{Math.min(endIndex, registrations.length)} из {registrations.length}
+                Показано {startIndex + 1}-
+                {Math.min(endIndex, registrations.length)} из{" "}
+                {registrations.length}
               </p>
-              
+
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
@@ -546,11 +622,11 @@ export const RegistrationsPage: React.FC<RegistrationsPageProps> = ({ eventId: i
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                
+
                 <span className="text-white">
                   Страница {currentPage} из {totalPages}
                 </span>
-                
+
                 <Button
                   variant="outline"
                   size="sm"

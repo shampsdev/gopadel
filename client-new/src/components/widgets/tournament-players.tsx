@@ -102,6 +102,9 @@ export const TournamentPlayers = ({
                     goToUserProfile(registration.user.id);
                   }}
                 >
+                  <div className="absolute bottom-[30%] z-10 left-0 bg-[#B4B7FF] text-black text-[12px] px-[2px] py-[3px] rounded-full w-[30px] text-center">
+                    {registration.user.rank.toString().slice(0, 3)}
+                  </div>
                   {registration.status === RegistrationStatus.CONFIRMED && (
                     <div className="absolute bg-[#AFFF3F] top-0 right-0 w-[24px] z-10 h-[24px] rounded-full flex items-center justify-center">
                       {Icons.Success("black")}

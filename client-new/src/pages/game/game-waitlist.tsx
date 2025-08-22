@@ -1,64 +1,107 @@
-import { useParams } from "react-router";
-import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
-import { useGetEventWaitlist } from "../../api/hooks/useGetEventWaitlist";
+import { Link, useParams } from "react-router";
 import { getRankTitle } from "../../utils/rank-title";
-import { Link } from "react-router";
+import { useGetEvents } from "../../api/hooks/useGetEvents";
+import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Preloader } from "../../components/widgets/preloader";
+import { RegistrationStatus } from "../../types/registration-status";
+import { useRejectGameRegistration } from "../../api/hooks/mutations/registration/reject-game-registration";
+import { useApproveGameRegistration } from "../../api/hooks/mutations/registration/approve-game-registration";
+import { checkGameOrganizerRight } from "../../utils/check-organizer-right";
+import { useAuthStore } from "../../shared/stores/auth.store";
+import { Icons } from "../../assets/icons";
 
 export const GameWaitlist = () => {
   useTelegramBackButton({ showOnMount: true });
   const { id } = useParams();
 
-  const { data: waitlist, isLoading } = useGetEventWaitlist(id!);
+  const { data: events, isLoading } = useGetEvents({ id: id });
+  const { user } = useAuthStore();
+
+  const { mutate: approveRegistration } = useApproveGameRegistration();
+  const { mutate: rejectRegistration } = useRejectGameRegistration();
 
   if (isLoading) return <Preloader />;
 
-  if (waitlist) {
+  if (events) {
     return (
       <div className="flex flex-col gap-9 pb-[100px]">
         <div className="flex flex-col gap-4">
-          <p>Список ожидания</p>
-          <div className="flex flex-col gap-[6px] text-[#5D6674] text-[16px] font-medium">
-            <p>В списке ожидания: {waitlist.length}</p>
-          </div>
+          <p className="text-[24px] font-medium">Список ожидания</p>
         </div>
 
         <div className="flex flex-col gap-[20px] justify-around">
-          {waitlist.map((waitlistItem, index) => {
-            return (
-              <Link to={`/profile/${waitlistItem.user.id}`}>
-                <div
-                  key={waitlistItem.user.id}
-                  className="flex flex-row items-center gap-[21px]"
-                >
-                  <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
-                    <img
-                      className="object-cover w-full h-full"
-                      src={waitlistItem.user.avatar}
-                      alt="avatar"
-                    />
-                  </div>
+          {events[0].participants &&
+            events[0].participants
+              ?.filter(
+                (participant) =>
+                  participant.status === RegistrationStatus.INVITED
+              )
+              ?.map((userRegistration) => {
+                return (
+                  <div
+                    key={userRegistration.userId}
+                    className="flex flex-row  bg-[#F8F8FA] rounded-[30px] px-[16px] py-[8px] items-center"
+                  >
+                    <Link
+                      to={`/profile/${userRegistration.userId}`}
+                      className="flex-1"
+                    >
+                      <div className="flex flex-row items-center gap-[21px] flex-1">
+                        <div className="w-[48px] h-[48px] rounded-full overflow-hidden">
+                          <img
+                            className="object-cover w-full h-full"
+                            src={userRegistration.user.avatar}
+                            alt="avatar"
+                          />
+                        </div>
 
-                  <div className="flex flex-row gap-[21px] flex-1 flex-grow ">
-                    <div className="flex flex-row flex-grow flex-1 justify-between">
-                      <div className="flex flex-col gap-[2px]">
-                        <p className="text-[14px]">
-                          {waitlistItem.user.firstName}{" "}
-                          {waitlistItem.user.lastName}
-                        </p>
-                        <p className="text-[#868D98] text-[14px]">
-                          {getRankTitle(waitlistItem.user.rank)}
-                        </p>
+                        <div className="flex flex-row gap-[21px] flex-1 flex-grow items-center">
+                          <div className="flex flex-row flex-grow flex-1 ">
+                            <div className="flex flex-col gap-[2px]">
+                              <p className="text-[14px]">
+                                {userRegistration.user.firstName}{" "}
+                                {userRegistration.user.lastName}
+                              </p>
+                              <p className="text-[#868D98] text-[14px]">
+                                {getRankTitle(userRegistration.user.rank)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-[#A4A9B4] text-[14px] w-[32px] h-[32px] bg-[#F8F8FA] rounded-full flex items-center justify-center flex-shrink-0">
-                        {index + 1}
-                      </div>
+                    </Link>
+                    <div className="flex flex-row justify-between gap-[4px] items-center">
+                      {checkGameOrganizerRight(user?.id || "", events?.[0]) && (
+                        <div
+                          className="rounded-full w-[42px] h-[42px] flex flex-row items-center justify-center bg-[#AFFF3F]"
+                          onClick={() => {
+                            approveRegistration({
+                              eventId: id!,
+                              userId: userRegistration.userId,
+                            });
+                          }}
+                        >
+                          {Icons.Accept()}
+                        </div>
+                      )}
+                      {checkGameOrganizerRight(user?.id || "", events?.[0]) && (
+                        <div
+                          className="rounded-full w-[42px] h-[42px] flex flex-row items-center justify-center"
+                          style={{ backgroundColor: "rgba(243, 67, 56, 0.24)" }}
+                          onClick={() => {
+                            rejectRegistration({
+                              eventId: id!,
+                              userId: userRegistration.userId,
+                            });
+                          }}
+                        >
+                          {Icons.Reject()}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              </Link>
-            );
-          })}
+                );
+              })}
         </div>
       </div>
     );

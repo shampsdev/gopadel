@@ -1,23 +1,17 @@
 import { useCancelRegistrationAfterPayment } from "../../api/hooks/mutations/registration/cancel-registration-after-payment";
 import { useReactivateCancelledRegistration } from "../../api/hooks/mutations/registration/reactivate-cancelled-registration";
-import { useAddUserToWaitlist } from "../../api/hooks/mutations/waitlist/add-user-to-waitlist";
-import { useRemoveUserFromWaitlist } from "../../api/hooks/mutations/waitlist/remove-user-from-waitlist";
 import { Icons } from "../../assets/icons";
 import type { User } from "../../types/user.type";
-import type { Waitlist } from "../../types/waitlist.type";
 import {
-  isRankAllowed,
   isEventFinished,
   isUserRegistered,
   participatingAvailable,
   isUserCancelledParticipating,
-  isUserInWaitlist,
   isUserApproved,
   isUserInvited,
 } from "../../utils/game-status-checks";
 import { Button } from "../ui/button";
 import { useModalStore } from "../../shared/stores/modal.store";
-import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { useRegisterToEvent } from "../../api/hooks/mutations/registration/register-to-event";
 import { EventStatus } from "../../types/event-status.type";
 import type { Game } from "../../types/game.type";
@@ -25,17 +19,10 @@ import type { Game } from "../../types/game.type";
 interface GameStatusActionsProps {
   game: Game;
   user: User;
-  waitlist: Waitlist;
 }
 
-export const GameStatusActions = ({
-  game,
-  user,
-  waitlist,
-}: GameStatusActionsProps) => {
+export const GameStatusActions = ({ game, user }: GameStatusActionsProps) => {
   const { openModal } = useModalStore();
-  const { mutateAsync: addUserToWaitlist } = useAddUserToWaitlist();
-  const { mutateAsync: removeUserFromWaitlist } = useRemoveUserFromWaitlist();
   const { mutateAsync: registerToEvent } = useRegisterToEvent();
   const { mutateAsync: reactivateCancelledRegistration } =
     useReactivateCancelledRegistration();
@@ -95,15 +82,6 @@ export const GameStatusActions = ({
         return (
           <>
             <div className="flex flex-col text-center gap-[18px]">
-              <div>
-                Для&nbsp;возврата средств обращайтесь к&nbsp;
-                <span
-                  onClick={() => openTelegramLink("https://t.me/Alievskey")}
-                  className="text-[#1599DB] text-[14px] cursor-pointer w-[70%] text-center"
-                >
-                  @Alievskey
-                </span>
-              </div>
               <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
                 <Button
                   onClick={async () => {
@@ -121,7 +99,6 @@ export const GameStatusActions = ({
       if (isUserApproved(game, user)) {
         return (
           <div className="flex flex-col text-center gap-[18px]">
-            <div>Вы зарегистрированы</div>
             <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
               <Button
                 className="bg-[#FF5053] text-white"
@@ -149,28 +126,17 @@ export const GameStatusActions = ({
     }
 
     if (!isUserRegistered(game, user)) {
-      if (isRankAllowed(game, user)) {
-        return (
-          <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
-            <Button
-              onClick={async () => {
-                await registerToEvent(game.id);
-              }}
-            >
-              Зарегистрироваться
-            </Button>
-          </div>
-        );
-      }
-
-      if (!isRankAllowed(game, user)) {
-        return (
-          <div className="flex flex-col text-center gap-[18px]">
-            <div>Ваш ранг не соответствует заявленному для&nbsp;этой игры</div>
-          </div>
-        );
-      }
-      return <></>;
+      return (
+        <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
+          <Button
+            onClick={async () => {
+              await registerToEvent(game.id);
+            }}
+          >
+            Зарегистрироваться
+          </Button>
+        </div>
+      );
     }
   }
 
@@ -201,52 +167,6 @@ export const GameStatusActions = ({
       );
     }
 
-    if (isRankAllowed(game, user)) {
-      if (isUserInWaitlist(waitlist, user)) {
-        return (
-          <div className="flex flex-col text-center gap-[18px]">
-            <div>Вы в&nbsp;листе ожидания</div>
-            <div className="mb-10 fixed bottom-8  right-0 left-0 flex flex-row gap-4 justify-center">
-              <Button
-                className="bg-[#FF5053] text-white"
-                onClick={async () => {
-                  await removeUserFromWaitlist(game.id);
-                }}
-              >
-                Покинуть лист ожидания
-              </Button>
-            </div>
-          </div>
-        );
-      }
-      if (!isUserInWaitlist(waitlist, user)) {
-        return (
-          <div className="flex flex-col text-center gap-[18px]">
-            <div>
-              Сейчас мест нет, но вы можете записаться в&nbsp;лист ожидания
-            </div>
-            <div className="mb-10 fixed bottom-8 z-20 right-0 left-0 flex flex-row gap-4 justify-center">
-              <Button
-                onClick={async () => {
-                  await addUserToWaitlist(game.id);
-                }}
-              >
-                В лист ожидания
-              </Button>
-            </div>
-          </div>
-        );
-      }
-      return <></>;
-    }
-
-    if (!isRankAllowed(game, user)) {
-      return (
-        <div className="flex flex-col text-center gap-[18px]">
-          <div>Ваш ранг не соответствует заявленному для&nbsp;этой игры</div>
-        </div>
-      );
-    }
     return <></>;
   }
 

@@ -10,7 +10,13 @@ export const useAddUserToWaitlist = () => {
     mutationFn: (eventId: string) => addUserToWaitlist(token!, eventId),
     onSuccess: (_, eventId) => {
       queryClient.invalidateQueries({
-        queryKey: ["event-waitlist", eventId],
+        queryKey: ["my-registrations"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["events"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["waitlist", eventId],
       });
     },
     onError: (error) => {

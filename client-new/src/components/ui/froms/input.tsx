@@ -20,10 +20,10 @@ export const Input = (props: InputProps) => {
           ${
             props.hasError
               ? "border-red-500 text-red-500 focus-within:border-red-600 focus-within:text-red-600"
-              : "border-[#EBEDF0] text-[#A4A9B4] focus-within:border-[#000] focus-within:text-[#000]"
+              : "border-[#EBEDF0] text-[#868D98] focus-within:border-[#000] focus-within:text-[#000]"
           }`}
       >
-        <legend className="px-2 text-[15px] font-semibold transition-all duration-100">
+        <legend className="px-2 text-[15px] font-medium transition-all duration-100">
           {props.title}
         </legend>
         <input

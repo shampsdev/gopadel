@@ -40,8 +40,6 @@ export const EditProfile = () => {
   const [firstNameError, setFirstNameError] = useState<boolean>(false);
   const [lastNameError, setLastNameError] = useState<boolean>(false);
   const [rankError, setRankError] = useState<boolean>(false);
-  const [bioError, setBioError] = useState<boolean>(false);
-  const [cityError, setCityError] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
@@ -97,18 +95,6 @@ export const EditProfile = () => {
     return isValid;
   };
 
-  const validateBio = (value: string) => {
-    const isValid = value.length > 0;
-    setBioError(!isValid);
-    return isValid;
-  };
-
-  const validateCity = (value: string) => {
-    const isValid = value.length > 0;
-    setCityError(!isValid);
-    return isValid;
-  };
-
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(
@@ -157,18 +143,33 @@ export const EditProfile = () => {
         birthDataISO = parseBirthDateToISO(birthDate);
       }
 
-      await patchMeMutation.mutateAsync({
-        avatar: avatarUrl!,
-        bio: bio ?? "",
-        firstName: firstName ?? "",
-        lastName: lastName ?? "",
-        rank: rank ?? 0,
-        birthDate: birthDataISO ?? undefined,
-        city: city ?? "",
-        playingPosition: playingPosition ?? "both",
-        isRegistered: true,
-        padelProfiles: profiles ?? "",
-      });
+      if (birthDate?.length === 0) {
+        await patchMeMutation.mutateAsync({
+          avatar: avatarUrl!,
+          bio: bio ?? "",
+          firstName: firstName ?? "",
+          lastName: lastName ?? "",
+          rank: rank ?? 0,
+          birthDate: "",
+          city: city ?? "",
+          playingPosition: playingPosition ?? "both",
+          isRegistered: true,
+          padelProfiles: profiles ?? "",
+        });
+      } else {
+        await patchMeMutation.mutateAsync({
+          avatar: avatarUrl!,
+          bio: bio ?? "",
+          firstName: firstName ?? "",
+          lastName: lastName ?? "",
+          rank: rank ?? 0,
+          birthDate: birthDataISO ?? "",
+          city: city ?? "",
+          playingPosition: playingPosition ?? "both",
+          isRegistered: true,
+          padelProfiles: profiles ?? "",
+        });
+      }
 
       navigate(-1);
     } catch (error) {
@@ -238,30 +239,20 @@ export const EditProfile = () => {
         <Textarea
           onChangeFunction={(value) => {
             setBio(value);
-            validateBio(value);
           }}
-          onBlur={() => validateBio(bio ?? "")}
           title={"О себе"}
           value={bio ?? ""}
           maxLength={255}
-          hasError={bioError}
         />
         <Input
           onChangeFunction={(value) => {
             const formatted = formatDateInput(value);
             setBirthDate(formatted);
 
-            if (validateBirthDate(formatted)) {
+            if (validateBirthDate(formatted) || formatted.length === 0) {
               setBirthDateError(false);
             } else {
-              setBirthDateError(formatted.length > 0);
-            }
-          }}
-          onBlur={() => {
-            if (!validateBirthDate(birthDate ?? "")) {
               setBirthDateError(true);
-            } else {
-              setBirthDateError(false);
             }
           }}
           title={"Дата рождения"}
@@ -275,11 +266,8 @@ export const EditProfile = () => {
           value={city ?? ""}
           onChangeFunction={(value) => {
             setCity(value);
-            validateCity(value);
           }}
-          onBlur={() => validateCity(city ?? "")}
           maxLength={100}
-          hasError={cityError}
         />
         <PositionSelector
           title={"Позиция игры"}
@@ -302,13 +290,9 @@ export const EditProfile = () => {
       firstName?.length &&
       lastName?.length &&
       rankInput.length > 0 &&
-      city?.length &&
-      (!birthDate || validateBirthDate(birthDate)) &&
       !firstNameError &&
       !lastNameError &&
       !rankError &&
-      !bioError &&
-      !cityError &&
       !birthDateError ? (
         <Button className="mx-auto" onClick={editProfile}>
           Готово

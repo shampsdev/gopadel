@@ -32,6 +32,14 @@ import { GameLeaderboardEdit } from "../pages/game/edit/game-leaderboard-edit";
 import { EventsHistory } from "../pages/profile/my-profile/events-history";
 import { GameLeaderboard } from "../pages/game/edit/game-leaderboard";
 import { GameWaitlist } from "../pages/game/game-waitlist";
+import { TournamentCalendar } from "../pages/tournament/edit/date/tournament-calendar";
+import { TournamentYearMonthPick } from "../pages/tournament/edit/date/tournament-year-month-pick";
+import { GameCalendar } from "../pages/game/edit/date/game-calendar";
+import { GameYearMonthPick } from "../pages/game/edit/date/game-year-month-picker";
+import { CreateTournamentCalendar } from "../pages/new-event/date/tournament/create-tournament-calendar";
+import { CreateTournamentYearMonthPick } from "../pages/new-event/date/tournament/create-tournament-picker";
+import { CreateGameCalendar } from "../pages/new-event/date/game/create-game-calendar";
+import { CreateGameYearMonthPick } from "../pages/new-event/date/game/create-game-picker";
 
 const authRoutes: RouteObject[] = [
   {
@@ -125,7 +133,6 @@ export const routes: RouteObject[] = [
                 children: [
                   {
                     path: ":id",
-
                     children: [
                       {
                         path: "",
@@ -137,6 +144,14 @@ export const routes: RouteObject[] = [
                               {
                                 path: "",
                                 element: <TournamentEdit />,
+                              },
+                              {
+                                path: "calendar",
+                                element: <TournamentCalendar />,
+                              },
+                              {
+                                path: "year-month-pick",
+                                element: <TournamentYearMonthPick />,
                               },
                               {
                                 path: "leaderboard",
@@ -175,6 +190,14 @@ export const routes: RouteObject[] = [
                                 element: <GameEdit />,
                               },
                               {
+                                path: "calendar",
+                                element: <GameCalendar />,
+                              },
+                              {
+                                path: "year-month-pick",
+                                element: <GameYearMonthPick />,
+                              },
+                              {
                                 path: "leaderboard",
                                 element: <GameLeaderboardEdit />,
                               },
@@ -196,8 +219,37 @@ export const routes: RouteObject[] = [
                 path: "new-event",
                 children: [
                   { path: "", element: <NewEvent /> },
-                  { path: "tournament", element: <CreateTournament /> },
-                  { path: "game", element: <CreateGame /> },
+                  {
+                    path: "tournament",
+                    children: [
+                      {
+                        path: "",
+                        element: <CreateTournament />,
+                      },
+                      {
+                        path: "calendar",
+                        element: <CreateTournamentCalendar />,
+                      },
+                      {
+                        path: "year-month-pick",
+                        element: <CreateTournamentYearMonthPick />,
+                      },
+                    ],
+                  },
+                  {
+                    path: "game",
+                    children: [
+                      {
+                        path: "",
+                        element: <CreateGame />,
+                      },
+                      { path: "calendar", element: <CreateGameCalendar /> },
+                      {
+                        path: "year-month-pick",
+                        element: <CreateGameYearMonthPick />,
+                      },
+                    ],
+                  },
                 ],
               },
               {

@@ -20,7 +20,7 @@ export const PageWrapper = ({ children }: { children: React.ReactNode }) => {
     }
   }, [backButton, navigate]);
   return (
-    <div className="mx-auto pt-[20px] max-h-screen overflow-y-scroll ">
+    <div className="mx-auto pt-[20px] max-h-screen overflow-y-scroll px-[5%]">
       {children}
     </div>
     // <motion.div
