@@ -5,7 +5,6 @@ import { useGetMe } from "../../../api/hooks/useGetMe";
 import { Link } from "react-router";
 import { formatBirthDate } from "../../../utils/date-format";
 import { formatUrl, getDisplayName } from "../../../utils/format-url";
-import { useEffect, useState } from "react";
 import NoLoyalty from "../../../assets/loyalty/no_loyalty.svg";
 import PadelActive from "../../../assets/loyalty/gopadel_active.svg";
 import PadelFriend from "../../../assets/loyalty/friend.svg";
@@ -18,44 +17,6 @@ export const MyProfile = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
 
   const { data: user } = useGetMe();
-
-  const [scrollPosition, setScrollPosition] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = (event: Event) => {
-      const target = event.target as HTMLElement;
-      const position = target.scrollTop || 0;
-      setScrollPosition(position);
-    };
-
-    const scrollContainer = document.querySelector(".overflow-y-scroll");
-
-    if (scrollContainer) {
-      scrollContainer.addEventListener("scroll", handleScroll, {
-        passive: true,
-      });
-      return () => scrollContainer.removeEventListener("scroll", handleScroll);
-    }
-
-    const handleScrollFallback = () => {
-      const position =
-        document.documentElement.scrollTop ||
-        document.body.scrollTop ||
-        window.pageYOffset ||
-        0;
-      setScrollPosition(position);
-    };
-    window.addEventListener("scroll", handleScrollFallback, { passive: true });
-    document.addEventListener("scroll", handleScrollFallback, {
-      passive: true,
-    });
-    return () => {
-      window.removeEventListener("scroll", handleScrollFallback);
-      document.removeEventListener("scroll", handleScrollFallback);
-    };
-  }, []);
-
-  const gradientOpacity = Math.max(0, 1 - scrollPosition / 150);
 
   return (
     <div className="relative flex flex-col pb-[150px]">

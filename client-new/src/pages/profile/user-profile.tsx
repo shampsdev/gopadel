@@ -8,7 +8,6 @@ import { formatUrl, getDisplayName } from "../../utils/format-url";
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { openTelegramLink } from "@telegram-apps/sdk-react";
 import { Preloader } from "../../components/widgets/preloader";
-import { useState, useEffect } from "react";
 import NoLoyalty from "../../assets/loyalty/no_loyalty.svg";
 import PadelActive from "../../assets/loyalty/gopadel_active.svg";
 import PadelFriend from "../../assets/loyalty/friend.svg";
@@ -23,42 +22,9 @@ export const UserProfile = () => {
   const { user: currentUser } = useAuthStore();
 
   const { data: users } = useGetUsers({ id: id ?? "" });
-  const [scrollPosition, setScrollPosition] = useState(0);
 
   const user = users?.[0];
-  useEffect(() => {
-    const handleScroll = (event: Event) => {
-      const target = event.target as HTMLElement;
-      const position = target.scrollTop || 0;
-      setScrollPosition(position);
-    };
-
-    const scrollContainer = document.querySelector(".overflow-y-scroll");
-
-    if (scrollContainer) {
-      scrollContainer.addEventListener("scroll", handleScroll, {
-        passive: true,
-      });
-      return () => scrollContainer.removeEventListener("scroll", handleScroll);
-    }
-
-    const handleScrollFallback = () => {
-      const position =
-        document.documentElement.scrollTop ||
-        document.body.scrollTop ||
-        window.pageYOffset ||
-        0;
-      setScrollPosition(position);
-    };
-    window.addEventListener("scroll", handleScrollFallback, { passive: true });
-    document.addEventListener("scroll", handleScrollFallback, {
-      passive: true,
-    });
-    return () => {
-      window.removeEventListener("scroll", handleScrollFallback);
-      document.removeEventListener("scroll", handleScrollFallback);
-    };
-  }, []);
+ 
 
   if (!users) return <Preloader />;
 
@@ -66,7 +32,6 @@ export const UserProfile = () => {
     return <Navigate to="/profile" replace />;
   }
 
-  const gradientOpacity = Math.max(0, 1 - scrollPosition / 150);
 
   return (
     <div className="relative flex flex-col pb-[150px]">
