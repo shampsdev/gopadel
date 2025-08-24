@@ -82,16 +82,6 @@ export const UserProfile = () => {
       />
 
       {/* Градиентное затемнение */}
-      <div
-        className="fixed top-0 left-0 w-screen h-[240px] z-10"
-        style={{
-          background: `linear-gradient(to bottom, rgba(175, 255, 63, ${
-            0.6 * gradientOpacity
-          }), rgba(0, 0, 0, ${0.4 * gradientOpacity}))`,
-          opacity: gradientOpacity,
-          transition: "opacity 0.2s ease-out",
-        }}
-      />
 
       <div
         className="rounded-t-[40px] w-[100vw] bg-white z-30 relative overflow-hidden"
