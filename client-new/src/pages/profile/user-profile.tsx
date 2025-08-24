@@ -54,7 +54,7 @@ export const UserProfile = () => {
           width: "100vw",
           marginLeft: "calc(50% - 50vw)",
           marginRight: "calc(50% - 50vw)",
-          marginTop: 50,
+          // marginTop: 50,
         }}
       >
         <div className="relative z-[2] flex flex-col gap-4 px-[16px] pt-[20px]">
