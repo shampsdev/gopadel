@@ -190,7 +190,7 @@ export const CreateGame = () => {
             />
           )}
           <CourtSelector
-            title="Корт"
+            title="Клуб"
             value={courtId}
             onChangeFunction={(id) => {
               setCourtId(id);

@@ -38,7 +38,7 @@ export const ClubSelector = ({
         </legend>
         <div className="flex justify-between items-center pb-[12px] py-[3px] px-[16px]">
           <span className={selectedClub ? "text-black" : "text-[#A4A9B4]"}>
-            {selectedClub ? selectedClub.name : "Выберите клуб"}
+            {selectedClub ? selectedClub.name : "Выберите сообщество"}
           </span>
           <svg
             className={`w-5 h-5 transition-transform ${

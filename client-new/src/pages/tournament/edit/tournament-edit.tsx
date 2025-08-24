@@ -216,7 +216,7 @@ export const TournamentEdit = () => {
           </div>
 
           <ClubSelector
-            title="Клуб"
+            title="Сообщество"
             value={clubId ?? ""}
             onChangeFunction={(id) => {
               setClubId(id);
@@ -226,7 +226,7 @@ export const TournamentEdit = () => {
           />
 
           <CourtSelector
-            title="Корт"
+            title="Клуб"
             value={courtId}
             onChangeFunction={(id) => {
               setCourtId(id);

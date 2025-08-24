@@ -38,7 +38,7 @@ export const CourtSelector = ({
         </legend>
         <div className="flex justify-between items-center pb-[12px] py-[3px] px-[16px]">
           <span className={selectedCourt ? "text-black" : "text-[#A4A9B4]"}>
-            {selectedCourt ? selectedCourt.name : "Выберите корт"}
+            {selectedCourt ? selectedCourt.name : "Выберите клуб"}
           </span>
           <svg
             className={`w-5 h-5 transition-transform ${

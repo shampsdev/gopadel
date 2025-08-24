@@ -225,7 +225,7 @@ export const GameEdit = () => {
           </div>
 
           <CourtSelector
-            title="Корт"
+            title="Клуб"
             value={courtId}
             onChangeFunction={(id) => {
               setCourtId(id);
