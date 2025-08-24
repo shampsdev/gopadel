@@ -140,9 +140,7 @@ export const Game = () => {
 
       {!checkGameOrganizerRight(user?.id || "", events?.[0]) ? (
         !(events?.[0].status === EventStatus.completed) && (
-          <div className="mt-[16px]">
-            <Prize variant="not-finished" />
-          </div>
+          <Prize variant="not-finished" />
         )
       ) : (
         <div className="flex flex-col mt-[12px]">

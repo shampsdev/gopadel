@@ -81,15 +81,16 @@ export const Prize = ({ className, variant = "default" }: PrizeProps) => {
 
   if (variant === "not-finished") {
     return (
-      <div
-        className={twMerge(
-          "flex flex-row px-[20px] py-[16px] rounded-[30px] justify-between items-center",
-          variants[variant],
-          className
-        )}
-      >
-        <p className="text-[14px]">Результатов пока нет</p>
-      </div>
+      // <div
+      //   className={twMerge(
+      //     "flex flex-row px-[20px] py-[16px] rounded-[30px] justify-between items-center",
+      //     variants[variant],
+      //     className
+      //   )}
+      // >
+      //   <p className="text-[14px]">Результатов пока нет</p>
+      // </div>
+      null
     );
   }
 
