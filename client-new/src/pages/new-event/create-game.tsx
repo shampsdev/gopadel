@@ -62,13 +62,15 @@ export const CreateGame = () => {
   } = useCreateGameStore();
 
   const { data: courts = [], isLoading: courtsLoading } = useGetCourts();
-  const { isLoading: clubsLoading } = useGetMyClubs(); // Удалена неиспользуемая переменная myClubs
+  const { data: myClubs, isLoading: clubsLoading } = useGetMyClubs(); // Удалена неиспользуемая переменная myClubs
 
   const { mutateAsync: createEvent, isPending: isCreatingEvent } =
     useCreateEvent();
 
   const handleCreateGame = async () => {
     const gameData = getGameData();
+
+    const clubId = myClubs && myClubs?.length > 1 ? "9UGJELP8SVO" : myClubs?.[0] ?? ""
 
     if (!gameData) {
       return;
@@ -80,6 +82,7 @@ export const CreateGame = () => {
         name: `${user?.firstName} ${user?.lastName} собирает игру`,
         organizerId: user?.id ?? "",
         type: EventType.game,
+        clubId: clubId
       } as CreateGameType);
       if (game?.id) {
         navigate(`/game/${game?.id}`);
