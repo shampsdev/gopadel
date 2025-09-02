@@ -97,6 +97,12 @@ func (e *Event) Patch(ctx context.Context, id string, patch *domain.PatchEvent) 
 		hasValidResult = hasResult
 	}
 
+	// Если изменяется MaxUsers, проверяем необходимость обновления статуса
+	var needsStatusCheck bool
+	if patch.MaxUsers != nil {
+		needsStatusCheck = true
+	}
+
 	err := e.eventRepo.Patch(ctx, id, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch event: %w", err)
@@ -111,6 +117,14 @@ func (e *Event) Patch(ctx context.Context, id string, patch *domain.PatchEvent) 
 		err = e.eventRepo.Patch(ctx, id, statusPatch)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update event status to completed: %w", err)
+		}
+	}
+
+	// Проверяем статус события после изменения MaxUsers
+	if needsStatusCheck && e.cases.Registration != nil {
+		err = e.updateEventStatusAfterCapacityChange(ctx, id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update event status after capacity change: %w", err)
 		}
 	}
 
@@ -261,6 +275,12 @@ func (e *Event) AdminPatch(ctx *Context, id string, patch *domain.AdminPatchEven
 		hasValidResult = hasResult
 	}
 
+	// Если изменяется MaxUsers, проверяем необходимость обновления статуса
+	var needsStatusCheck bool
+	if patch.MaxUsers != nil {
+		needsStatusCheck = true
+	}
+
 	err := e.eventRepo.AdminPatch(ctx.Context, id, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch event: %w", err)
@@ -276,6 +296,14 @@ func (e *Event) AdminPatch(ctx *Context, id string, patch *domain.AdminPatchEven
 		err = e.eventRepo.AdminPatch(ctx.Context, id, statusPatch)
 		if err != nil {
 			return nil, fmt.Errorf("failed to update event status to completed: %w", err)
+		}
+	}
+
+	// Проверяем статус события после изменения MaxUsers
+	if needsStatusCheck && e.cases.Registration != nil {
+		err = e.updateEventStatusAfterCapacityChange(ctx.Context, id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update event status after capacity change: %w", err)
 		}
 	}
 
@@ -386,6 +414,55 @@ func (e *Event) TryRegisterFromWaitlist(ctx context.Context, eventID string) err
 		if err != nil {
 			slog.Info("failed to send message to user", slogx.Err(err))
 			continue
+		}
+	}
+
+	return nil
+}
+
+// updateEventStatusAfterCapacityChange обновляет статус события после изменения его ёмкости (MaxUsers)
+func (e *Event) updateEventStatusAfterCapacityChange(ctx context.Context, eventID string) error {
+	// Получаем событие
+	eventFilter := &domain.FilterEvent{ID: &eventID}
+	events, err := e.Filter(ctx, eventFilter)
+	if err != nil {
+		return fmt.Errorf("failed to get event: %w", err)
+	}
+
+	if len(events) == 0 {
+		return fmt.Errorf("event not found")
+	}
+
+	event := events[0]
+
+	// Только для событий в статусе registration или full
+	if event.Status != domain.EventStatusRegistration && event.Status != domain.EventStatusFull {
+		return nil
+	}
+
+	// Подсчитываем активные регистрации
+	activeCount, err := e.cases.Registration.GetActiveRegistrationsCount(ctx, eventID)
+	if err != nil {
+		return fmt.Errorf("failed to get active registrations count: %w", err)
+	}
+
+	// Определяем нужный статус
+	var needStatus domain.EventStatus
+	if activeCount >= event.MaxUsers {
+		needStatus = domain.EventStatusFull
+	} else {
+		needStatus = domain.EventStatusRegistration
+	}
+
+	// Обновляем статус события только если он должен измениться
+	if event.Status != needStatus {
+		patch := &domain.PatchEvent{
+			Status: &needStatus,
+		}
+
+		err = e.eventRepo.Patch(ctx, eventID, patch)
+		if err != nil {
+			return fmt.Errorf("failed to update event status: %w", err)
 		}
 	}
 

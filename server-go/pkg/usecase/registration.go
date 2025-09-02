@@ -744,7 +744,7 @@ func (r *Registration) updateEventStatusAfterRegistration(ctx context.Context, e
 	}
 
 	// Подсчитываем активные регистрации
-	activeCount, err := r.getActiveRegistrationsCount(ctx, eventID)
+	activeCount, err := r.GetActiveRegistrationsCount(ctx, eventID)
 	if err != nil {
 		return err
 	}
@@ -793,7 +793,7 @@ func (r *Registration) updateEventStatusAfterCancellation(ctx context.Context, e
 	}
 
 	// Подсчитываем активные регистрации
-	activeCount, err := r.getActiveRegistrationsCount(ctx, eventID)
+	activeCount, err := r.GetActiveRegistrationsCount(ctx, eventID)
 	if err != nil {
 		return err
 	}
@@ -814,8 +814,8 @@ func (r *Registration) updateEventStatusAfterCancellation(ctx context.Context, e
 	return nil
 }
 
-// getActiveRegistrationsCount подсчитывает количество активных регистраций
-func (r *Registration) getActiveRegistrationsCount(ctx context.Context, eventID string) (int, error) {
+// GetActiveRegistrationsCount подсчитывает количество активных регистраций
+func (r *Registration) GetActiveRegistrationsCount(ctx context.Context, eventID string) (int, error) {
 	// Получаем событие для определения типа
 	eventFilter := &domain.FilterEvent{ID: &eventID}
 	events, err := r.cases.Event.Filter(ctx, eventFilter)
