@@ -94,7 +94,8 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, userID
 		if err := r.updateEventStatusAfterRegistration(ctx, eventID); err != nil {
 			fmt.Printf("Warning: failed to update event status after approval: %v\n", err)
 		}
-	} else if oldStatus == domain.RegistrationStatusConfirmed {
+	} else if oldStatus == domain.RegistrationStatusConfirmed || oldStatus == domain.RegistrationStatusPending {
+		// Если переходим от активного статуса к неактивному - освобождаем место
 		if err := r.updateEventStatusAfterCancellation(ctx, eventID); err != nil {
 			fmt.Printf("Warning: failed to update event status after status change: %v\n", err)
 		}
@@ -333,8 +334,15 @@ func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain
 	}
 
 	// Обновляем статус события после отмены регистрации
-	if err := r.updateEventStatusAfterCancellation(ctx, eventID); err != nil {
-		fmt.Printf("Warning: failed to update event status after cancellation: %v\n", err)
+	// Только если регистрация была активной (занимала место)
+	wasActive := registration.Status == domain.RegistrationStatusPending || 
+		registration.Status == domain.RegistrationStatusConfirmed ||
+		registration.Status == domain.RegistrationStatusInvited
+	
+	if wasActive {
+		if err := r.updateEventStatusAfterCancellation(ctx, eventID); err != nil {
+			fmt.Printf("Warning: failed to update event status after cancellation: %v\n", err)
+		}
 	}
 
 	err = r.cases.Event.TryRegisterFromWaitlist(ctx, eventID)
