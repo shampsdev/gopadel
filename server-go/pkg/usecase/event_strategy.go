@@ -200,12 +200,23 @@ func (t *TournamentEventStrategy) DetermineRegistrationStatusForUser(ctx context
 	if user.ID == event.Organizer.ID {
 		return domain.RegistrationStatusConfirmed
 	}
-	// Для остальных участников - статус ожидания оплаты
+	
+	// Для бесплатных турниров автоматически подтверждаем регистрацию
+	if event.Price == 0 {
+		return domain.RegistrationStatusConfirmed
+	}
+	
+	// Для платных турниров - статус ожидания оплаты
 	return domain.RegistrationStatusPending
 }
 
 func (t *TournamentEventStrategy) HandleCancellation(ctx context.Context, registration *domain.Registration, event *domain.Event, hasPaid bool) domain.RegistrationStatus {
-	// Для турниров: если оплачено -> AFTER, если нет -> BEFORE
+	// Для бесплатных турниров всегда используем статус отмены до оплаты
+	if event.Price == 0 {
+		return domain.RegistrationStatusCancelledBeforePayment
+	}
+	
+	// Для платных турниров: если оплачено -> AFTER, если нет -> BEFORE
 	if hasPaid {
 		return domain.RegistrationStatusCancelledAfterPayment
 	}
