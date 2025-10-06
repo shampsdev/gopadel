@@ -23,7 +23,7 @@ CREATE TABLE loyalties (
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     telegram_id BIGINT NOT NULL UNIQUE,
-    username VARCHAR(255),
+    username VARCHAR(255) UNIQUE,
     first_name VARCHAR(255) NOT NULL,
     second_name VARCHAR(255) NOT NULL,
     avatar VARCHAR(255),

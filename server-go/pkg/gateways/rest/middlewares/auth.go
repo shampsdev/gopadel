@@ -24,18 +24,18 @@ func ExtractUserTGData() gin.HandlerFunc {
 			return
 		}
 
-		parsed, err := initdata.Parse(initData)
-		if ginerr.AbortIfErr(c, err, http.StatusUnauthorized, "failed to parse initdata") {
-			return
-		}
+	parsed, err := initdata.Parse(initData)
+	if ginerr.AbortIfErr(c, err, http.StatusUnauthorized, "failed to parse initdata") {
+		return
+	}
 
-		c.Set("user_tg_data", &domain.UserTGData{
-			TelegramID:       parsed.User.ID,
-			FirstName:        parsed.User.FirstName,
-			LastName:         parsed.User.LastName,
-			TelegramUsername: parsed.User.Username,
-			Avatar:           parsed.User.PhotoURL,
-		})
+	c.Set("user_tg_data", &domain.UserTGData{
+		TelegramID:       parsed.User.ID,
+		FirstName:        parsed.User.FirstName,
+		LastName:         parsed.User.LastName,
+		TelegramUsername: parsed.User.Username, // Пустая строка будет конвертирована в NULL при сохранении в БД
+		Avatar:           parsed.User.PhotoURL,
+	})
 
 		c.Next()
 	}

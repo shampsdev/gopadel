@@ -25,9 +25,17 @@ func NewUserRepo(db *pgxpool.Pool) *UserRepo {
 }
 
 func (r *UserRepo) Create(ctx context.Context, user *domain.CreateUser) (string, error) {
+	// Конвертируем пустую строку в NULL для telegram_username
+	var telegramUsername interface{}
+	if user.TelegramUsername == "" {
+		telegramUsername = nil
+	} else {
+		telegramUsername = user.TelegramUsername
+	}
+	
 	s := r.psql.Insert(`"users"`).
 		Columns("telegram_id", "telegram_username", "first_name", "last_name", "avatar").
-		Values(user.TelegramID, user.TelegramUsername, user.FirstName, user.LastName, user.Avatar).
+		Values(user.TelegramID, telegramUsername, user.FirstName, user.LastName, user.Avatar).
 		Suffix("RETURNING id")
 
 	sql, args, err := s.ToSql()
@@ -172,7 +180,12 @@ func (r *UserRepo) Filter(ctx context.Context, filter *domain.FilterUser) ([]*do
 func (r *UserRepo) Patch(ctx context.Context, id string, user *domain.PatchUser) error {
 	s := r.psql.Update(`"users"`).Where(sq.Eq{"id": id})
 	if user.TelegramUsername != nil {
-		s = s.Set("telegram_username", *user.TelegramUsername)
+		// Конвертируем пустую строку в NULL для telegram_username
+		if *user.TelegramUsername == "" {
+			s = s.Set("telegram_username", nil)
+		} else {
+			s = s.Set("telegram_username", *user.TelegramUsername)
+		}
 	}
 	if user.FirstName != nil {
 		s = s.Set("first_name", *user.FirstName)
