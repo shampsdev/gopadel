@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
@@ -141,18 +142,41 @@ func (r *Registration) GetRegistrationWithPayments(ctx context.Context, userID s
 
 // RegisterForEvent - регистрация на событие с использованием стратегий
 func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, eventID string) (*domain.Registration, error) {
+	slog.Info("User attempting to register for event",
+		"user_id", user.ID,
+		"user_telegram_id", user.TelegramID,
+		"user_name", user.FirstName+" "+user.LastName,
+		"user_rank", user.Rank,
+		"event_id", eventID)
+
 	// Получаем событие напрямую через репозиторий
 	eventFilter := &domain.FilterEvent{ID: &eventID}
 	events, err := r.cases.Event.Filter(ctx, eventFilter)
 	if err != nil {
+		slog.Error("Failed to get event for registration",
+			"user_id", user.ID,
+			"event_id", eventID,
+			"error", err)
 		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
 
 	if len(events) == 0 {
+		slog.Error("Event not found for registration",
+			"user_id", user.ID,
+			"event_id", eventID)
 		return nil, fmt.Errorf("event not found")
 	}
 
 	event := events[0]
+	slog.Info("Event details for registration",
+		"event_id", eventID,
+		"event_name", event.Name,
+		"event_type", event.Type,
+		"event_status", event.Status,
+		"max_users", event.MaxUsers,
+		"rank_min", event.RankMin,
+		"rank_max", event.RankMax,
+		"user_rank", user.Rank)
 
 	// Получаем стратегию для данного типа события
 	strategy := GetEventStrategy(event.Type)
@@ -170,10 +194,21 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 
 	// Если есть регистрация, обрабатываем её
 	for _, reg := range existingRegistrations {
+		slog.Info("Found existing registration",
+			"user_id", user.ID,
+			"event_id", eventID,
+			"existing_status", reg.Status,
+			"created_at", reg.CreatedAt)
+
 		// Для игр проверяем возможность повторной подачи заявки
 		if event.Type == domain.EventTypeGame {
 			gameStrategy := strategy.(*GameEventStrategy)
 			if !gameStrategy.CanReapply(reg) {
+				slog.Warn("User cannot reapply for game event",
+					"user_id", user.ID,
+					"event_id", eventID,
+					"current_status", reg.Status,
+					"reason", "cannot_reapply")
 				switch reg.Status {
 				case domain.RegistrationStatusInvited:
 					return nil, fmt.Errorf("user already has an invited registration for this event")
@@ -190,18 +225,37 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 			// Если можно подать заявку повторно, переиспользуем существующую регистрацию
 			// Определяем статус через стратегию с учетом пользователя
 			newStatus := gameStrategy.DetermineRegistrationStatusForUser(ctx, event, user)
+			slog.Info("Updating existing game registration",
+				"user_id", user.ID,
+				"event_id", eventID,
+				"old_status", reg.Status,
+				"new_status", newStatus,
+				"action", "reapply")
+
 			patch := &domain.PatchRegistration{
 				Status: &newStatus,
 			}
 
 			err := r.registrationRepo.Patch(ctx, reg.UserID, reg.EventID, patch)
 			if err != nil {
+				slog.Error("Failed to update registration status",
+					"user_id", user.ID,
+					"event_id", eventID,
+					"error", err)
 				return nil, fmt.Errorf("failed to update registration status: %w", err)
 			}
 
+			slog.Info("Successfully updated registration status",
+				"user_id", user.ID,
+				"event_id", eventID,
+				"new_status", newStatus)
+
 			// Обновляем статус события после обновления регистрации
 			if err := r.updateEventStatusAfterRegistration(ctx, eventID); err != nil {
-				fmt.Printf("Warning: failed to update event status after registration update: %v\n", err)
+				slog.Warn("Failed to update event status after registration update",
+					"user_id", user.ID,
+					"event_id", eventID,
+					"error", err)
 			}
 
 			return r.getRegistrationByID(ctx, reg.UserID, reg.EventID)
@@ -249,12 +303,27 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 
 	// Определяем статус регистрации через стратегию с учетом пользователя
 	status := strategy.DetermineRegistrationStatusForUser(ctx, event, user)
+	slog.Info("Determined registration status for new registration",
+		"user_id", user.ID,
+		"event_id", eventID,
+		"determined_status", status,
+		"event_type", event.Type,
+		"is_organizer", user.ID == event.Organizer.ID)
 
 	// Проверяем доступные слоты только если статус регистрации занимает место
 	// Для игр INVITED статус не занимает места, поэтому проверка не нужна
 	// Для организаторов статус CONFIRMED занимает место, но они имеют приоритет
 	if status == domain.RegistrationStatusPending || (status == domain.RegistrationStatusConfirmed && user.ID != event.Organizer.ID) {
+		slog.Info("Checking available slots for registration",
+			"user_id", user.ID,
+			"event_id", eventID,
+			"status", status)
 		if err := r.validateAvailableSlots(ctx, eventID); err != nil {
+			slog.Warn("Registration failed - no available slots",
+				"user_id", user.ID,
+				"event_id", eventID,
+				"status", status,
+				"error", err)
 			return nil, err
 		}
 	}
@@ -266,14 +335,32 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 		Status:  status,
 	}
 
+	slog.Info("Creating new registration",
+		"user_id", user.ID,
+		"event_id", eventID,
+		"status", status)
+
 	err = r.registrationRepo.Create(ctx, createReg)
 	if err != nil {
+		slog.Error("Failed to create registration",
+			"user_id", user.ID,
+			"event_id", eventID,
+			"status", status,
+			"error", err)
 		return nil, fmt.Errorf("failed to create registration: %w", err)
 	}
 
+	slog.Info("Successfully created registration",
+		"user_id", user.ID,
+		"event_id", eventID,
+		"status", status)
+
 	// Обновляем статус события после создания регистрации
 	if err := r.updateEventStatusAfterRegistration(ctx, eventID); err != nil {
-		fmt.Printf("Warning: failed to update event status after registration: %v\n", err)
+		slog.Warn("Failed to update event status after registration",
+			"user_id", user.ID,
+			"event_id", eventID,
+			"error", err)
 	}
 
 	// Возвращаем созданную регистрацию
@@ -282,26 +369,58 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 
 // CancelEventRegistration - отмена регистрации на событие
 func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain.User, eventID string) (*domain.Registration, error) {
+	slog.Info("User attempting to cancel registration",
+		"user_id", user.ID,
+		"user_telegram_id", user.TelegramID,
+		"user_name", user.FirstName+" "+user.LastName,
+		"event_id", eventID)
+
 	eventFilter := &domain.FilterEvent{ID: &eventID}
 	events, err := r.cases.Event.Filter(ctx, eventFilter)
 	if err != nil {
+		slog.Error("Failed to get event for cancellation",
+			"user_id", user.ID,
+			"event_id", eventID,
+			"error", err)
 		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
 
 	if len(events) == 0 {
+		slog.Error("Event not found for cancellation",
+			"user_id", user.ID,
+			"event_id", eventID)
 		return nil, fmt.Errorf("event not found")
 	}
 
 	event := events[0]
+	slog.Info("Event details for cancellation",
+		"event_id", eventID,
+		"event_name", event.Name,
+		"event_type", event.Type,
+		"event_status", event.Status)
 
 	registration, err := r.findActiveRegistration(ctx, user.ID, eventID)
 	if err != nil {
+		slog.Error("Failed to find registration for cancellation",
+			"user_id", user.ID,
+			"event_id", eventID,
+			"error", err)
 		return nil, err
 	}
+
+	slog.Info("Found registration for cancellation",
+		"user_id", user.ID,
+		"event_id", eventID,
+		"current_status", registration.Status,
+		"created_at", registration.CreatedAt)
 
 	if registration.Status == domain.RegistrationStatusCancelledBeforePayment ||
 		registration.Status == domain.RegistrationStatusCancelledAfterPayment ||
 		registration.Status == domain.RegistrationStatusRefunded {
+		slog.Warn("Registration is already cancelled",
+			"user_id", user.ID,
+			"event_id", eventID,
+			"current_status", registration.Status)
 		return nil, fmt.Errorf("registration is already cancelled")
 	}
 
@@ -324,14 +443,33 @@ func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain
 	strategy := GetEventStrategy(event.Type)
 	newStatus := strategy.HandleCancellation(ctx, registration, event, hasPaid)
 
+	slog.Info("Processing registration cancellation",
+		"user_id", user.ID,
+		"event_id", eventID,
+		"old_status", registration.Status,
+		"new_status", newStatus,
+		"has_paid", hasPaid,
+		"event_type", event.Type)
+
 	patch := &domain.PatchRegistration{
 		Status: &newStatus,
 	}
 
 	err = r.registrationRepo.Patch(ctx, registration.UserID, registration.EventID, patch)
 	if err != nil {
+		slog.Error("Failed to update registration status during cancellation",
+			"user_id", user.ID,
+			"event_id", eventID,
+			"new_status", newStatus,
+			"error", err)
 		return nil, fmt.Errorf("failed to cancel registration: %w", err)
 	}
+
+	slog.Info("Successfully cancelled registration",
+		"user_id", user.ID,
+		"event_id", eventID,
+		"final_status", newStatus,
+		"has_paid", hasPaid)
 
 	// Обновляем статус события после отмены регистрации
 	// Только если регистрация была активной (занимала место)
@@ -339,14 +477,30 @@ func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain
 		registration.Status == domain.RegistrationStatusConfirmed ||
 		registration.Status == domain.RegistrationStatusInvited
 	
+	slog.Info("Checking if registration was active",
+		"user_id", user.ID,
+		"event_id", eventID,
+		"was_active", wasActive,
+		"old_status", registration.Status)
+	
 	if wasActive {
 		if err := r.updateEventStatusAfterCancellation(ctx, eventID); err != nil {
-			fmt.Printf("Warning: failed to update event status after cancellation: %v\n", err)
+			slog.Warn("Failed to update event status after cancellation",
+				"user_id", user.ID,
+				"event_id", eventID,
+				"error", err)
 		}
 	}
 
+	slog.Info("Attempting to register users from waitlist after cancellation",
+		"event_id", eventID,
+		"cancelled_user_id", user.ID)
 	err = r.cases.Event.TryRegisterFromWaitlist(ctx, eventID)
 	if err != nil {
+		slog.Error("Failed to register users from waitlist after cancellation",
+			"event_id", eventID,
+			"cancelled_user_id", user.ID,
+			"error", err)
 		return nil, fmt.Errorf("failed to try register from waitlist: %w", err)
 	}
 

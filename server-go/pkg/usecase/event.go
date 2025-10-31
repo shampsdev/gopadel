@@ -12,7 +12,6 @@ import (
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/repo"
 	"github.com/shampsdev/go-telegram-template/pkg/utils"
-	"github.com/shampsdev/go-telegram-template/pkg/utils/slogx"
 )
 
 type Event struct {
@@ -379,30 +378,84 @@ func (e *Event) CreateEventWithPermissionCheck(ctx context.Context, createEvent 
 }
 
 func (e *Event) TryRegisterFromWaitlist(ctx context.Context, eventID string) error {
+	slog.Info("Attempting to register users from waitlist",
+		"event_id", eventID)
+
 	event, err := e.GetEventByID(ctx, eventID)
 	if err != nil {
+		slog.Error("Failed to get event for waitlist registration",
+			"event_id", eventID,
+			"error", err)
 		return fmt.Errorf("failed to get event: %w", err)
 	}
+
+	slog.Info("Event details for waitlist registration",
+		"event_id", eventID,
+		"event_name", event.Name,
+		"event_type", event.Type,
+		"max_users", event.MaxUsers)
+
 	waitlist, err := e.cases.Waitlist.GetEventWaitlist(ctx, eventID)
 	if err != nil {
+		slog.Error("Failed to get waitlist for registration",
+			"event_id", eventID,
+			"error", err)
 		return fmt.Errorf("failed to get waitlist: %w", err)
 	}
+
+	if len(waitlist) == 0 {
+		slog.Info("No users in waitlist",
+			"event_id", eventID)
+		return nil
+	}
+
+	slog.Info("Found users in waitlist",
+		"event_id", eventID,
+		"waitlist_count", len(waitlist))
 
 	slices.SortFunc(waitlist, func(a, b *domain.Waitlist) int {
 		return a.Date.Compare(b.Date)
 	})
 
-	for _, waitlistUser := range waitlist {
+	registeredCount := 0
+	for i, waitlistUser := range waitlist {
+		slog.Info("Attempting to register user from waitlist",
+			"event_id", eventID,
+			"user_id", waitlistUser.User.ID,
+			"user_telegram_id", waitlistUser.User.TelegramID,
+			"user_name", waitlistUser.User.FirstName+" "+waitlistUser.User.LastName,
+			"user_rank", waitlistUser.User.Rank,
+			"waitlist_position", i+1,
+			"waitlist_date", waitlistUser.Date)
+
 		_, err := e.cases.Registration.RegisterForEvent(ctx, waitlistUser.User, eventID)
 		if err != nil {
-			slog.Info("failed to register user from waitlist", slogx.Err(err))
+			slog.Warn("Failed to register user from waitlist",
+				"event_id", eventID,
+				"user_id", waitlistUser.User.ID,
+				"user_telegram_id", waitlistUser.User.TelegramID,
+				"waitlist_position", i+1,
+				"error", err)
 			continue
 		}
 
+		slog.Info("Successfully registered user from waitlist",
+			"event_id", eventID,
+			"user_id", waitlistUser.User.ID,
+			"user_telegram_id", waitlistUser.User.TelegramID,
+			"waitlist_position", i+1)
+
 		err = e.cases.Waitlist.Delete(ctx, waitlistUser.ID)
 		if err != nil {
+			slog.Error("Failed to delete user from waitlist after successful registration",
+				"event_id", eventID,
+				"user_id", waitlistUser.User.ID,
+				"waitlist_id", waitlistUser.ID,
+				"error", err)
 			return fmt.Errorf("failed to delete from waitlist")
 		}
+
+		registeredCount++
 
 		_, err = e.bot.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: waitlistUser.User.TelegramID,
@@ -412,10 +465,18 @@ func (e *Event) TryRegisterFromWaitlist(ctx context.Context, eventID string) err
 			ParseMode: models.ParseModeHTML,
 		})
 		if err != nil {
-			slog.Info("failed to send message to user", slogx.Err(err))
-			continue
+			slog.Warn("Failed to send notification to user registered from waitlist",
+				"event_id", eventID,
+				"user_id", waitlistUser.User.ID,
+				"user_telegram_id", waitlistUser.User.TelegramID,
+				"error", err)
 		}
 	}
+
+	slog.Info("Completed waitlist registration process",
+		"event_id", eventID,
+		"total_in_waitlist", len(waitlist),
+		"successfully_registered", registeredCount)
 
 	return nil
 }
