@@ -71,7 +71,7 @@ export const Games = () => {
     notFull: showOnlyAvailable || undefined,
     type: EventType.game,
     notCompleted: true,
-    statuses: [EventStatus.registration, EventStatus.full],
+    statuses: [EventStatus.registration, EventStatus.full, EventStatus.in_progress],
     courtId: selectedCourtId || undefined,
   };
 

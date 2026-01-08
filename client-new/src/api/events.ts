@@ -93,3 +93,15 @@ export const deleteEvent = async (
   });
   return response.status === 204;
 };
+
+export const startEvent = async (
+  token: string,
+  eventId: string
+): Promise<Event | null> => {
+  const response = await api.put(`/events/${eventId}/start`, {}, {
+    headers: {
+      "X-Api-Token": token,
+    },
+  });
+  return response.data;
+};

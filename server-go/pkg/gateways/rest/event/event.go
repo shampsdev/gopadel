@@ -26,6 +26,7 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases) {
 	g.PATCH("/:event_id", handler.updateEvent)                   // обновление события
 	g.DELETE("/:event_id", handler.deleteEvent)                  // удаление события
 	g.POST("/filter", handler.filterEvents)                       // фильтрация событий
+	g.PUT("/:event_id/start", handler.startEvent)                // перевести событие в статус in_progress (только организатор)
 	g.GET("/:event_id/waitlist", handler.getWaitlist)            // получить список ожидания
 	g.POST("/:event_id/waitlist", handler.addToWaitlist)         // добавить себя в список ожидания
 	g.DELETE("/:event_id/waitlist", handler.removeFromWaitlist)  // убрать себя из списка ожидания

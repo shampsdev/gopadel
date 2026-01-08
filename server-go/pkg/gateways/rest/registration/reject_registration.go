@@ -63,6 +63,12 @@ func (h *Handler) rejectRegistration(c *gin.Context) {
 		return
 	}
 
+	// Проверяем, что событие не в статусе in_progress (отклонение разрешено)
+	if event.Status == domain.EventStatusInProgress {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "cannot reject registration: event is in progress and participant list is locked"})
+		return
+	}
+
 	// Проверяем права через GameStrategy
 	gameStrategy := &usecase.GameEventStrategy{}
 	err = gameStrategy.CanReject(organizer, event, registration)

@@ -72,7 +72,7 @@ export const Tournaments = () => {
     notFull: showOnlyAvailable || undefined,
     type: EventType.tournament,
     notCompleted: true,
-    statuses: [EventStatus.registration, EventStatus.full],
+    statuses: [EventStatus.registration, EventStatus.full, EventStatus.in_progress],
     courtId: selectedCourtId || undefined,
   };
 

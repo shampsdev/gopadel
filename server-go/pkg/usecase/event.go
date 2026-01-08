@@ -497,6 +497,7 @@ func (e *Event) updateEventStatusAfterCapacityChange(ctx context.Context, eventI
 	event := events[0]
 
 	// Только для событий в статусе registration или full
+	// События в статусе in_progress не должны автоматически изменять статус
 	if event.Status != domain.EventStatusRegistration && event.Status != domain.EventStatusFull {
 		return nil
 	}

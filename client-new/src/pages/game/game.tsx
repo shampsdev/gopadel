@@ -24,6 +24,7 @@ import { EventStatusView } from "../../components/ui/event-status-view";
 import { GameStatusActions } from "../../components/widgets/game-status-actions";
 import { GamePlayers } from "../../components/widgets/game-players";
 import { GameStatusWarning } from "../../components/widgets/game-status-warning";
+import { useStartEvent } from "../../api/hooks/mutations/events/useStartEvent";
 
 export const Game = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -45,6 +46,7 @@ export const Game = () => {
   const { data: waitlist } = useGetEventWaitlist(id!);
 
   const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const { mutateAsync: startEvent, isPending: isStartingEvent } = useStartEvent();
 
   const getPersonWord = (count: number) => {
     if (count === 1) return "человек";
@@ -52,7 +54,15 @@ export const Game = () => {
     return "человек";
   };
 
-  if (isLoading || isUpdatingEvent) return <Preloader />;
+  const handleStartEvent = async () => {
+    try {
+      await startEvent(id!);
+    } catch (error) {
+      console.error("Failed to start event:", error);
+    }
+  };
+
+  if (isLoading || isUpdatingEvent || isStartingEvent) return <Preloader />;
 
   if (!events?.[0] || !user || !waitlist) return <></>;
 
@@ -145,9 +155,39 @@ export const Game = () => {
       ) : (
         <div className="flex flex-col mt-[12px]">
           <div className="py-5 ">
+            {/* Кнопка "Начать игру" - показывается только при статусе full */}
+            {events?.[0].status === EventStatus.full && (
+              <div
+                onClick={() => {
+                  openModal({
+                    title: "Начать игру",
+                    subtitle: "Этот процесс необратим. После начала игры состав участников будет заблокирован и нельзя будет добавлять новых игроков.",
+                    acceptButtonOnClick: handleStartEvent,
+                    acceptButtonText: "Начать игру",
+                    declineButtonText: "Отмена",
+                    declineButtonOnClick: () => {},
+                  });
+                }}
+                className="flex flex-row justify-between items-center gap-[18px] mb-[20px] cursor-pointer"
+              >
+                <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#3B82F6] rounded-full">
+                  {Icons.Fire("white")}
+                </div>
+
+                <div className="text-black text-[16px] flex-grow flex flex-col gap-[2px]">
+                  <p>Начать игру</p>
+                  <div className="text-[#868D98] text-[12px]">
+                    Заблокировать состав участников
+                  </div>
+                </div>
+
+                {Icons.ArrowRight("#A4A9B4", "24", "24")}
+              </div>
+            )}
+
             <div
               onClick={async () => {
-                navigate(`/tournament/${id}/leaderboard`);
+                navigate(`/game/${id}/leaderboard`);
               }}
               className="flex flex-row justify-between items-center gap-[18px]"
             >
@@ -156,7 +196,7 @@ export const Game = () => {
               </div>
 
               <div className="text-black text-[16px] flex-grow flex flex-col gap-[2px]">
-                <p>Результаты турнира</p>
+                <p>Результаты игры</p>
                 <div className="text-[#868D98] text-[12px]">
                   Ваш результат:{" "}
                   <span className="text-black">

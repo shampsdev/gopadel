@@ -26,6 +26,7 @@ import { TournamentStatusWarning } from "../../components/widgets/tournament-sta
 import { usePatchEvent } from "../../api/hooks/mutations/events/usePatchEvent";
 import { useModalStore } from "../../shared/stores/modal.store";
 import { useTournamentEditStore } from "../../shared/stores/tournament-edit.store";
+import { useStartEvent } from "../../api/hooks/mutations/events/useStartEvent";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -44,6 +45,7 @@ export const Tournament = () => {
   const { mutateAsync: patchEvent, isPending: isUpdatingEvent } = usePatchEvent(
     id!
   );
+  const { mutateAsync: startEvent, isPending: isStartingEvent } = useStartEvent();
 
   const { resetStore } = useTournamentEditStore();
 
@@ -55,6 +57,14 @@ export const Tournament = () => {
     return "человек";
   };
 
+  const handleStartEvent = async () => {
+    try {
+      await startEvent(id!);
+    } catch (error) {
+      console.error("Failed to start event:", error);
+    }
+  };
+
   useEffect(() => {
     resetStore();
   }, []);
@@ -63,7 +73,7 @@ export const Tournament = () => {
 
   if (!events?.[0] || !user || !waitlist) return <></>;
 
-  if (isUpdatingEvent) return <Preloader />;
+  if (isUpdatingEvent || isStartingEvent) return <Preloader />;
   if (!events?.[0])
     return (
       <div className="flex flex-col gap-8 pb-[100px]">
@@ -162,6 +172,36 @@ export const Tournament = () => {
       ) : (
         <div className="flex flex-col mt-[12px]">
           <div className="py-5 ">
+            {/* Кнопка "Начать турнир" - показывается только при статусе full */}
+            {events?.[0].status === EventStatus.full && (
+              <div
+                onClick={() => {
+                  openModal({
+                    title: "Начать турнир",
+                    subtitle: "Этот процесс необратим. После начала турнира состав участников будет заблокирован и нельзя будет добавлять новых игроков.",
+                    acceptButtonOnClick: handleStartEvent,
+                    acceptButtonText: "Начать турнир",
+                    declineButtonText: "Отмена",
+                    declineButtonOnClick: () => {},
+                  });
+                }}
+                className="flex flex-row justify-between items-center gap-[18px] mb-[20px] cursor-pointer"
+              >
+                <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#3B82F6] rounded-full">
+                  {Icons.Fire("white")}
+                </div>
+
+                <div className="text-black text-[16px] flex-grow flex flex-col gap-[2px]">
+                  <p>Начать турнир</p>
+                  <div className="text-[#868D98] text-[12px]">
+                    Заблокировать состав участников
+                  </div>
+                </div>
+
+                {Icons.ArrowRight("#A4A9B4", "24", "24")}
+              </div>
+            )}
+
             <div
               onClick={async () => {
                 navigate(`/tournament/${id}/leaderboard`);

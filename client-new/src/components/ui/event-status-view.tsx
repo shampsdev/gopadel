@@ -19,6 +19,12 @@ export const EventStatusView = ({ status }: { status: EventStatus }) => {
           <div className={twMerge(defaultStyle, "bg-[#F59E0B]")}>заполнено</div>
         </div>
       );
+    case EventStatus.in_progress:
+      return (
+        <div>
+          <div className={twMerge(defaultStyle, "bg-[#3B82F6] text-white")}>в процессе</div>
+        </div>
+      );
     case EventStatus.completed:
       return (
         <div>

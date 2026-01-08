@@ -10,6 +10,7 @@ type EventStatus string
 const (
 	EventStatusRegistration EventStatus = "registration" // Регистрация открыта
 	EventStatusFull         EventStatus = "full"         // Набор закрыт (все места заняты)
+	EventStatusInProgress   EventStatus = "in_progress"  // Событие в процессе (состав участников заблокирован)
 	EventStatusCompleted    EventStatus = "completed"    // Событие завершено
 	EventStatusCancelled    EventStatus = "cancelled"    // Событие отменено
 )

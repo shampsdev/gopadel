@@ -30,6 +30,13 @@ const statusOptions: {
     description: "Все места заняты",
   },
   {
+    value: EventStatus.in_progress,
+    label: "В процессе",
+    color: "#3B82F6",
+    bgColor: "#EFF6FF",
+    description: "Событие началось, состав заблокирован",
+  },
+  {
     value: EventStatus.completed,
     label: "Завершено",
     color: "#10B981",

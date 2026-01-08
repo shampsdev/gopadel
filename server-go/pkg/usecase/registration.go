@@ -57,21 +57,28 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, userID
 	currentRegistration := currentRegistrations[0]
 	oldStatus := currentRegistration.Status
 
+	// Получаем событие для проверки статуса
+	eventFilter := &domain.FilterEvent{ID: &eventID}
+	events, err := r.cases.Event.Filter(ctx, eventFilter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get event: %w", err)
+	}
+
+	if len(events) == 0 {
+		return nil, fmt.Errorf("event not found")
+	}
+
+	event := events[0]
+
+	// Проверяем, что событие не в статусе in_progress (кроме случаев отмены регистрации)
+	if event.Status == domain.EventStatusInProgress && 
+		status != domain.RegistrationStatusCancelled && 
+		status != domain.RegistrationStatusLeft {
+		return nil, fmt.Errorf("cannot modify registration: event is in progress and participant list is locked")
+	}
+
 	// Если переводим в статус CONFIRMED, проверяем свободные места
 	if status == domain.RegistrationStatusConfirmed && oldStatus != domain.RegistrationStatusConfirmed {
-		// Получаем событие для проверки мест
-		eventFilter := &domain.FilterEvent{ID: &eventID}
-		events, err := r.cases.Event.Filter(ctx, eventFilter)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get event: %w", err)
-		}
-
-		if len(events) == 0 {
-			return nil, fmt.Errorf("event not found")
-		}
-
-		event := events[0]
-
 		// Для игр проверяем свободные места (так как INVITED не занимает места, а CONFIRMED занимает)
 		if event.Type == domain.EventTypeGame {
 			if err := r.validateAvailableSlots(ctx, eventID); err != nil {
@@ -177,6 +184,15 @@ func (r *Registration) RegisterForEvent(ctx context.Context, user *domain.User, 
 		"rank_min", event.RankMin,
 		"rank_max", event.RankMax,
 		"user_rank", user.Rank)
+
+	// Проверяем, что событие не в статусе in_progress
+	if event.Status == domain.EventStatusInProgress {
+		slog.Warn("Registration blocked - event is in progress",
+			"user_id", user.ID,
+			"event_id", eventID,
+			"event_status", event.Status)
+		return nil, fmt.Errorf("cannot register for event: event is in progress and participant list is locked")
+	}
 
 	// Получаем стратегию для данного типа события
 	strategy := GetEventStrategy(event.Type)
@@ -398,6 +414,15 @@ func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain
 		"event_name", event.Name,
 		"event_type", event.Type,
 		"event_status", event.Status)
+
+	// Проверяем, что событие не в статусе in_progress (отмена разрешена только для выхода из события)
+	if event.Status == domain.EventStatusInProgress {
+		slog.Warn("Cancellation blocked - event is in progress",
+			"user_id", user.ID,
+			"event_id", eventID,
+			"event_status", event.Status)
+		return nil, fmt.Errorf("cannot cancel registration: event is in progress and participant list is locked")
+	}
 
 	registration, err := r.findActiveRegistration(ctx, user.ID, eventID)
 	if err != nil {
@@ -901,6 +926,7 @@ func (r *Registration) updateEventStatusAfterRegistration(ctx context.Context, e
 	event := events[0]
 
 	// Только для событий в статусе registration или full
+	// События в статусе in_progress не должны автоматически изменять статус
 	if event.Status != domain.EventStatusRegistration && event.Status != domain.EventStatusFull {
 		return nil
 	}
