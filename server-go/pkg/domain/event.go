@@ -83,6 +83,7 @@ type FilterEvent struct {
 	NotFull           *bool          `json:"notFull,omitempty"`      // true если событие не заполнено
 	NotCompleted      *bool          `json:"notCompleted,omitempty"` // true если событие не завершено
 	OrganizerID       *string        `json:"organizerId,omitempty"`
+	CourtID           *string        `json:"courtId,omitempty"`      // фильтрация по корту
 	ClubID            *string        `json:"clubId,omitempty"`
 	FilterByUserClubs *string        `json:"filterByUserClubs,omitempty"` // user ID для фильтрации по клубам пользователя
 }

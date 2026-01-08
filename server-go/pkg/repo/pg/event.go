@@ -105,6 +105,10 @@ func (r *EventRepo) Filter(ctx context.Context, filter *domain.FilterEvent) ([]*
 		s = s.Where(sq.Eq{`"e"."organizer_id"`: *filter.OrganizerID})
 	}
 
+	if filter.CourtID != nil {
+		s = s.Where(sq.Eq{`"e"."court_id"`: *filter.CourtID})
+	}
+
 	if filter.ClubID != nil {
 		s = s.Where(sq.Eq{`"e"."club_id"`: *filter.ClubID})
 	}

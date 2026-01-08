@@ -3,75 +3,67 @@ import { useGetEvents } from "../../api/hooks/useGetEvents";
 import type { FilterEvent } from "../../types/filter.type";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { motion } from "framer-motion";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
 import { Preloader } from "../../components/widgets/preloader";
 import { getEventType } from "../../utils/get-event-type";
 import { EventStatus } from "../../types/event-status.type";
+import { CourtFilter } from "../../components/widgets/court-filter";
+import { useGetCourts } from "../../api/hooks/useGetCourts";
 
 export const Events = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const searchParams = new URLSearchParams(location.search);
-  const urlShowOnlyAvailable = searchParams.get("available") === "true";
+  const urlCourtId = searchParams.get("courtId");
 
-  const [showOnlyAvailable, setShowOnlyAvailable] =
-    useState(urlShowOnlyAvailable);
+  const [selectedCourtId, setSelectedCourtId] = useState<string | null>(
+    urlCourtId || null
+  );
+
+  const { data: courts, isLoading: isLoadingCourts } = useGetCourts();
 
   useEffect(() => {
-    setShowOnlyAvailable(urlShowOnlyAvailable);
-  }, [urlShowOnlyAvailable]);
+    setSelectedCourtId(urlCourtId || null);
+  }, [urlCourtId]);
 
-  const toggleSwitch = () => {
-    const newValue = !showOnlyAvailable;
-    setShowOnlyAvailable(newValue);
+  const handleCourtChange = (courtId: string | null) => {
+    setSelectedCourtId(courtId);
 
     const newSearchParams = new URLSearchParams(location.search);
-    if (newValue) {
-      newSearchParams.set("available", "true");
+    if (courtId) {
+      newSearchParams.set("courtId", courtId);
     } else {
-      newSearchParams.delete("available");
+      newSearchParams.delete("courtId");
     }
     navigate(`${location.pathname}?${newSearchParams.toString()}`);
   };
 
   const filter: FilterEvent = {
-    notFull: showOnlyAvailable || undefined,
     notCompleted: true,
     statuses: [EventStatus.registration, EventStatus.full],
+    courtId: selectedCourtId || undefined,
   };
 
   const { data: events, isLoading } = useGetEvents(filter);
 
-  if (isLoading) return <Preloader />;
+  if (isLoading || isLoadingCourts) return <Preloader />;
 
   return (
     <div className="pb-[100px]">
       <HomeNavbar />
-      <div className="flex flex-row items-center py-6 px-5 border-[#EBEDF0] justify-between border-[1px] gap-6 rounded-[24px] bg-white">
-        <p className="flex-1 flex-grow text-[14px] text-[#5D6674]">
-          Только со свободными местами
-        </p>
-        <motion.div
-          className="h-[28px] w-[60px] rounded-[16px] flex items-center cursor-pointer relative"
-          onClick={toggleSwitch}
-          animate={{
-            backgroundColor: showOnlyAvailable ? "#AFFF3F" : "#F8F8FA",
-          }}
-          transition={{ duration: 0.3 }}
-          style={{ zIndex: 0 }}
-        >
-          <motion.div
-            className="h-[20px] w-[20px] rounded-full bg-white shadow-sm absolute z-10 left-1"
-            animate={{ x: showOnlyAvailable ? 32 : 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            style={{ zIndex: 0 }}
+      {courts && courts.length > 0 && (
+        <div className="mb-4">
+          <CourtFilter
+            courts={courts}
+            selectedCourtId={selectedCourtId}
+            onCourtChange={handleCourtChange}
+            placeholder="Начните вводить название клуба"
           />
-        </motion.div>
-      </div>
+        </div>
+      )}
 
-      <div className="flex flex-col gap-4  mt-4">
+      <div className="flex flex-col gap-4 mt-4">
         {events?.map((event) => (
           <EventCard
             status={event.status}

@@ -3,6 +3,7 @@ import type { EventType } from "./event-type.type";
 
 export interface FilterEvent {
   clubId?: string;
+  courtId?: string;
   filterByUserClubs?: string;
   id?: string;
   name?: string;

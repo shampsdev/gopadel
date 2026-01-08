@@ -10,19 +10,31 @@ import type { Event } from "../../types/event.type";
 import type { FilterEvent } from "../../types/filter.type";
 import { RegistrationStatus } from "../../types/registration-status";
 import { EventStatus } from "../../types/event-status.type";
+import { CourtFilter } from "../../components/widgets/court-filter";
+import { useGetCourts } from "../../api/hooks/useGetCourts";
 export const Games = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const searchParams = new URLSearchParams(location.search);
   const urlShowOnlyAvailable = searchParams.get("available") === "true";
+  const urlCourtId = searchParams.get("courtId");
 
   const [showOnlyAvailable, setShowOnlyAvailable] =
     useState(urlShowOnlyAvailable);
+  const [selectedCourtId, setSelectedCourtId] = useState<string | null>(
+    urlCourtId || null
+  );
+
+  const { data: courts, isLoading: isLoadingCourts } = useGetCourts();
 
   useEffect(() => {
     setShowOnlyAvailable(urlShowOnlyAvailable);
   }, [urlShowOnlyAvailable]);
+
+  useEffect(() => {
+    setSelectedCourtId(urlCourtId || null);
+  }, [urlCourtId]);
 
   const toggleSwitch = () => {
     const newValue = !showOnlyAvailable;
@@ -34,6 +46,24 @@ export const Games = () => {
     } else {
       newSearchParams.delete("available");
     }
+    if (selectedCourtId) {
+      newSearchParams.set("courtId", selectedCourtId);
+    }
+    navigate(`${location.pathname}?${newSearchParams.toString()}`);
+  };
+
+  const handleCourtChange = (courtId: string | null) => {
+    setSelectedCourtId(courtId);
+
+    const newSearchParams = new URLSearchParams(location.search);
+    if (showOnlyAvailable) {
+      newSearchParams.set("available", "true");
+    }
+    if (courtId) {
+      newSearchParams.set("courtId", courtId);
+    } else {
+      newSearchParams.delete("courtId");
+    }
     navigate(`${location.pathname}?${newSearchParams.toString()}`);
   };
 
@@ -42,15 +72,26 @@ export const Games = () => {
     type: EventType.game,
     notCompleted: true,
     statuses: [EventStatus.registration, EventStatus.full],
+    courtId: selectedCourtId || undefined,
   };
 
   const { data: events, isLoading } = useGetEvents(filter);
 
-  if (isLoading) return <Preloader />;
+  if (isLoading || isLoadingCourts) return <Preloader />;
 
   return (
     <>
       <HomeNavbar />
+      {courts && courts.length > 0 && (
+        <div className="mb-4">
+          <CourtFilter
+            courts={courts}
+            selectedCourtId={selectedCourtId}
+            onCourtChange={handleCourtChange}
+            placeholder="Начните вводить название клуба"
+          />
+        </div>
+      )}
       <div className="flex flex-row items-center py-6 px-5 border-[#EBEDF0] justify-between border-[1px] gap-6 rounded-[24px] bg-white">
         <p className="flex-1 flex-grow text-[14px] text-[#5D6674]">
           Только со свободными местами

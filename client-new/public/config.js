@@ -1,4 +1,4 @@
 window.api = {
-  BOT_USERNAME: "study_stats_bot",
-  API_URL: "https://gopadel.dev.shamps.dev",
+  BOT_USERNAME: "mrussydev_bot",
+  API_URL: "http://localhost:8000",
 };
