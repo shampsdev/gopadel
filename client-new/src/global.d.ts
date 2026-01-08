@@ -3,6 +3,9 @@ declare global {
     api: {
       BOT_USERNAME: string;
       API_URL: string;
+      VIDEOS: {
+        LEAGUE_MAIN: string;
+      };
     };
   }
 }

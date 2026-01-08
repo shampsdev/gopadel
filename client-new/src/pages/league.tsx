@@ -1,9 +1,10 @@
 import { Button } from "../components/ui/button";
-import videoFile from "../assets/IMG_8675.MP4?url";
 import { useTelegramBackButton } from "../shared/hooks/useTelegramBackButton";
 
 export const League = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
+
+  const videoUrl = window.api?.VIDEOS?.LEAGUE_MAIN || "";
 
   return (
     <div className="flex flex-col justify-between h-full w-full gap-[27px] pb-[100px]">
@@ -16,7 +17,7 @@ export const League = () => {
           playsInline
           loop
         >
-          <source src={videoFile} type="video/mp4" />
+          <source src={videoUrl} type="video/mp4" />
           Ваш браузер не поддерживает воспроизведение видео.
         </video>
       </div>
