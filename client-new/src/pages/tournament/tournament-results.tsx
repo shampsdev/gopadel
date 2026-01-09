@@ -1,13 +1,11 @@
-import { useParams, useNavigate } from "react-router";
+import { useParams } from "react-router";
 import { useState, useEffect } from "react";
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { useGetEvents } from "../../api/hooks/useGetEvents";
 import { useTournamentApi } from "../../api/hooks/useTournamentApi";
 import { Preloader } from "../../components/widgets/preloader";
 import { Button } from "../../components/ui/button";
-import { Icons } from "../../assets/icons";
 import { twMerge } from "tailwind-merge";
-import { EventStatus } from "../../types/event-status.type";
 import { RegistrationStatus } from "../../types/registration-status";
 import type { Tournament as TournamentType } from "../../types/tournament.type";
 
@@ -54,7 +52,6 @@ interface TournamentState {
 export const TournamentResults = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   const { id } = useParams();
-  const navigate = useNavigate();
   
   const [tournamentState, setTournamentState] = useState<TournamentState | null>(null);
   const [editingMatch, setEditingMatch] = useState<string | null>(null);
@@ -109,9 +106,12 @@ export const TournamentResults = () => {
       .map(p => p.userId) || [];
 
     try {
+      const tournamentType = event.data?.tournament?.type;
+      const format = tournamentType === "мексикано" ? "MEXICANO" : "AMERICANO";
+      
       await createTournament(id, {
-        type: event.data?.tournament?.type || "американо",
-        format: "AMERICANO",
+        type: tournamentType || "американо",
+        format: format,
         mode: "SOLO",
         matchPoints: 16,
         courtsCount: 1,

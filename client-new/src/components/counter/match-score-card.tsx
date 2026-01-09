@@ -27,12 +27,15 @@ export const MatchScoreCard = ({
   };
 
   const handleScoreChange = (team: 'A' | 'B', score: number) => {
+    // Ограничиваем значение от 0 до maxPoints
+    const validScore = Math.max(0, Math.min(maxPoints, score));
+    
     if (team === 'A') {
-      setTeamAScore(score);
-      setTeamBScore(maxPoints - score);
+      setTeamAScore(validScore);
+      setTeamBScore(maxPoints - validScore);
     } else {
-      setTeamBScore(score);
-      setTeamAScore(maxPoints - score);
+      setTeamBScore(validScore);
+      setTeamAScore(maxPoints - validScore);
     }
   };
 
@@ -102,21 +105,22 @@ export const MatchScoreCard = ({
                   max={maxPoints}
                   value={teamAScore}
                   onChange={(e) => handleScoreChange('A', parseInt(e.target.value) || 0)}
-                  className="w-[60px] h-[60px] text-[24px] font-bold text-center border-2 border-[#AFFF3F] rounded-[12px] bg-[#F8F8FA]"
+                  className="w-[60px] h-[60px] text-[24px] font-bold text-center border-2 border-[#AFFF3F] rounded-[12px] bg-white"
                 />
+                <div className="text-[10px] text-[#5D6674] text-center">
+                  Ввод
+                </div>
               </div>
               
               <div className="text-[20px] font-medium text-[#5D6674]">:</div>
               
               <div className="flex flex-col items-center gap-[8px]">
-                <input
-                  type="number"
-                  min="0"
-                  max={maxPoints}
-                  value={teamBScore}
-                  onChange={(e) => handleScoreChange('B', parseInt(e.target.value) || 0)}
-                  className="w-[60px] h-[60px] text-[24px] font-bold text-center border-2 border-[#AFFF3F] rounded-[12px] bg-[#F8F8FA]"
-                />
+                <div className="w-[60px] h-[60px] text-[24px] font-bold text-center border-2 border-[#EBEDF0] rounded-[12px] bg-[#F8F8FA] flex items-center justify-center text-[#5D6674]">
+                  {teamBScore}
+                </div>
+                <div className="text-[10px] text-[#5D6674] text-center">
+                  Авто
+                </div>
               </div>
             </>
           ) : (
@@ -168,13 +172,7 @@ export const MatchScoreCard = ({
           </button>
           <button
             onClick={handleSave}
-            disabled={teamAScore + teamBScore !== maxPoints}
-            className={twMerge(
-              "flex-1 py-[12px] px-[16px] rounded-[16px] font-medium transition-colors",
-              teamAScore + teamBScore === maxPoints
-                ? "bg-[#AFFF3F] text-black hover:bg-[#9FEF2F]"
-                : "bg-[#EBEDF0] text-[#A4A9B4] cursor-not-allowed"
-            )}
+            className="flex-1 py-[12px] px-[16px] bg-[#AFFF3F] text-black rounded-[16px] font-medium hover:bg-[#9FEF2F] transition-colors"
           >
             Сохранить
           </button>

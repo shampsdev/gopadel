@@ -96,6 +96,7 @@ export interface TournamentStateResponse {
   mode: TournamentMode;
   currentRound: number;
   totalRounds: number;
+  matchPoints: number;
   status: TournamentEngineStatus;
   participants: TournamentPlayer[];
   matches: TournamentMatch[];

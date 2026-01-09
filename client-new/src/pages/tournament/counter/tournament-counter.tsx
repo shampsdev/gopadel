@@ -235,7 +235,7 @@ export const TournamentCounter = () => {
           currentRound={tournamentState.currentRound}
           courtsCount={tournamentState.matches.length > 0 ? 
             Math.max(...tournamentState.matches.map(m => m.court)) : 1}
-          maxPoints={16} // TODO: получать из конфигурации турнира
+           maxPoints={tournamentState.matchPoints}
           onScoreUpdate={handleScoreUpdate}
           disabled={isLoading_any || tournamentState.status === "FINISHED"}
         />

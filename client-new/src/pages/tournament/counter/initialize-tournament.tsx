@@ -24,10 +24,13 @@ export const InitializeTournament = () => {
   const { data: events } = useGetEvents({ id: id! });
   const { data: isAdmin } = useIsAdmin();
   
-  const [format, setFormat] = useState<TournamentFormat>("AMERICANO");
   const [mode, setMode] = useState<TournamentMode>("SOLO");
   const [matchPoints, setMatchPoints] = useState(16);
   const [courtsCount, setCourtsCount] = useState(1);
+
+  // Получаем формат турнира из данных события
+  const tournamentType = events?.[0]?.data?.tournament?.type;
+  const format: TournamentFormat = tournamentType === "мексикано" ? "MEXICANO" : "AMERICANO";
 
   const { mutateAsync: initializeTournament, isPending } = useInitializeTournament();
 
@@ -101,61 +104,32 @@ export const InitializeTournament = () => {
       </div>
 
       <div className="space-y-[24px]">
-        {/* Формат турнира */}
-        <div className="bg-white rounded-[20px] p-[16px] shadow-sm border border-[#EBEDF0]">
+        {/* Формат турнира - информационный блок */}
+        <div className="bg-[#F8FFF0] rounded-[20px] p-[16px]">
           <h3 className="text-[16px] font-medium mb-[12px]">Формат турнира</h3>
           
-          <div className="grid grid-cols-2 gap-[12px]">
-            <button
-              onClick={() => setFormat("AMERICANO")}
-              className={twMerge(
-                "p-[16px] rounded-[16px] border-2 transition-colors text-left",
-                format === "AMERICANO"
-                  ? "border-[#AFFF3F] bg-[#F8FFF0]"
-                  : "border-[#EBEDF0] bg-white hover:border-[#D1D5DB]"
-              )}
-            >
-              <div className="flex items-center gap-[8px] mb-[8px]">
-                <div className={twMerge(
-                  "w-[20px] h-[20px] rounded-full border-2 flex items-center justify-center",
-                  format === "AMERICANO" ? "border-[#AFFF3F] bg-[#AFFF3F]" : "border-[#D1D5DB]"
-                )}>
-                  {format === "AMERICANO" && Icons.Approve("black", "12", "12")}
-                </div>
-                <span className="font-medium">AMERICANO</span>
-              </div>
+          <div className="flex items-center gap-[12px] p-[16px] bg-white rounded-[16px]">
+            <div className="w-[20px] h-[20px] rounded-full bg-[#AFFF3F] flex items-center justify-center">
+              {Icons.Approve("black", "12", "12")}
+            </div>
+            <div>
+              <div className="font-medium text-[16px]">{format}</div>
               <p className="text-[12px] text-[#5D6674]">
-                Фиксированные раунды, максимум разнообразия партнёров
+                {format === "AMERICANO" 
+                  ? "Фиксированные раунды, максимум разнообразия партнёров"
+                  : "Пары формируются по лидерборду после каждого раунда"
+                }
               </p>
-            </button>
-
-            <button
-              onClick={() => setFormat("MEXICANO")}
-              className={twMerge(
-                "p-[16px] rounded-[16px] border-2 transition-colors text-left",
-                format === "MEXICANO"
-                  ? "border-[#AFFF3F] bg-[#F8FFF0]"
-                  : "border-[#EBEDF0] bg-white hover:border-[#D1D5DB]"
-              )}
-            >
-              <div className="flex items-center gap-[8px] mb-[8px]">
-                <div className={twMerge(
-                  "w-[20px] h-[20px] rounded-full border-2 flex items-center justify-center",
-                  format === "MEXICANO" ? "border-[#AFFF3F] bg-[#AFFF3F]" : "border-[#D1D5DB]"
-                )}>
-                  {format === "MEXICANO" && Icons.Approve("black", "12", "12")}
-                </div>
-                <span className="font-medium">MEXICANO</span>
-              </div>
-              <p className="text-[12px] text-[#5D6674]">
-                Пары формируются по лидерборду после каждого раунда
-              </p>
-            </button>
+            </div>
           </div>
+          
+          <p className="text-[12px] text-[#5D6674] mt-[8px]">
+            Формат определен при создании турнира: <strong>{tournamentType}</strong>
+          </p>
         </div>
 
         {/* Режим игры */}
-        <div className="bg-white rounded-[20px] p-[16px] shadow-sm border border-[#EBEDF0]">
+        <div className="bg-white rounded-[20px] p-[16px]">
           <h3 className="text-[16px] font-medium mb-[12px]">Режим игры</h3>
           
           <div className="grid grid-cols-2 gap-[12px]">
@@ -208,7 +182,7 @@ export const InitializeTournament = () => {
         </div>
 
         {/* Очки за матч */}
-        <div className="bg-white rounded-[20px] p-[16px] shadow-sm border border-[#EBEDF0]">
+        <div className="bg-white rounded-[20px] p-[16px]">
           <h3 className="text-[16px] font-medium mb-[12px]">Очки за матч</h3>
           
           <div className="grid grid-cols-4 gap-[8px]">
@@ -234,7 +208,7 @@ export const InitializeTournament = () => {
         </div>
 
         {/* Количество кортов */}
-        <div className="bg-white rounded-[20px] p-[16px] shadow-sm border border-[#EBEDF0]">
+        <div className="bg-white rounded-[20px] p-[16px]">
           <h3 className="text-[16px] font-medium mb-[12px]">Количество кортов</h3>
           
           <div className="grid grid-cols-4 gap-[8px]">

@@ -210,7 +210,7 @@ export const Tournament = () => {
              {events?.[0].status === EventStatus.in_progress && 
               checkOrganizerRight(isAdmin?.admin || false, user?.id, events?.[0]) && (
                <>
-                 <div
+            <div
                    onClick={() => {
                      // Если турнир не инициализирован, идем на страницу инициализации
                      if (!tournamentState) {
@@ -218,11 +218,11 @@ export const Tournament = () => {
                      } else {
                        navigate(`/tournament/${id}/counter`);
                      }
-                   }}
+              }}
                    className="w-full bg-[#AFFF3F] text-black text-[17px] font-medium py-[18px] px-[30px] rounded-[30px] text-center mb-[20px] cursor-pointer transition-colors hover:bg-[#9FEF2F]"
                  >
                    {!tournamentState ? "НАСТРОИТЬ СЧЕТЧИК" : "ВЕСТИ СЧЕТ"}
-                 </div>
+              </div>
 
                </>
              )}
