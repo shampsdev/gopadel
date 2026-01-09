@@ -282,7 +282,7 @@ export const createStartAndEndTime = (
   moscowEndDate.setUTCHours(moscowEndDate.getUTCHours() - 3);
 
   const startDate = moscowStartDate;
-  let endDate = moscowEndDate;
+  const endDate = moscowEndDate;
 
   // Если время конца меньше времени начала, добавляем один день
   const startTimeInMinutes = startHour * 60 + startMinute;

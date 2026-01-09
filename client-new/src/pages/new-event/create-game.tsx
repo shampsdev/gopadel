@@ -1,14 +1,8 @@
-// Удален неиспользуемый импорт useState
 import { useTelegramBackButton } from "../../shared/hooks/useTelegramBackButton";
 import { Input } from "../../components/ui/froms/input";
 import { Textarea } from "../../components/ui/froms/textarea";
 import { CourtSelector } from "../../components/ui/froms/court-selector";
-// Удален неиспользуемый импорт ClubSelector
-// Удален неиспользуемый импорт PlayerCountSelector
-// Удалены неиспользуемые импорты из date-format
 import { Button } from "../../components/ui/button";
-// Удален неиспользуемый импорт RankSelector
-// Удален неиспользуемый импорт ranks
 import { useAuthStore } from "../../shared/stores/auth.store";
 import { useGetCourts } from "../../api/hooks/useGetCourts";
 import { useGetMyClubs } from "../../api/hooks/useGetMyClubs";

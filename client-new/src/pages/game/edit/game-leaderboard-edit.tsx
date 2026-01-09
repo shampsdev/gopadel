@@ -65,6 +65,7 @@ export const GameLeaderboardEdit = () => {
         break;
       case 3:
         if (thirdPrizeUserId && thirdPrizeUserId !== userId) {
+          // Логика для обработки конфликта призов
         }
         setThirdPrizeUserId(userId);
         break;

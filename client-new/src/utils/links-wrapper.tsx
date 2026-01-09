@@ -6,7 +6,7 @@ const openLink = (url: string) => {
     postEvent("web_app_open_link", {
       url: url,
     });
-  } catch (error) {
+  } catch {
     window.open(url, "_blank");
   }
 };
