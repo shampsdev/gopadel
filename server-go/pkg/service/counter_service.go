@@ -98,6 +98,9 @@ func (s *CounterService) InitializeTournament(ctx context.Context, eventID strin
 		Result: json.RawMessage("{}"),
 	}
 
+	// Автоматически создаем начальные результаты
+	s.updateTournamentResults(eventData, eventData.TournamentEngine)
+
 	// Сериализуем данные
 	dataBytes, err := json.Marshal(eventData)
 	if err != nil {
@@ -160,6 +163,9 @@ func (s *CounterService) StartNextRound(ctx context.Context, eventID string) (*d
 
 	engine.Matches = append(engine.Matches, newMatches...)
 	engine.State.Status = domain.TournamentEngineStatusActive
+
+	// Автоматически обновляем результаты
+	s.updateTournamentResults(&eventData, engine)
 
 	// Сохраняем обновленные данные
 	dataBytes, err := json.Marshal(&eventData)
@@ -235,6 +241,9 @@ func (s *CounterService) UpdateMatchScore(ctx context.Context, eventID, matchID 
 	// Обновляем лидерборд
 	s.updateLeaderboard(engine)
 
+	// Автоматически обновляем промежуточные результаты
+	s.updateTournamentResults(&eventData, engine)
+
 	// Сохраняем данные
 	dataBytes, err := json.Marshal(&eventData)
 	if err != nil {
@@ -271,13 +280,8 @@ func (s *CounterService) FinishTournament(ctx context.Context, eventID string) (
 	// Обновляем финальный лидерборд
 	s.updateLeaderboard(engine)
 
-	// Сохраняем результат в поле result
-	resultData := map[string]interface{}{
-		"leaderboard": engine.Leaderboard,
-		"completedAt": time.Now(),
-	}
-	resultBytes, _ := json.Marshal(resultData)
-	eventData.Result = json.RawMessage(resultBytes)
+	// Автоматически формируем финальные результаты
+	s.updateTournamentResults(&eventData, engine)
 
 	// Обновляем статус события
 	event.Status = domain.EventStatusCompleted
@@ -303,13 +307,24 @@ func (s *CounterService) GetTournamentState(ctx context.Context, eventID string)
 		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
 
-	var eventData domain.EventData
-	if err := json.Unmarshal(event.Data, &eventData); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal event data: %w", err)
+	// Проверяем, что это турнир по типу события
+	if event.Type != domain.EventTypeTournament {
+		return nil, fmt.Errorf("event is not a tournament")
 	}
 
-	if !eventData.IsTournament() {
-		return nil, fmt.Errorf("event is not a tournament")
+	// Если данные пустые или не содержат структуру турнира, возвращаем nil
+	if len(event.Data) == 0 {
+		return nil, fmt.Errorf("tournament not initialized")
+	}
+
+	var eventData domain.EventData
+	if err := json.Unmarshal(event.Data, &eventData); err != nil {
+		return nil, fmt.Errorf("tournament not initialized")
+	}
+
+	// Если это не турнир или нет турнирного движка, значит не инициализирован
+	if !eventData.IsTournament() || eventData.TournamentEngine == nil {
+		return nil, fmt.Errorf("tournament not initialized")
 	}
 
 	return eventData.TournamentEngine, nil
@@ -367,8 +382,68 @@ func (s *CounterService) generateAmericanoMatches(participants []domain.Tourname
 			matches = append(matches, match)
 		}
 	}
-	
+
 	return matches
+}
+
+// updateTournamentResults автоматически обновляет результаты турнира
+func (s *CounterService) updateTournamentResults(eventData *domain.EventData, engine *domain.TournamentEngine) {
+	// Создаем структуру результатов на основе текущего лидерборда
+	leaderboardEntries := make([]map[string]interface{}, len(engine.Leaderboard))
+	
+	for i, entry := range engine.Leaderboard {
+		// Находим участника по ID
+		var participant *domain.TournamentPlayer
+		for j := range engine.Participants {
+			if engine.Participants[j].ID == entry.UserID {
+				participant = &engine.Participants[j]
+				break
+			}
+		}
+		
+		if participant != nil {
+			leaderboardEntries[i] = map[string]interface{}{
+				"place":  entry.Position,
+				"userId": entry.UserID,
+				"name":   participant.Name,
+				"stats": map[string]interface{}{
+					"wins":        participant.Stats.Wins,
+					"draws":       participant.Stats.Draws,
+					"losses":      participant.Stats.Losses,
+					"scored":      participant.Stats.Scored,
+					"conceded":    participant.Stats.Conceded,
+					"diff":        participant.Stats.Diff,
+					"tablePoints": participant.Stats.TablePoints,
+					"wdlPoints":   participant.Stats.WDLPoints,
+				},
+			}
+		}
+	}
+
+	// Формируем результаты турнира
+	resultData := map[string]interface{}{
+		"leaderboard": leaderboardEntries,
+		"updatedAt":   time.Now(),
+	}
+
+	// Если турнир завершен, добавляем информацию о завершении
+	if engine.State.Status == domain.TournamentEngineStatusFinished {
+		resultData["completedAt"] = time.Now()
+		resultData["status"] = "completed"
+		
+		// Определяем победителя
+		if len(leaderboardEntries) > 0 {
+			resultData["winner"] = leaderboardEntries[0]
+		}
+	} else {
+		resultData["status"] = "in_progress"
+	}
+
+	// Сериализуем и сохраняем результаты
+	resultBytes, err := json.Marshal(resultData)
+	if err == nil {
+		eventData.Result = json.RawMessage(resultBytes)
+	}
 }
 
 func (s *CounterService) generateMexicanoMatches(participants []domain.TournamentPlayer, round, courtsCount int) []domain.TournamentMatch {

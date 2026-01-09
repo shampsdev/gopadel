@@ -14,7 +14,6 @@ import { Preloader } from "../../components/widgets/preloader";
 import { BOT_NAME } from "../../shared/constants/api";
 import { useIsAdmin } from "../../api/hooks/useIsAdmin";
 import { Prize } from "../../components/widgets/prize";
-import { getPrizeString } from "../../utils/get-prize-string";
 import { checkOrganizerRight } from "../../utils/check-organizer-right";
 import { LinksWrapper } from "../../components/helpers/links-wrapper";
 import { RegistrationStatus } from "../../types/registration-status";
@@ -27,6 +26,8 @@ import { usePatchEvent } from "../../api/hooks/mutations/events/usePatchEvent";
 import { useModalStore } from "../../shared/stores/modal.store";
 import { useTournamentEditStore } from "../../shared/stores/tournament-edit.store";
 import { useStartEvent } from "../../api/hooks/mutations/events/useStartEvent";
+import { useGetTournamentState } from "../../api/hooks/useCounterApi";
+import { TournamentAutoResults } from "../../components/tournament/tournament-auto-results";
 
 export const Tournament = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
@@ -40,6 +41,7 @@ export const Tournament = () => {
   }) as { data: TournamentType[] | undefined; isLoading: boolean };
   const { data: waitlist } = useGetEventWaitlist(id!);
   const { data: isAdmin } = useIsAdmin();
+  const { data: tournamentState } = useGetTournamentState(id!);
 
   const { openModal } = useModalStore();
   const { mutateAsync: patchEvent, isPending: isUpdatingEvent } = usePatchEvent(
@@ -64,6 +66,7 @@ export const Tournament = () => {
       console.error("Failed to start event:", error);
     }
   };
+
 
   useEffect(() => {
     resetStore();
@@ -202,41 +205,27 @@ export const Tournament = () => {
               </div>
             )}
 
-            <div
-              onClick={async () => {
-                navigate(`/tournament/${id}/leaderboard`);
-              }}
-              className="flex flex-row justify-between items-center gap-[18px]"
-            >
-              <div className="flex flex-col items-center justify-center w-[42px] h-[42px] min-w-[42px] min-h-[42px] bg-[#041124] rounded-full">
-                {Icons.Stack()}
-              </div>
 
-              <div className="text-black text-[16px] flex-grow flex flex-col gap-[2px]">
-                <p>Результаты турнира</p>
-                <div className="text-[#868D98] text-[12px]">
-                  Ваш результат:{" "}
-                  <span className="text-black">
-                    {(events?.[0].status !== EventStatus.completed ||
-                      !events?.[0].participants?.find(
-                        (participant) => participant.userId === user?.id
-                      )) &&
-                      "-"}
-                    {events?.[0].status === EventStatus.completed &&
-                      events?.[0].participants?.find(
-                        (participant) => participant.userId === user?.id
-                      ) &&
-                      getPrizeString(
-                        events?.[0].data?.result?.leaderboard.find(
-                          (place) => place.userId === user?.id
-                        )?.place
-                      )}
-                  </span>
-                </div>
-              </div>
+             {/* Кнопка "ВЕСТИ СЧЕТ" - показывается только для турниров в прогрессе и только организатору/админу */}
+             {events?.[0].status === EventStatus.in_progress && 
+              checkOrganizerRight(isAdmin?.admin || false, user?.id, events?.[0]) && (
+               <>
+                 <div
+                   onClick={() => {
+                     // Если турнир не инициализирован, идем на страницу инициализации
+                     if (!tournamentState) {
+                       navigate(`/tournament/${id}/counter/initialize`);
+                     } else {
+                       navigate(`/tournament/${id}/counter`);
+                     }
+                   }}
+                   className="w-full bg-[#AFFF3F] text-black text-[17px] font-medium py-[18px] px-[30px] rounded-[30px] text-center mb-[20px] cursor-pointer transition-colors hover:bg-[#9FEF2F]"
+                 >
+                   {!tournamentState ? "НАСТРОИТЬ СЧЕТЧИК" : "ВЕСТИ СЧЕТ"}
+                 </div>
 
-              {Icons.ArrowRight("#A4A9B4", "24", "24")}
-            </div>
+               </>
+             )}
 
             {events?.[0].description.length > 0 && (
               <div className="flex flex-col pt-[20px] gap-[8px]">
@@ -333,6 +322,13 @@ export const Tournament = () => {
       </div>
 
       <div className="flex flex-col gap-6 mt-[24px]">
+        {/* Автоматические результаты турнира */}
+        {events?.[0] && (
+          <div className="px-[8px]">
+            <TournamentAutoResults tournament={events[0]} />
+          </div>
+        )}
+
         <div className="flex flex-row justify-between items-center px-[8px]">
           <div className="flex flex-row gap-[7px] items-center">
             <p>Участники</p>

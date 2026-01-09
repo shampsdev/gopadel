@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shampsdev/go-telegram-template/pkg/domain"
 	"github.com/shampsdev/go-telegram-template/pkg/gateways/rest/ginerr"
+	"github.com/shampsdev/go-telegram-template/pkg/repo"
 )
 
 // InitializeTournamentRequest представляет запрос на инициализацию турнира
@@ -62,13 +63,33 @@ type FinishTournamentResponse struct {
 // @Param request body InitializeTournamentRequest true "Параметры турнира"
 // @Success 200 {object} TournamentStateResponse
 // @Failure 400 {object} ginerr.ErrorResponse
+// @Failure 401 "Unauthorized"
 // @Failure 404 {object} ginerr.ErrorResponse
 // @Failure 500 {object} ginerr.ErrorResponse
+// @Security ApiKeyAuth
 // @Router /events/{event_id}/counter/initialize [post]
 func (h *Handler) initializeCounter(c *gin.Context) {
+	// Проверяем аутентификацию пользователя
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		return
+	}
+
+	domainUser, ok := user.(*domain.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user type"})
+		return
+	}
+
 	eventID := c.Param("event_id")
 	if eventID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "event_id is required"})
+		return
+	}
+
+	// Проверяем права доступа к счетчику
+	if err := h.checkCounterAccess(c, eventID, domainUser); err != nil {
 		return
 	}
 
@@ -155,9 +176,27 @@ func (h *Handler) initializeCounter(c *gin.Context) {
 // @Failure 500 {object} ginerr.ErrorResponse
 // @Router /events/{event_id}/counter [get]
 func (h *Handler) getTournamentState(c *gin.Context) {
+	// Проверяем аутентификацию пользователя
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		return
+	}
+
+	domainUser, ok := user.(*domain.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user type"})
+		return
+	}
+
 	eventID := c.Param("event_id")
 	if eventID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "event_id is required"})
+		return
+	}
+
+	// Проверяем права доступа к счетчику
+	if err := h.checkCounterAccess(c, eventID, domainUser); err != nil {
 		return
 	}
 
@@ -214,6 +253,19 @@ func (h *Handler) getTournamentState(c *gin.Context) {
 // @Failure 500 {object} ginerr.ErrorResponse
 // @Router /events/{event_id}/counter/matches/{match_id}/score [put]
 func (h *Handler) updateMatchScore(c *gin.Context) {
+	// Проверяем аутентификацию пользователя
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		return
+	}
+
+	domainUser, ok := user.(*domain.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user type"})
+		return
+	}
+
 	eventID := c.Param("event_id")
 	matchID := c.Param("match_id")
 	
@@ -223,6 +275,11 @@ func (h *Handler) updateMatchScore(c *gin.Context) {
 	}
 	if matchID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "match_id is required"})
+		return
+	}
+
+	// Проверяем права доступа к счетчику
+	if err := h.checkCounterAccess(c, eventID, domainUser); err != nil {
 		return
 	}
 
@@ -295,9 +352,27 @@ func (h *Handler) updateMatchScore(c *gin.Context) {
 // @Failure 500 {object} ginerr.ErrorResponse
 // @Router /events/{event_id}/counter/next-round [post]
 func (h *Handler) nextRound(c *gin.Context) {
+	// Проверяем аутентификацию пользователя
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		return
+	}
+
+	domainUser, ok := user.(*domain.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user type"})
+		return
+	}
+
 	eventID := c.Param("event_id")
 	if eventID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "event_id is required"})
+		return
+	}
+
+	// Проверяем права доступа к счетчику
+	if err := h.checkCounterAccess(c, eventID, domainUser); err != nil {
 		return
 	}
 
@@ -333,9 +408,27 @@ func (h *Handler) nextRound(c *gin.Context) {
 // @Failure 500 {object} ginerr.ErrorResponse
 // @Router /events/{event_id}/counter/finish [post]
 func (h *Handler) finishTournament(c *gin.Context) {
+	// Проверяем аутентификацию пользователя
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		return
+	}
+
+	domainUser, ok := user.(*domain.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user type"})
+		return
+	}
+
 	eventID := c.Param("event_id")
 	if eventID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "event_id is required"})
+		return
+	}
+
+	// Проверяем права доступа к счетчику
+	if err := h.checkCounterAccess(c, eventID, domainUser); err != nil {
 		return
 	}
 
@@ -360,4 +453,34 @@ func (h *Handler) finishTournament(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+// checkCounterAccess проверяет права доступа к турнирному счетчику
+// Доступ имеют только организатор события или админы
+func (h *Handler) checkCounterAccess(c *gin.Context, eventID string, user *domain.User) error {
+	// Получаем событие
+	event, err := h.cases.Event.GetEventByID(c, eventID)
+	if err != nil {
+		if err == repo.ErrNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "event not found"})
+			return err
+		}
+		ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to get event")
+		return err
+	}
+
+	// Проверяем права доступа (только организатор или админ)
+	if event.Organizer.ID != user.ID {
+		_, err := h.cases.AdminUser.GetByUserID(c, user.ID)
+		if err != nil {
+			if err == repo.ErrNotFound {
+				c.JSON(http.StatusForbidden, gin.H{"error": "only event organizer or admin can manage tournament counter"})
+				return err
+			}
+			ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "failed to check admin status")
+			return err
+		}
+	}
+
+	return nil
 }

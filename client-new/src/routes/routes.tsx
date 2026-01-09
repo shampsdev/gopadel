@@ -23,8 +23,6 @@ import { League } from "../pages/league";
 import { Games } from "../pages/home/games";
 import { Trainings } from "../pages/home/trainings";
 import { TournamentEdit } from "../pages/tournament/edit/tournament-edit";
-import { TournamentLeaderboardEdit } from "../pages/tournament/edit/tournament-leaderboard-edit";
-import { TournamentLeaderboard } from "../pages/tournament/edit/tournament-leaderboard";
 import { Game } from "../pages/game/game";
 import { GamePlayers } from "../pages/game/game-players";
 import { GameEdit } from "../pages/game/edit/game-edit";
@@ -40,6 +38,8 @@ import { CreateTournamentCalendar } from "../pages/new-event/date/tournament/cre
 import { CreateTournamentYearMonthPick } from "../pages/new-event/date/tournament/create-tournament-picker";
 import { CreateGameCalendar } from "../pages/new-event/date/game/create-game-calendar";
 import { CreateGameYearMonthPick } from "../pages/new-event/date/game/create-game-picker";
+import { TournamentCounter } from "../pages/tournament/counter/tournament-counter";
+import { InitializeTournament } from "../pages/tournament/counter/initialize-tournament";
 
 const authRoutes: RouteObject[] = [
   {
@@ -153,15 +153,14 @@ export const routes: RouteObject[] = [
                                 path: "year-month-pick",
                                 element: <TournamentYearMonthPick />,
                               },
-                              {
-                                path: "leaderboard",
-                                element: <TournamentLeaderboardEdit />,
-                              },
                             ],
                           },
                           {
-                            path: "leaderboard",
-                            element: <TournamentLeaderboard />,
+                            path: "counter",
+                            children: [
+                              { path: "", element: <TournamentCounter /> },
+                              { path: "initialize", element: <InitializeTournament /> },
+                            ],
                           },
                         ],
                       },
