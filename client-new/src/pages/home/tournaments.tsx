@@ -93,27 +93,7 @@ export const Tournaments = () => {
           />
         </div>
       )}
-      <div className="flex flex-row items-center py-6 px-5 border-[#EBEDF0] justify-between border-[1px] gap-6 rounded-[24px] bg-white">
-        <p className="flex-1 flex-grow text-[14px] text-[#5D6674]">
-          Только со свободными местами
-        </p>
-        <motion.div
-          className="h-[28px] w-[60px] rounded-[16px] z-10 flex items-center cursor-pointer relative"
-          onClick={toggleSwitch}
-          animate={{
-            backgroundColor: showOnlyAvailable ? "#AFFF3F" : "#F8F8FA",
-          }}
-          transition={{ duration: 0.3 }}
-          style={{ zIndex: 0 }}
-        >
-          <motion.div
-            className="h-[20px] w-[20px] z-10 rounded-full bg-white shadow-sm absolute left-1"
-            animate={{ x: showOnlyAvailable ? 32 : 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            style={{ zIndex: 0 }}
-          />
-        </motion.div>
-      </div>
+     
 
       <div className="flex flex-col gap-4 pb-[100px] mt-4">
         {events?.map((event: Event) => (
