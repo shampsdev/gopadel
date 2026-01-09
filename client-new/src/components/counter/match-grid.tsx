@@ -58,8 +58,8 @@ export const MatchGrid = ({
 
   return (
     <div className="space-y-[20px]">
-      {/* Заголовок с прогрессом */}
-      <div className="bg-white rounded-[20px] p-[16px] shadow-sm border border-[#EBEDF0]">
+       {/* Заголовок с прогрессом */}
+       <div className="bg-white rounded-[20px] p-[16px] shadow-sm">
         <div className="flex items-center justify-between mb-[12px]">
           <div className="flex items-center gap-[8px]">
             {Icons.Grid()}
@@ -90,7 +90,7 @@ export const MatchGrid = ({
             const hasMatches = courtMatches.length > 0;
             
             return (
-              <div key={courtNumber} className="space-y-[12px]">
+              <div key={courtNumber} className="space-y-[8px]">
                 {/* Заголовок корта */}
                 <div className="flex items-center gap-[8px] px-[4px]">
                   <div className="bg-[#041124] text-white rounded-full w-[24px] h-[24px] flex items-center justify-center text-[12px] font-medium">
@@ -133,7 +133,7 @@ export const MatchGrid = ({
         </div>
       ) : (
         // Один корт - показываем матчи без группировки
-        <div className="space-y-[12px]">
+        <div className="space-y-[8px]">
           {currentRoundMatches.length > 0 ? (
             currentRoundMatches.map(match => (
               <MatchScoreCard
@@ -158,7 +158,7 @@ export const MatchGrid = ({
 
       {/* Пустое состояние */}
       {totalMatches === 0 && (
-        <div className="bg-white rounded-[20px] p-[32px] text-center shadow-sm border border-[#EBEDF0]">
+         <div className="bg-white rounded-[20px] p-[32px] text-center shadow-sm">
           <div className="mb-[12px] text-[#5D6674]">{Icons.Grid()}</div>
           <div className="text-[16px] font-medium mb-[4px]">Матчи не созданы</div>
           <div className="text-[14px] text-[#5D6674]">

@@ -30,21 +30,15 @@ export const Leaderboard = ({ participants, format, currentUserId }: Leaderboard
     return a.seed - b.seed;
   });
 
-  const getMedalIcon = (position: number) => {
-    switch (position) {
-      case 1:
-        return <div className="w-[24px] h-[24px] bg-[#FFD700] rounded-full flex items-center justify-center text-[12px] font-bold">🥇</div>;
-      case 2:
-        return <div className="w-[24px] h-[24px] bg-[#C0C0C0] rounded-full flex items-center justify-center text-[12px] font-bold">🥈</div>;
-      case 3:
-        return <div className="w-[24px] h-[24px] bg-[#CD7F32] rounded-full flex items-center justify-center text-[12px] font-bold">🥉</div>;
-      default:
-        return (
-          <div className="w-[24px] h-[24px] bg-[#F8F8FA] rounded-full flex items-center justify-center text-[12px] font-medium text-[#5D6674]">
-            {position}
-          </div>
-        );
-    }
+  const getPositionNumber = (position: number) => {
+    return (
+      <div className={twMerge(
+        "w-[24px] h-[24px] rounded-full flex items-center justify-center text-[12px] font-bold",
+        position === 1 ? "bg-[#FFF3CD] text-[#B45309]" : "text-[#5D6674]"
+      )}>
+        {position}
+      </div>
+    );
   };
 
   const getWinRate = (player: TournamentPlayer) => {
@@ -54,9 +48,9 @@ export const Leaderboard = ({ participants, format, currentUserId }: Leaderboard
   };
 
   return (
-    <div className="bg-white rounded-[20px] overflow-hidden shadow-sm border border-[#EBEDF0]">
+    <div className="bg-white rounded-[20px] overflow-hidden shadow-sm">
       {/* Заголовок */}
-      <div className="bg-[#F8F8FA] px-[16px] py-[12px] border-b border-[#EBEDF0]">
+      <div className="bg-[#F8F8FA] px-[16px] py-[12px]">
         <div className="flex items-center gap-[8px]">
           {Icons.Stack()}
           <h3 className="text-[16px] font-medium">Таблица лидеров</h3>
@@ -67,7 +61,7 @@ export const Leaderboard = ({ participants, format, currentUserId }: Leaderboard
       </div>
 
       {/* Заголовки колонок */}
-      <div className="px-[16px] py-[8px] bg-[#FAFBFC] border-b border-[#EBEDF0]">
+      <div className="px-[16px] py-[8px] bg-[#FAFBFC]">
         <div className="grid grid-cols-12 gap-[8px] text-[12px] text-[#5D6674] font-medium">
           <div className="col-span-1">#</div>
           <div className="col-span-4">Игрок</div>
@@ -88,35 +82,25 @@ export const Leaderboard = ({ participants, format, currentUserId }: Leaderboard
             <div
               key={player.id}
               className={twMerge(
-                "px-[16px] py-[12px] border-b border-[#EBEDF0] last:border-b-0 transition-colors",
-                isCurrentUser ? "bg-[#E7FFC6]" : "hover:bg-[#FAFBFC]"
+                "px-[16px] py-[12px] transition-colors",
+                position === 1 ? "bg-[#FFF9E6]" : isCurrentUser ? "bg-[#E7FFC6]" : "hover:bg-[#FAFBFC]"
               )}
             >
               <div className="grid grid-cols-12 gap-[8px] items-center">
                 {/* Позиция */}
                 <div className="col-span-1">
-                  {getMedalIcon(position)}
+                  {getPositionNumber(position)}
                 </div>
 
-                {/* Имя игрока */}
-                <div className="col-span-4">
-                  <div className="flex items-center gap-[8px]">
-                    <span className={twMerge(
-                      "text-[14px] font-medium",
-                      isCurrentUser ? "text-[#77BE14]" : "text-black"
-                    )}>
-                      {player.name}
-                    </span>
-                    {isCurrentUser && (
-                      <div className="bg-[#77BE14] text-white text-[10px] px-[6px] py-[2px] rounded-[8px] font-medium">
-                        ВЫ
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-[12px] text-[#5D6674]">
-                    Seed: {player.seed}
-                  </div>
-                </div>
+                 {/* Имя игрока */}
+                 <div className="col-span-4">
+                   <div className="text-[14px] font-medium text-black">
+                     {player.name}
+                   </div>
+                   <div className="text-[12px] text-[#5D6674]">
+                     Seed: {player.seed}
+                   </div>
+                 </div>
 
                 {/* Игры/Победы/Поражения */}
                 <div className="col-span-2 text-center">

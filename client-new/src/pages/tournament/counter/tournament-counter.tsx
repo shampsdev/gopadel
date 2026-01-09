@@ -19,8 +19,6 @@ import { MatchGrid } from "../../../components/counter/match-grid";
 import { Leaderboard } from "../../../components/counter/leaderboard";
 import { RoundManager } from "../../../components/counter/round-manager";
 
-type TabType = "matches" | "leaderboard";
-
 export const TournamentCounter = () => {
   useTelegramBackButton({ showOnMount: true, hideOnUnmount: true });
   
@@ -28,8 +26,6 @@ export const TournamentCounter = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { openModal } = useModalStore();
-  
-  const [activeTab, setActiveTab] = useState<TabType>("matches");
 
   // API хуки
   const { data: tournamentState, isLoading, error } = useGetTournamentState(id!);
@@ -83,6 +79,24 @@ export const TournamentCounter = () => {
           navigate(`/tournament/${id}`);
         } catch (error) {
           console.error("Failed to finish tournament:", error);
+        }
+      },
+      declineButtonOnClick: () => {},
+    });
+  };
+
+  const handleFinishEarly = async () => {
+    openModal({
+      title: "Завершить турнир досрочно?",
+      subtitle: "⚠️ ВНИМАНИЕ: Это действие нельзя отменить! Турнир будет завершен с текущими результатами. Все незавершенные матчи будут аннулированы.",
+      acceptButtonText: "Да, завершить досрочно",
+      declineButtonText: "Отмена",
+      acceptButtonOnClick: async () => {
+        try {
+          await finishTournament(id!);
+          navigate(`/tournament/${id}`);
+        } catch (error) {
+          console.error("Failed to finish tournament early:", error);
         }
       },
       declineButtonOnClick: () => {},
@@ -165,70 +179,31 @@ export const TournamentCounter = () => {
   const isLoading_any = isUpdatingScore || isStartingRound || isFinishingTournament;
 
   return (
-    <div className="flex flex-col pb-[100px]">
+    <div className="flex flex-col pb-[100px] px-[16px]">
       {/* Заголовок */}
-      <div className="flex items-center justify-between mb-[20px]">
-        <div>
-          <h1 className="text-[24px] font-medium">Ведение счета</h1>
-          <div className="flex items-center gap-[8px] mt-[4px]">
-            <div className="bg-[#F8F8FA] rounded-full px-[12px] py-[4px]">
-              <span className="text-[12px] text-[#5D6674]">{tournamentState.format}</span>
+      <div className="flex items-start justify-between mb-[16px] gap-[12px]">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-[20px] sm:text-[24px] font-medium">Ведение счета</h1>
+          <div className="flex items-center gap-[6px] mt-[4px] flex-wrap">
+            <div className="bg-[#F8F8FA] rounded-full px-[8px] py-[2px]">
+              <span className="text-[10px] text-[#5D6674]">{tournamentState.format}</span>
             </div>
-            <div className="bg-[#F8F8FA] rounded-full px-[12px] py-[4px]">
-              <span className="text-[12px] text-[#5D6674]">{tournamentState.mode}</span>
+            <div className="bg-[#F8F8FA] rounded-full px-[8px] py-[2px]">
+              <span className="text-[10px] text-[#5D6674]">{tournamentState.mode}</span>
             </div>
           </div>
         </div>
 
         <button
           onClick={() => navigate(`/tournament/${id}`)}
-          className="p-[12px] bg-[#F8F8FA] rounded-full hover:bg-[#EBEDF0] transition-colors"
+          className="p-[8px] bg-[#F8F8FA] rounded-full hover:bg-[#EBEDF0] transition-colors flex-shrink-0"
         >
           {Icons.Close()}
         </button>
       </div>
 
-      {/* Управление раундами */}
-      <div className="mb-[20px]">
-        <RoundManager
-          currentRound={tournamentState.currentRound}
-          totalRounds={tournamentState.totalRounds}
-          status={tournamentState.status}
-          canStartNextRound={canStartNextRound}
-          onNextRound={handleNextRound}
-          onFinishTournament={handleFinishTournament}
-          isLoading={isLoading_any}
-        />
-      </div>
-
-      {/* Табы */}
-      <div className="flex bg-[#F8F8FA] rounded-[16px] p-[4px] mb-[20px]">
-        <button
-          onClick={() => setActiveTab("matches")}
-          className={twMerge(
-            "flex-1 py-[12px] px-[16px] rounded-[12px] text-[14px] font-medium transition-colors",
-            activeTab === "matches"
-              ? "bg-white text-black shadow-sm"
-              : "text-[#5D6674] hover:text-black"
-          )}
-        >
-          Матчи ({tournamentState.matches.filter(m => m.round === tournamentState.currentRound).length})
-        </button>
-        <button
-          onClick={() => setActiveTab("leaderboard")}
-          className={twMerge(
-            "flex-1 py-[12px] px-[16px] rounded-[12px] text-[14px] font-medium transition-colors",
-            activeTab === "leaderboard"
-              ? "bg-white text-black shadow-sm"
-              : "text-[#5D6674] hover:text-black"
-          )}
-        >
-          Таблица ({tournamentState.participants.length})
-        </button>
-      </div>
-
-      {/* Контент табов */}
-      {activeTab === "matches" ? (
+      {/* Матчи раунда */}
+      <div className="mb-[16px]">
         <MatchGrid
           matches={tournamentState.matches}
           participants={tournamentState.participants}
@@ -239,13 +214,28 @@ export const TournamentCounter = () => {
           onScoreUpdate={handleScoreUpdate}
           disabled={isLoading_any || tournamentState.status === "FINISHED"}
         />
-      ) : (
-        <Leaderboard
-          participants={tournamentState.participants}
-          format={tournamentState.format}
-          currentUserId={user?.id}
+      </div>
+
+      {/* Управление раундами */}
+      <div className="mb-[16px]">
+        <RoundManager
+          currentRound={tournamentState.currentRound}
+          totalRounds={tournamentState.totalRounds}
+          status={tournamentState.status}
+          canStartNextRound={canStartNextRound}
+          onNextRound={handleNextRound}
+          onFinishTournament={handleFinishTournament}
+          onFinishEarly={handleFinishEarly}
+          isLoading={isLoading_any}
         />
-      )}
+      </div>
+
+      {/* Таблица лидеров */}
+      <Leaderboard
+        participants={tournamentState.participants}
+        format={tournamentState.format}
+        currentUserId={user?.id}
+      />
 
       {/* Индикатор загрузки */}
       {isLoading_any && (

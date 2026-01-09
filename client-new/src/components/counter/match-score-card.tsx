@@ -54,9 +54,9 @@ export const MatchScoreCard = ({
   const canEdit = !disabled && !isCompleted;
 
   return (
-    <div className="bg-white rounded-[20px] p-[16px] shadow-sm border border-[#EBEDF0]">
+    <div className="bg-white rounded-[20px] p-[20px] shadow-lg">
       {/* Заголовок матча */}
-      <div className="flex justify-between items-center mb-[16px]">
+      <div className="flex justify-center items-center mb-[16px]">
         <div className="flex items-center gap-[8px]">
           <div className="bg-[#F8F8FA] rounded-full px-[12px] py-[4px]">
             <span className="text-[12px] text-[#5D6674]">Корт {match.court}</span>
@@ -65,37 +65,45 @@ export const MatchScoreCard = ({
             <span className="text-[12px] text-[#5D6674]">Раунд {match.round}</span>
           </div>
         </div>
-        
-        {canEdit && !isEditing && (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="p-[8px] rounded-full bg-[#F8F8FA] hover:bg-[#EBEDF0] transition-colors"
-          >
-            {Icons.Edit()}
-          </button>
-        )}
       </div>
 
       {/* Команды и счет */}
-      <div className="flex items-center justify-between">
-        {/* Команда A */}
-        <div className="flex-1">
-          <div className="text-[14px] font-medium text-[#5D6674] mb-[4px]">
-            Команда 1
+      <div className="flex flex-col gap-[16px]">
+        {/* Команды */}
+        <div className="flex justify-between items-start gap-[12px]">
+          {/* Команда A */}
+          <div className="flex-1 min-w-0">
+            <div className="text-[12px] font-medium text-[#5D6674] mb-[4px]">
+              Команда 1
+            </div>
+            <div className="text-[14px] font-medium leading-tight">
+              <div className="truncate">{getPlayerName(match.teamA.player1)}</div>
+              {match.teamA.player2 && (
+                <div className="text-[12px] text-[#5D6674] truncate">
+                  {getPlayerName(match.teamA.player2)}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="text-[16px] font-medium">
-            {getPlayerName(match.teamA.player1)}
-            {match.teamA.player2 && (
-              <>
-                <br />
-                <span className="text-[14px]">{getPlayerName(match.teamA.player2)}</span>
-              </>
-            )}
+
+          {/* Команда B */}
+          <div className="flex-1 min-w-0 text-right">
+            <div className="text-[12px] font-medium text-[#5D6674] mb-[4px]">
+              Команда 2
+            </div>
+            <div className="text-[14px] font-medium leading-tight">
+              <div className="truncate">{getPlayerName(match.teamB.player1)}</div>
+              {match.teamB.player2 && (
+                <div className="text-[12px] text-[#5D6674] truncate">
+                  {getPlayerName(match.teamB.player2)}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Счет */}
-        <div className="flex items-center gap-[16px] mx-[20px]">
+        {/* Счет - главный элемент */}
+        <div className="flex items-center justify-center gap-[20px] my-[24px]">
           {isEditing ? (
             <>
               <div className="flex flex-col items-center gap-[8px]">
@@ -105,76 +113,74 @@ export const MatchScoreCard = ({
                   max={maxPoints}
                   value={teamAScore}
                   onChange={(e) => handleScoreChange('A', parseInt(e.target.value) || 0)}
-                  className="w-[60px] h-[60px] text-[24px] font-bold text-center border-2 border-[#AFFF3F] rounded-[12px] bg-white"
+                  className="w-[80px] h-[80px] text-[32px] font-bold text-center bg-[#AFFF3F] rounded-[16px] text-black shadow-lg"
+                  autoFocus
                 />
-                <div className="text-[10px] text-[#5D6674] text-center">
-                  Ввод
+                <div className="text-[12px] text-[#5D6674] font-medium">
+                  Команда 1
                 </div>
               </div>
               
-              <div className="text-[20px] font-medium text-[#5D6674]">:</div>
+              <div className="text-[32px] font-bold text-[#5D6674]">:</div>
               
               <div className="flex flex-col items-center gap-[8px]">
-                <div className="w-[60px] h-[60px] text-[24px] font-bold text-center border-2 border-[#EBEDF0] rounded-[12px] bg-[#F8F8FA] flex items-center justify-center text-[#5D6674]">
+                <div className="w-[80px] h-[80px] text-[32px] font-bold text-center rounded-[16px] bg-[#F8F8FA] flex items-center justify-center text-[#5D6674] shadow-lg">
                   {teamBScore}
                 </div>
-                <div className="text-[10px] text-[#5D6674] text-center">
-                  Авто
+                <div className="text-[12px] text-[#5D6674] font-medium">
+                  Команда 2
                 </div>
               </div>
             </>
           ) : (
             <>
               <div className={twMerge(
-                "w-[60px] h-[60px] flex items-center justify-center rounded-[12px] text-[24px] font-bold",
+                "w-[80px] h-[80px] flex items-center justify-center rounded-[16px] text-[32px] font-bold shadow-lg cursor-pointer transition-all hover:scale-105",
                 teamAScore > teamBScore ? "bg-[#AFFF3F] text-black" : "bg-[#F8F8FA] text-[#5D6674]"
-              )}>
+              )}
+              onClick={() => canEdit && setIsEditing(true)}
+              >
                 {teamAScore}
               </div>
               
-              <div className="text-[20px] font-medium text-[#5D6674]">:</div>
+              <div className="text-[32px] font-bold text-[#5D6674]">:</div>
               
               <div className={twMerge(
-                "w-[60px] h-[60px] flex items-center justify-center rounded-[12px] text-[24px] font-bold",
+                "w-[80px] h-[80px] flex items-center justify-center rounded-[16px] text-[32px] font-bold shadow-lg cursor-pointer transition-all hover:scale-105",
                 teamBScore > teamAScore ? "bg-[#AFFF3F] text-black" : "bg-[#F8F8FA] text-[#5D6674]"
-              )}>
+              )}
+              onClick={() => canEdit && setIsEditing(true)}
+              >
                 {teamBScore}
               </div>
             </>
           )}
         </div>
 
-        {/* Команда B */}
-        <div className="flex-1 text-right">
-          <div className="text-[14px] font-medium text-[#5D6674] mb-[4px]">
-            Команда 2
+        {/* Подсказка для ввода */}
+        {!isEditing && canEdit && (
+          <div className="text-center mb-[16px]">
+            <div className="text-[12px] text-[#5D6674] bg-[#F8F8FA] rounded-[8px] px-[12px] py-[4px] inline-block">
+              Нажмите на счет для редактирования
+            </div>
           </div>
-          <div className="text-[16px] font-medium">
-            {getPlayerName(match.teamB.player1)}
-            {match.teamB.player2 && (
-              <>
-                <br />
-                <span className="text-[14px]">{getPlayerName(match.teamB.player2)}</span>
-              </>
-            )}
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Кнопки управления при редактировании */}
       {isEditing && (
-        <div className="flex gap-[12px] mt-[16px]">
+        <div className="flex gap-[16px] mt-[20px]">
           <button
             onClick={handleCancel}
-            className="flex-1 py-[12px] px-[16px] bg-[#F8F8FA] text-[#5D6674] rounded-[16px] font-medium"
+            className="flex-1 py-[16px] px-[20px] bg-[#F8F8FA] text-[#5D6674] rounded-[16px] font-medium text-[16px] hover:bg-[#EBEDF0] transition-colors"
           >
             Отмена
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 py-[12px] px-[16px] bg-[#AFFF3F] text-black rounded-[16px] font-medium hover:bg-[#9FEF2F] transition-colors"
+            className="flex-1 py-[16px] px-[20px] bg-[#AFFF3F] text-black rounded-[16px] font-medium text-[16px] hover:bg-[#9FEF2F] transition-colors shadow-lg"
           >
-            Сохранить
+            Сохранить результат
           </button>
         </div>
       )}
