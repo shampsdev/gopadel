@@ -4,7 +4,6 @@ import type { Event } from "../../types/event.type";
 import type { FilterEvent } from "../../types/filter.type";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { motion } from "framer-motion";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
 import { Preloader } from "../../components/widgets/preloader";
 import { RegistrationStatus } from "../../types/registration-status";
@@ -37,21 +36,6 @@ export const Tournaments = () => {
     setSelectedCourtId(urlCourtId || null);
   }, [urlCourtId]);
 
-  const toggleSwitch = () => {
-    const newValue = !showOnlyAvailable;
-    setShowOnlyAvailable(newValue);
-
-    const newSearchParams = new URLSearchParams(location.search);
-    if (newValue) {
-      newSearchParams.set("available", "true");
-    } else {
-      newSearchParams.delete("available");
-    }
-    if (selectedCourtId) {
-      newSearchParams.set("courtId", selectedCourtId);
-    }
-    navigate(`${location.pathname}?${newSearchParams.toString()}`);
-  };
 
   const handleCourtChange = (courtId: string | null) => {
     setSelectedCourtId(courtId);

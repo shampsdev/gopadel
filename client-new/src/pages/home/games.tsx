@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from "react-router";
 import { HomeNavbar } from "../../components/widgets/home-navbar";
-import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useGetEvents } from "../../api/hooks/useGetEvents";
 import { EventCard } from "../../components/widgets/event-card";
@@ -36,21 +35,6 @@ export const Games = () => {
     setSelectedCourtId(urlCourtId || null);
   }, [urlCourtId]);
 
-  const toggleSwitch = () => {
-    const newValue = !showOnlyAvailable;
-    setShowOnlyAvailable(newValue);
-
-    const newSearchParams = new URLSearchParams(location.search);
-    if (newValue) {
-      newSearchParams.set("available", "true");
-    } else {
-      newSearchParams.delete("available");
-    }
-    if (selectedCourtId) {
-      newSearchParams.set("courtId", selectedCourtId);
-    }
-    navigate(`${location.pathname}?${newSearchParams.toString()}`);
-  };
 
   const handleCourtChange = (courtId: string | null) => {
     setSelectedCourtId(courtId);

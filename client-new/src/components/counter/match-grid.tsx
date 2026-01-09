@@ -9,7 +9,6 @@ interface MatchGridProps {
   currentRound: number;
   courtsCount: number;
   maxPoints: number;
-  onMatchStart?: (matchId: string) => void;
   onScoreUpdate: (matchId: string, teamAScore: number, teamBScore: number) => void;
   disabled?: boolean;
 }
@@ -20,7 +19,6 @@ export const MatchGrid = ({
   currentRound,
   courtsCount,
   maxPoints,
-  onMatchStart,
   onScoreUpdate,
   disabled = false,
 }: MatchGridProps) => {
