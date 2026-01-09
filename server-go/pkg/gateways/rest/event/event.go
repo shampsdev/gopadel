@@ -30,4 +30,12 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases) {
 	g.GET("/:event_id/waitlist", handler.getWaitlist)            // получить список ожидания
 	g.POST("/:event_id/waitlist", handler.addToWaitlist)         // добавить себя в список ожидания
 	g.DELETE("/:event_id/waitlist", handler.removeFromWaitlist)  // убрать себя из списка ожидания
+
+	// Турнирный счетчик
+	counter := g.Group("/:event_id/counter")
+	counter.POST("/initialize", handler.initializeCounter)                    // инициализация турнирного счетчика
+	counter.GET("", handler.getTournamentState)                              // получение состояния турнира
+	counter.PUT("/matches/:match_id/score", handler.updateMatchScore)        // обновление счета матча
+	counter.POST("/next-round", handler.nextRound)                           // генерация следующего раунда
+	counter.POST("/finish", handler.finishTournament)                        // завершение турнира
 } 

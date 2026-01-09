@@ -56,6 +56,9 @@ type Event interface {
 	Patch(ctx context.Context, id string, event *domain.PatchEvent) error
 	Filter(ctx context.Context, filter *domain.FilterEvent) ([]*domain.Event, error)
 	GetEventsByUserID(ctx context.Context, userID string) ([]*domain.Event, error)
+	GetByID(ctx context.Context, id string) (*domain.Event, error)
+	GetParticipants(ctx context.Context, eventID string) ([]*domain.User, error)
+	Update(ctx context.Context, event *domain.Event) error
 	Delete(ctx context.Context, id string) error
 	AdminFilter(ctx context.Context, filter *domain.AdminFilterEvent) ([]*domain.Event, error)
 	AdminPatch(ctx context.Context, id string, event *domain.AdminPatchEvent) error

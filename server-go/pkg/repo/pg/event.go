@@ -500,6 +500,135 @@ func (r *EventRepo) AdminDelete(ctx context.Context, id string) error {
 	return r.Delete(ctx, id)
 }
 
+// GetByID получает событие по ID
+func (r *EventRepo) GetByID(ctx context.Context, id string) (*domain.Event, error) {
+	filter := &domain.FilterEvent{ID: &id}
+	events, err := r.Filter(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(events) == 0 {
+		return nil, fmt.Errorf("event with id %s not found", id)
+	}
+
+	return events[0], nil
+}
+
+// GetParticipants получает участников события
+func (r *EventRepo) GetParticipants(ctx context.Context, eventID string) ([]*domain.User, error) {
+	s := r.psql.Select(
+		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, 
+		`"u"."avatar"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."loyalty_id"`, 
+		`"u"."is_registered"`, `"u"."bio"`, `"u"."playing_position"`, `"u"."padel_profiles"`,
+	).
+		From(`"users" AS u`).
+		Join(`"registrations" AS r ON "u"."id" = "r"."user_id"`).
+		Where(sq.Eq{`"r"."event_id"`: eventID}).
+		Where(sq.Eq{`"r"."status"`: "CONFIRMED"})
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	rows, err := r.db.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute SQL: %w", err)
+	}
+	defer rows.Close()
+
+	var participants []*domain.User
+	for rows.Next() {
+		var user domain.User
+		var telegramUsername, avatar, bio, city, padelProfiles pgtype.Text
+		var birthDate pgtype.Date
+		var playingPosition pgtype.Text
+		var rank pgtype.Float8
+		var isRegistered pgtype.Bool
+		var loyaltyID pgtype.Int4
+
+		err := rows.Scan(
+			&user.ID, &user.TelegramID, &telegramUsername, &user.FirstName, &user.LastName,
+			&avatar, &rank, &city, &birthDate, &loyaltyID,
+			&isRegistered, &bio, &playingPosition, &padelProfiles,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan participant: %w", err)
+		}
+
+		// Обработка nullable полей
+		if telegramUsername.Valid {
+			user.TelegramUsername = telegramUsername.String
+		}
+		if avatar.Valid {
+			user.Avatar = avatar.String
+		}
+		if bio.Valid {
+			user.Bio = bio.String
+		}
+		if rank.Valid {
+			user.Rank = rank.Float64
+		}
+		if city.Valid {
+			user.City = city.String
+		}
+		if birthDate.Valid {
+			user.BirthDate = birthDate.Time.Format("2006-01-02")
+		}
+		if playingPosition.Valid {
+			user.PlayingPosition = domain.PlayingPosition(playingPosition.String)
+		}
+		if padelProfiles.Valid {
+			user.PadelProfiles = padelProfiles.String
+		}
+		if isRegistered.Valid {
+			user.IsRegistered = isRegistered.Bool
+		}
+
+		participants = append(participants, &user)
+	}
+
+	return participants, nil
+}
+
+// Update обновляет событие
+func (r *EventRepo) Update(ctx context.Context, event *domain.Event) error {
+	s := r.psql.Update(`"event"`).
+		Set("name", event.Name).
+		Set("description", event.Description).
+		Set("start_time", event.StartTime).
+		Set("end_time", event.EndTime).
+		Set("rank_min", event.RankMin).
+		Set("rank_max", event.RankMax).
+		Set("price", event.Price).
+		Set("max_users", event.MaxUsers).
+		Set("status", event.Status).
+		Set("type", event.Type).
+		Set("court_id", event.Court.ID).
+		Set("organizer_id", event.Organizer.ID).
+		Set("club_id", event.ClubID).
+		Set("data", event.Data).
+		Set("updated_at", "NOW()").
+		Where(sq.Eq{"id": event.ID})
+
+	sql, args, err := s.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL: %w", err)
+	}
+
+	result, err := r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update event: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("event with id %s not found", event.ID)
+	}
+
+	return nil
+}
+
 // scanEvent сканирует строку результата в структуру Event
 func (r *EventRepo) scanEvent(rows pgx.Rows) (*domain.Event, error) {
 	var event domain.Event

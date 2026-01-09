@@ -21,6 +21,7 @@ type Cases struct {
 	Registration *Registration
 	Payment      *Payment
 	Waitlist     *Waitlist
+	Counter      *Counter
 }
 
 func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
@@ -63,6 +64,7 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 	registrationCase := NewRegistration(ctx, registrationRepo, cases) // нужен Payment
 	paymentCase := NewPayment(ctx, paymentRepo, cfg, cases)           // нужен Event, Registration
 	waitlistCase := NewWaitlist(ctx, waitlistRepo, cases)             // нужен Event
+	counterCase := NewCounter(ctx, eventRepo)                         // турнирный счетчик
 
 	*cases = Cases{
 		User:         userCase,
@@ -75,6 +77,7 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 		Registration: registrationCase,
 		Payment:      paymentCase,
 		Waitlist:     waitlistCase,
+		Counter:      counterCase,
 	}
 
 	return *cases
