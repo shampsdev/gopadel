@@ -1,6 +1,4 @@
 import { useParams, useNavigate } from "react-router";
-import { useState } from "react";
-import { twMerge } from "tailwind-merge";
 import { useTelegramBackButton } from "../../../shared/hooks/useTelegramBackButton";
 import { useAuthStore } from "../../../shared/stores/auth.store";
 import { useModalStore } from "../../../shared/stores/modal.store";
