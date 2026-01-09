@@ -192,4 +192,4 @@ func (h *Handler) DeleteCourt(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Court deleted successfully"})
-} 
+}

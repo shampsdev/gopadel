@@ -34,4 +34,4 @@ func (h *Handler) filterEvents(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, events)
-} 
+}

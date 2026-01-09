@@ -46,7 +46,7 @@ func main() {
 	defer pool.Close()
 
 	cases := usecase.Setup(ctx, cfg, pool)
-	
+
 	var notificationService *notifications.NotificationService
 	natsConn, err := cfg.ConnectNATS()
 	if err != nil {

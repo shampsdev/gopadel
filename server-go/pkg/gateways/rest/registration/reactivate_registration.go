@@ -37,4 +37,4 @@ func (h *Handler) reactivateRegistration(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, registration)
-} 
+}

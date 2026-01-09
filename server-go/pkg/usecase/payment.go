@@ -175,7 +175,7 @@ func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, 
 	}
 
 	finalPrice := p.calculateFinalPrice(event.Price, user)
-	
+
 	createPayment := &domain.CreatePayment{
 		PaymentID:         yooPayment.ID,
 		Amount:            finalPrice,
@@ -191,17 +191,17 @@ func (p *Payment) CreateYooKassaPayment(ctx context.Context, user *domain.User, 
 
 func (p *Payment) findPendingRegistration(ctx context.Context, userID, eventID string) (*domain.Registration, error) {
 	return p.cases.Registration.FindPendingRegistration(ctx, userID, eventID)
-	}
+}
 
 func (p *Payment) createYooKassaPayment(event *domain.Event, user *domain.User, returnURL string) (*YooKassaPaymentResponse, error) {
 	finalPrice := p.calculateFinalPrice(event.Price, user)
-	
+
 	if finalPrice <= 0 {
 		return nil, fmt.Errorf("invalid payment amount: %d", finalPrice)
 	}
 
 	customerEmail := p.generateCustomerEmail(user)
-	
+
 	amountStr := fmt.Sprintf("%d.00", finalPrice)
 
 	paymentData := YooKassaPaymentRequest{
@@ -249,14 +249,14 @@ func (p *Payment) createYooKassaPayment(event *domain.Event, user *domain.User, 
 	idempotencyKey := uuid.New().String()
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Idempotence-Key", idempotencyKey)
-	
+
 	auth := base64.StdEncoding.EncodeToString([]byte(p.config.YooKassa.ShopID + ":" + p.config.YooKassa.SecretKey))
 	req.Header.Set("Authorization", "Basic "+auth)
 
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		slog.Error("Failed to send request to YooKassa", 
+		slog.Error("Failed to send request to YooKassa",
 			"error", err.Error(),
 			"shop_id", p.config.YooKassa.ShopID,
 			"amount", amountStr,
@@ -273,7 +273,7 @@ func (p *Payment) createYooKassaPayment(event *domain.Event, user *domain.User, 
 
 	// Проверяем статус ответа
 	if resp.StatusCode != http.StatusOK {
-		slog.Error("YooKassa API returned error", 
+		slog.Error("YooKassa API returned error",
 			"status_code", resp.StatusCode,
 			"response_body", string(bodyBytes),
 			"shop_id", p.config.YooKassa.ShopID,
@@ -288,7 +288,7 @@ func (p *Payment) createYooKassaPayment(event *domain.Event, user *domain.User, 
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
-	slog.Info("YooKassa payment created successfully", 
+	slog.Info("YooKassa payment created successfully",
 		"payment_id", paymentResponse.ID,
 		"status", paymentResponse.Status,
 		"confirmation_url", paymentResponse.Confirmation.ConfirmationURL,
@@ -308,7 +308,7 @@ func (p *Payment) calculateFinalPrice(originalPrice int, user *domain.User) int 
 	}
 
 	finalPrice := float64(originalPrice) * (1 - float64(discount)/100)
-	
+
 	return int(finalPrice + 0.5)
 }
 
@@ -316,7 +316,7 @@ func (p *Payment) isValidEmail(email string) bool {
 	if email == "" {
 		return false
 	}
-	
+
 	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 	return emailRegex.MatchString(email)
 }
@@ -329,13 +329,13 @@ func (p *Payment) generateCustomerEmail(user *domain.User) string {
 			return email
 		}
 	}
-	
+
 	if user.ID != "" {
 		email := fmt.Sprintf("user%s@gopadel.com", user.ID)
 		if p.isValidEmail(email) {
 			return email
 		}
 	}
-	
+
 	return "tournament@gopadel.com"
 }

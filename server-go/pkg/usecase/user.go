@@ -76,7 +76,7 @@ func (u *User) PatchMe(ctx Context, patch *domain.PatchUser) (*domain.User, erro
 	if patch.Rank != nil && *patch.Rank < 0 {
 		return nil, fmt.Errorf("rank cannot be negative")
 	}
-	
+
 	// Преобразование пустых строк в nil для опциональных полей
 	if patch.BirthDate != nil && strings.TrimSpace(*patch.BirthDate) == "" {
 		patch.BirthDate = nil
@@ -98,7 +98,7 @@ func (u *User) PatchMe(ctx Context, patch *domain.PatchUser) (*domain.User, erro
 	if patch.PadelProfiles != nil && strings.TrimSpace(*patch.PadelProfiles) == "" {
 		patch.PadelProfiles = nil
 	}
-	
+
 	err := u.userRepo.Patch(ctx, ctx.User.ID, patch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch user: %w", err)
@@ -138,7 +138,7 @@ func (u *User) AdminPatchUser(ctx context.Context, userID string, patch *domain.
 		IsRegistered:    patch.IsRegistered,
 		LoyaltyID:       patch.LoyaltyID,
 	}
-	
+
 	if patch.FirstName != nil && strings.TrimSpace(*patch.FirstName) == "" {
 		return nil, fmt.Errorf("first name cannot be empty")
 	}
@@ -148,7 +148,7 @@ func (u *User) AdminPatchUser(ctx context.Context, userID string, patch *domain.
 	if patch.Rank != nil && *patch.Rank < 0 {
 		return nil, fmt.Errorf("rank cannot be negative")
 	}
-	
+
 	if patch.BirthDate != nil && strings.TrimSpace(*patch.BirthDate) == "" {
 		patchUser.BirthDate = nil
 	}
@@ -168,17 +168,17 @@ func (u *User) AdminPatchUser(ctx context.Context, userID string, patch *domain.
 	if patch.PadelProfiles != nil && strings.TrimSpace(*patch.PadelProfiles) == "" {
 		patchUser.PadelProfiles = nil
 	}
-	
+
 	err := u.userRepo.Patch(ctx, userID, patchUser)
 	if err != nil {
 		return nil, fmt.Errorf("failed to patch user: %w", err)
 	}
-	
+
 	user, err := repo.First(u.userRepo.Filter)(ctx, &domain.FilterUser{ID: &userID})
 	if err != nil {
 		return nil, err
 	}
-	
+
 	u.tgDataCache.Delete(user.TelegramID)
 	return user, nil
 }

@@ -78,7 +78,7 @@ func (h *Handler) CreateAdmin(c *gin.Context) {
 	filter := &domain.FilterAdminUser{
 		ID: &id,
 	}
-	
+
 	admins, err := h.adminUserCase.Filter(c.Request.Context(), filter)
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to get created admin") {
 		return
@@ -161,7 +161,7 @@ func (h *Handler) DeleteAdmin(c *gin.Context) {
 	filter := &domain.FilterAdminUser{
 		ID: &adminID,
 	}
-	
+
 	admins, err := h.adminUserCase.Filter(c.Request.Context(), filter)
 	if err != nil {
 		if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to check admin existence") {
@@ -180,4 +180,4 @@ func (h *Handler) DeleteAdmin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Admin deleted successfully"})
-} 
+}

@@ -46,4 +46,4 @@ func (h *Handler) GetCourts(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, courts)
-} 
+}

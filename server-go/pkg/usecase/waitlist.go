@@ -81,7 +81,7 @@ func (w *Waitlist) AddToWaitlist(ctx context.Context, userID, eventID string) (*
 			"event_id", eventID)
 		return nil, fmt.Errorf("event not found")
 	}
-	
+
 	event := events[0]
 	slog.Info("Event details for waitlist",
 		"event_id", eventID,
@@ -110,7 +110,7 @@ func (w *Waitlist) AddToWaitlist(ctx context.Context, userID, eventID string) (*
 			"error", err)
 		return nil, fmt.Errorf("failed to check existing waitlist: %w", err)
 	}
-	
+
 	if len(existing) > 0 {
 		slog.Warn("User is already in waitlist",
 			"user_id", userID,
@@ -123,11 +123,11 @@ func (w *Waitlist) AddToWaitlist(ctx context.Context, userID, eventID string) (*
 		UserID:  userID,
 		EventID: eventID,
 	}
-	
+
 	slog.Info("Creating waitlist entry",
 		"user_id", userID,
 		"event_id", eventID)
-	
+
 	waitlistID, err := w.waitlistRepo.Create(ctx, createWaitlist)
 	if err != nil {
 		slog.Error("Failed to create waitlist entry",
@@ -145,16 +145,16 @@ func (w *Waitlist) AddToWaitlist(ctx context.Context, userID, eventID string) (*
 	waitlistFilter := &domain.FilterWaitlist{
 		ID: &waitlistID,
 	}
-	
+
 	waitlists, err := w.waitlistRepo.Filter(ctx, waitlistFilter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get created waitlist entry: %w", err)
 	}
-	
+
 	if len(waitlists) == 0 {
 		return nil, fmt.Errorf("created waitlist entry not found")
 	}
-	
+
 	return waitlists[0], nil
 }
 
@@ -190,7 +190,7 @@ func (w *Waitlist) RemoveFromWaitlist(ctx context.Context, userID, eventID strin
 		UserID:  &userID,
 		EventID: &eventID,
 	}
-	
+
 	waitlists, err := w.waitlistRepo.Filter(ctx, waitlistFilter)
 	if err != nil {
 		slog.Error("Failed to find waitlist entry for removal",
@@ -199,7 +199,7 @@ func (w *Waitlist) RemoveFromWaitlist(ctx context.Context, userID, eventID strin
 			"error", err)
 		return fmt.Errorf("failed to find waitlist entry: %w", err)
 	}
-	
+
 	if len(waitlists) == 0 {
 		slog.Warn("User not found in waitlist",
 			"user_id", userID,
@@ -229,4 +229,4 @@ func (w *Waitlist) RemoveFromWaitlist(ctx context.Context, userID, eventID strin
 		"waitlist_id", waitlists[0].ID)
 
 	return nil
-} 
+}

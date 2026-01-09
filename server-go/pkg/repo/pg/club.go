@@ -236,4 +236,4 @@ func (r *ClubRepo) Delete(ctx context.Context, clubID string) error {
 	}
 
 	return nil
-} 
+}

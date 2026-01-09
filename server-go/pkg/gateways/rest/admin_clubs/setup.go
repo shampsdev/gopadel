@@ -8,16 +8,16 @@ import (
 
 func Setup(r *gin.RouterGroup, useCases usecase.Cases) {
 	handler := NewHandler(useCases.Club)
-	
+
 	adminClubsGroup := r.Group("/admin/clubs")
 	{
 		adminClubsGroup.Use(middlewares.RequireAdminJWT(useCases.AdminUser))
-		
+
 		adminClubsGroup.GET("", handler.GetAllClubs)
-		
+
 		superUserGroup := adminClubsGroup.Group("")
 		superUserGroup.Use(middlewares.RequireAdminSuperuser())
-		
+
 		superUserGroup.POST("", handler.CreateClub)
 		superUserGroup.PATCH("/:id", handler.PatchClub)
 		superUserGroup.DELETE("/:id", handler.DeleteClub)

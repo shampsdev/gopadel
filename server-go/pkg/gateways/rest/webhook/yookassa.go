@@ -45,10 +45,10 @@ func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *useca
 		}
 
 		paymentID := event.Object.ID
-		
+
 		client := yookassa.NewClient(cfg.YooKassa.ShopID, cfg.YooKassa.SecretKey)
 		paymentHandler := yookassa.NewPaymentHandler(client)
-		
+
 		yooPayment, err := paymentHandler.FindPayment(paymentID)
 		if err != nil {
 			if ginerr.AbortIfErr(c, err, http.StatusBadRequest, "Payment not found in YooKassa") {
@@ -87,7 +87,7 @@ func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *useca
 						return
 					}
 				}
-				
+
 				// Активируем регистрацию только для турниров, не для игр
 				if event.Type == domain.EventTypeTournament {
 					err = registrationUseCase.UpdateRegistrationStatus(c.Request.Context(), payment.Registration.UserID, payment.Registration.EventID, domain.RegistrationStatusConfirmed)
@@ -106,4 +106,4 @@ func YooKassaWebhook(paymentUseCase *usecase.Payment, registrationUseCase *useca
 
 		c.JSON(http.StatusOK, gin.H{"status": "success"})
 	}
-} 
+}

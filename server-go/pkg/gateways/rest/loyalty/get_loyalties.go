@@ -34,4 +34,4 @@ func GetLoyalties(loyaltyCase *usecase.Loyalty) gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, loyalties)
 	}
-} 
+}

@@ -82,17 +82,17 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 		var adminUser domain.AdminUser
 		var user domain.User
 		var loyalty domain.Loyalty
-		
+
 		// Admin fields
 		var adminUsername, adminPasswordHash, adminFirstName, adminLastName, adminUserID pgtype.Text
-		
+
 		// User fields
 		var userID, userTelegramUsername, userFirstName, userLastName, userAvatar, userBio, userCity, userPlayingPosition, userPadelProfiles pgtype.Text
 		var userTelegramID pgtype.Int8
 		var userRank pgtype.Float8
 		var userIsRegistered pgtype.Bool
 		var userBirthDate pgtype.Date
-		
+
 		// Loyalty fields
 		var loyaltyID, loyaltyDiscount pgtype.Int8
 		var loyaltyName, loyaltyDescription, loyaltyRequirements pgtype.Text
@@ -152,7 +152,7 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 		// Fill user fields if user exists
 		if userID.Valid {
 			user.ID = userID.String
-			
+
 			if userTelegramID.Valid {
 				user.TelegramID = userTelegramID.Int64
 			}
@@ -193,7 +193,7 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 			// Fill loyalty if exists
 			if loyaltyID.Valid {
 				loyalty.ID = int(loyaltyID.Int64)
-				
+
 				if loyaltyName.Valid {
 					loyalty.Name = loyaltyName.String
 				}
@@ -206,10 +206,10 @@ func (r *AdminUserRepo) Filter(ctx context.Context, filter *domain.FilterAdminUs
 				if loyaltyRequirements.Valid {
 					loyalty.Requirements = loyaltyRequirements.String
 				}
-				
+
 				user.Loyalty = &loyalty
 			}
-			
+
 			adminUser.User = &user
 		}
 
@@ -364,4 +364,4 @@ func (r *AdminUserRepo) UpdatePassword(ctx context.Context, id string, passwordH
 	}
 
 	return nil
-} 
+}

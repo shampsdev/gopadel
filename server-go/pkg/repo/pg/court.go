@@ -160,4 +160,4 @@ func (r *CourtRepo) GetByID(ctx context.Context, id string) (*domain.Court, erro
 	}
 
 	return courts[0], nil
-} 
+}

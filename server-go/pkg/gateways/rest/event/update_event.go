@@ -78,4 +78,4 @@ func (h *Handler) updateEvent(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, updatedEvent)
-} 
+}

@@ -83,4 +83,4 @@ func (uc *Club) AdminFilter(ctx *Context, filter *domain.FilterClub) ([]*domain.
 
 func (uc *Club) AdminCreate(ctx *Context, club *domain.CreateClub) error {
 	return uc.repo.Create(ctx.Context, club)
-} 
+}

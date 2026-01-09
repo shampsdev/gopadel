@@ -18,24 +18,24 @@ func NewHandler(cases *usecase.Cases) *Handler {
 
 func Setup(r *gin.RouterGroup, cases usecase.Cases) {
 	handler := NewHandler(&cases)
-	
+
 	g := r.Group("/events")
 	middlewares.SetupAuth(g, cases.User)
 
-	g.POST("", handler.createEvent)                           // создание события (игры - всем, турниры - админам)
-	g.PATCH("/:event_id", handler.updateEvent)                   // обновление события
-	g.DELETE("/:event_id", handler.deleteEvent)                  // удаление события
-	g.POST("/filter", handler.filterEvents)                       // фильтрация событий
-	g.PUT("/:event_id/start", handler.startEvent)                // перевести событие в статус in_progress (только организатор)
-	g.GET("/:event_id/waitlist", handler.getWaitlist)            // получить список ожидания
-	g.POST("/:event_id/waitlist", handler.addToWaitlist)         // добавить себя в список ожидания
-	g.DELETE("/:event_id/waitlist", handler.removeFromWaitlist)  // убрать себя из списка ожидания
+	g.POST("", handler.createEvent)                             // создание события (игры - всем, турниры - админам)
+	g.PATCH("/:event_id", handler.updateEvent)                  // обновление события
+	g.DELETE("/:event_id", handler.deleteEvent)                 // удаление события
+	g.POST("/filter", handler.filterEvents)                     // фильтрация событий
+	g.PUT("/:event_id/start", handler.startEvent)               // перевести событие в статус in_progress (только организатор)
+	g.GET("/:event_id/waitlist", handler.getWaitlist)           // получить список ожидания
+	g.POST("/:event_id/waitlist", handler.addToWaitlist)        // добавить себя в список ожидания
+	g.DELETE("/:event_id/waitlist", handler.removeFromWaitlist) // убрать себя из списка ожидания
 
 	// Турнирный счетчик
 	counter := g.Group("/:event_id/counter")
-	counter.POST("/initialize", handler.initializeCounter)                    // инициализация турнирного счетчика
-	counter.GET("", handler.getTournamentState)                              // получение состояния турнира
-	counter.PUT("/matches/:match_id/score", handler.updateMatchScore)        // обновление счета матча
-	counter.POST("/next-round", handler.nextRound)                           // генерация следующего раунда
-	counter.POST("/finish", handler.finishTournament)                        // завершение турнира
-} 
+	counter.POST("/initialize", handler.initializeCounter)            // инициализация турнирного счетчика
+	counter.GET("", handler.getTournamentState)                       // получение состояния турнира
+	counter.PUT("/matches/:match_id/score", handler.updateMatchScore) // обновление счета матча
+	counter.POST("/next-round", handler.nextRound)                    // генерация следующего раунда
+	counter.POST("/finish", handler.finishTournament)                 // завершение турнира
+}

@@ -160,4 +160,4 @@ func (r *WaitlistRepo) Delete(ctx context.Context, id int) error {
 
 	_, err = r.db.Exec(ctx, sql, args...)
 	return err
-} 
+}

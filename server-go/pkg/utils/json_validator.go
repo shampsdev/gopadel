@@ -21,7 +21,7 @@ func ValidateEventDataJSON(data []byte, userID string) (bool, error) {
 	// Проверяем безопасность - ищем подозрительные строки
 	dataStr := string(data)
 	dangerousPatterns := []string{
-		"--", "/*", "*/", ";", 
+		"--", "/*", "*/", ";",
 		"DROP", "DELETE", "INSERT", "UPDATE", "SELECT",
 		"drop", "delete", "insert", "update", "select",
 		"<script", "</script>", "javascript:",
@@ -44,4 +44,4 @@ func ValidateEventDataJSON(data []byte, userID string) (bool, error) {
 	}
 
 	return false, nil
-} 
+}

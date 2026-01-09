@@ -86,7 +86,7 @@ func (s *CounterService) InitializeTournament(ctx context.Context, eventID strin
 			Mode:   mode,
 		},
 		TournamentEngine: &domain.TournamentEngine{
-			Config:       config,
+			Config: config,
 			State: domain.TournamentState{
 				Status:       domain.TournamentEngineStatusNotStarted,
 				CurrentRound: 0,
@@ -202,7 +202,7 @@ func (s *CounterService) UpdateMatchScore(ctx context.Context, eventID, matchID 
 	// Валидация счета
 	totalScore := teamAScore + teamBScore
 	if totalScore != engine.Config.MatchPoints {
-		return fmt.Errorf("invalid score: %d + %d = %d, expected %d", 
+		return fmt.Errorf("invalid score: %d + %d = %d, expected %d",
 			teamAScore, teamBScore, totalScore, engine.Config.MatchPoints)
 	}
 
@@ -220,7 +220,7 @@ func (s *CounterService) UpdateMatchScore(ctx context.Context, eventID, matchID 
 	}
 
 	match := &engine.Matches[matchIndex]
-	
+
 	// Сохраняем старые счета для отката статистики
 	oldTeamAScore := match.TeamA.Score
 	oldTeamBScore := match.TeamB.Score
@@ -354,11 +354,11 @@ func (s *CounterService) getMatchesByRound(matches []domain.TournamentMatch, rou
 
 func (s *CounterService) generateAmericanoMatches(participants []domain.TournamentPlayer, round, courtsCount int) []domain.TournamentMatch {
 	var matches []domain.TournamentMatch
-	
+
 	// Простая реализация round-robin для Americano
 	participantCount := len(participants)
 	matchesPerRound := participantCount / 4 * courtsCount
-	
+
 	for court := 1; court <= courtsCount && len(matches) < matchesPerRound; court++ {
 		// Генерируем пары для корта
 		baseIndex := (court - 1) * 4
@@ -390,7 +390,7 @@ func (s *CounterService) generateAmericanoMatches(participants []domain.Tourname
 func (s *CounterService) updateTournamentResults(eventData *domain.EventData, engine *domain.TournamentEngine) {
 	// Создаем структуру результатов на основе текущего лидерборда
 	leaderboardEntries := make([]map[string]interface{}, len(engine.Leaderboard))
-	
+
 	for i, entry := range engine.Leaderboard {
 		// Находим участника по ID
 		var participant *domain.TournamentPlayer
@@ -400,7 +400,7 @@ func (s *CounterService) updateTournamentResults(eventData *domain.EventData, en
 				break
 			}
 		}
-		
+
 		if participant != nil {
 			leaderboardEntries[i] = map[string]interface{}{
 				"place":  entry.Position,
@@ -430,7 +430,7 @@ func (s *CounterService) updateTournamentResults(eventData *domain.EventData, en
 	if engine.State.Status == domain.TournamentEngineStatusFinished {
 		resultData["completedAt"] = time.Now()
 		resultData["status"] = "completed"
-		
+
 		// Определяем победителя
 		if len(leaderboardEntries) > 0 {
 			resultData["winner"] = leaderboardEntries[0]
@@ -450,7 +450,7 @@ func (s *CounterService) generateMexicanoMatches(participants []domain.Tournamen
 	// Для Mexicano сортируем участников по текущему рейтингу
 	sortedParticipants := make([]domain.TournamentPlayer, len(participants))
 	copy(sortedParticipants, participants)
-	
+
 	sort.Slice(sortedParticipants, func(i, j int) bool {
 		if sortedParticipants[i].Stats.WDLPoints != sortedParticipants[j].Stats.WDLPoints {
 			return sortedParticipants[i].Stats.WDLPoints > sortedParticipants[j].Stats.WDLPoints
@@ -460,9 +460,9 @@ func (s *CounterService) generateMexicanoMatches(participants []domain.Tournamen
 		}
 		return sortedParticipants[i].Stats.TablePoints > sortedParticipants[j].Stats.TablePoints
 	})
-	
+
 	var matches []domain.TournamentMatch
-	
+
 	// Формула Mexicano: 1+4 vs 2+3
 	for court := 1; court <= courtsCount && (court-1)*4+3 < len(sortedParticipants); court++ {
 		baseIndex := (court - 1) * 4
@@ -472,26 +472,26 @@ func (s *CounterService) generateMexicanoMatches(participants []domain.Tournamen
 			Court:  court,
 			Status: domain.MatchStatusPending,
 			TeamA: domain.MatchTeam{
-				Player1: sortedParticipants[baseIndex].ID,     // 1-й
-				Player2: sortedParticipants[baseIndex+3].ID,   // 4-й
+				Player1: sortedParticipants[baseIndex].ID,   // 1-й
+				Player2: sortedParticipants[baseIndex+3].ID, // 4-й
 				Score:   0,
 			},
 			TeamB: domain.MatchTeam{
-				Player1: sortedParticipants[baseIndex+1].ID,   // 2-й
-				Player2: sortedParticipants[baseIndex+2].ID,   // 3-й
+				Player1: sortedParticipants[baseIndex+1].ID, // 2-й
+				Player2: sortedParticipants[baseIndex+2].ID, // 3-й
 				Score:   0,
 			},
 		}
 		matches = append(matches, match)
 	}
-	
+
 	return matches
 }
 
 func (s *CounterService) updatePlayerStats(engine *domain.TournamentEngine, match *domain.TournamentMatch, oldTeamAScore, oldTeamBScore int, wasCompleted bool) error {
 	// Находим игроков
 	var teamAPlayers, teamBPlayers []*domain.TournamentPlayer
-	
+
 	for i := range engine.Participants {
 		player := &engine.Participants[i]
 		if player.ID == match.TeamA.Player1 || player.ID == match.TeamA.Player2 {
@@ -501,15 +501,15 @@ func (s *CounterService) updatePlayerStats(engine *domain.TournamentEngine, matc
 			teamBPlayers = append(teamBPlayers, player)
 		}
 	}
-	
+
 	// Откатываем старую статистику если матч уже был завершен
 	if wasCompleted {
 		s.revertPlayerStats(teamAPlayers, teamBPlayers, oldTeamAScore, oldTeamBScore)
 	}
-	
+
 	// Применяем новую статистику
 	s.applyPlayerStats(teamAPlayers, teamBPlayers, match.TeamA.Score, match.TeamB.Score)
-	
+
 	return nil
 }
 
@@ -520,7 +520,7 @@ func (s *CounterService) revertPlayerStats(teamAPlayers, teamBPlayers []*domain.
 		player.Stats.Conceded -= teamBScore
 		player.Stats.Diff = player.Stats.Scored - player.Stats.Conceded
 		player.Stats.TablePoints = player.Stats.Scored
-		
+
 		if teamAScore > teamBScore {
 			player.Stats.Wins--
 			player.Stats.WDLPoints -= 2
@@ -531,14 +531,14 @@ func (s *CounterService) revertPlayerStats(teamAPlayers, teamBPlayers []*domain.
 			player.Stats.Losses--
 		}
 	}
-	
+
 	// Откатываем статистику команды B
 	for _, player := range teamBPlayers {
 		player.Stats.Scored -= teamBScore
 		player.Stats.Conceded -= teamAScore
 		player.Stats.Diff = player.Stats.Scored - player.Stats.Conceded
 		player.Stats.TablePoints = player.Stats.Scored
-		
+
 		if teamBScore > teamAScore {
 			player.Stats.Wins--
 			player.Stats.WDLPoints -= 2
@@ -558,7 +558,7 @@ func (s *CounterService) applyPlayerStats(teamAPlayers, teamBPlayers []*domain.T
 		player.Stats.Conceded += teamBScore
 		player.Stats.Diff = player.Stats.Scored - player.Stats.Conceded
 		player.Stats.TablePoints = player.Stats.Scored
-		
+
 		if teamAScore > teamBScore {
 			player.Stats.Wins++
 			player.Stats.WDLPoints += 2
@@ -569,14 +569,14 @@ func (s *CounterService) applyPlayerStats(teamAPlayers, teamBPlayers []*domain.T
 			player.Stats.Losses++
 		}
 	}
-	
+
 	// Обновляем статистику команды B
 	for _, player := range teamBPlayers {
 		player.Stats.Scored += teamBScore
 		player.Stats.Conceded += teamAScore
 		player.Stats.Diff = player.Stats.Scored - player.Stats.Conceded
 		player.Stats.TablePoints = player.Stats.Scored
-		
+
 		if teamBScore > teamAScore {
 			player.Stats.Wins++
 			player.Stats.WDLPoints += 2
@@ -593,11 +593,11 @@ func (s *CounterService) updateLeaderboard(engine *domain.TournamentEngine) {
 	// Создаем копию участников для сортировки
 	sortedParticipants := make([]domain.TournamentPlayer, len(engine.Participants))
 	copy(sortedParticipants, engine.Participants)
-	
+
 	// Сортируем по правилам лидерборда
 	sort.Slice(sortedParticipants, func(i, j int) bool {
 		a, b := sortedParticipants[i].Stats, sortedParticipants[j].Stats
-		
+
 		if a.WDLPoints != b.WDLPoints {
 			return a.WDLPoints > b.WDLPoints
 		}
@@ -609,7 +609,7 @@ func (s *CounterService) updateLeaderboard(engine *domain.TournamentEngine) {
 		}
 		return sortedParticipants[i].Seed < sortedParticipants[j].Seed
 	})
-	
+
 	// Создаем лидерборд
 	engine.Leaderboard = make([]domain.LeaderboardEntry, len(sortedParticipants))
 	for i, participant := range sortedParticipants {

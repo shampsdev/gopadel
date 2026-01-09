@@ -82,4 +82,4 @@ func (h *Handler) PatchUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
-} 
+}

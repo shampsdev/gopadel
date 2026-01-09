@@ -21,18 +21,18 @@ func NewHandler(cases *usecase.Cases, cfg *config.Config) *Handler {
 
 func Setup(r *gin.RouterGroup, cases usecase.Cases, cfg *config.Config) {
 	handler := NewHandler(&cases, cfg)
-	
+
 	g := r.Group("/registrations")
 	middlewares.SetupAuth(g, cases.User)
 
-	g.GET("/my", handler.getMyRegistrations)                             // получить все мои регистрации
-	g.POST("/:event_id", handler.createRegistration)                    // создание регистрации (статус PENDING)
-	g.POST("/:event_id/payment", handler.createPayment)                 // создание платежа (получение ссылки)
-	g.POST("/:event_id/cancel", handler.cancelRegistration)             // отмена до оплаты (CANCELLED_BEFORE_PAYMENT)
-	g.POST("/:event_id/cancel-paid", handler.cancelPaidRegistration)    // отмена после оплаты (CANCELLED_AFTER_PAYMENT)
-	g.POST("/:event_id/reactivate", handler.reactivateRegistration)     // повторная активация
-	
+	g.GET("/my", handler.getMyRegistrations)                         // получить все мои регистрации
+	g.POST("/:event_id", handler.createRegistration)                 // создание регистрации (статус PENDING)
+	g.POST("/:event_id/payment", handler.createPayment)              // создание платежа (получение ссылки)
+	g.POST("/:event_id/cancel", handler.cancelRegistration)          // отмена до оплаты (CANCELLED_BEFORE_PAYMENT)
+	g.POST("/:event_id/cancel-paid", handler.cancelPaidRegistration) // отмена после оплаты (CANCELLED_AFTER_PAYMENT)
+	g.POST("/:event_id/reactivate", handler.reactivateRegistration)  // повторная активация
+
 	// Новые эндпоинты для организаторов игр
-	g.PUT("/:event_id/:user_id/approve", handler.approveRegistration)   // одобрить заявку (PENDING -> CONFIRMED)
-	g.PUT("/:event_id/:user_id/reject", handler.rejectRegistration)     // отклонить заявку (PENDING -> CANCELLED)
-} 
+	g.PUT("/:event_id/:user_id/approve", handler.approveRegistration) // одобрить заявку (PENDING -> CONFIRMED)
+	g.PUT("/:event_id/:user_id/reject", handler.rejectRegistration)   // отклонить заявку (PENDING -> CANCELLED)
+}

@@ -48,4 +48,4 @@ func (h *Handler) GetEventWaitlist(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, waitlist)
-} 
+}

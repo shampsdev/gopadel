@@ -26,7 +26,7 @@ import (
 func (h *Handler) approveRegistration(c *gin.Context) {
 	eventID := c.Param("event_id")
 	userID := c.Param("user_id")
-	
+
 	if eventID == "" || userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "event_id and user_id are required"})
 		return
@@ -84,4 +84,4 @@ func (h *Handler) approveRegistration(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, updatedReg)
-} 
+}

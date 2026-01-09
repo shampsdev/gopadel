@@ -11,7 +11,7 @@ type Waitlist struct {
 }
 
 type WaitlistUser struct {
-	User *User `json:"user"`
+	User *User     `json:"user"`
 	Date time.Time `json:"date"`
 }
 
@@ -24,4 +24,4 @@ type FilterWaitlist struct {
 	ID      *int    `json:"id,omitempty"`
 	UserID  *string `json:"userId,omitempty"`
 	EventID *string `json:"eventId,omitempty"`
-} 
+}

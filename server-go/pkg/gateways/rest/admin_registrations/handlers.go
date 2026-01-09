@@ -71,19 +71,19 @@ func (h *Handler) FilterRegistrations(c *gin.Context) {
 func (h *Handler) UpdateRegistrationStatus(c *gin.Context) {
 	userID := c.Param("user_id")
 	eventID := c.Param("event_id")
-	
+
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 		return
 	}
-	
+
 	if eventID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "event_id is required"})
 		return
 	}
 
 	var statusUpdate domain.RegistrationStatusUpdate
-	
+
 	if err := c.ShouldBindJSON(&statusUpdate); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -91,9 +91,9 @@ func (h *Handler) UpdateRegistrationStatus(c *gin.Context) {
 
 	// Обновляем статус регистрации
 	registration, err := h.registrationCase.AdminUpdateRegistrationStatus(
-		c.Request.Context(), 
-		userID, 
-		eventID, 
+		c.Request.Context(),
+		userID,
+		eventID,
 		statusUpdate.Status,
 	)
 	if ginerr.AbortIfErr(c, err, http.StatusInternalServerError, "Failed to update registration status") {
@@ -101,4 +101,4 @@ func (h *Handler) UpdateRegistrationStatus(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, registration)
-} 
+}

@@ -15,7 +15,7 @@ func main() {
 	}
 
 	password := os.Args[1]
-	
+
 	if len(password) < 4 {
 		fmt.Println("Ошибка: пароль должен содержать минимум 6 символов")
 		os.Exit(1)
@@ -31,4 +31,4 @@ func main() {
 	fmt.Println(hash)
 	fmt.Println()
 	fmt.Println("Используйте этот хеш в базе данных для поля password_hash админ-пользователя")
-} 
+}

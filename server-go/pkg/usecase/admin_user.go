@@ -30,16 +30,16 @@ func (a *AdminUser) GetByUserID(ctx context.Context, userID string) (*domain.Adm
 	filter := &domain.FilterAdminUser{
 		UserID: &userID,
 	}
-	
+
 	adminUsers, err := a.adminUserRepo.Filter(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if len(adminUsers) == 0 {
 		return nil, repo.ErrNotFound
 	}
-	
+
 	return adminUsers[0], nil
 }
 
@@ -83,16 +83,16 @@ func (a *AdminUser) Patch(ctx context.Context, id string, patchData *domain.Patc
 	filter := &domain.FilterAdminUser{
 		ID: &id,
 	}
-	
+
 	adminUsers, err := a.adminUserRepo.Filter(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if len(adminUsers) == 0 {
 		return nil, repo.ErrNotFound
 	}
-	
+
 	return adminUsers[0], nil
 }
 
@@ -159,4 +159,4 @@ func (a *AdminUser) ChangePassword(ctx context.Context, admin *domain.AdminUser,
 	}
 
 	return a.adminUserRepo.UpdatePassword(ctx, admin.ID, newPasswordHash)
-} 
+}

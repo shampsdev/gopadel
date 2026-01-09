@@ -29,8 +29,8 @@ type Config struct {
 		Database string `envconfig:"POSTGRES_DB"`
 	}
 	TG struct {
-		BotToken   string `envconfig:"TG_BOT_TOKEN"`
-		WebAppName string `envconfig:"WEBAPP_NAME"`
+		BotToken    string `envconfig:"TG_BOT_TOKEN"`
+		WebAppName  string `envconfig:"WEBAPP_NAME"`
 		BotUsername string `envconfig:"TG_BOT_USERNAME" default:"gopadel_bot"`
 	}
 	Storage struct {
@@ -44,8 +44,8 @@ type Config struct {
 		SecretKey string `envconfig:"SHOP_SECRET"`
 	}
 	JWT struct {
-		SecretKey            string        `envconfig:"JWT_SECRET_KEY"`
-		AccessTokenExpireHours int         `envconfig:"JWT_ACCESS_TOKEN_EXPIRE_HOURS" default:"24"`
+		SecretKey              string `envconfig:"JWT_SECRET_KEY"`
+		AccessTokenExpireHours int    `envconfig:"JWT_ACCESS_TOKEN_EXPIRE_HOURS" default:"24"`
 	}
 
 	NATS struct {
@@ -146,12 +146,12 @@ func (c *Config) NatsOptions() []nats.Option {
 func (c *Config) ConnectNATS() (*nats.Conn, error) {
 	natsURL := c.NatsURL()
 	opts := c.NatsOptions()
-	
+
 	nc, err := nats.Connect(natsURL, opts...)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	slog.Info("Connected to NATS server", "url", natsURL)
 	return nc, nil
 }

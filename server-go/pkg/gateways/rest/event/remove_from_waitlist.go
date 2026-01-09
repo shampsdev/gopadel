@@ -52,4 +52,4 @@ func (h *Handler) removeFromWaitlist(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, waitlist)
-} 
+}

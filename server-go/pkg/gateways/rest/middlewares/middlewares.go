@@ -33,20 +33,20 @@ func Logger(ctx context.Context) gin.HandlerFunc {
 	log := slogx.FromCtx(ctx)
 	return func(c *gin.Context) {
 		slogx.InjectGin(c, log)
-		
+
 		start := time.Now()
 		path := c.Request.URL.Path
 		query := c.Request.URL.RawQuery
-		
+
 		// Обрабатываем запрос
 		c.Next()
-		
+
 		// Собираем информацию после обработки
 		duration := time.Since(start)
 		statusCode := c.Writer.Status()
 		clientIP := c.ClientIP()
 		method := c.Request.Method
-		
+
 		// Подготавливаем атрибуты для логирования
 		attrs := []any{
 			slog.String("method", method),
@@ -55,22 +55,22 @@ func Logger(ctx context.Context) gin.HandlerFunc {
 			slog.Duration("duration", duration),
 			slog.String("ip", clientIP),
 		}
-		
+
 		if query != "" {
 			attrs = append(attrs, slog.String("query", query))
 		}
-		
+
 		// Добавляем информацию о пользователе если доступна
 		if userTGData, exists := c.Get("user_tg_data"); exists {
 			if tgData, ok := userTGData.(*domain.UserTGData); ok {
-				attrs = append(attrs, 
+				attrs = append(attrs,
 					slog.Int64("tg_id", tgData.TelegramID),
 					slog.String("tg_username", tgData.TelegramUsername),
 					slog.String("user_name", tgData.FirstName+" "+tgData.LastName),
 				)
 			}
 		}
-		
+
 		// Добавляем информацию об админе если доступна
 		if admin, exists := c.Get("admin"); exists {
 			if adminUser, ok := admin.(*domain.AdminUser); ok {
@@ -80,7 +80,7 @@ func Logger(ctx context.Context) gin.HandlerFunc {
 				)
 			}
 		}
-		
+
 		// Логируем с соответствующим уровнем в зависимости от статуса
 		if statusCode >= 500 {
 			log.Error("Request completed", attrs...)

@@ -40,4 +40,4 @@ func GetMeAdmin(adminUserCase *usecase.AdminUser) gin.HandlerFunc {
 		// Пользователь является админом
 		c.JSON(http.StatusOK, gin.H{"admin": true})
 	}
-} 
+}

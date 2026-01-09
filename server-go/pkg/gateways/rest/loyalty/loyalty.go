@@ -13,4 +13,4 @@ func Setup(r *gin.RouterGroup, cases usecase.Cases) {
 	gAuth := g.Group("")
 	gAuth.Use(middlewares.AuthUser(cases.User))
 	gAuth.GET("", GetLoyalties(cases.Loyalty))
-} 
+}

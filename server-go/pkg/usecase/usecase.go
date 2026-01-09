@@ -48,9 +48,6 @@ func Setup(ctx context.Context, cfg *config.Config, db *pgxpool.Pool) Cases {
 		panic(err)
 	}
 
-	// NATS и уведомления пока не используются
-	_ = cfg
-
 	cases := &Cases{}
 
 	userCase := NewUser(ctx, userRepo, storage)

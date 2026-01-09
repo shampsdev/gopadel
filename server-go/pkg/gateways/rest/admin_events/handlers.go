@@ -78,7 +78,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 
 	// Получаем админа из контекста
 	admin := middlewares.MustGetAdmin(c)
-	
+
 	// Если не указан организатор, устанавливаем текущего пользователя
 	if createEvent.OrganizerID == "" {
 		createEvent.OrganizerID = admin.UserID
@@ -125,7 +125,7 @@ func (h *Handler) PatchEvent(c *gin.Context) {
 
 	// Получаем админа из контекста
 	admin := middlewares.MustGetAdmin(c)
-	
+
 	// Создаем контекст с пользователем админа
 	ctx := usecase.NewContext(c, admin.User)
 
@@ -165,7 +165,7 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 
 	// Получаем админа из контекста
 	admin := middlewares.MustGetAdmin(c)
-	
+
 	// Создаем контекст с пользователем админа
 	ctx := usecase.NewContext(c, admin.User)
 
@@ -180,4 +180,4 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
-} 
+}

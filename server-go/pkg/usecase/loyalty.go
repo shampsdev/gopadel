@@ -33,4 +33,4 @@ func (l *Loyalty) Patch(ctx Context, id int, loyalty *domain.PatchLoyalty) error
 
 func (l *Loyalty) Delete(ctx Context, id int) error {
 	return l.loyaltyRepo.Delete(ctx.Context, id)
-} 
+}

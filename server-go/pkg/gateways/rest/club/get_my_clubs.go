@@ -33,4 +33,4 @@ func GetMyClubs(clubCase *usecase.Club) gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, clubs)
 	}
-} 
+}

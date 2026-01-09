@@ -47,4 +47,4 @@ func (c *Court) GetByID(ctx Context, id string) (*domain.Court, error) {
 
 func (c *Court) Delete(ctx Context, id string) error {
 	return c.courtRepo.Delete(ctx.Context, id)
-} 
+}

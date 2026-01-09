@@ -14,7 +14,7 @@ import (
 func RequireTelegramAdmin(adminUserCase *usecase.AdminUser) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := MustGetUser(c)
-		
+
 		adminUser, err := adminUserCase.GetByUserID(c.Request.Context(), user.ID)
 		if err != nil {
 			if err == repo.ErrNotFound {
@@ -33,7 +33,7 @@ func RequireTelegramAdmin(adminUserCase *usecase.AdminUser) gin.HandlerFunc {
 func RequireTelegramSuperAdmin(adminUserCase *usecase.AdminUser) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := MustGetUser(c)
-		
+
 		adminUser, err := adminUserCase.GetByUserID(c.Request.Context(), user.ID)
 		if err != nil {
 			if err == repo.ErrNotFound {
@@ -61,4 +61,4 @@ func MustGetTelegramAdmin(c *gin.Context) *domain.AdminUser {
 		panic("telegram admin not found")
 	}
 	return adminUser
-} 
+}

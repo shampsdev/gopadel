@@ -57,7 +57,7 @@ func (h *Handler) Login(c *gin.Context) {
 // @Router /admin/auth/me [get]
 func (h *Handler) Me(c *gin.Context) {
 	admin := middlewares.MustGetAdmin(c)
-	
+
 	response := &domain.AdminMe{
 		Username:    admin.Username,
 		IsSuperUser: admin.IsSuperUser,
@@ -65,7 +65,7 @@ func (h *Handler) Me(c *gin.Context) {
 		FirstName:   admin.FirstName,
 		LastName:    admin.LastName,
 	}
-	
+
 	c.JSON(http.StatusOK, response)
 }
 
@@ -83,7 +83,7 @@ func (h *Handler) Me(c *gin.Context) {
 // @Router /admin/auth/change-password [post]
 func (h *Handler) ChangePassword(c *gin.Context) {
 	admin := middlewares.MustGetAdmin(c)
-	
+
 	var passwordData domain.AdminPasswordChange
 	if err := c.ShouldBindJSON(&passwordData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -91,9 +91,9 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 	}
 
 	err := h.adminUserCase.ChangePassword(
-		c.Request.Context(), 
-		admin, 
-		passwordData.OldPassword, 
+		c.Request.Context(),
+		admin,
+		passwordData.OldPassword,
 		passwordData.NewPassword,
 	)
 	if ginerr.AbortIfErr(c, err, http.StatusBadRequest, "Failed to change password") {
@@ -101,4 +101,4 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
-} 
+}

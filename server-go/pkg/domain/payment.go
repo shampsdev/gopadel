@@ -46,4 +46,4 @@ type FilterPayment struct {
 	Status    *PaymentStatus `json:"status,omitempty"`
 	UserID    *string        `json:"userId,omitempty"`
 	EventID   *string        `json:"eventId,omitempty"`
-} 
+}

@@ -32,7 +32,7 @@ func (r *UserRepo) Create(ctx context.Context, user *domain.CreateUser) (string,
 	} else {
 		telegramUsername = user.TelegramUsername
 	}
-	
+
 	s := r.psql.Insert(`"users"`).
 		Columns("telegram_id", "telegram_username", "first_name", "last_name", "avatar").
 		Values(user.TelegramID, telegramUsername, user.FirstName, user.LastName, user.Avatar).
@@ -229,11 +229,11 @@ func (r *UserRepo) Patch(ctx context.Context, id string, user *domain.PatchUser)
 	if err != nil {
 		return fmt.Errorf("failed to update user: %w", err)
 	}
-	
+
 	if result.RowsAffected() == 0 {
 		return fmt.Errorf("user with id %s not found", id)
 	}
-	
+
 	return nil
 }
 

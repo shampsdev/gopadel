@@ -16,7 +16,7 @@ type Counter struct {
 // NewCounter создает новый экземпляр Counter usecase
 func NewCounter(ctx context.Context, eventRepo domain.EventRepository) *Counter {
 	counterService := service.NewCounterService(eventRepo)
-	
+
 	return &Counter{
 		ctx:     ctx,
 		service: counterService,

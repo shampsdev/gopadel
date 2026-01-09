@@ -168,4 +168,4 @@ func (s *NotificationService) SendTournamentTasksCancel(userTelegramID int64, to
 	}
 
 	return s.natsClient.SendImmediateNotification(nil, TaskTypeTournamentTasksCancel, data)
-} 
+}

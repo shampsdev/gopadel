@@ -53,7 +53,7 @@ func (h *Handler) deleteEvent(c *gin.Context) {
 
 	// Получаем админского пользователя, если он есть
 	adminUser, _ := h.cases.AdminUser.GetByUserID(c, domainUser.ID)
-	
+
 	// Проверяем права на удаление через стратегию
 	strategy := h.cases.Event.GetStrategy(event.Type)
 	if err := strategy.CanDelete(domainUser, adminUser, event); err != nil {

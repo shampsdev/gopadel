@@ -8,11 +8,11 @@ import (
 
 func Setup(r *gin.RouterGroup, useCases usecase.Cases) {
 	handler := NewHandler(useCases.AdminUser)
-	
+
 	adminAuthGroup := r.Group("/admin/auth")
 	{
 		adminAuthGroup.POST("/login", handler.Login)
-		
+
 		protected := adminAuthGroup.Group("")
 		protected.Use(middlewares.RequireAdminJWT(useCases.AdminUser))
 		{
@@ -20,4 +20,4 @@ func Setup(r *gin.RouterGroup, useCases usecase.Cases) {
 			protected.POST("/change-password", handler.ChangePassword)
 		}
 	}
-} 
+}

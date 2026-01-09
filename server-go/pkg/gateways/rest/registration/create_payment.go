@@ -88,4 +88,4 @@ func (h *Handler) createPayment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, response)
-} 
+}

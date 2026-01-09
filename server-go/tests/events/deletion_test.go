@@ -65,4 +65,4 @@ func TestEventDeletion(t *testing.T) {
 			t.Errorf("Admin should be able to delete any game: %v", err)
 		}
 	})
-} 
+}

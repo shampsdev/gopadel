@@ -49,24 +49,24 @@ type PatchUser struct {
 }
 
 type FilterUser struct {
-	ID               *string `json:"id"`
-	TelegramID       *int64  `json:"telegramId"`
-	TelegramUsername *string `json:"telegramUsername"`
-	FirstName        *string `json:"firstName"`
-	LastName         *string `json:"lastName"`
+	ID                *string `json:"id"`
+	TelegramID        *int64  `json:"telegramId"`
+	TelegramUsername  *string `json:"telegramUsername"`
+	FirstName         *string `json:"firstName"`
+	LastName          *string `json:"lastName"`
 	FilterByUserClubs *string `json:"filterByUserClubs,omitempty"`
 }
 
 type AdminPatchUser struct {
-	FirstName        *string          `json:"firstName"`
-	LastName         *string          `json:"lastName"`
-	Avatar           *string          `json:"avatar"`
-	Bio              *string          `json:"bio"`
-	Rank             *float64         `json:"rank"`
-	City             *string          `json:"city"`
-	BirthDate        *string          `json:"birthDate"`
-	PlayingPosition  *PlayingPosition `json:"playingPosition"`
-	PadelProfiles    *string          `json:"padelProfiles"`
-	IsRegistered     *bool            `json:"isRegistered"`
-	LoyaltyID        *int             `json:"loyaltyId"`
+	FirstName       *string          `json:"firstName"`
+	LastName        *string          `json:"lastName"`
+	Avatar          *string          `json:"avatar"`
+	Bio             *string          `json:"bio"`
+	Rank            *float64         `json:"rank"`
+	City            *string          `json:"city"`
+	BirthDate       *string          `json:"birthDate"`
+	PlayingPosition *PlayingPosition `json:"playingPosition"`
+	PadelProfiles   *string          `json:"padelProfiles"`
+	IsRegistered    *bool            `json:"isRegistered"`
+	LoyaltyID       *int             `json:"loyaltyId"`
 }

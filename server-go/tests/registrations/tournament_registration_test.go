@@ -58,4 +58,4 @@ func TestTournamentRegistrationFlow(t *testing.T) {
 			t.Error("Expected error when registering twice for same tournament")
 		}
 	})
-} 
+}

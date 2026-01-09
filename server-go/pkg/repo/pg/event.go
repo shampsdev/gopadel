@@ -172,8 +172,8 @@ func (r *EventRepo) GetEventsByUserID(ctx context.Context, userID string) ([]*do
 		Join(`"courts" AS c ON "e"."court_id" = "c"."id"`).
 		Join(`"users" AS u ON "e"."organizer_id" = "u"."id"`).
 		LeftJoin(`"registrations" AS r ON "e"."id" = "r"."event_id"`).
-			Join(`"registrations" AS ur ON "e"."id" = "ur"."event_id" AND "ur"."user_id" = ?`, userID).
-	GroupBy(`"e"."id"`, `"c"."id"`, `"u"."id"`)
+		Join(`"registrations" AS ur ON "e"."id" = "ur"."event_id" AND "ur"."user_id" = ?`, userID).
+		GroupBy(`"e"."id"`, `"c"."id"`, `"u"."id"`)
 
 	s = s.OrderBy(`"e"."start_time" ASC`)
 
@@ -518,8 +518,8 @@ func (r *EventRepo) GetByID(ctx context.Context, id string) (*domain.Event, erro
 // GetParticipants получает участников события
 func (r *EventRepo) GetParticipants(ctx context.Context, eventID string) ([]*domain.User, error) {
 	s := r.psql.Select(
-		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`, 
-		`"u"."avatar"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."loyalty_id"`, 
+		`"u"."id"`, `"u"."telegram_id"`, `"u"."telegram_username"`, `"u"."first_name"`, `"u"."last_name"`,
+		`"u"."avatar"`, `"u"."rank"`, `"u"."city"`, `"u"."birth_date"`, `"u"."loyalty_id"`,
 		`"u"."is_registered"`, `"u"."bio"`, `"u"."playing_position"`, `"u"."padel_profiles"`,
 	).
 		From(`"users" AS u`).

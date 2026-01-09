@@ -44,7 +44,7 @@ func (h *Handler) createEvent(c *gin.Context) {
 
 	// Получаем админского пользователя, если он есть
 	adminUser, _ := h.cases.AdminUser.GetByUserID(c, domainUser.ID)
-	
+
 	// Проверяем права на создание через стратегию
 	strategy := h.cases.Event.GetStrategy(createEvent.Type)
 	if err := strategy.CanCreate(domainUser, adminUser); err != nil {
@@ -54,11 +54,11 @@ func (h *Handler) createEvent(c *gin.Context) {
 
 	// Устанавливаем организатора
 	createEvent.OrganizerID = domainUser.ID
-	
+
 	// Создаем событие (используем AdminCreate для турниров если пользователь админ)
 	var event *domain.Event
 	var err error
-	
+
 	if createEvent.Type == domain.EventTypeTournament && adminUser != nil {
 		ctx := usecase.NewContext(c, domainUser)
 		event, err = h.cases.Event.AdminCreate(&ctx, &createEvent)
@@ -70,4 +70,4 @@ func (h *Handler) createEvent(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, event)
-} 
+}

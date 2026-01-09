@@ -43,7 +43,7 @@ func RequireAdminJWT(adminUserCase *usecase.AdminUser) gin.HandlerFunc {
 func RequireAdminSuperuser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		admin := MustGetAdmin(c)
-		
+
 		if !admin.IsSuperUser {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Superuser rights required"})
 			c.Abort()
@@ -61,4 +61,4 @@ func MustGetAdmin(c *gin.Context) *domain.AdminUser {
 		panic("admin not found in context")
 	}
 	return admin
-} 
+}

@@ -22,15 +22,15 @@ type NATSTaskMessage struct {
 type TaskType string
 
 const (
-	TaskTypeTournamentRegistrationSuccess      TaskType = "tournament.registration.success"
-	TaskTypeTournamentReminder48Hours          TaskType = "tournament.reminder.48hours"
-	TaskTypeTournamentReminder24Hours          TaskType = "tournament.reminder.24hours"
-	TaskTypeTournamentFreeReminder48Hours      TaskType = "tournament.free.reminder.48hours"
-	TaskTypeTournamentPaymentSuccess           TaskType = "tournament.payment.success"
-	TaskTypeTournamentLoyaltyChanged           TaskType = "tournament.loyalty.changed"
-	TaskTypeTournamentRegistrationCanceled     TaskType = "tournament.registration.canceled"
+	TaskTypeTournamentRegistrationSuccess          TaskType = "tournament.registration.success"
+	TaskTypeTournamentReminder48Hours              TaskType = "tournament.reminder.48hours"
+	TaskTypeTournamentReminder24Hours              TaskType = "tournament.reminder.24hours"
+	TaskTypeTournamentFreeReminder48Hours          TaskType = "tournament.free.reminder.48hours"
+	TaskTypeTournamentPaymentSuccess               TaskType = "tournament.payment.success"
+	TaskTypeTournamentLoyaltyChanged               TaskType = "tournament.loyalty.changed"
+	TaskTypeTournamentRegistrationCanceled         TaskType = "tournament.registration.canceled"
 	TaskTypeTournamentRegistrationAutoDeleteUnpaid TaskType = "tournament.registration.auto_delete_unpaid"
-	TaskTypeTournamentTasksCancel              TaskType = "tournament.tasks.cancel"
+	TaskTypeTournamentTasksCancel                  TaskType = "tournament.tasks.cancel"
 )
 
 // NATSClient клиент для отправки уведомлений через NATS
@@ -101,4 +101,4 @@ func (c *NATSClient) SendImmediateNotification(ctx context.Context, taskType Tas
 // SendScheduledNotification отправляет запланированное уведомление
 func (c *NATSClient) SendScheduledNotification(ctx context.Context, taskType TaskType, executeAt time.Time, data interface{}) error {
 	return c.SendNotification(ctx, taskType, executeAt, data)
-} 
+}

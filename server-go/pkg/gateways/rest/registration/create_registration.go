@@ -35,4 +35,4 @@ func (h *Handler) createRegistration(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, registration)
-} 
+}

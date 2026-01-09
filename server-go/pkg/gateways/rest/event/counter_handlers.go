@@ -30,15 +30,15 @@ type UpdateMatchScoreRequest struct {
 
 // TournamentStateResponse представляет ответ с состоянием турнира
 type TournamentStateResponse struct {
-	Format       string                     `json:"format" example:"AMERICANO"`
-	Mode         string                     `json:"mode" example:"SOLO"`
-	CurrentRound int                        `json:"currentRound" example:"2"`
-	TotalRounds  int                        `json:"totalRounds" example:"5"`
-	MatchPoints  int                        `json:"matchPoints" example:"16"`
-	Status       string                     `json:"status" example:"ACTIVE"`
-	Participants []domain.TournamentPlayer  `json:"participants"`
-	Matches      []domain.TournamentMatch   `json:"matches"`
-	Leaderboard  []domain.LeaderboardEntry  `json:"leaderboard"`
+	Format       string                    `json:"format" example:"AMERICANO"`
+	Mode         string                    `json:"mode" example:"SOLO"`
+	CurrentRound int                       `json:"currentRound" example:"2"`
+	TotalRounds  int                       `json:"totalRounds" example:"5"`
+	MatchPoints  int                       `json:"matchPoints" example:"16"`
+	Status       string                    `json:"status" example:"ACTIVE"`
+	Participants []domain.TournamentPlayer `json:"participants"`
+	Matches      []domain.TournamentMatch  `json:"matches"`
+	Leaderboard  []domain.LeaderboardEntry `json:"leaderboard"`
 }
 
 // NextRoundResponse представляет ответ на генерацию следующего раунда
@@ -268,7 +268,7 @@ func (h *Handler) updateMatchScore(c *gin.Context) {
 
 	eventID := c.Param("event_id")
 	matchID := c.Param("match_id")
-	
+
 	if eventID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "event_id is required"})
 		return

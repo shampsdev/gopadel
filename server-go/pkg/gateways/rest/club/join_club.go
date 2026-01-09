@@ -40,4 +40,4 @@ func JoinClub(clubCase *usecase.Club) gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, club)
 	}
-} 
+}

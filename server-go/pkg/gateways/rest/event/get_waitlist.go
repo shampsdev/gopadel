@@ -33,4 +33,4 @@ func (h *Handler) getWaitlist(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, waitlist)
-} 
+}

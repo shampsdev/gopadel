@@ -19,7 +19,7 @@ type Claims struct {
 // CreateAccessToken создает JWT токен для админ-пользователя
 func CreateAccessToken(admin *domain.AdminUser, cfg *config.Config) (string, error) {
 	expirationTime := time.Now().Add(time.Duration(cfg.JWT.AccessTokenExpireHours) * time.Hour)
-	
+
 	claims := &Claims{
 		Username:    admin.Username,
 		IsSuperUser: admin.IsSuperUser,
@@ -41,7 +41,7 @@ func CreateAccessToken(admin *domain.AdminUser, cfg *config.Config) (string, err
 // ValidateToken проверяет и парсит JWT токен
 func ValidateToken(tokenString string, cfg *config.Config) (*Claims, error) {
 	claims := &Claims{}
-	
+
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -73,4 +73,4 @@ func HashPassword(password string) (string, error) {
 func VerifyPassword(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
-} 
+}

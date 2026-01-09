@@ -103,7 +103,7 @@ func (s *Storage) SaveImageByReaderWithPath(ctx context.Context, imageData io.Re
 	}
 
 	fileUUID := uuid.New().String()
-	
+
 	mimeType := http.DetectContentType(data)
 	fileExtension, _ := mime.ExtensionsByType(mimeType)
 	if len(fileExtension) == 0 {

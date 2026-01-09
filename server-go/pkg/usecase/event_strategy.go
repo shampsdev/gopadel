@@ -11,19 +11,19 @@ import (
 type EventStrategy interface {
 	// ValidateRegistration проверяет возможность регистрации на событие
 	ValidateRegistration(ctx context.Context, user *domain.User, event *domain.Event) error
-	
+
 	// DetermineRegistrationStatus определяет статус регистрации при создании
 	DetermineRegistrationStatus(ctx context.Context, event *domain.Event) domain.RegistrationStatus
-	
+
 	// DetermineRegistrationStatusForUser определяет статус регистрации с учетом пользователя
 	DetermineRegistrationStatusForUser(ctx context.Context, event *domain.Event, user *domain.User) domain.RegistrationStatus
-	
+
 	// HandleCancellation обрабатывает отмену регистрации
 	HandleCancellation(ctx context.Context, registration *domain.Registration, event *domain.Event, hasPaid bool) domain.RegistrationStatus
-	
+
 	// CanCreate проверяет, может ли пользователь создать событие данного типа
 	CanCreate(user *domain.User, adminUser *domain.AdminUser) error
-	
+
 	// CanDelete проверяет, может ли пользователь удалить событие данного типа
 	CanDelete(user *domain.User, adminUser *domain.AdminUser, event *domain.Event) error
 }
@@ -34,19 +34,19 @@ func (b *BaseEventStrategy) ValidateRegistration(ctx context.Context, user *doma
 	if user.Rank < event.RankMin || user.Rank > event.RankMax {
 		return errors.New("user rank does not fit this event")
 	}
-	
+
 	if event.Status == domain.EventStatusCompleted {
 		return errors.New("event is already completed")
 	}
-	
+
 	if event.Status == domain.EventStatusCancelled {
 		return errors.New("event is cancelled")
 	}
-	
+
 	if event.Status == domain.EventStatusFull {
 		return errors.New("all spots for this event are taken")
 	}
-	
+
 	return nil
 }
 
@@ -60,15 +60,15 @@ func (g *GameEventStrategy) ValidateRegistration(ctx context.Context, user *doma
 	if event.Status == domain.EventStatusCompleted {
 		return errors.New("event is already completed")
 	}
-	
+
 	if event.Status == domain.EventStatusCancelled {
 		return errors.New("event is cancelled")
 	}
-	
+
 	if event.Status == domain.EventStatusFull {
 		return errors.New("all spots for this event are taken")
 	}
-	
+
 	// Для игр не проверяем ранг - любой может подавать заявки
 	return nil
 }
@@ -106,22 +106,22 @@ func (g *GameEventStrategy) CanDelete(user *domain.User, adminUser *domain.Admin
 	if user == nil {
 		return errors.New("user authentication required")
 	}
-	
+
 	// Суперюзер может удалять любые игры
 	if adminUser != nil && adminUser.IsSuperUser {
 		return nil
 	}
-	
+
 	// Администратор может удалять любые игры
 	if adminUser != nil {
 		return nil
 	}
-	
+
 	// Обычный пользователь может удалять только свои игры
 	if event.Organizer.ID == user.ID {
 		return nil
 	}
-	
+
 	return errors.New("insufficient permissions to delete this game")
 }
 
@@ -131,7 +131,7 @@ func (g *GameEventStrategy) CanRegister(user *domain.User, event *domain.Event) 
 
 func (g *GameEventStrategy) CanCancel(user *domain.User, event *domain.Event, registration *domain.Registration) error {
 	// Участник может отменить заявку в любом статусе кроме уже отмененных
-	if registration.Status == domain.RegistrationStatusCancelled || 
+	if registration.Status == domain.RegistrationStatusCancelled ||
 		registration.Status == domain.RegistrationStatusLeft ||
 		registration.Status == domain.RegistrationStatusCancelledBeforePayment ||
 		registration.Status == domain.RegistrationStatusCancelledAfterPayment ||
@@ -155,7 +155,7 @@ func (g *GameEventStrategy) GetCancelStatus(registration *domain.Registration) d
 
 func (g *GameEventStrategy) CanReapply(registration *domain.Registration) bool {
 	// Можно подать новую заявку если статус CANCELLED или LEFT
-	return registration.Status == domain.RegistrationStatusCancelled || 
+	return registration.Status == domain.RegistrationStatusCancelled ||
 		registration.Status == domain.RegistrationStatusLeft
 }
 
@@ -163,11 +163,11 @@ func (g *GameEventStrategy) CanApprove(organizer *domain.User, event *domain.Eve
 	if organizer.ID != event.Organizer.ID {
 		return errors.New("only event organizer can approve registrations")
 	}
-	
+
 	if registration.Status != domain.RegistrationStatusInvited {
 		return errors.New("can only approve invited registrations")
 	}
-	
+
 	return nil
 }
 
@@ -175,11 +175,11 @@ func (g *GameEventStrategy) CanReject(organizer *domain.User, event *domain.Even
 	if organizer.ID != event.Organizer.ID {
 		return errors.New("only event organizer can reject registrations")
 	}
-	
+
 	if registration.Status != domain.RegistrationStatusInvited {
 		return errors.New("can only reject invited registrations")
 	}
-	
+
 	return nil
 }
 
@@ -200,12 +200,12 @@ func (t *TournamentEventStrategy) DetermineRegistrationStatusForUser(ctx context
 	if user.ID == event.Organizer.ID {
 		return domain.RegistrationStatusConfirmed
 	}
-	
+
 	// Для бесплатных турниров автоматически подтверждаем регистрацию
 	if event.Price == 0 {
 		return domain.RegistrationStatusConfirmed
 	}
-	
+
 	// Для платных турниров - статус ожидания оплаты
 	return domain.RegistrationStatusPending
 }
@@ -215,7 +215,7 @@ func (t *TournamentEventStrategy) HandleCancellation(ctx context.Context, regist
 	if event.Price == 0 {
 		return domain.RegistrationStatusCancelledBeforePayment
 	}
-	
+
 	// Для платных турниров: если оплачено -> AFTER, если нет -> BEFORE
 	if hasPaid {
 		return domain.RegistrationStatusCancelledAfterPayment
@@ -235,17 +235,17 @@ func (t *TournamentEventStrategy) CanDelete(user *domain.User, adminUser *domain
 	if user == nil {
 		return errors.New("user authentication required")
 	}
-	
+
 	// Суперюзер может удалять любые турниры
 	if adminUser != nil && adminUser.IsSuperUser {
 		return nil
 	}
-	
+
 	// Администратор может удалять только свои турниры
 	if adminUser != nil && event.Organizer.ID == user.ID {
 		return nil
 	}
-	
+
 	return errors.New("insufficient permissions to delete this tournament")
 }
 
@@ -258,7 +258,7 @@ func (tr *TrainingEventStrategy) ValidateRegistration(ctx context.Context, user 
 	if err := tr.BaseEventStrategy.ValidateRegistration(ctx, user, event); err != nil {
 		return err
 	}
-	
+
 	return errors.New("training registration functionality is not ready yet")
 }
 
@@ -287,8 +287,6 @@ func (tr *TrainingEventStrategy) CanDelete(user *domain.User, adminUser *domain.
 	return errors.New("training deletion functionality is not available yet")
 }
 
-
-
 func GetEventStrategy(eventType domain.EventType) EventStrategy {
 	switch eventType {
 	case domain.EventTypeGame:
@@ -300,4 +298,4 @@ func GetEventStrategy(eventType domain.EventType) EventStrategy {
 	default:
 		return &TournamentEventStrategy{} // По умолчанию используем турнирную стратегию
 	}
-} 
+}

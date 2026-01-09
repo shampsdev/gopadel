@@ -20,4 +20,4 @@ func NewImage(ctx context.Context, storage repo.ImageStorage) *Image {
 
 func (i *Image) GetStorage() repo.ImageStorage {
 	return i.storage
-} 
+}

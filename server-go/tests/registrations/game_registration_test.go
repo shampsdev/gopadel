@@ -63,4 +63,4 @@ func TestGameRegistrationFlow(t *testing.T) {
 			t.Errorf("Failed to cancel registration: %v", err)
 		}
 	})
-} 
+}

@@ -38,4 +38,4 @@ func (h *Handler) cancelRegistration(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, registration)
-} 
+}

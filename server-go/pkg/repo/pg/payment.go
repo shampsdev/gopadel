@@ -238,4 +238,4 @@ func (r *PaymentRepo) scanPayment(rows pgx.Rows) (*domain.Payment, error) {
 	}
 
 	return &payment, nil
-} 
+}

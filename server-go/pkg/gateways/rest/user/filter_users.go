@@ -42,4 +42,4 @@ func FilterUsers(userCase *usecase.User) gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, users)
 	}
-} 
+}

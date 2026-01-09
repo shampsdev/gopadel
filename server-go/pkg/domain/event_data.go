@@ -35,10 +35,10 @@ const (
 type TournamentEngineStatus string
 
 const (
-	TournamentEngineStatusNotStarted TournamentEngineStatus = "NOT_STARTED"  // Турнир не начат
-	TournamentEngineStatusActive     TournamentEngineStatus = "ACTIVE"       // Турнир активен
-	TournamentEngineStatusPaused     TournamentEngineStatus = "PAUSED"       // Турнир приостановлен
-	TournamentEngineStatusFinished   TournamentEngineStatus = "FINISHED"     // Турнир завершен
+	TournamentEngineStatusNotStarted TournamentEngineStatus = "NOT_STARTED" // Турнир не начат
+	TournamentEngineStatusActive     TournamentEngineStatus = "ACTIVE"      // Турнир активен
+	TournamentEngineStatusPaused     TournamentEngineStatus = "PAUSED"      // Турнир приостановлен
+	TournamentEngineStatusFinished   TournamentEngineStatus = "FINISHED"    // Турнир завершен
 )
 
 // MatchStatus определяет статус матча
@@ -82,18 +82,18 @@ type TrainingData struct {
 
 // TournamentEngine управляет логикой турнира
 type TournamentEngine struct {
-	Config       TournamentConfig    `json:"config"`
-	State        TournamentState     `json:"state"`
-	Participants []TournamentPlayer  `json:"participants"`
-	Matches      []TournamentMatch   `json:"matches"`
-	Leaderboard  []LeaderboardEntry  `json:"leaderboard"`
+	Config       TournamentConfig   `json:"config"`
+	State        TournamentState    `json:"state"`
+	Participants []TournamentPlayer `json:"participants"`
+	Matches      []TournamentMatch  `json:"matches"`
+	Leaderboard  []LeaderboardEntry `json:"leaderboard"`
 }
 
 // TournamentConfig содержит конфигурацию турнира
 type TournamentConfig struct {
-	MatchPoints  int `json:"matchPoints"`
-	CourtsCount  int `json:"courtsCount"`
-	RoundsCount  int `json:"roundsCount"`
+	MatchPoints int `json:"matchPoints"`
+	CourtsCount int `json:"courtsCount"`
+	RoundsCount int `json:"roundsCount"`
 }
 
 // TournamentState содержит текущее состояние турнира
@@ -104,11 +104,11 @@ type TournamentState struct {
 
 // TournamentPlayer представляет участника турнира
 type TournamentPlayer struct {
-	ID    string            `json:"id"`
-	Name  string            `json:"name"`
-	Rank  float64           `json:"rank"`
-	Seed  int               `json:"seed"`
-	Stats TournamentStats   `json:"stats"`
+	ID    string          `json:"id"`
+	Name  string          `json:"name"`
+	Rank  float64         `json:"rank"`
+	Seed  int             `json:"seed"`
+	Stats TournamentStats `json:"stats"`
 }
 
 // TournamentStats содержит статистику игрока в турнире

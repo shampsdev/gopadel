@@ -71,8 +71,8 @@ func (r *Registration) AdminUpdateRegistrationStatus(ctx context.Context, userID
 	event := events[0]
 
 	// Проверяем, что событие не в статусе in_progress (кроме случаев отмены регистрации)
-	if event.Status == domain.EventStatusInProgress && 
-		status != domain.RegistrationStatusCancelled && 
+	if event.Status == domain.EventStatusInProgress &&
+		status != domain.RegistrationStatusCancelled &&
 		status != domain.RegistrationStatusLeft {
 		return nil, fmt.Errorf("cannot modify registration: event is in progress and participant list is locked")
 	}
@@ -498,16 +498,16 @@ func (r *Registration) CancelEventRegistration(ctx context.Context, user *domain
 
 	// Обновляем статус события после отмены регистрации
 	// Только если регистрация была активной (занимала место)
-	wasActive := registration.Status == domain.RegistrationStatusPending || 
+	wasActive := registration.Status == domain.RegistrationStatusPending ||
 		registration.Status == domain.RegistrationStatusConfirmed ||
 		registration.Status == domain.RegistrationStatusInvited
-	
+
 	slog.Info("Checking if registration was active",
 		"user_id", user.ID,
 		"event_id", eventID,
 		"was_active", wasActive,
 		"old_status", registration.Status)
-	
+
 	if wasActive {
 		if err := r.updateEventStatusAfterCancellation(ctx, eventID); err != nil {
 			slog.Warn("Failed to update event status after cancellation",

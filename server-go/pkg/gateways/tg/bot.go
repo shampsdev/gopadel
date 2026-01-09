@@ -75,8 +75,8 @@ func (b *Bot) handleCommandStart(ctx context.Context, _ *bot.Bot, update *models
 	if err != nil {
 		slogx.FromCtxWithErr(ctx, err).Error("error opening video file")
 		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID:    update.Message.Chat.ID,
-			Text:      b.messages.Welcome(),
+			ChatID: update.Message.Chat.ID,
+			Text:   b.messages.Welcome(),
 			ReplyMarkup: &models.InlineKeyboardMarkup{
 				InlineKeyboard: [][]models.InlineKeyboardButton{
 					{{Text: "Присоединиться к нам!", URL: b.webAppUrl}},
@@ -124,4 +124,4 @@ func (b *Bot) handleAnyText(ctx context.Context, _ *bot.Bot, update *models.Upda
 	if err != nil {
 		slogx.FromCtxWithErr(ctx, err).Error("error sending message")
 	}
-}	
+}

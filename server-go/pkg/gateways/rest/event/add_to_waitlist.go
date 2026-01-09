@@ -49,4 +49,4 @@ func (h *Handler) addToWaitlist(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"data": waitlistEntry,
 	})
-} 
+}

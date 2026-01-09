@@ -12,5 +12,4 @@ var (
 	_ repo.Registration = &RegistrationRepo{}
 	_ repo.Payment      = &PaymentRepo{}
 	_ repo.Waitlist     = &WaitlistRepo{}
-	_ repo.AdminUser    = &AdminUserRepo{}
 )

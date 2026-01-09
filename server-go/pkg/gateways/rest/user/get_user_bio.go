@@ -37,7 +37,7 @@ func GetUserBio(userCase *usecase.User) gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, gin.H{
 			"telegram_username": user.TelegramUsername,
-			"bio": bio,
+			"bio":               bio,
 		})
 	}
 }

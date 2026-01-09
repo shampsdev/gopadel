@@ -18,12 +18,12 @@ const (
 )
 
 type Registration struct {
-	UserID    string             `json:"userId"`
-	EventID   string             `json:"eventId"`
-	Status    RegistrationStatus `json:"status"`
-	CreatedAt time.Time          `json:"createdAt"`
-	UpdatedAt time.Time          `json:"updatedAt"`
-	User      *User              `json:"user,omitempty"`
+	UserID    string                `json:"userId"`
+	EventID   string                `json:"eventId"`
+	Status    RegistrationStatus    `json:"status"`
+	CreatedAt time.Time             `json:"createdAt"`
+	UpdatedAt time.Time             `json:"updatedAt"`
+	User      *User                 `json:"user,omitempty"`
 	Event     *EventForRegistration `json:"event,omitempty"`
 }
 
